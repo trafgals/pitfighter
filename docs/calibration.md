@@ -62,6 +62,52 @@ frame of the sampler, and this game does not reproduce it.
 Enemy strike motions hit on frames 14–26. The thugs' jabs are slower than
 Brad's.
 
+## Every moveset, read from the executable
+
+The measurements above cover Brad and the first fight's thugs. The frame data of
+every moveset comes from the game's own attack tables instead:
+`tools/ur-calibration/movesets.cjs` decodes them into
+`calibration/urban-reign-movesets.json` (every record) and
+`calibration/urban-reign-movesets.md` (a frame data table per moveset).
+
+The tables are static data in the executable, byte-identical to the same
+addresses in an EE RAM dump taken mid-fight, so the dump needs no emulator run.
+Their layout comes from the Urban Reign Redux mod
+([Jasonafex/urban-reign-redux](https://github.com/Jasonafex/urban-reign-redux),
+`runtime/combat-trial13/ur_actions.py`):
+
+| table | address | record | what it gives |
+|---|---|---|---|
+| action | 0x4616f0 | 64 bytes, indexed by the action id at actor + 0x8d40 | animation, state class, last frame, branch list, reaction record |
+| reaction | 0x4ab768 | 236 bytes | the hit list (only strike actions, state 6, have one) |
+| hit | 0x51e5a0 | 9 × s16 | the first active frame of each hit |
+| branch | 0x5338d8 | 15 × s16 | the follow-up action and the frames in which its input is taken |
+| moveset | pointers at 0x59b560 | 128 records | 12 root actions; [0] is the neutral strike |
+
+The branch table is the same one the urban-reign-pitfighter tests read as the
+"per-player record table" at 0x5338d8.
+
+`tests/urban-reign-movesets.test.ts` checks the decoded records against
+everything measured in EE RAM:
+
+- Brad's moveset (0) roots at 1388, and its branches chain 1388 → 1389 → 1390 → 1391.
+- Every measured hit lands 0–2 frames after its record's first active frame, a
+  little later when the target stands further away.
+- An action that ran to its end lasts its record's last frame + 1: 43 for the
+  lone strike, 36 for the dodge, 41 for the hit reaction, 101 for the grapple
+  hold. The deflection motions fall inside their measured ranges.
+- The actions measured shorter than their record were cut by whatever followed:
+  the finisher (57 decoded, 46–47 measured), Brad's stick-down strike 2937
+  (59 / 48), the evade (34 / 29–31), the hold follow-up (49 / 47) and the get-up
+  (51 / 50).
+- The string's follow-up windows open after each hit, and taking them on their
+  first frame reproduces the measured hit gaps within a few frames.
+
+Still unidentified: the meaning of moveset roots [1]–[9], the hit fields after
+the first (field [3] looks like the limb), the branch fields other than the
+target, input and window, and which character uses which moveset (index 0 is
+Brad; the index is not the character index of the name table).
+
 ## Not calibrated
 
 - **Damage, reach and knockback** stay this game's own. Urban Reign scales
@@ -71,9 +117,10 @@ Brad's.
 - **Reversal damage and pushback.** An Urban Reign deflection deals no damage.
   The 8 damage and the kinetic pushback are design choices for the 8-player
   game.
-- **Style tempo.** Only Brad's (All-Round) frame data was measured. The style
+- **Style tempo.** Only Brad's (All-Round) frame data feeds `moves.ts`. The style
   tempo modifiers in `styles.ts` were doubled with the frame scale, so every
-  style keeps the same relative speed it had before.
+  style keeps the same relative speed it had before. The other movesets' frame
+  data is now dumped (above) but not used yet.
 
 ## Reproducing
 

@@ -93,7 +93,7 @@ npm test
 This runs the Vitest unit tests for the simulation:
 
 - frame data and strings;
-- the Urban Reign calibration (`tests/calibration.test.ts`);
+- the Urban Reign calibration (`tests/calibration.test.ts`) and the decoded Urban Reign movesets (`tests/urban-reign-movesets.test.ts`);
 - reversals and pushback;
 - grapples and the crowd rule;
 - limbs, hopping and crawling;
@@ -125,3 +125,7 @@ The frame data is calibrated against *Urban Reign*: startup, string timing,
 hitstun, the reversal window, grapples and knockdowns were read frame by frame
 out of the retail game's EE RAM. See `docs/calibration.md`.
 `tests/calibration.test.ts` holds the simulation to those numbers.
+
+The frame data of all 128 Urban Reign movesets is decoded from the game's attack
+tables into `docs/calibration/urban-reign-movesets.md` (and `.json`), ready to
+base new fighters on. Regenerate it with `node tools/ur-calibration/movesets.cjs`.
