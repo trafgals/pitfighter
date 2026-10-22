@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { Bot } from "../src/sim/ai";
-import { SIT_FRAMES } from "../src/sim/moves";
+import { MOVES, SIT_FRAMES } from "../src/sim/moves";
 import { SPAWN_R, TOILET_FRAMES, type PlayerInput } from "../src/sim/types";
 import { World, spawnPoints } from "../src/sim/world";
 import { BTN, duel, run, tap } from "./helpers";
@@ -50,7 +50,7 @@ describe("arena", () => {
     expect(progress).toBeGreaterThan(90);
     Object.assign(b, { x: 1.0, y: 0, facing: Math.PI });
     tap(w, 1, BTN.HIGH);
-    run(w, 10);
+    run(w, MOVES.jab1.startup + 4);
     expect(a.state).toBe("down");
     expect(w.s.toiletOccupant).toBe(-1);
     const kept = a.toilet;

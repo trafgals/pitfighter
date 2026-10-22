@@ -1,0 +1,43 @@
+{
+  "source": "Urban Reign (SLUS_212.09) retail engine, first story fight (Brad vs. Real Deal and two thugs), read from EE RAM every frame",
+  "fields": {
+    "motion": "actor + 0x8d40 (u16)",
+    "state": "actor + 0x8d44 (u16): 0 idle/move, 1 AI idle, 5 approach, 6 strike, 7 hit reaction, 8 dodge/deflect/grapple, 9 deflected or grappling, 10 dodge, 11 knocked down",
+    "motionChanged": "actor + 0x88f0 (u16, 1 on the first frame of a motion)",
+    "hp": "actor + 0x8e28 (u16, max at + 0x8e2a)",
+    "hitsTaken": "actor + 0x8ed0 (u16)"
+  },
+  "padLatency": 4,
+  "neutralString": {
+    "motions": [1388, 1389, 1390, 1391],
+    "hitFrame": [12, 9, 11, 17],
+    "hitGaps": [12, 14, 20],
+    "cancelAfterHit": 3,
+    "singleTotal": [42, 44],
+    "finisherTotal": [46, 47],
+    "damageOf1200": [13, 13, 20, 29]
+  },
+  "lowStrikes": [
+    { "motion": 2937, "hitFrame": 18, "total": 48, "damageOf1200": 30 },
+    { "motion": 2214, "hitFrame": [26, 27], "total": [53, 66], "damageOf1200": [49, 60] }
+  ],
+  "hitReaction": { "light": 41, "lightInterruptedByNextHit": [26, 28], "heavyLow": [55, 78] },
+  "enemyStrikeHitFrames": { "2030": [20, 22], "2031": 24, "2032": 26, "2037": 17, "2072": 24, "2272": 23, "2757": [14, 15] },
+  "dodge": {
+    "button": "Square (message 1112: Dodge/Deflection)",
+    "motion": 76,
+    "total": 36,
+    "caughtOnDodgeFrame": [2, 5, 13, 14],
+    "missedWhenStartedOnOrAfterHitFrame": true,
+    "evadeMotion": { "motions": [3221, 3222], "total": [29, 31] }
+  },
+  "deflection": {
+    "input": "Square + stick direction",
+    "defenderMotion": { "motions": [3165, 3168, 3169], "total": [39, 51] },
+    "attackerMotion": { "motions": [147, 149], "state": 9, "total": [54, 66] },
+    "defenderAdvantage": 15,
+    "damage": 0
+  },
+  "grapple": { "catchFrame": 0, "whiffTotal": [42, 62], "hold": 101, "holdFollowUp": 47 },
+  "knockdown": { "fallAndFloor": [40, 60], "getUp": 50 }
+}

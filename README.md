@@ -7,8 +7,8 @@ any hit knocks you off.
 
 The combat is modelled on the feel of Namco's *Urban Reign*:
 
-- frame-data strikes: a 6f jab, strings that combo on hit, and heavy enders that knock down;
-- high/low reversals with an 8-frame window;
+- frame-data strikes measured from the real game: a 12f jab, strings that combo on hit, and heavy enders that knock down;
+- high/low reversals that catch a strike landing on their frames 2–14;
 - grapples with knees and directional throws;
 - guard, combo damage scaling and wake-up invulnerability;
 - soft lock-on;
@@ -93,6 +93,7 @@ npm test
 This runs the Vitest unit tests for the simulation:
 
 - frame data and strings;
+- the Urban Reign calibration (`tests/calibration.test.ts`);
 - reversals and pushback;
 - grapples and the crowd rule;
 - limbs, hopping and crawling;
@@ -120,6 +121,7 @@ Screenshots go to `test-output/`.
 - `src/render/`: the Three.js scene and the DOM HUD. They only read the simulation.
 - `src/input.ts`, `src/select.ts`, `src/main.ts`: devices, the character select and the game loop.
 
-The frame data is a first estimate of *Urban Reign*'s timings. The plan is to
-calibrate it against the real game by measuring hitstun, startup and the
-reversal windows from its EE RAM.
+The frame data is calibrated against *Urban Reign*: startup, string timing,
+hitstun, the reversal window, grapples and knockdowns were read frame by frame
+out of the retail game's EE RAM. See `docs/calibration.md`.
+`tests/calibration.test.ts` holds the simulation to those numbers.

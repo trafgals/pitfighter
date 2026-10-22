@@ -588,7 +588,7 @@ export class World {
 
   private strike(a: Fighter, d: Fighter, m: Move & { total: number }): void {
     // reversal: right height, inside the window, facing the attacker
-    if (d.state === "reversal" && d.t <= REVERSAL.window && d.revHeight === m.height && this.facingDot(d, a) > 0) {
+    if (d.state === "reversal" && this.inReversalWindow(d) && d.revHeight === m.height && this.facingDot(d, a) > 0) {
       this.reverse(d, a);
       return;
     }
@@ -636,6 +636,12 @@ export class World {
     this.setState(d, "down", DOWN.dur);
     d.slideX = (dx * push) / 12;
     d.slideY = (dy * push) / 12;
+  }
+
+  /** t has already advanced this frame, so t - 1 is the reversal's motion frame (0 on the press frame). */
+  private inReversalWindow(d: Fighter): boolean {
+    const frame = d.t - 1;
+    return frame >= REVERSAL.first && frame <= REVERSAL.window;
   }
 
   private reverse(d: Fighter, a: Fighter): void {
@@ -805,7 +811,7 @@ export class World {
       }
     }
     if (!best) return;
-    if (best.state === "reversal" && best.t <= REVERSAL.window && best.revHeight === "high" && this.facingDot(best, f) > 0) {
+    if (best.state === "reversal" && this.inReversalWindow(best) && best.revHeight === "high" && this.facingDot(best, f) > 0) {
       this.reverse(best, f);
       return;
     }

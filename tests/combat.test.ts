@@ -65,7 +65,7 @@ describe("strikes", () => {
     run(w, 3, (inp) => (inp[1].buttons = BTN.GUARD));
     tap(w, 0, BTN.HIGH, (inp) => (inp[1].buttons = BTN.GUARD));
     let blocked = false;
-    run(w, 12, (inp) => {
+    run(w, MOVES.jab1.startup + 6, (inp) => {
       inp[1].buttons = BTN.GUARD;
       if (w.s.events.some((e) => e.kind === "block")) blocked = true;
     });
@@ -78,7 +78,7 @@ describe("strikes", () => {
     w2.fighters[1].facing = 0;
     tap(w2, 0, BTN.HIGH, (inp) => (inp[1].buttons = BTN.GUARD));
     let hit = false;
-    run(w2, 12, (inp) => {
+    run(w2, MOVES.jab1.startup + 6, (inp) => {
       inp[1].buttons = BTN.GUARD;
       w2.fighters[1].facing = 0;
       if (hitFrame(w2)) hit = true;
@@ -95,7 +95,7 @@ describe("strikes", () => {
     Object.assign(c, { x: 0.9, y: 2.7, facing: Math.PI });
     tap(w, 0, BTN.HIGH);
     const hit = new Set<number>();
-    run(w, 10, () => {
+    run(w, MOVES.jab1.startup + 4, () => {
       for (const e of w.s.events) if (e.kind === "hit") hit.add(e.b!);
     });
     expect([...hit].sort()).toEqual([1, 2]);
@@ -107,9 +107,9 @@ describe("reversals", () => {
     const w = duel();
     tap(w, 0, BTN.HIGH);
     run(w, 1);
-    tap(w, 1, BTN.REV); // reversal 2 frames after the jab started, active on its frame 6
+    tap(w, 1, BTN.REV); // reversal 2 frames after the jab started: the jab lands on its frame 10
     let reversed = false;
-    run(w, 8, () => {
+    run(w, MOVES.jab1.startup + 2, () => {
       if (w.s.events.some((e) => e.kind === "reversal" && e.a === 1)) reversed = true;
     });
     expect(reversed).toBe(true);
@@ -121,10 +121,10 @@ describe("reversals", () => {
   it("the wrong height loses: a high reversal does not stop a low kick", () => {
     const w = duel();
     tap(w, 0, BTN.LOW);
-    run(w, 2);
+    run(w, MOVES.kick1.startup - 10);
     tap(w, 1, BTN.REV);
     let hit = false;
-    run(w, 10, () => {
+    run(w, 14, () => {
       if (hitFrame(w)) hit = true;
     });
     expect(hit).toBe(true);
@@ -134,9 +134,9 @@ describe("reversals", () => {
   it("R1+Triangle is a low reversal that beats a low kick", () => {
     const w = duel();
     tap(w, 0, BTN.LOW);
-    run(w, 2);
+    run(w, MOVES.kick1.startup - 10);
     tap(w, 1, BTN.REV | BTN.GUARD);
-    run(w, 10);
+    run(w, 14);
     expect(w.fighters[0].state).toBe("reversed");
   });
 
@@ -146,10 +146,24 @@ describe("reversals", () => {
     run(w, REVERSAL.window + 2);
     tap(w, 0, BTN.HIGH);
     let hit = false;
-    run(w, 10, () => {
+    run(w, MOVES.jab1.startup + 4, () => {
       if (hitFrame(w)) hit = true;
     });
     expect(hit).toBe(true);
+  });
+
+  it("a reversal started one frame before the strike lands is too late", () => {
+    const w = duel();
+    tap(w, 0, BTN.HIGH);
+    run(w, MOVES.jab1.startup - 2);
+    tap(w, 1, BTN.REV); // the jab lands on this reversal's frame 1, before REVERSAL.first
+    let hit = false;
+    run(w, 6, () => {
+      if (hitFrame(w)) hit = true;
+    });
+    expect(REVERSAL.first).toBeGreaterThan(1);
+    expect(hit).toBe(true);
+    expect(w.fighters[0].state).not.toBe("reversed");
   });
 
   it("a reversal pushes the surrounding crowd away (kinetic pushback)", () => {
@@ -224,8 +238,9 @@ describe("crowd protection", () => {
     Object.assign(a, { x: -0.9, y: 4, facing: 0 });
     Object.assign(b, { x: 0.9, y: 4, facing: Math.PI });
     Object.assign(c, { x: 0, y: 4.9, facing: -Math.PI / 2 });
-    c.invuln = 16; // c stands inside the jab cones of a and b; keep it out of their hits
-    run(w, 30, (inp, i) => {
+    // the attackers stand inside each other's jab cones; keep them out of each other's hits
+    for (const f of [a, b, c]) f.invuln = MOVES.jab1.startup + 16;
+    run(w, MOVES.jab1.startup + 16, (inp, i) => {
       if (i === 0) inp[1].buttons = BTN.HIGH;
       if (i === 4) inp[2].buttons = BTN.HIGH;
       if (i === 8) inp[3].buttons = BTN.HIGH;
