@@ -115,8 +115,10 @@ describe("Urban Reign movesets decoded from the executable", () => {
       timeout: 60000,
       stdio: "pipe",
     });
-    const fresh = fs.readFileSync(out, "utf8");
+    // git may check the committed file out with CRLF line ends
+    const text = (f: string) => fs.readFileSync(f, "utf8").replace(/\r\n/g, "\n");
+    const fresh = text(out);
     fs.rmSync(path.dirname(out), { recursive: true, force: true });
-    expect(fresh).toBe(fs.readFileSync(path.resolve(__dirname, "../docs/calibration/urban-reign-movesets.json"), "utf8"));
+    expect(fresh).toBe(text(path.resolve(__dirname, "../docs/calibration/urban-reign-movesets.json")));
   }, 70000);
 });
