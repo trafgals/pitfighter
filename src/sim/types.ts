@@ -82,6 +82,8 @@ export interface Fighter {
   moveHits: number[]; // fighter ids this move instance already hit
   moveLanded: boolean;
   chain: boolean; // a follow-up of the current string is buffered
+  chargeHeld: boolean; // the string opener's button has stayed down since the press, so it can still charge
+  charge: number; // frames the current strike was charged (0..CHARGE.max)
   revHeight: Height;
   target: number;
   parts: Record<PartId, Part>;

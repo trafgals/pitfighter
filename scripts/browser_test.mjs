@@ -81,8 +81,10 @@ async function main() {
         { id: "hell-toilet", on: true, soon: false },
         { id: "construction-site", on: false, soon: true },
         { id: "collapsing-tower", on: false, soon: true },
+        { id: "hindenburg-blimp", on: false, soon: true },
+        { id: "castle-under-siege", on: false, soon: true },
       ]),
-    `stage list: Hell Toilet selected, Construction Site and Collapsing Tower coming soon (${JSON.stringify(stages)})`,
+    `stage list: Hell Toilet selected, the four planned stages coming soon (${JSON.stringify(stages)})`,
   );
   await page.screenshot({ path: path.join(OUT, "1_select.png") });
 

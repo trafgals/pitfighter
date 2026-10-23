@@ -2,7 +2,7 @@
 // won. Only playable stages can start a match; planned ones are listed on the
 // select screen as "coming soon" so the roadmap is visible in the game.
 
-export type StageId = "hell-toilet" | "construction-site" | "collapsing-tower";
+export type StageId = "hell-toilet" | "construction-site" | "collapsing-tower" | "hindenburg-blimp" | "castle-under-siege";
 
 export interface Stage {
   id: StageId;
@@ -28,6 +28,18 @@ export const STAGES: readonly Stage[] = [
     id: "collapsing-tower",
     name: "Collapsing Tower",
     blurb: "The floor gives way under the fight.",
+    playable: false,
+  },
+  {
+    id: "hindenburg-blimp",
+    name: "Hindenburg Blimp",
+    blurb: "A fight aboard the doomed airship.",
+    playable: false,
+  },
+  {
+    id: "castle-under-siege",
+    name: "Castle Under Siege",
+    blurb: "Brawl on the walls while the siege rages around you.",
     playable: false,
   },
 ];

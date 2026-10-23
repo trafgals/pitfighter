@@ -4,7 +4,7 @@
 // pickup on the floor.
 import * as THREE from "three";
 import { LAVA_R, LIMBS, RING_R, type Fighter, type PartId, type Pickup } from "../sim/types";
-import { DOWN, GEYSER, HOP_AIR, HOP_CYCLE, MOVES } from "../sim/moves";
+import { CHARGE, DOWN, GEYSER, HOP_AIR, HOP_CYCLE, MOVES } from "../sim/moves";
 import { STYLES } from "../sim/styles";
 import { legs, type World } from "../sim/world";
 
@@ -354,6 +354,8 @@ export class Scene {
         break;
       case "attack": {
         if (!f.move) break;
+        // a charging opener glows brighter the longer it is held
+        if (f.chargeHeld && f.charge > 0) (v.flash.material as THREE.MeshBasicMaterial).opacity = 0.1 + (0.4 * f.charge) / CHARGE.max;
         if (f.move === "grab") {
           L.armL.rotation.x = L.armR.rotation.x = -1.5;
           v.body.rotation.x = 0.2;

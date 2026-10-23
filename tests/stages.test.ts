@@ -3,11 +3,13 @@ import { World } from "../src/sim/world";
 import { DEFAULT_STAGE, PLAYABLE_STAGES, STAGES, stageById } from "../src/sim/stages";
 
 describe("stages", () => {
-  it("lists Hell Toilet as playable and the two planned stages after it", () => {
+  it("lists Hell Toilet as playable and the four planned stages after it", () => {
     expect(STAGES.map((s) => [s.name, s.playable])).toEqual([
       ["Hell Toilet", true],
       ["Construction Site", false],
       ["Collapsing Tower", false],
+      ["Hindenburg Blimp", false],
+      ["Castle Under Siege", false],
     ]);
     expect(stageById("construction-site").blurb).toMatch(/different construction vehicle/);
     expect(PLAYABLE_STAGES.map((s) => s.id)).toEqual(["hell-toilet"]);

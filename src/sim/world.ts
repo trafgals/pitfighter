@@ -39,6 +39,8 @@ import {
   REGROW_FRAMES,
   RESPAWN_INVULN,
   REVERSAL,
+  REVERSAL_WHIFF_TOTAL,
+  CHARGE,
   SIT_FRAMES,
   SPEED,
   STRING_STARTS,
@@ -129,6 +131,8 @@ export class World {
         moveHits: [],
         moveLanded: false,
         chain: false,
+        chargeHeld: false,
+        charge: 0,
         revHeight: "high",
         target: -1,
         parts: freshParts(style),
@@ -225,8 +229,16 @@ export class World {
     if (m.kind === "punch" && arms(f) === 1) startup += 2;
     startup = Math.max(3, startup);
     const mult = m.kind === "punch" ? st.punch : m.kind === "kick" ? st.kick : 1;
-    const dmg = m.dmg * mult * (m.kind === "punch" && arms(f) === 1 ? 0.8 : 1);
-    return { ...m, startup, dmg, reach: m.reach * st.reach, total: startup + m.active + m.recovery };
+    let dmg = m.dmg * mult * (m.kind === "punch" && arms(f) === 1 ? 0.8 : 1);
+    let push = m.push;
+    let knockdown = m.knockdown;
+    if (id === f.move && f.charge > 0) {
+      const k = f.charge / CHARGE.max;
+      dmg *= 1 + CHARGE.dmg * k;
+      push *= 1 + CHARGE.push * k;
+      knockdown ||= k >= 1;
+    }
+    return { ...m, startup, dmg, push, knockdown, reach: m.reach * st.reach, total: startup + m.active + m.recovery };
   }
 
   /** The string follow-up allowed for this style (high strings have style.string jabs). */
@@ -246,6 +258,8 @@ export class World {
     f.moveHits = [];
     f.moveLanded = false;
     f.chain = false;
+    f.charge = 0;
+    f.chargeHeld = id === STRING_STARTS.high || id === STRING_STARTS.low;
     const t = this.lockTarget(f);
     if (t && dist(f, t) < 3) f.facing = Math.atan2(t.y - f.y, t.x - f.x);
   }
@@ -271,7 +285,7 @@ export class World {
         this.updateActionable(f, inp);
         break;
       case "attack":
-        this.updateAttack(f);
+        this.updateAttack(f, inp);
         break;
       case "holding":
         this.updateHolding(f, inp);
@@ -367,7 +381,7 @@ export class World {
       const height: Height = guardHeld || nArms === 0 ? "low" : "high";
       if (height === "high" || nLegs > 0) {
         this.consume(f, BTN.REV);
-        this.setState(f, "reversal", REVERSAL.dur);
+        this.setState(f, "reversal", REVERSAL_WHIFF_TOTAL); // a landed reversal ends early
         f.revHeight = height;
         const t = this.lockTarget(f);
         if (t && dist(f, t) < 3) f.facing = Math.atan2(t.y - f.y, t.x - f.x);
@@ -419,10 +433,20 @@ export class World {
     if (t && dist(f, t) < 4.5) turnToward(f, Math.atan2(t.y - f.y, t.x - f.x), 0.25);
   }
 
-  private updateAttack(f: Fighter): void {
+  private updateAttack(f: Fighter, inp: PlayerInput): void {
     if (!f.move) return;
     if (f.move === "grab") return;
     const m = this.eff(f, f.move);
+    // charge: the opener waits on its last startup frame while its button is held
+    if (f.chargeHeld) {
+      const held = (inp.buttons & (m.height === "high" ? BTN.HIGH : BTN.LOW)) !== 0;
+      if (held && f.t === m.startup - 1 && f.charge < CHARGE.max) {
+        f.charge++;
+        f.t--; // updateFighter advances it again
+        return;
+      }
+      if (!held || f.t >= m.startup - 1) f.chargeHeld = false;
+    }
     if (f.t < m.startup) {
       f.x += Math.cos(f.facing) * 0.012;
       f.y += Math.sin(f.facing) * 0.012;
@@ -1013,6 +1037,7 @@ export class World {
       mix(f.state.length * 31 + f.state.charCodeAt(0));
       mix(f.invuln);
       mix(f.toilet);
+      mix(f.charge);
       for (const p of PARTS) mix(f.parts[p].hp + (f.parts[p].attached ? 1000 : 0));
     }
     for (const p of s.pickups) {

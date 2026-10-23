@@ -63,6 +63,18 @@ export const GRAB = { startup: 1, active: 3, whiff: 41, reach: 1.05, arc: 0.6 };
 export const HOLD = { dur: 100, escape: 12, knee: 6, kneeCool: 18, kneeMax: 3 };
 export const THROW = { dur: 24, dist: 4, dmg: 12, splash: 6 };
 export const REVERSAL = { first: 2, window: 14, dur: 36, stun: 15, dmg: 8, pushR: 2.5, push: 1.6, pushStun: 14 };
+// Pitfighter's tweak to Urban Reign: a reversal that counters nothing takes
+// 3x as long to recover from (its frames after the window, 21 -> 63), so
+// sitting there spamming reversal is punishable. A reversal that lands ends
+// at once, so only a whiff plays the full length.
+export const REVERSAL_WHIFF_RECOVERY = 3;
+export const REVERSAL_WHIFF_TOTAL = REVERSAL.window + 1 + REVERSAL_WHIFF_RECOVERY * (REVERSAL.dur - REVERSAL.window - 1);
+// Pitfighter's other tweak: hold the button of a string's first strike (jab1 /
+// kick1) to charge it. The strike stops on its last startup frame while the
+// button stays down, for up to `max` frames; on release it fires with up to
+// `dmg` and `push` extra (x2 at full charge), and a full charge knocks down.
+// A tap releases before that frame, so an uncharged strike is unchanged.
+export const CHARGE = { max: 60, dmg: 1, push: 1 };
 export const DOWN = { dur: 50, wake: 50, wakeInvuln: 30, otgScale: 0.5 };
 export const CROWD = { attackers: 3, window: 60, invuln: 40 };
 export const COMBO_SCALE = 0.85;

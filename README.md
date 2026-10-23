@@ -10,6 +10,8 @@ stage decides the arena and how a match is won.
 | **Hell Toilet** | playable | Everyone spawns around the edge of a ring of hellfire. In the middle stands the last toilet in hell. Sit on it for 15 seconds in total to win. Progress is kept between sittings, and any hit knocks you off. |
 | **Construction Site** | planned | Everyone starts in a different construction vehicle. |
 | **Collapsing Tower** | planned | The floor gives way under the fight. |
+| **Hindenburg Blimp** | planned | A fight aboard the doomed airship. |
+| **Castle Under Siege** | planned | Brawl on the walls while the siege rages around you. |
 
 Planned stages are listed on the select screen as *coming soon* and cannot be
 picked yet. Stages live in `src/sim/stages.ts`; a match is started with
@@ -23,6 +25,17 @@ The combat is modelled on the feel of Namco's *Urban Reign*:
 - guard, combo damage scaling and wake-up invulnerability;
 - soft lock-on;
 - multi-target hits, kinetic pushback when you land a reversal, and dogpile protection.
+
+Pitfighter changes two things (`src/sim/moves.ts`, `tests/tweaks.test.ts`):
+
+- **Charged openers.** Hold □ or ✕ to charge the first strike of a string. It
+  waits on its last startup frame while you hold, for up to 1 s, and fires on
+  release with up to double damage and knockback. A full charge knocks down.
+  A tap is the normal strike, and the follow-ups of a string never charge.
+  You glow while you charge, and you can be hit out of it.
+- **Whiffed reversals.** A reversal that counters nothing takes 3x as long to
+  recover from (63 frames after its window instead of 21), so spamming
+  reversal gets punished. A reversal that lands ends at once, as before.
 
 All characters, names and art are original.
 
