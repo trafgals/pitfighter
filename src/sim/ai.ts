@@ -5,10 +5,15 @@
 // Like Urban Reign's crowds, bots take turns: only the few fighters nearest a
 // target close in on it (its "attack tokens"); the rest circle at a distance
 // and wait for an opening instead of all piling in at once.
-import { BTN, RING_R, type Fighter, type PlayerInput } from "./types";
-import { FURY, GEYSER, MOVES } from "./moves";
+//
+// What is dangerous and what is worth going for comes from the stage's Arena
+// (arena.ts): the hellfire, an edge, a cracking tile, the blimp's fire, a
+// vehicle bearing down; the toilet, the banner, a free vehicle.
+import { BTN, type Fighter, type PlayerInput } from "./types";
+import { FURY, MOVES } from "./moves";
 import { STYLES } from "./styles";
 import { Rng } from "./rng";
+import { HAZARDS } from "./arena";
 import { actionable, alive, arms, dist, legs, type World } from "./world";
 
 /** how many fighters may close in on one target at once */
@@ -62,8 +67,8 @@ export class Bot {
       if (me.t > 8 && this.rng.chance(0.08)) {
         if (me.holdStrikes < 2 && this.rng.chance(0.5)) press(BTN.HIGH);
         else {
-          // throw them toward the lava
-          const a = Math.atan2(me.y, me.x);
+          // throw them into the hazard, or over the edge
+          const a = w.arena.throwAngle(w, me);
           out.x = Math.cos(a);
           out.y = Math.sin(a);
           press(BTN.GRAB);
@@ -72,6 +77,7 @@ export class Bot {
       return out;
     }
     if (me.state === "seated" || me.state === "sitting") return out;
+    if (me.state === "driving") return this.drive(w, me, out, press);
     if (me.state === "attack") {
       // keep the string going
       if (this.plan === "string" && this.rng.chance(0.3)) press(BTN.HIGH);
@@ -105,18 +111,18 @@ export class Bot {
     let goal: { x: number; y: number } | null = null;
     let use = false;
 
-    // 2. get out of the fire and away from erupting geysers
-    const r = Math.hypot(me.x, me.y);
+    // 2. get away from a hazard about to strike, and out of danger (fire, an edge, a vehicle)
     for (const g of s.geysers) {
-      if (g.t < GEYSER.warn && Math.hypot(me.x - g.x, me.y - g.y) < GEYSER.radius + 0.6) {
+      const H = HAZARDS[g.kind];
+      if (g.t < H.warn && Math.hypot(me.x - g.x, me.y - g.y) < H.radius + 0.6) {
         const a = Math.atan2(me.y - g.y, me.x - g.x);
-        return this.steer(out, me, { x: me.x + Math.cos(a) * 3, y: me.y + Math.sin(a) * 3 });
+        return this.steer(out, me, w.arena.clampGoal(me.x + Math.cos(a) * 3, me.y + Math.sin(a) * 3));
       }
     }
-    if (r > RING_R - 0.4) return this.steer(out, me, { x: 0, y: 0 });
+    if (w.arena.danger(w, me, me.x, me.y)) return this.steer(out, me, w.arena.safe(w, me));
 
     // 3. pick our limbs back up
-    const mine = s.pickups.filter((p) => p.owner === me.id && p.burning === 0 && Math.hypot(p.x, p.y) < RING_R);
+    const mine = s.pickups.filter((p) => p.owner === me.id && p.burning === 0 && !w.arena.danger(w, me, p.x, p.y));
     if (mine.length) {
       const p = mine.reduce((a, b) => (dist(me, a) < dist(me, b) ? a : b));
       const near = enemies.some((e) => dist(e, me) < 1.5);
@@ -126,20 +132,22 @@ export class Bot {
       }
     }
 
-    // 4. the toilet
-    const occ = s.fighters[s.toiletOccupant];
-    if (!goal && !occ) {
-      const closer = enemies.filter((e) => Math.hypot(e.x, e.y) < r).length;
-      if (closer <= 1 || r < 3) {
-        goal = { x: 0, y: 0 };
-        use = r < 0.8;
+    // 4. the stage's objective (the toilet, the banner, a free vehicle)
+    if (!goal) {
+      const g = w.arena.botGoal(w, me, enemies);
+      if (g) {
+        goal = g;
+        use = g.use;
       }
     }
 
-    // 5. fight: whoever is on the throne, else the nearest enemy
+    // 5. fight: whoever holds the objective, else the nearest enemy (on foot, if there is one)
+    const occ = s.fighters[s.toiletOccupant];
     if (!goal) {
+      const onFoot = enemies.filter((e) => e.state !== "driving");
+      const pool = onFoot.length ? onFoot : enemies;
       const tgt: Fighter | undefined =
-        occ && occ.id !== me.id ? occ : enemies.reduce<Fighter | undefined>((a, b) => (!a || dist(me, b) < dist(me, a) ? b : a), undefined);
+        occ && occ.id !== me.id && alive(occ) ? occ : pool.reduce<Fighter | undefined>((a, b) => (!a || dist(me, b) < dist(me, a) ? b : a), undefined);
       if (tgt) {
         const d = dist(me, tgt);
         // a special when it can reach
@@ -148,7 +156,7 @@ export class Bot {
           press(BTN.SPECIAL);
           return out;
         }
-        if (!hasToken(w, me, tgt)) return this.circle(out, me, tgt);
+        if (!hasToken(w, me, tgt)) return this.circle(w, out, me, tgt);
         if (d > 1.15) goal = tgt;
         else {
           if (--this.planT <= 0) {
@@ -173,19 +181,32 @@ export class Bot {
   }
 
   /** Wait for a turn: orbit the target at CIRCLE_R, guarding now and then. */
-  private circle(out: PlayerInput, me: Fighter, tgt: Fighter): PlayerInput {
+  private circle(w: World, out: PlayerInput, me: Fighter, tgt: Fighter): PlayerInput {
     const dir = me.id % 2 === 0 ? 1 : -1;
     const a = Math.atan2(me.y - tgt.y, me.x - tgt.x) + dir * 0.45;
-    let gx = tgt.x + Math.cos(a) * CIRCLE_R;
-    let gy = tgt.y + Math.sin(a) * CIRCLE_R;
     // stay on the floor
-    const r = Math.hypot(gx, gy);
-    if (r > RING_R - 0.8) {
-      gx *= (RING_R - 0.8) / r;
-      gy *= (RING_R - 0.8) / r;
-    }
-    this.steer(out, me, { x: gx, y: gy });
+    this.steer(out, me, w.arena.clampGoal(tgt.x + Math.cos(a) * CIRCLE_R, tgt.y + Math.sin(a) * CIRCLE_R));
     if (dist(me, tgt) < 1.6 && arms(me) > 0 && legs(me) === 2 && this.rng.chance(0.3)) out.buttons |= BTN.GUARD;
+    return out;
+  }
+
+  /** At the wheel: run down the nearest fighter on foot (else ram the nearest machine), boost when lined up. */
+  private drive(w: World, me: Fighter, out: PlayerInput, press: (b: number) => void): PlayerInput {
+    const v = w.s.arena.vehicles[me.vehicle];
+    if (!v) return out;
+    // bail out of a machine about to go up, and now and then to fight on foot
+    if ((v.hp < v.max * 0.2 && this.rng.chance(0.06)) || this.rng.chance(0.0012)) {
+      press(BTN.USE);
+      return out;
+    }
+    const prey = w.s.fighters.filter((o) => o.id !== me.id && alive(o) && o.state !== "driving" && o.invuln === 0);
+    let tgt: { x: number; y: number } | undefined = prey.reduce<Fighter | undefined>((a, b) => (!a || dist(v, b) < dist(v, a) ? b : a), undefined);
+    if (!tgt) tgt = w.s.arena.vehicles.filter((o) => o.id !== v.id && !o.wrecked).reduce<typeof v | undefined>((a, b) => (!a || dist(v, b) < dist(v, a) ? b : a), undefined);
+    if (!tgt) return out;
+    const a = Math.atan2(tgt.y - v.y, tgt.x - v.x);
+    out.x = Math.cos(a);
+    out.y = Math.sin(a);
+    if (Math.cos(a - v.facing) > 0.92 && dist(v, tgt) < 7 && v.cool === 0 && this.rng.chance(0.04 + 0.05 * this.skill)) press(BTN.HIGH);
     return out;
   }
 

@@ -4,7 +4,8 @@ import { FPS, NO_INPUT, type PlayerInput } from "./sim/types";
 import { World } from "./sim/world";
 import { Input, type DeviceId } from "./input";
 import { Scene } from "./render/scene";
-import { Hud } from "./render/hud";
+import { Hud, winLine } from "./render/hud";
+import { STAGES, type StageId } from "./sim/stages";
 import { CueTracker } from "./render/cues";
 import { Sfx } from "./render/sfx";
 import { Select, type SelectResult } from "./select";
@@ -28,6 +29,14 @@ let acc = 0;
 let overT = 0;
 let lastStart = false;
 
+const OPENERS: Record<StageId, string> = {
+  "hell-toilet": "FIGHT FOR THE THRONE!",
+  "construction-site": "START YOUR ENGINES!",
+  "collapsing-tower": "THE ROOF WON'T HOLD!",
+  "hindenburg-blimp": "OH, THE HUMANITY!",
+  "castle-under-siege": "HOLD THE WALLS!",
+};
+
 const select = new Select(document.querySelector<HTMLElement>("#select")!, input, (r) => startMatch(r));
 
 window.addEventListener("keydown", (e) => {
@@ -46,13 +55,13 @@ function startMatch(r: SelectResult, seed = Number(params.get("seed") ?? Date.no
   hud.attach(world);
   cues.reset();
   sfx.unlock();
-  sfx.startAmbient();
+  sfx.startAmbient(r.stage);
   select.show(false);
   overEl.classList.remove("show");
   document.body.classList.add("playing");
   mode = "match";
   acc = 0;
-  hud.say("FIGHT FOR THE THRONE!", 120);
+  hud.say(OPENERS[r.stage], 120);
 }
 
 function stepOnce(): void {
@@ -72,7 +81,7 @@ function stepOnce(): void {
     mode = "over";
     overT = 0;
     const f = w.fighters[w.s.winner];
-    overEl.innerHTML = `<h2>P${f.id + 1} WINS</h2><p>After an eternity of waiting, they finally got to go.</p><p class="small">Press Enter / Start for another round</p>`;
+    overEl.innerHTML = `<h2>P${f.id + 1} WINS</h2><p>${winLine(w.s.stage, f.id)}</p><p class="small">Press Enter / Start for another round</p>`;
     overEl.classList.add("show");
   }
 }
@@ -110,6 +119,9 @@ requestAnimationFrame(frame);
 
 if (params.get("auto")) {
   select.setCount(Number(params.get("fighters") ?? 8));
+  // ?stage=<id>: start on that stage
+  const st = params.get("stage");
+  if (st && STAGES.some((x) => x.id === st)) select.setStage(st as StageId);
   select.start(Number(params.get("seed") ?? 1));
 }
 

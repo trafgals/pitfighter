@@ -1,17 +1,13 @@
 // The fight simulation. Deterministic: a World is fully defined by its seed,
 // the match config and the per-frame inputs, and it never reads the clock or
-// Math.random. Rendering only reads `world.s`.
+// Math.random. Rendering only reads `world.s`. The stage's rules (walls,
+// edges, hazards, the objective and the win) live in arena.ts.
 import {
   BTN,
   FPS,
-  LAVA_R,
   LIMBS,
   NO_INPUT,
   PARTS,
-  RING_R,
-  SPAWN_R,
-  TOILET_FRAMES,
-  TOILET_R,
   type Fighter,
   type FighterState,
   type GameEvent,
@@ -27,13 +23,12 @@ import {
   CROWD,
   DIZZY,
   DOWN,
-  GEYSER,
+  FALL_FRAMES,
   GRAB,
   HOLD,
   HOP_AIR,
   HOP_CYCLE,
   KO_FRAMES,
-  LAVA,
   MOVES,
   REATTACH,
   REGROW_FRAMES,
@@ -44,7 +39,6 @@ import {
   FURY,
   HITSTOP,
   hitstopFor,
-  SIT_FRAMES,
   SPECIAL_CHORD,
   SPECIAL_NAMES,
   SPEED,
@@ -54,7 +48,10 @@ import {
 } from "./moves";
 import { STYLES } from "./styles";
 import { Rng } from "./rng";
-import { DEFAULT_STAGE, stageById, type StageId } from "./stages";
+import { DEFAULT_STAGE, type StageId } from "./stages";
+import { freshArenaState, makeArena, type Arena } from "./arena";
+
+export { spawnPoints } from "./arena";
 
 export interface MatchConfig {
   seed: number;
@@ -69,18 +66,9 @@ const BUTTONS = [BTN.HIGH, BTN.LOW, BTN.GRAB, BTN.REV, BTN.GUARD, BTN.TARGET, BT
 const BIT_INDEX: Record<number, number> = Object.fromEntries(BUTTONS.map((b, i) => [b, i]));
 const LIMB_TORSO_SHARE = 0.35; // part of every limb/head hit that also lands on the torso
 const GUARD_ARC = Math.cos((75 * Math.PI) / 180);
-const BODY_R = 0.33;
-
-export function spawnPoints(n: number): { x: number; y: number; facing: number }[] {
-  const out = [];
-  for (let i = 0; i < n; i++) {
-    const a = -Math.PI / 2 + (2 * Math.PI * i) / n;
-    const x = Math.cos(a) * SPAWN_R;
-    const y = Math.sin(a) * SPAWN_R;
-    out.push({ x, y, facing: Math.atan2(-y, -x) });
-  }
-  return out;
-}
+export const BODY_R = 0.33;
+// states a knock leaves you in: falling from one of them credits whoever hit you last
+const KNOCKED = new Set(["down", "hitstun", "blockstun", "thrown", "reversed", "dizzy"]);
 
 export function arms(f: Fighter): number {
   return (f.parts.armL.attached ? 1 : 0) + (f.parts.armR.attached ? 1 : 0);
@@ -88,8 +76,9 @@ export function arms(f: Fighter): number {
 export function legs(f: Fighter): number {
   return (f.parts.legL.attached ? 1 : 0) + (f.parts.legR.attached ? 1 : 0);
 }
+/** Still in the fight: not KO'd and not falling off the stage. */
 export function alive(f: Fighter): boolean {
-  return f.state !== "ko";
+  return f.state !== "ko" && f.state !== "falling";
 }
 export function actionable(f: Fighter): boolean {
   return f.state === "idle" || f.state === "walk" || f.state === "guard";
@@ -108,6 +97,7 @@ export class World {
   s: WorldState;
   rng: Rng;
   readonly hitstop: boolean;
+  readonly arena: Arena;
   /** fighters frozen by hitstop on the current step: they neither act nor slide nor hit */
   private frozen: boolean[] = [];
 
@@ -115,10 +105,10 @@ export class World {
     const n = cfg.styles.length;
     if (n < 2 || n > 8) throw new Error(`2..8 fighters, got ${n}`);
     const stage = cfg.stage ?? DEFAULT_STAGE;
-    if (!stageById(stage).playable) throw new Error(`stage ${stage} is not playable yet`);
+    this.arena = makeArena(stage);
     this.rng = new Rng(cfg.seed);
     this.hitstop = cfg.hitstop ?? true;
-    const sp = spawnPoints(n);
+    const sp = this.arena.spawns(n);
     this.s = {
       frame: 0,
       seed: cfg.seed,
@@ -162,6 +152,9 @@ export class World {
         toilet: 0,
         kos: 0,
         deaths: 0,
+        vehicle: -1,
+        out: false,
+        lastHitBy: -1,
       })),
       pickups: [],
       nextPickupId: 1,
@@ -170,7 +163,9 @@ export class World {
       toiletOccupant: -1,
       winner: -1,
       events: [],
+      arena: freshArenaState(),
     };
+    this.arena.init(this);
   }
 
   get fighters(): Fighter[] {
@@ -199,16 +194,38 @@ export class World {
     for (const f of fs) if (!this.frozen[f.id]) this.resolveThrown(f);
     this.physics();
     this.updatePickups();
-    this.updateGeysers();
-    this.updateToilet();
+    this.arena.update(this);
+    if (!this.arena.respawn && s.winner < 0) {
+      // the last one standing wins
+      const left = fs.filter((f) => !f.out);
+      if (left.length <= 1) this.win(left.length ? left[0].id : [...fs].sort((a, b) => b.kos - a.kos || a.id - b.id)[0].id);
+    }
   }
 
-  private ev(e: Omit<GameEvent, "f">): void {
+  win(id: number): void {
+    if (this.s.winner >= 0) return;
+    this.s.winner = id;
+    this.ev({ kind: "win", a: id });
+  }
+
+  /** Over the edge: falls for FALL_FRAMES, then is KO'd (and out, on a stage without respawns). */
+  fall(f: Fighter): void {
+    if (!alive(f)) return;
+    if (!KNOCKED.has(f.state)) f.lastHitBy = -1; // walked off, or the floor went: nobody's KO
+    else if (f.state === "thrown" && f.partner >= 0) f.lastHitBy = f.partner;
+    if (f.state === "holding" || f.state === "held") this.release(f);
+    if (f.state === "reattach") this.dropReattach(f);
+    this.setState(f, "falling", FALL_FRAMES);
+    f.stop = 0;
+    this.ev({ kind: "fall", a: f.id, b: f.lastHitBy });
+  }
+
+  ev(e: Omit<GameEvent, "f">): void {
     this.s.events.push({ f: this.s.frame, ...e });
   }
 
   /** Freeze both parties of a contact for `frames` (never shortening a freeze already running). */
-  private freeze(a: Fighter | undefined, b: Fighter | undefined, frames: number): number {
+  freeze(a: Fighter | undefined, b: Fighter | undefined, frames: number): number {
     if (!this.hitstop) return 0;
     for (const f of [a, b]) if (f) f.stop = Math.max(f.stop, frames);
     return frames;
@@ -253,16 +270,16 @@ export class World {
     f.prevButtons = inp.buttons;
   }
 
-  private buffered(f: Fighter, b: number, since = this.s.frame - BUFFER): boolean {
+  buffered(f: Fighter, b: number, since = this.s.frame - BUFFER): boolean {
     return f.pressed[BIT_INDEX[b]] >= Math.max(since, this.s.frame - BUFFER);
   }
 
-  private consume(f: Fighter, b: number): void {
+  consume(f: Fighter, b: number): void {
     f.pressed[BIT_INDEX[b]] = -1000;
   }
 
   // ---------------------------------------------------------------- states
-  private setState(f: Fighter, st: FighterState, dur = 0): void {
+  setState(f: Fighter, st: FighterState, dur = 0): void {
     if (f.state === "seated" || f.state === "sitting") {
       if (st !== "seated" && this.s.toiletOccupant === f.id) {
         this.s.toiletOccupant = -1;
@@ -375,6 +392,9 @@ export class World {
         f.x *= 0.7;
         f.y *= 0.7;
         break;
+      case "driving":
+        this.arena.drive(this, f, inp);
+        break;
       default:
         break;
     }
@@ -418,7 +438,11 @@ export class World {
         this.setState(f, "seated");
         break;
       case "ko":
-        this.respawn(f);
+        if (this.arena.respawn) this.respawn(f);
+        else f.dur = 0; // out for good
+        break;
+      case "falling":
+        this.ko(f, f.lastHitBy, true);
         break;
       default:
         this.setState(f, "idle");
@@ -483,6 +507,11 @@ export class World {
       else sp = SPEED.crawl;
       f.x += dx * sp;
       f.y += dy * sp;
+      // walking never takes you over an edge
+      if (!this.arena.canWalk(this, f, f.x, f.y)) {
+        f.x -= dx * sp;
+        f.y -= dy * sp;
+      }
       moving = true;
       if (f.state === "idle") this.setState(f, "walk");
       const t = this.lockTarget(f);
@@ -627,13 +656,7 @@ export class World {
       this.setState(f, "reattach", REATTACH.dur);
       return true;
     }
-    if (s.toiletOccupant < 0 && Math.hypot(f.x, f.y) < TOILET_R) {
-      s.toiletOccupant = f.id;
-      this.setState(f, "sitting", SIT_FRAMES);
-      f.facing = Math.atan2(-f.spawnY, -f.spawnX) + Math.PI; // face back out at the crowd
-      this.ev({ kind: "sit", a: f.id });
-      return true;
-    }
+    if (this.arena.use(this, f)) return true;
     for (const p of s.pickups) {
       if (p.owner === f.id || p.burning > 0 || p.z > 0.25) continue;
       if (Math.hypot(p.x - f.x, p.y - f.y) < REATTACH.range) {
@@ -657,6 +680,7 @@ export class World {
     const m = this.eff(f, f.move);
     if (f.t - 1 < m.startup || f.t - 1 >= m.startup + m.active) return; // t was advanced this frame
     if (m.rehit && (f.t - 1 - m.startup) % m.rehit === 0) f.moveHits = [];
+    this.arena.strikeObjects(this, f, m);
     for (const d of this.s.fighters) {
       if (d.id === f.id || f.moveHits.includes(d.id) || !this.inCone(f, d, m.reach, m.arc)) continue;
       if (!this.hittable(d, m.height)) continue;
@@ -666,7 +690,7 @@ export class World {
     }
   }
 
-  private inCone(f: Fighter, d: Fighter, reach: number, arc: number): boolean {
+  inCone(f: Fighter, d: Fighter, reach: number, arc: number): boolean {
     const dx = d.x - f.x;
     const dy = d.y - f.y;
     const dd = Math.hypot(dx, dy);
@@ -676,7 +700,7 @@ export class World {
   }
 
   private hittable(d: Fighter, height: Height): boolean {
-    if (d.state === "ko" || d.state === "thrown" || d.invuln > 0) return false;
+    if (!alive(d) || d.state === "thrown" || d.state === "driving" || d.invuln > 0) return false;
     if (d.state === "down") return height === "low"; // only low strikes reach a downed body
     if (d.state === "wakeup") return false;
     return true;
@@ -720,6 +744,7 @@ export class World {
     this.addFury(a, FURY.hit);
     this.addFury(d, FURY.taken);
     this.damage(d, part, dmg, a.id);
+    this.arena.onHit(this, d);
     hit.stop = this.freeze(a, d, d.state === "ko" ? HITSTOP.ko : hitstopFor(dmg, knock && !otg));
     if (d.state === "ko") return;
     if (otg) return;
@@ -740,7 +765,7 @@ export class World {
     }
   }
 
-  private knockDown(d: Fighter, dx: number, dy: number, push: number): void {
+  knockDown(d: Fighter, dx: number, dy: number, push: number): void {
     if (d.state === "holding" || d.state === "held") this.release(d);
     this.setState(d, "down", DOWN.dur);
     d.slideX = (dx * push) / 12;
@@ -767,7 +792,7 @@ export class World {
     // kinetic pushback: clear the crowd around the reverser
     for (const o of this.s.fighters) {
       if (o.id === d.id || o.id === a.id || !alive(o)) continue;
-      if (o.state === "down" || o.state === "seated" || o.state === "thrown" || o.state === "wakeup") continue;
+      if (o.state === "down" || o.state === "seated" || o.state === "thrown" || o.state === "wakeup" || o.state === "driving") continue;
       const ox = o.x - d.x;
       const oy = o.y - d.y;
       const od = Math.hypot(ox, oy);
@@ -803,7 +828,8 @@ export class World {
 
   /** Apply damage to a body part; limbs at 0 HP fall off, torso at 0 is a KO. */
   damage(d: Fighter, part: PartId, dmg: number, by: number): void {
-    if (d.state === "ko") return;
+    if (!alive(d)) return;
+    if (by >= 0) d.lastHitBy = by;
     const p = d.parts[part];
     p.hp -= dmg;
     if (part !== "torso") d.parts.torso.hp -= dmg * LIMB_TORSO_SHARE;
@@ -866,18 +892,20 @@ export class World {
     });
   }
 
-  private ko(d: Fighter, by: number): void {
+  private ko(d: Fighter, by: number, fell = false): void {
     if (d.state === "holding" || d.state === "held") this.release(d);
     if (d.state === "reattach") this.dropReattach(d);
+    this.arena.onKo(this, d);
     d.parts.torso.hp = 0;
     d.fury = 0;
     this.setState(d, "ko", KO_FRAMES);
     d.deaths++;
+    if (!this.arena.respawn) d.out = true;
     const killer = this.s.fighters[by];
     if (killer && killer.id !== d.id) killer.kos++;
-    // the body comes apart
-    for (const p of LIMBS) if (d.parts[p].attached) this.detach(d, p, by);
-    this.ev({ kind: "ko", a: d.id, b: by });
+    // the body comes apart (one that fell is gone already)
+    if (!fell) for (const p of LIMBS) if (d.parts[p].attached) this.detach(d, p, by);
+    this.ev({ kind: "ko", a: d.id, b: by, what: fell ? "fall" : undefined });
   }
 
   private respawn(f: Fighter): void {
@@ -889,6 +917,7 @@ export class World {
     f.slideX = f.slideY = 0;
     f.combo = 0;
     f.recentHits = [];
+    f.lastHitBy = -1;
     f.invuln = RESPAWN_INVULN;
     this.setState(f, "idle");
     this.ev({ kind: "respawn", a: f.id });
@@ -915,7 +944,7 @@ export class World {
     let bd = 1e9;
     for (const d of this.s.fighters) {
       if (d.id === f.id || !this.inCone(f, d, reach, GRAB.arc)) continue;
-      if (d.invuln > 0 || ["ko", "down", "wakeup", "thrown", "held", "holding"].includes(d.state)) continue;
+      if (d.invuln > 0 || ["ko", "falling", "driving", "down", "wakeup", "thrown", "held", "holding"].includes(d.state)) continue;
       const dd = dist(f, d);
       if (dd < bd) {
         bd = dd;
@@ -936,6 +965,7 @@ export class World {
     f.holdCool = 8;
     f.facing = Math.atan2(best.y - f.y, best.x - f.x);
     const stop = this.freeze(f, best, HITSTOP.grab);
+    this.arena.onHit(this, best);
     this.ev({ kind: "grab", a: f.id, b: best.id, stop });
   }
 
@@ -959,7 +989,7 @@ export class World {
   private physics(): void {
     const fs = this.s.fighters;
     for (const f of fs) {
-      if (f.state === "seated" || this.frozen[f.id]) continue;
+      if (f.state === "seated" || f.state === "driving" || this.frozen[f.id]) continue;
       f.x += f.slideX;
       f.y += f.slideY;
       const decay = f.state === "thrown" ? 1 : 0.85;
@@ -973,7 +1003,7 @@ export class World {
       for (let j = i + 1; j < fs.length; j++) {
         const a = fs[i];
         const b = fs[j];
-        if (!alive(a) || !alive(b) || a.state === "thrown" || b.state === "thrown") continue;
+        if (!alive(a) || !alive(b) || a.state === "thrown" || b.state === "thrown" || a.state === "driving" || b.state === "driving") continue;
         if (a.partner === b.id && (a.state === "holding" || a.state === "held")) continue;
         const dx = b.x - a.x;
         const dy = b.y - a.y;
@@ -995,26 +1025,7 @@ export class World {
         }
       }
     }
-    for (const f of fs) {
-      if (f.state === "seated" || f.state === "sitting") continue;
-      const r = Math.hypot(f.x, f.y);
-      // the toilet is solid
-      if (r < 0.55 && this.s.toiletOccupant !== f.id) {
-        const k = r > 1e-6 ? 0.55 / r : 0;
-        f.x = r > 1e-6 ? f.x * k : 0.55;
-        f.y = r > 1e-6 ? f.y * k : 0;
-      }
-      const wall = LAVA_R - BODY_R;
-      if (r > wall) {
-        f.x *= wall / r;
-        f.y *= wall / r;
-        f.slideX = f.slideY = 0;
-      }
-      if (alive(f) && r > RING_R && this.s.frame % LAVA.tick === 0 && f.invuln === 0) {
-        this.damage(f, "torso", LAVA.dmg, -1);
-        this.ev({ kind: "hit", a: -1, b: f.id, part: "torso", dmg: LAVA.dmg });
-      }
-    }
+    for (const f of fs) if (f.state !== "falling") this.arena.bound(this, f);
   }
 
   private updatePickups(): void {
@@ -1036,16 +1047,7 @@ export class World {
         p.vy *= 0.8;
         p.spin *= 0.8;
       }
-      const r = Math.hypot(p.x, p.y);
-      if (r > LAVA_R) {
-        p.x *= LAVA_R / r;
-        p.y *= LAVA_R / r;
-        p.vx = p.vy = 0;
-      }
-      if (p.z === 0 && Math.hypot(p.x, p.y) > RING_R) {
-        p.burning = 40;
-        this.ev({ kind: "burn", a: p.owner, part: p.part });
-      }
+      this.arena.boundPickup(this, p);
     }
     for (const p of s.pickups) {
       if (p.burning === 1) {
@@ -1055,49 +1057,6 @@ export class World {
       }
     }
     s.pickups = s.pickups.filter((p) => p.burning !== 1);
-  }
-
-  private updateGeysers(): void {
-    const s = this.s;
-    if (s.frame >= s.nextGeyser) {
-      const a = this.rng.range(0, Math.PI * 2);
-      const r = this.rng.range(2.5, RING_R - 0.8);
-      s.geysers.push({ x: Math.cos(a) * r, y: Math.sin(a) * r, t: 0 });
-      s.nextGeyser = s.frame + Math.round(this.rng.range(GEYSER.minGap, GEYSER.maxGap));
-    }
-    for (const g of s.geysers) {
-      g.t++;
-      if (g.t !== GEYSER.warn) continue;
-      this.ev({ kind: "geyser", a: -1 });
-      for (const f of s.fighters) {
-        if (!alive(f) || f.invuln > 0 || f.state === "down" || f.state === "seated") continue;
-        const dx = f.x - g.x;
-        const dy = f.y - g.y;
-        const d = Math.hypot(dx, dy);
-        if (d > GEYSER.radius) continue;
-        this.ev({ kind: "hit", a: -1, b: f.id, part: "torso", dmg: GEYSER.dmg });
-        this.damage(f, "torso", GEYSER.dmg, -1);
-        if (alive(f)) this.knockDown(f, d > 0.01 ? dx / d : 1, d > 0.01 ? dy / d : 0, 1.0);
-      }
-    }
-    s.geysers = s.geysers.filter((g) => g.t < GEYSER.warn + GEYSER.erupt);
-  }
-
-  private updateToilet(): void {
-    const s = this.s;
-    const occ = s.fighters[s.toiletOccupant];
-    if (!occ) return;
-    if (occ.state !== "seated" && occ.state !== "sitting") {
-      s.toiletOccupant = -1;
-      return;
-    }
-    if (occ.state === "seated") {
-      occ.toilet++;
-      if (occ.toilet >= TOILET_FRAMES) {
-        s.winner = occ.id;
-        this.ev({ kind: "win", a: occ.id });
-      }
-    }
   }
 
   // ---------------------------------------------------------------- misc
@@ -1113,6 +1072,7 @@ export class World {
     mix(this.rng.s);
     mix(s.toiletOccupant);
     mix(s.winner);
+    this.arena.hash(mix, s.arena);
     for (const f of s.fighters) {
       mix(f.x);
       mix(f.y);
@@ -1124,6 +1084,8 @@ export class World {
       mix(f.charge);
       mix(f.stop);
       mix(f.fury);
+      mix(f.vehicle);
+      mix(f.out ? 1 : 0);
       for (const p of PARTS) mix(f.parts[p].hp + (f.parts[p].attached ? 1000 : 0));
     }
     for (const p of s.pickups) {

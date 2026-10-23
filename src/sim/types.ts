@@ -20,7 +20,7 @@ export const BTN = {
   REV: 8, // Triangle: high reversal (R1+Triangle: low reversal)
   GUARD: 16, // R1
   TARGET: 32, // L1: switch soft-lock target
-  USE: 64, // R2: pick up limb / sit on the toilet
+  USE: 64, // R2: pick up limb / sit on the toilet / get in or out of a vehicle
   SPECIAL: 128, // L2 (or Square + Cross together): the style's special, costs fury
 } as const;
 
@@ -63,6 +63,8 @@ export type FighterState =
   | "reattach"
   | "sitting"
   | "seated"
+  | "driving" // in a construction vehicle (Construction Site)
+  | "falling" // off the edge: eliminated, or dead and respawning, when it ends
   | "ko";
 
 export interface Fighter {
@@ -101,9 +103,12 @@ export interface Fighter {
   reattachPickup: number;
   prevButtons: number;
   pressed: number[]; // frame each button was last pressed (input buffer)
-  toilet: number; // seated progress in frames, kept between sittings
+  toilet: number; // objective progress in frames (seated on the toilet, holding the banner), kept between turns
   kos: number;
   deaths: number;
+  vehicle: number; // the vehicle this fighter drives, -1 on foot
+  out: boolean; // eliminated (stages without respawns)
+  lastHitBy: number; // who hit this fighter last (-1: nobody or the arena), credited with a fall
 }
 
 export interface Pickup {
@@ -121,10 +126,43 @@ export interface Pickup {
   burning: number; // >0: sinking into the lava, frames left
 }
 
+/** what the arena throws at the fighters: it warns, then strikes (see HAZARDS) */
+export type HazardKind = "geyser" | "beam" | "boulder" | "arrows";
+
 export interface Geyser {
+  kind: HazardKind;
   x: number;
   y: number;
-  t: number; // frames since it appeared; erupts at GEYSER_WARN
+  t: number; // frames since it appeared; strikes at HAZARDS[kind].warn
+}
+
+export type VehicleKind = "bulldozer" | "excavator" | "dumptruck" | "forklift" | "roller" | "mixer" | "loader" | "crane";
+
+export interface Vehicle {
+  id: number;
+  kind: VehicleKind;
+  x: number;
+  y: number;
+  facing: number;
+  speed: number; // m/frame along facing (negative: reversing)
+  hp: number;
+  max: number;
+  driver: number; // fighter id, -1 parked
+  boost: number; // frames of boost left
+  cool: number; // frames until the next boost
+  wrecked: boolean;
+  lastBy: number; // who damaged it last
+}
+
+/** Stage-specific state. Every stage has every field; the ones it does not use stay at their defaults. */
+export interface ArenaState {
+  vehicles: Vehicle[]; // Construction Site
+  tiles: number[]; // Collapsing Tower: 0 intact, >0 frames cracking, -1 fallen
+  nextCrack: number;
+  fireX: number; // Hindenburg Blimp: the deck burns beyond this x
+  wind: number; // Hindenburg Blimp: <0 a gust is coming (frames to go, counting up), >0 gust frames left
+  windDir: number; // +1 / -1: the gust blows toward +y / -y
+  nextWind: number;
 }
 
 export interface GameEvent {
@@ -148,12 +186,25 @@ export interface GameEvent {
     | "crowd"
     | "punt"
     | "dizzy"
-    | "special";
+    | "special"
+    | "fall" // went over the edge
+    | "crash" // a vehicle hit a wall, another vehicle or a strike
+    | "wreck"
+    | "enter"
+    | "exit"
+    | "crack" // a floor tile starts to give way
+    | "collapse"
+    | "wind"
+    | "impact" // the blimp hits the ground
+    | "capture";
   a: number; // actor
   b?: number; // other party
   part?: PartId;
   dmg?: number;
   stop?: number; // the hitstop the event froze both parties for
+  what?: string; // detail: the hazard kind, "fall" on a KO by falling, "warn" / "gust" on wind
+  x?: number; // where, for events without a fighter at the spot
+  y?: number;
 }
 
 export interface WorldState {
@@ -163,9 +214,10 @@ export interface WorldState {
   fighters: Fighter[];
   pickups: Pickup[];
   nextPickupId: number;
-  geysers: Geyser[];
-  nextGeyser: number;
-  toiletOccupant: number;
+  geysers: Geyser[]; // the arena's hazards (geysers, falling beams, boulders, arrow volleys)
+  nextGeyser: number; // frame of the next hazard
+  toiletOccupant: number; // the fighter holding the objective (toilet, banner), -1 none
+  arena: ArenaState;
   winner: number;
   events: GameEvent[]; // events of the most recent step only
 }

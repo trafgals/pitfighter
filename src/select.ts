@@ -100,7 +100,7 @@ export class Select {
     this.render();
   }
 
-  /** Step through the playable stages; planned stages cannot be picked. */
+  /** Step through the playable stages; a stage that is not playable cannot be picked. */
   cycleStage(dir: number): void {
     const n = PLAYABLE_STAGES.length;
     const i = PLAYABLE_STAGES.findIndex((s) => s.id === this.stage);

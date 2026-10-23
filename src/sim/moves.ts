@@ -117,6 +117,7 @@ export const COMBO_SCALE = 0.85;
 export const COMBO_FLOOR = 0.4;
 export const DIZZY = { dur: 90, headReset: 20 };
 export const KO_FRAMES = 180;
+export const FALL_FRAMES = 50; // over the edge to gone
 export const RESPAWN_INVULN = 90;
 export const REATTACH = { dur: 30, range: 1.1, hpFrac: 0.5 };
 export const REGROW_FRAMES = 720;

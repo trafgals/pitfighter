@@ -1,7 +1,8 @@
 // End-to-end browser test. Builds nothing: it serves the repo with Vite (or,
 // with a URL in BASE_URL or as the first argument, tests that deployed site instead, e.g. GitHub Pages), drives
 // real headless Chrome through the character select with the keyboard into an
-// 8-fighter match, plays it, and checks the canvas, the HUD and the sim state.
+// 8-fighter match, plays it, and checks the canvas, the HUD and the sim state;
+// then starts an 8-fighter match on each of the other stages and plays it.
 // Every step has a timeout and a global watchdog tears everything down.
 import { spawn } from "node:child_process";
 import fs from "node:fs";
@@ -28,9 +29,9 @@ const teardown = async (code) => {
   process.exit(code);
 };
 const watchdog = setTimeout(() => {
-  console.error("TIMEOUT: browser test exceeded 90 s");
+  console.error("TIMEOUT: browser test exceeded 240 s");
   teardown(1);
-}, 90_000);
+}, 240_000);
 
 const withTimeout = (p, ms, what) =>
   Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error(`timeout (${ms} ms): ${what}`)), ms))]);
@@ -82,21 +83,25 @@ async function main() {
     JSON.stringify(stages) ===
       JSON.stringify([
         { id: "hell-toilet", on: true, soon: false },
-        { id: "construction-site", on: false, soon: true },
-        { id: "collapsing-tower", on: false, soon: true },
-        { id: "hindenburg-blimp", on: false, soon: true },
-        { id: "castle-under-siege", on: false, soon: true },
+        { id: "construction-site", on: false, soon: false },
+        { id: "collapsing-tower", on: false, soon: false },
+        { id: "hindenburg-blimp", on: false, soon: false },
+        { id: "castle-under-siege", on: false, soon: false },
       ]),
-    `stage list: Hell Toilet selected, the four planned stages coming soon (${JSON.stringify(stages)})`,
+    `stage list: all five stages playable, Hell Toilet selected (${JSON.stringify(stages)})`,
   );
   await page.screenshot({ path: path.join(OUT, "1_select.png") });
 
   // P1 joins on the keyboard, moves the cursor two styles right, confirms, starts
+  // the game reads the keyboard once per animation frame, and a slow software
+  // renderer can go longer than a fixed delay between frames: hold every key
+  // down, and then up, across two rendered frames so the poll always sees both
+  const frames = () => withTimeout(page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))), 5_000, "two frames");
   const press = async (key) => {
     await page.keyboard.down(key);
-    await new Promise((r) => setTimeout(r, 60));
+    await frames();
     await page.keyboard.up(key);
-    await new Promise((r) => setTimeout(r, 60));
+    await frames();
   };
   await press("KeyJ");
   await press("KeyD");
@@ -105,8 +110,11 @@ async function main() {
   check(JSON.stringify(chosen) === JSON.stringify([["kb1", 2, false]]), `kb1 joined and picked style 2 (${JSON.stringify(chosen)})`);
   await press("KeyJ");
   await press("BracketRight");
+  const stageNext = await page.evaluate(() => window.__game.select.stage);
+  check(stageNext === "construction-site", `] picks the next stage (${stageNext})`);
+  await press("BracketLeft");
   const stageAfter = await page.evaluate(() => window.__game.select.stage);
-  check(stageAfter === "hell-toilet", `] skips the planned stages (${stageAfter})`);
+  check(stageAfter === "hell-toilet", `[ goes back to Hell Toilet (${stageAfter})`);
   await press("Enter");
   await page.waitForFunction(() => window.__game.mode === "match", { timeout: 10_000 });
   const setup = await page.evaluate(() => window.__game.world.fighters.map((f) => ({ style: f.style, human: f.human, x: f.spawnX, y: f.spawnY })));
@@ -241,6 +249,92 @@ async function main() {
   await page.screenshot({ path: path.join(OUT, "3_match_fight.png") });
 
   check(errors.length === 0, `no page errors${errors.length ? ": " + errors.slice(0, 3).join(" | ") : ""}`);
+
+  // every other stage: start an 8-CPU match with ?stage=, play it, look at it
+  const litCanvas = () =>
+    page.evaluate(() => {
+      const c = document.querySelector("#view");
+      const g = document.createElement("canvas");
+      g.width = 64;
+      g.height = 40;
+      const ctx = g.getContext("2d");
+      ctx.drawImage(c, 0, 0, 64, 40);
+      const d = ctx.getImageData(0, 0, 64, 40).data;
+      let lit = 0;
+      const colours = new Set();
+      for (let i = 0; i < d.length; i += 4) {
+        if (d[i] + d[i + 1] + d[i + 2] > 120) lit++;
+        colours.add(((d[i] >> 4) << 8) | ((d[i + 1] >> 4) << 4) | (d[i + 2] >> 4));
+      }
+      return { lit, colours: colours.size };
+    });
+  const STAGE_RUNS = [
+    { id: "construction-site", frames: 1500 },
+    { id: "collapsing-tower", frames: 1800 },
+    // the blimp starts 5 s before the crash, so every run sees the impact and the wreck
+    { id: "hindenburg-blimp", frames: 1200, from: 1500 },
+    { id: "castle-under-siege", frames: 1500 },
+  ];
+  for (const [i, run] of STAGE_RUNS.entries()) {
+    errors.length = 0;
+    await withTimeout(page.goto(`${SITE}/?auto=1&fighters=8&seed=${11 + i}&stage=${run.id}`, { waitUntil: "load" }), 20_000, `load ${run.id}`);
+    await page.waitForFunction(() => window.__game && window.__game.mode === "match", { timeout: 10_000 });
+    const start = await page.evaluate(() => {
+      const w = window.__game.world;
+      return {
+        stage: w.s.stage,
+        view: window.__game.scene.stage,
+        n: w.fighters.length,
+        driving: w.fighters.filter((f) => f.state === "driving").length,
+        vehicles: w.s.arena.vehicles.length,
+        banner: document.querySelector(".banner")?.textContent,
+      };
+    });
+    check(start.stage === run.id && start.view === run.id && start.n === 8, `${run.id}: an 8-fighter match starts on the stage and its view (${JSON.stringify(start)})`);
+    if (run.id === "construction-site") check(start.driving === 8 && start.vehicles === 8, `construction-site: everyone starts in their own vehicle (${start.driving} driving, ${start.vehicles} vehicles)`);
+    await new Promise((r) => setTimeout(r, 1200));
+    await page.screenshot({ path: path.join(OUT, `6_${run.id}_start.png`) });
+    const after = await withTimeout(
+      page.evaluate((n, from) => {
+        const g = window.__game;
+        if (from) g.world.s.frame = from;
+        const seen = {};
+        for (let k = 0; k < n && g.mode === "match"; k++) {
+          g.step(1);
+          for (const e of g.world.s.events) seen[e.kind] = (seen[e.kind] ?? 0) + 1;
+        }
+        const w = g.world;
+        return {
+          frame: w.s.frame,
+          winner: w.s.winner,
+          seen,
+          nan: w.fighters.some((f) => !Number.isFinite(f.x + f.y + f.parts.torso.hp)),
+          tilesGone: w.s.arena.tiles.filter((t) => t === -1).length,
+          fireX: w.s.arena.fireX,
+          down: w.s.frame >= 1800,
+          headline: document.querySelector(".throne-name")?.textContent ?? "",
+          cards: document.querySelectorAll(".card").length,
+          played: Object.keys(g.sfx.played).length,
+        };
+      }, run.frames, run.from ?? 0),
+      60_000,
+      `play ${run.id}`,
+    );
+    console.log(`      ${run.id}:`, JSON.stringify(after));
+    check(!after.nan, `${run.id}: no NaN in fighter state`);
+    check(after.frame >= (run.from ?? 0) + run.frames || after.winner >= 0, `${run.id}: ran to frame ${(run.from ?? 0) + run.frames} or was won (frame ${after.frame}, winner ${after.winner})`);
+    check((after.seen.hit ?? 0) > 0, `${run.id}: fighting happened (${after.seen.hit ?? 0} hits)`);
+    check(after.cards === 8 && after.headline.length > 0, `${run.id}: HUD shows 8 cards and the stage headline ("${after.headline}")`);
+    if (run.id === "construction-site") check((after.seen.crash ?? 0) > 0, `construction-site: machines crashed (${after.seen.crash ?? 0})`);
+    if (run.id === "collapsing-tower") check(after.tilesGone > 0 && (after.seen.collapse ?? 0) > 0, `collapsing-tower: the roof is falling apart (${after.tilesGone} tiles gone)`);
+    if (run.id === "hindenburg-blimp") check(after.fireX < 10 && after.down && (after.seen.impact ?? 0) === 1, `hindenburg-blimp: the fire spreads (x = ${after.fireX.toFixed(2)}) and the blimp hit the ground (${after.seen.impact ?? 0} impact)`);
+    if (run.id === "castle-under-siege") check((after.seen.geyser ?? 0) > 0, `castle-under-siege: the siege engines fire (${after.seen.geyser ?? 0} strikes)`);
+    await new Promise((r) => setTimeout(r, 600));
+    const px = await litCanvas();
+    check(px.lit > 200 && px.colours > 40, `${run.id}: canvas renders the arena (${px.lit} lit px, ${px.colours} colours)`);
+    await page.screenshot({ path: path.join(OUT, `7_${run.id}_fight.png`) });
+    check(errors.length === 0, `${run.id}: no page errors${errors.length ? ": " + errors.slice(0, 3).join(" | ") : ""}`);
+  }
 }
 
 main()

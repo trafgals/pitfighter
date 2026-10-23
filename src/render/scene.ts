@@ -1,7 +1,7 @@
 // Three.js view of a World. Reads the simulation state each frame and never
-// writes to it. The fighters' bodies and poses live in body.ts; this file
-// builds the arena (hellfire, rocks, the last toilet, a crowd of the damned),
-// places everything each frame, runs the camera, and turns each step's cues
+// writes to it. The fighters' bodies and poses live in body.ts and each
+// stage's arena in stageviews.ts; this file places the fighters, limbs and
+// hazards each frame, runs the camera, and turns each step's cues
 // into impact effects: hit sparks, flash rings, dust, white hit flashes, a
 // shaking and punching-in camera, and hitstop jitter on the victim.
 import * as THREE from "three";
@@ -9,18 +9,18 @@ import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
-import { LAVA_R, RING_R, type Fighter, type PartId, type Pickup } from "../sim/types";
-import { FURY, GEYSER } from "../sim/moves";
+import { type Fighter, type Geyser, type HazardKind, type PartId, type Pickup } from "../sim/types";
+import { FALL_FRAMES, FURY } from "../sim/moves";
+import { HAZARDS } from "../sim/arena";
+import type { StageId } from "../sim/stages";
 import { STYLES } from "../sim/styles";
 import { alive, type World } from "../sim/world";
 import { PLAYER_COLORS, applyPose, buildBody, syncLimbs, targetPose, type Body } from "./body";
 import type { Cue } from "./cues";
 import { Fx } from "./fx";
+import { canvasTexture, makeStageView, toV, yaw, type StageView } from "./stageviews";
 
 export { PLAYER_COLORS };
-
-const toV = (x: number, y: number, h = 0) => new THREE.Vector3(x, h, -y);
-const yaw = (facing: number) => Math.atan2(Math.cos(facing), -Math.sin(facing));
 
 // where on the body a hit on each part lands (metres above the floor)
 const PART_H: Record<PartId, number> = { head: 1.62, torso: 1.2, armL: 1.3, armR: 1.3, legL: 0.5, legR: 0.5 };
@@ -33,17 +33,7 @@ interface FighterView extends Body {
   stars: THREE.Group;
   aura: THREE.Mesh;
   marker: THREE.Mesh | null; // a human's lock-on chevron, floating over their target
-}
-
-function canvasTexture(w: number, h: number, draw: (g: CanvasRenderingContext2D) => void): THREE.CanvasTexture {
-  const c = document.createElement("canvas");
-  c.width = w;
-  c.height = h;
-  draw(c.getContext("2d")!);
-  const t = new THREE.CanvasTexture(c);
-  t.colorSpace = THREE.SRGBColorSpace;
-  t.wrapS = t.wrapT = THREE.RepeatWrapping;
-  return t;
+  fell: boolean; // went over the edge: stays out of sight until it respawns
 }
 
 function labelSprite(text: string, color: number): THREE.Sprite {
@@ -72,14 +62,8 @@ export class Scene {
   private bloom: UnrealBloomPass | null = null;
   private fighters: FighterView[] = [];
   private pickups = new Map<number, THREE.Group>();
-  private geysers: THREE.Group[] = [];
-  private lavaTex!: THREE.CanvasTexture;
-  private lavaLight!: THREE.PointLight;
-  private embers!: THREE.Points;
-  private toiletGlow!: THREE.PointLight;
-  private halo!: THREE.Mesh;
-  private crowd!: THREE.InstancedMesh;
-  private crowdBase: { x: number; y: number; z: number; ph: number; sp: number }[] = [];
+  private hazards: { kind: HazardKind; g: THREE.Group }[] = [];
+  private view!: StageView;
   private camTarget = new THREE.Vector3(0, 0, 0);
   private camDist = 22;
   private world: World | null = null;
@@ -87,7 +71,6 @@ export class Scene {
   private punch = 0; // camera punch-in toward `punchAt`, 0..1
   private punchAt = new THREE.Vector3();
   private hype = 0; // how loud the crowd is, 0..1
-  private dummy = new THREE.Object3D();
 
   constructor(
     readonly canvas: HTMLCanvasElement,
@@ -98,10 +81,8 @@ export class Scene {
     this.renderer.shadowMap.enabled = !lofi;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.scene.background = new THREE.Color(0x140303);
-    this.scene.fog = new THREE.Fog(0x2a0505, 26, 60);
-    this.buildArena();
-    this.buildCrowd();
+    // the select screen shows the first stage behind it
+    this.setStage("hell-toilet");
     this.scene.add(this.fx.group);
     if (!lofi) {
       // bloom makes the hellfire, the sparks and the halo glow
@@ -129,173 +110,22 @@ export class Scene {
   }
 
   // ---------------------------------------------------------------- arena
-  private buildArena(): void {
-    const sc = this.scene;
-    sc.add(new THREE.HemisphereLight(0xff8866, 0x220000, 0.55));
-    const key = new THREE.DirectionalLight(0xffc0a0, 1.4);
-    key.position.set(-6, 18, 10);
-    key.castShadow = true;
-    key.shadow.mapSize.set(2048, 2048);
-    const sh = key.shadow.camera as THREE.OrthographicCamera;
-    sh.left = sh.bottom = -13;
-    sh.right = sh.top = 13;
-    sc.add(key);
-    // a cold rim light from behind picks the fighters out of the red
-    const rim = new THREE.DirectionalLight(0x6080ff, 0.7);
-    rim.position.set(4, 8, -14);
-    sc.add(rim);
-
-    // cracked basalt floor with glowing veins
-    const floorTex = canvasTexture(1024, 1024, (g) => {
-      g.fillStyle = "#2b1d1a";
-      g.fillRect(0, 0, 1024, 1024);
-      for (let i = 0; i < 3500; i++) {
-        const v = 20 + Math.random() * 30;
-        g.fillStyle = `rgb(${v + 10},${v},${v - 5})`;
-        g.fillRect(Math.random() * 1024, Math.random() * 1024, 3 + Math.random() * 10, 3 + Math.random() * 10);
-      }
-      g.strokeStyle = "rgba(255,90,20,0.55)";
-      g.lineWidth = 3;
-      for (let i = 0; i < 40; i++) {
-        let x = Math.random() * 1024;
-        let y = Math.random() * 1024;
-        g.beginPath();
-        g.moveTo(x, y);
-        for (let k = 0; k < 8; k++) {
-          x += (Math.random() - 0.5) * 120;
-          y += (Math.random() - 0.5) * 120;
-          g.lineTo(x, y);
-        }
-        g.stroke();
-      }
-    });
-    const floor = new THREE.Mesh(
-      new THREE.CylinderGeometry(RING_R, RING_R + 0.2, 0.6, 72),
-      new THREE.MeshStandardMaterial({ map: floorTex, roughness: 0.95, emissive: 0x220500, emissiveMap: floorTex, emissiveIntensity: 0.6 }),
-    );
-    floor.position.y = -0.3;
-    floor.receiveShadow = true;
-    sc.add(floor);
-
-    // a ring of hellfire around the floor
-    this.lavaTex = canvasTexture(512, 512, (g) => {
-      const grd = g.createLinearGradient(0, 0, 512, 512);
-      grd.addColorStop(0, "#ff3a00");
-      grd.addColorStop(0.5, "#ffb000");
-      grd.addColorStop(1, "#ff2000");
-      g.fillStyle = grd;
-      g.fillRect(0, 0, 512, 512);
-      for (let i = 0; i < 300; i++) {
-        g.fillStyle = `rgba(${120 + Math.random() * 80},${Math.random() * 30},0,0.6)`;
-        g.beginPath();
-        g.arc(Math.random() * 512, Math.random() * 512, 6 + Math.random() * 30, 0, Math.PI * 2);
-        g.fill();
-      }
-    });
-    this.lavaTex.repeat.set(6, 1);
-    const lava = new THREE.Mesh(
-      new THREE.RingGeometry(RING_R - 0.05, LAVA_R + 3, 96, 1),
-      new THREE.MeshBasicMaterial({ map: this.lavaTex, side: THREE.DoubleSide }),
-    );
-    lava.rotation.x = -Math.PI / 2;
-    lava.position.y = -0.45;
-    sc.add(lava);
-    this.lavaLight = new THREE.PointLight(0xff4a10, 60, 30, 1.6);
-    this.lavaLight.position.set(0, 0.5, 0);
-    sc.add(this.lavaLight);
-
-    // jagged rocks at the outer wall
-    const rockMat = new THREE.MeshStandardMaterial({ color: 0x1a0d0b, roughness: 1 });
-    for (let i = 0; i < 46; i++) {
-      const a = (i / 46) * Math.PI * 2 + Math.random() * 0.05;
-      const h = 1.5 + Math.random() * 3.5;
-      const rock = new THREE.Mesh(new THREE.ConeGeometry(0.6 + Math.random() * 0.7, h, 5), rockMat);
-      rock.position.set(Math.cos(a) * (LAVA_R + 1.0 + Math.random()), h / 2 - 0.5, Math.sin(a) * (LAVA_R + 1.0 + Math.random()));
-      rock.rotation.set((Math.random() - 0.5) * 0.3, Math.random() * 3, (Math.random() - 0.5) * 0.3);
-      sc.add(rock);
+  /** Swap in the view of another stage. */
+  setStage(id: StageId): void {
+    if (this.view?.id === id) return;
+    if (this.view) {
+      this.scene.remove(this.view.group);
+      this.view.dispose();
     }
-
-    // THE LAST TOILET
-    const porcelain = new THREE.MeshStandardMaterial({ color: 0xf4f1ea, roughness: 0.25, metalness: 0.05 });
-    const gold = new THREE.MeshStandardMaterial({ color: 0xffc23a, roughness: 0.3, metalness: 0.9, emissive: 0x442200 });
-    const toilet = new THREE.Group();
-    const bowl = new THREE.Mesh(
-      new THREE.LatheGeometry([new THREE.Vector2(0.18, 0), new THREE.Vector2(0.22, 0.2), new THREE.Vector2(0.3, 0.35), new THREE.Vector2(0.34, 0.45), new THREE.Vector2(0.3, 0.46)], 24),
-      porcelain,
-    );
-    const seat = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.05, 10, 24), gold);
-    seat.rotation.x = Math.PI / 2;
-    seat.position.y = 0.48;
-    const tank = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.5, 0.22), porcelain);
-    tank.position.set(0, 0.75, -0.32);
-    const plinth = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.7, 0.18, 24), new THREE.MeshStandardMaterial({ color: 0x3a0a0a, roughness: 0.6 }));
-    plinth.position.y = 0.0;
-    for (const m of [bowl, seat, tank, plinth]) {
-      m.castShadow = true;
-      m.receiveShadow = true;
-      toilet.add(m);
-    }
-    // the toilet faces south, toward the camera
-    toilet.position.set(0, 0.08, 0);
-    sc.add(toilet);
-    this.halo = new THREE.Mesh(new THREE.TorusGeometry(0.35, 0.03, 8, 32), new THREE.MeshBasicMaterial({ color: 0xffe9a0 }));
-    this.halo.rotation.x = Math.PI / 2;
-    this.halo.position.set(0, 1.55, -0.3);
-    sc.add(this.halo);
-    this.toiletGlow = new THREE.PointLight(0xffe2a0, 25, 6, 2);
-    this.toiletGlow.position.set(0, 2.2, 0);
-    sc.add(this.toiletGlow);
-    const beam = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.4, 0.9, 14, 24, 1, true),
-      new THREE.MeshBasicMaterial({ color: 0xfff0b0, transparent: true, opacity: 0.08, side: THREE.DoubleSide, depthWrite: false }),
-    );
-    beam.position.y = 7;
-    sc.add(beam);
-
-    // rising embers
-    const n = 400;
-    const pos = new Float32Array(n * 3);
-    for (let i = 0; i < n; i++) {
-      const a = Math.random() * Math.PI * 2;
-      const r = RING_R + Math.random() * 4;
-      pos[i * 3] = Math.cos(a) * r;
-      pos[i * 3 + 1] = Math.random() * 10;
-      pos[i * 3 + 2] = Math.sin(a) * r;
-    }
-    const eg = new THREE.BufferGeometry();
-    eg.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-    this.embers = new THREE.Points(eg, new THREE.PointsMaterial({ color: 0xffa040, size: 0.09, transparent: true, opacity: 0.85 }));
-    sc.add(this.embers);
+    this.view = makeStageView(id);
+    this.scene.add(this.view.group);
+    this.scene.background = new THREE.Color(this.view.background);
+    const [c, near, far] = this.view.fog;
+    this.scene.fog = new THREE.Fog(c, near, far);
   }
 
-  /** Tiers of rock behind the hellfire, packed with the damned. They bounce harder the louder it gets. */
-  private buildCrowd(): void {
-    const tierMat = new THREE.MeshStandardMaterial({ color: 0x140806, roughness: 1 });
-    for (let i = 0; i < 3; i++) {
-      const r0 = LAVA_R + 3.2 + i * 1.4;
-      const tier = new THREE.Mesh(new THREE.CylinderGeometry(r0 + 1.4, r0 + 1.4, 0.6 + i * 0.9, 64, 1, true), tierMat);
-      tier.position.y = (0.6 + i * 0.9) / 2 - 0.4;
-      tier.material.side = THREE.DoubleSide;
-      this.scene.add(tier);
-      const top = new THREE.Mesh(new THREE.RingGeometry(r0, r0 + 1.4, 64), tierMat);
-      top.rotation.x = -Math.PI / 2;
-      top.position.y = 0.2 + i * 0.9 - 0.4 + 0.2;
-      this.scene.add(top);
-    }
-    const geo = new THREE.CapsuleGeometry(0.2, 0.55, 3, 8);
-    const mat = new THREE.MeshStandardMaterial({ roughness: 0.8, emissive: 0x300000 });
-    const n = 220;
-    this.crowd = new THREE.InstancedMesh(geo, mat, n);
-    const col = new THREE.Color();
-    for (let i = 0; i < n; i++) {
-      const tierI = i % 3;
-      const a = (i / n) * Math.PI * 2 * 3 + tierI * 0.37;
-      const r = LAVA_R + 3.9 + tierI * 1.4;
-      this.crowdBase.push({ x: Math.cos(a) * r, y: 0.55 + tierI * 0.9, z: Math.sin(a) * r, ph: (i * 2.39) % (Math.PI * 2), sp: 5 + (i % 5) });
-      col.setHSL(0.0 + ((i * 37) % 10) / 120, 0.6, 0.12 + ((i * 13) % 7) / 60);
-      this.crowd.setColorAt(i, col);
-    }
-    this.scene.add(this.crowd);
+  get stage(): StageId {
+    return this.view.id;
   }
 
   // ---------------------------------------------------------------- fighters
@@ -342,7 +172,7 @@ export class Scene {
       this.scene.add(marker);
     }
     this.scene.add(b.root);
-    return { ...b, ring, fury, label, stars, aura, marker };
+    return { ...b, ring, fury, label, stars, aura, marker, fell: false };
   }
 
   attach(world: World): void {
@@ -351,10 +181,11 @@ export class Scene {
       if (v.marker) this.scene.remove(v.marker);
     }
     for (const p of this.pickups.values()) this.scene.remove(p);
-    for (const g of this.geysers) this.scene.remove(g);
+    for (const h of this.hazards) this.scene.remove(h.g);
+    this.setStage(world.s.stage);
     this.fighters = world.fighters.map((f) => this.buildFighter(f));
     this.pickups.clear();
-    this.geysers = [];
+    this.hazards = [];
     this.world = world;
     this.camTarget.set(0, 0, 0);
   }
@@ -461,9 +292,54 @@ export class Scene {
           this.hype = Math.min(1, this.hype + 0.3);
           break;
         }
-        case "geyser":
-          this.shake = Math.min(1, this.shake + 0.35);
+        case "geyser": {
+          // a hazard strikes: the hellfire geyser, a steel beam, a catapult stone, an arrow volley
+          const p = toV(q.x ?? 0, q.y ?? 0, 0.1);
+          if (q.what === "beam" || q.what === "boulder") {
+            this.fx.burst(p, { count: 30, speed: 3, color: 0x6a5a48, life: 0.8, gravity: 1, up: 1.4, dust: true });
+            this.fx.ring(p, q.what === "beam" ? 0xffd080 : 0xc0a080, 2.6, 0.35, true);
+            this.shake = Math.min(1, this.shake + 0.5);
+          } else if (q.what === "arrows") this.fx.burst(p, { count: 14, speed: 1.5, color: 0x8a7050, life: 0.4, gravity: 3, dust: true });
+          else this.shake = Math.min(1, this.shake + 0.35);
           break;
+        }
+        case "crash":
+        case "wreck": {
+          const p = toV(q.x ?? 0, q.y ?? 0, 0.9);
+          const big = q.kind === "wreck";
+          this.fx.burst(p, { count: big ? 60 : 16, speed: big ? 6 : 3, color: big ? 0xff8020 : 0xffe090, life: big ? 0.9 : 0.3, gravity: 5, up: big ? 2 : 0.5 });
+          if (big) {
+            this.fx.ring(toV(q.x ?? 0, q.y ?? 0, 0.05), 0xff5010, 4, 0.5, true);
+            this.punchIn(p, 0.8);
+            this.hype = 1;
+          }
+          this.shake = Math.min(1, this.shake + (big ? 0.8 : q.what === "vehicle" ? 0.35 : 0.12));
+          break;
+        }
+        case "crack":
+          this.fx.burst(toV(q.x ?? 0, q.y ?? 0, 0.05), { count: 10, speed: 1.2, color: 0x6a6660, life: 0.5, gravity: 2, up: 0.4, dust: true });
+          break;
+        case "collapse":
+          this.fx.burst(toV(q.x ?? 0, q.y ?? 0, 0), { count: 30, speed: 2.5, color: 0x8a8680, life: 0.9, gravity: 3, up: 1, dust: true });
+          this.shake = Math.min(1, this.shake + 0.25);
+          break;
+        case "fall":
+          this.hype = 1;
+          break;
+        case "impact":
+          // the blimp hits the ground: dust and fire all along the hull
+          for (let x = -9; x <= 9; x += 3) {
+            this.fx.burst(toV(x, 0, 0.1), { count: 30, speed: 5, color: 0x8a7a60, life: 1.2, gravity: 2, up: 1.5, dust: true });
+            this.fx.burst(toV(x, 0, 0.3), { count: 24, speed: 6, color: 0xff8030, life: 0.7, gravity: 3, up: 2 });
+          }
+          this.shake = 1;
+          this.hype = 1;
+          break;
+        case "capture": {
+          const f = fs[q.a];
+          if (f) this.fx.ring(at(f, 0.05), PLAYER_COLORS[f.id], 3, 0.4, true);
+          break;
+        }
         case "burn": {
           const p = w.s.pickups.find((x) => x.owner === q.a && x.part === q.part);
           if (p) this.fx.burst(toV(p.x, p.y, 0.1), { count: 16, speed: 1.5, color: 0xff6010, life: 0.7, gravity: -2 });
@@ -513,30 +389,8 @@ export class Scene {
   render(time: number, dt: number): void {
     const w = this.world;
     if (w) this.sync(w, time, dt);
-    // lava flow and embers
-    this.lavaTex.offset.x = time * 0.02;
-    this.lavaTex.offset.y = time * 0.05;
-    this.lavaLight.intensity = 55 + Math.sin(time * 7.3) * 5 + Math.sin(time * 3.1) * 4;
-    const pos = this.embers.geometry.getAttribute("position") as THREE.BufferAttribute;
-    for (let i = 0; i < pos.count; i++) {
-      let y = pos.getY(i) + dt * (0.6 + (i % 7) * 0.15);
-      if (y > 10) y = 0;
-      pos.setY(i, y);
-    }
-    pos.needsUpdate = true;
-    this.halo.position.y = 1.55 + Math.sin(time * 2) * 0.06;
-    this.halo.rotation.z = time;
-    this.toiletGlow.intensity = 20 + Math.sin(time * 3) * 6;
-    // the crowd bounces with the hype
     this.hype *= Math.exp(-dt * 0.6);
-    const amp = 0.04 + 0.3 * this.hype;
-    this.crowdBase.forEach((c, i) => {
-      this.dummy.position.set(c.x, c.y + Math.abs(Math.sin(time * c.sp + c.ph)) * amp, c.z);
-      this.dummy.rotation.set(0, -Math.atan2(c.z, c.x), Math.sin(time * 2 + c.ph) * 0.1);
-      this.dummy.updateMatrix();
-      this.crowd.setMatrixAt(i, this.dummy.matrix);
-    });
-    this.crowd.instanceMatrix.needsUpdate = true;
+    this.view.update(w, time, dt, this.hype);
     this.fx.update(dt, this.camera);
     if (this.composer) this.composer.render(dt);
     else this.renderer.render(this.scene, this.camera);
@@ -550,6 +404,16 @@ export class Scene {
       const v = this.fighters[i];
       v.root.position.copy(toV(f.x, f.y));
       v.root.rotation.y = yaw(f.facing);
+      const car = f.state === "driving" ? s.arena.vehicles[f.vehicle] : undefined;
+      if (car) {
+        const st = this.view.seat(car);
+        v.root.position.copy(st.pos);
+        v.root.rotation.y = yaw(st.facing);
+      }
+      if (f.state === "falling") {
+        // over the edge: a long drop
+        v.root.position.y -= 0.5 * 0.012 * f.t * f.t;
+      }
       syncLimbs(v, f);
       v.hurt.age += dt;
       v.flash = Math.max(0, v.flash - dt * 9);
@@ -581,14 +445,18 @@ export class Scene {
 
       const flicker = f.invuln > 0 && f.state !== "down" && f.state !== "wakeup" && Math.floor(s.frame / 4) % 2 === 0;
       v.body.visible = !flicker;
-      v.label.visible = f.state !== "ko";
-      v.ring.visible = f.state !== "ko";
+      const gone = f.state === "ko" || f.out || (f.state === "falling" && f.t > FALL_FRAMES * 0.8 && s.winner !== f.id);
+      if (f.state === "falling") v.fell = true;
+      else if (alive(f)) v.fell = false;
+      v.root.visible = !(v.fell && f.state !== "falling") && v.root.position.y > -60;
+      v.label.visible = !gone;
+      v.ring.visible = !gone && f.state !== "driving" && f.state !== "falling";
       if (v.marker) {
         const tg = s.fighters[f.target];
         v.marker.visible = !!tg && tg.id !== f.id && alive(tg) && alive(f);
         if (tg) v.marker.position.copy(toV(tg.x, tg.y, 2.5 + Math.sin(time * 6) * 0.06));
       }
-      if (f.state !== "ko") {
+      if (alive(f)) {
         centre.add(v.root.position);
         n++;
       }
@@ -617,36 +485,25 @@ export class Scene {
       }
     }
 
-    // geysers
-    while (this.geysers.length < s.geysers.length) {
-      const g = new THREE.Group();
-      const warn = new THREE.Mesh(new THREE.RingGeometry(GEYSER.radius - 0.15, GEYSER.radius, 40), new THREE.MeshBasicMaterial({ color: 0xffa000, transparent: true }));
-      warn.rotation.x = -Math.PI / 2;
-      warn.position.y = 0.03;
-      const col = new THREE.Mesh(
-        new THREE.CylinderGeometry(GEYSER.radius * 0.7, GEYSER.radius, 6, 20, 1, true),
-        new THREE.MeshBasicMaterial({ color: 0xff6010, transparent: true, opacity: 0.75, side: THREE.DoubleSide, depthWrite: false }),
-      );
-      col.position.y = 3;
-      g.add(warn, col);
-      this.scene.add(g);
-      this.geysers.push(g);
-    }
-    this.geysers.forEach((g, i) => {
-      const gs = s.geysers[i];
-      g.visible = !!gs;
-      if (!gs) return;
-      g.position.copy(toV(gs.x, gs.y));
-      const [warn, col] = g.children as THREE.Mesh[];
-      (warn.material as THREE.MeshBasicMaterial).opacity = 0.4 + 0.5 * Math.abs(Math.sin(gs.t * 0.3));
-      col.visible = gs.t >= GEYSER.warn;
-      col.scale.y = col.visible ? 0.3 + Math.min(1, (gs.t - GEYSER.warn) / 5) : 1;
+    // hazards: a warning ring, then the strike
+    s.geysers.forEach((gs, i) => {
+      let h = this.hazards[i];
+      if (!h || h.kind !== gs.kind) {
+        if (h) this.scene.remove(h.g);
+        h = { kind: gs.kind, g: buildHazard(gs.kind) };
+        this.hazards[i] = h;
+        this.scene.add(h.g);
+      }
+      h.g.visible = true;
+      animateHazard(h.g, gs, time);
     });
+    for (let i = s.geysers.length; i < this.hazards.length; i++) this.hazards[i].g.visible = false;
 
     // camera: frames everyone still standing, punches in on big hits, shakes with trauma
     if (n) centre.divideScalar(n);
+    centre.y = 0;
     let spread = 4;
-    for (const f of s.fighters) if (f.state !== "ko") spread = Math.max(spread, Math.hypot(f.x - centre.x, -f.y - centre.z));
+    for (const f of s.fighters) if (alive(f)) spread = Math.max(spread, Math.hypot(f.x - centre.x, -f.y - centre.z));
     centre.lerp(new THREE.Vector3(0, 0, 0), 0.35);
     const k = 1 - Math.exp(-dt * 3);
     this.camTarget.lerp(centre, k);
@@ -690,5 +547,111 @@ export class Scene {
     tag.position.y = -0.07;
     holder.add(tag);
     return holder;
+  }
+}
+
+const HAZARD_COLOR: Record<HazardKind, number> = { geyser: 0xffa000, beam: 0xffd040, boulder: 0xff6040, arrows: 0xff3030 };
+
+/** A hazard's warning ring (child 0) and the thing that strikes (child 1). */
+function buildHazard(kind: HazardKind): THREE.Group {
+  const H = HAZARDS[kind];
+  const g = new THREE.Group();
+  const warn = new THREE.Mesh(new THREE.RingGeometry(H.radius - 0.15, H.radius, 40), new THREE.MeshBasicMaterial({ color: HAZARD_COLOR[kind], transparent: true, depthWrite: false }));
+  warn.rotation.x = -Math.PI / 2;
+  warn.position.y = 0.04;
+  let obj: THREE.Object3D;
+  switch (kind) {
+    case "geyser": {
+      obj = new THREE.Mesh(
+        new THREE.CylinderGeometry(H.radius * 0.7, H.radius, 6, 20, 1, true),
+        new THREE.MeshBasicMaterial({ color: 0xff6010, transparent: true, opacity: 0.75, side: THREE.DoubleSide, depthWrite: false }),
+      );
+      obj.position.y = 3;
+      break;
+    }
+    case "beam": {
+      // a steel I-beam on a crane cable
+      const steel = new THREE.MeshStandardMaterial({ color: 0xb0381c, roughness: 0.5, metalness: 0.6 });
+      const b = new THREE.Group();
+      b.add(new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.06, 0.3), steel));
+      const top = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.06, 0.3), steel);
+      top.position.y = 0.3;
+      const web = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.3, 0.05), steel);
+      web.position.y = 0.15;
+      const cable = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 30, 4), new THREE.MeshBasicMaterial({ color: 0x222222 }));
+      cable.position.y = 15.3;
+      cable.name = "cable";
+      b.add(top, web, cable);
+      b.traverse((o) => (o.castShadow = true));
+      obj = b;
+      break;
+    }
+    case "boulder": {
+      obj = new THREE.Mesh(new THREE.DodecahedronGeometry(0.55, 1), new THREE.MeshStandardMaterial({ color: 0x6a6258, roughness: 1, flatShading: true }));
+      obj.castShadow = true;
+      break;
+    }
+    case "arrows": {
+      const a = new THREE.Group();
+      const shaft = new THREE.MeshBasicMaterial({ color: 0x5a4028 });
+      const fletch = new THREE.MeshBasicMaterial({ color: 0xe8e0d0 });
+      for (let i = 0; i < 26; i++) {
+        const r = Math.sqrt(((i * 0.618) % 1)) * H.radius;
+        const t = i * 2.39996;
+        const arrow = new THREE.Group();
+        const m = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.7, 4), shaft);
+        const f = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.12, 0.01), fletch);
+        f.position.y = 0.3;
+        arrow.add(m, f);
+        arrow.position.set(Math.cos(t) * r, 0, Math.sin(t) * r);
+        arrow.rotation.set(0.25, 0, 0.15);
+        a.add(arrow);
+      }
+      obj = a;
+      break;
+    }
+  }
+  g.add(warn, obj);
+  return g;
+}
+
+function animateHazard(g: THREE.Group, gs: Geyser, time: number): void {
+  const H = HAZARDS[gs.kind];
+  g.position.copy(toV(gs.x, gs.y));
+  const [warn, obj] = g.children as [THREE.Mesh, THREE.Object3D];
+  const wm = warn.material as THREE.MeshBasicMaterial;
+  const struck = gs.t >= H.warn;
+  wm.opacity = struck ? Math.max(0, 0.6 - (gs.t - H.warn) / H.erupt) : 0.4 + 0.5 * Math.abs(Math.sin(gs.t * (0.2 + (0.4 * gs.t) / H.warn)));
+  const k = Math.min(1, gs.t / H.warn); // 0 → 1 over the warning
+  const fade = struck ? 1 - (gs.t - H.warn) / H.erupt : 1;
+  switch (gs.kind) {
+    case "geyser":
+      obj.visible = struck;
+      obj.scale.y = struck ? 0.3 + Math.min(1, (gs.t - H.warn) / 5) : 1;
+      break;
+    case "beam": {
+      // it hangs high and swings, then drops in the last third of the warning
+      const drop = Math.max(0, (k - 0.65) / 0.35);
+      obj.position.y = struck ? 0 : 14 * (1 - drop * drop);
+      obj.rotation.y = gs.x * 1.3 + (struck ? 0 : Math.sin(time * 1.5) * 0.15);
+      obj.rotation.z = struck ? 0.04 : Math.sin(time * 2) * 0.05;
+      obj.getObjectByName("cable")!.visible = !struck && drop < 0.05;
+      obj.visible = fade > 0.15;
+      break;
+    }
+    case "boulder": {
+      // lobbed from beyond the wall (the -y side), landing as the warning ends
+      const arc = 1 - k;
+      obj.position.set(0, struck ? 0.4 : 0.4 + Math.sin(k * Math.PI) * 9 + arc * 6, struck ? 0 : arc * 26);
+      obj.rotation.set(time * 4, time * 3, 0);
+      obj.visible = k > 0.15 && fade > 0.1;
+      break;
+    }
+    case "arrows": {
+      const fall = Math.max(0, (k - 0.7) / 0.3);
+      obj.position.y = struck ? -0.2 : 10 * (1 - fall);
+      obj.visible = fall > 0 || struck;
+      break;
+    }
   }
 }

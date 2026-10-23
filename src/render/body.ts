@@ -562,6 +562,31 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
         p.tail = Math.sin(time * 3) * 0.6;
       }
       break;
+    case "driving":
+      // in the cab: seated, both hands on the wheel, rocking with the engine
+      p.y = -0.36 + Math.sin(time * 23) * 0.006;
+      p.legL = [-1.45, 0.12];
+      p.legR = [-1.45, -0.12];
+      p.kneeL = p.kneeR = 1.45;
+      p.spineX = 0.12;
+      p.armL = [-1.05, 0, -0.3];
+      p.armR = [-1.05, 0, 0.3];
+      p.elbowL = p.elbowR = -0.65;
+      p.headX = -0.1;
+      break;
+    case "falling":
+      // over the edge: flailing as the body tumbles away (the scene drops the root)
+      p.rx = -0.5 - t * 0.04;
+      p.rz = Math.sin(t * 0.3) * 0.4;
+      p.armL = [-2.6 + Math.sin(t * 0.9) * 0.6, 0, 0.9];
+      p.armR = [-2.6 + Math.cos(t * 0.9) * 0.6, 0, -0.9];
+      p.elbowL = p.elbowR = -0.5;
+      p.legL = [-0.6 + Math.sin(t * 0.8) * 0.5, 0.2];
+      p.legR = [-0.6 - Math.sin(t * 0.8) * 0.5, -0.2];
+      p.kneeL = p.kneeR = 0.7;
+      p.headX = -0.4;
+      rate = 10;
+      break;
     default:
       break;
   }
@@ -574,7 +599,7 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
     p.legR = [-0.15, 0];
     p.kneeL = p.kneeR = 0.4;
   }
-  if (nLegs === 0 && !["down", "ko", "thrown", "held", "wakeup"].includes(f.state)) {
+  if (nLegs === 0 && !["down", "ko", "thrown", "held", "wakeup", "driving", "falling"].includes(f.state)) {
     p.y += -0.78;
     p.spineX += 0.6;
   }

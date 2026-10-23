@@ -1,12 +1,14 @@
 // Sound, synthesised with Web Audio: no sample files, so the game stays a
 // static page. Every cue of a step maps to a short voice (filtered noise and
-// pitched oscillators), panned by where it happened. A lava rumble and a crowd
-// bed loop under the match; the crowd swells on big moments.
+// pitched oscillators), panned by where it happened. A bed for the stage (the
+// lava's rumble, idling engines, wind at altitude, propellers, a siege) and a
+// crowd loop under the match; the crowd swells on big moments.
 //
 // The AudioContext is only created after a key press, click or touch (the
 // browser's autoplay rule). M mutes; ?mute=1 starts muted.
 import type { Cue } from "./cues";
 import type { World } from "../sim/world";
+import type { StageId } from "../sim/stages";
 
 type Voice = (t: number, out: AudioNode, k: number) => void;
 
@@ -18,6 +20,8 @@ export class Sfx {
   private noise!: AudioBuffer;
   private brown!: AudioBuffer;
   private crowd: GainNode | null = null;
+  private bed: AudioScheduledSourceNode[] = [];
+  private bedStage: StageId | null = null;
   private hype = 0;
   muted = false;
   /** voices started, by cue kind (automated tests) */
@@ -175,22 +179,115 @@ export class Sfx {
     regrow: (t, o) => this.tone(t, o, "sine", 300, 900, 0.2, 0.12),
     respawn: (t, o) => this.tone(t, o, "triangle", 200, 600, 0.2, 0.3, 0.05),
     crowd: (t, o) => this.noiseHit(t, o, "bandpass", 700, 1100, 0.8, 0.5, 0.8),
+    // ---- the stages
+    "win:other": (t, o) => {
+      for (const [i, f] of [392, 523, 659, 784, 1047].entries()) this.tone(t + i * 0.11, o, "sawtooth", f, f, 0.1, 0.4, 0.01);
+      this.noiseHit(t, o, "bandpass", 600, 1200, 0.7, 0.4, 1.2);
+    },
+    fall: (t, o) => {
+      // the long scream down
+      this.tone(t, o, "triangle", 900, 160, 0.22, 1.3, 0.02);
+      this.noiseHit(t, o, "bandpass", 1500, 400, 2, 0.2, 1.1);
+    },
+    impact: (t, o) => {
+      // the blimp hits the ground: a huge low crunch, then the frame groaning
+      this.tone(t, o, "sine", 60, 18, 1, 1.6);
+      this.noiseHit(t, o, "lowpass", 1800, 40, 0.5, 1, 2.2);
+      this.noiseHit(t + 0.08, o, "bandpass", 2500, 600, 2, 0.5, 0.9);
+      this.tone(t + 0.4, o, "sawtooth", 140, 90, 0.08, 1.4, 0.2);
+    },
+    crash: (t, o, k) => {
+      this.tone(t, o, "square", 180 + 60 * k, 70, 0.3, 0.18);
+      this.noiseHit(t, o, "bandpass", 2400, 900, 4, 0.5, 0.16);
+      this.tone(t, o, "triangle", 1300, 1250, 0.12, 0.35);
+    },
+    wreck: (t, o) => {
+      this.tone(t, o, "sine", 70, 24, 1, 1.0);
+      this.noiseHit(t, o, "lowpass", 2500, 60, 0.6, 1, 1.4);
+      this.noiseHit(t + 0.05, o, "bandpass", 3000, 1500, 3, 0.3, 0.4);
+    },
+    enter: (t, o) => {
+      this.noiseHit(t, o, "lowpass", 600, 200, 1, 0.4, 0.08); // the door
+      this.tone(t + 0.1, o, "sawtooth", 40, 90, 0.25, 0.5, 0.05); // the engine catches
+    },
+    exit: (t, o) => this.noiseHit(t, o, "lowpass", 700, 250, 1, 0.4, 0.08),
+    crack: (t, o) => {
+      this.noiseHit(t, o, "highpass", 2500, 1200, 1.5, 0.35, 0.12);
+      this.tone(t, o, "sine", 120, 60, 0.25, 0.2);
+    },
+    collapse: (t, o) => {
+      this.noiseHit(t, o, "lowpass", 400, 50, 0.6, 0.9, 1.4);
+      this.tone(t, o, "sine", 55, 25, 0.6, 1.2);
+    },
+    wind: (t, o, k) => this.noiseHit(t, o, "bandpass", 300 + 400 * k, 900 + 900 * k, 1.2, 0.25 + 0.45 * k, 1.6 + 0.4 * k),
+    capture: (t, o) => {
+      // a horn from the walls
+      this.tone(t, o, "sawtooth", 220, 220, 0.12, 0.6, 0.05);
+      this.tone(t, o, "sawtooth", 330, 330, 0.08, 0.6, 0.05);
+    },
+    "geyser:beam": (t, o) => {
+      this.tone(t, o, "square", 140, 60, 0.4, 0.3);
+      this.tone(t, o, "triangle", 900, 880, 0.2, 0.9); // steel rings on impact
+      this.noiseHit(t, o, "lowpass", 800, 100, 0.6, 0.7, 0.5);
+    },
+    "geyser:boulder": (t, o) => {
+      this.tone(t, o, "sine", 75, 30, 0.9, 0.5);
+      this.noiseHit(t, o, "lowpass", 1200, 80, 0.6, 0.9, 0.7);
+    },
+    "geyser:arrows": (t, o) => {
+      for (let i = 0; i < 6; i++) this.noiseHit(t + i * 0.03, o, "highpass", 3000, 1500, 1, 0.2, 0.08);
+    },
   };
 
   // ------------------------------------------------------------ match
-  startAmbient(): void {
+  /** The stage's bed and the crowd loop. A new stage swaps the bed. */
+  startAmbient(stage: StageId = "hell-toilet"): void {
     const c = this.ctx;
-    if (!c || this.crowd) return;
-    const lava = c.createBufferSource();
-    lava.buffer = this.brown;
-    lava.loop = true;
-    const lf = c.createBiquadFilter();
-    lf.type = "lowpass";
-    lf.frequency.value = 220;
-    const lg = c.createGain();
-    lg.gain.value = 0.35;
-    lava.connect(lf).connect(lg).connect(this.master);
-    lava.start();
+    if (!c) return;
+    if (this.bedStage !== stage) {
+      for (const n of this.bed) n.stop();
+      this.bed = [];
+      this.bedStage = stage;
+      // [buffer, filter, cutoff, gain] noise layers, and [type, Hz, gain] drones
+      const noise: [AudioBuffer, BiquadFilterType, number, number][] = [];
+      const drones: [OscillatorType, number, number][] = [];
+      if (stage === "hell-toilet") noise.push([this.brown, "lowpass", 220, 0.35]);
+      else if (stage === "construction-site") {
+        noise.push([this.brown, "lowpass", 160, 0.2]);
+        drones.push(["sawtooth", 46, 0.025], ["sawtooth", 61, 0.018]); // diesels idling
+      } else if (stage === "collapsing-tower") noise.push([this.noise, "bandpass", 420, 0.12], [this.brown, "lowpass", 120, 0.15]);
+      else if (stage === "hindenburg-blimp") {
+        noise.push([this.noise, "bandpass", 600, 0.1], [this.brown, "lowpass", 300, 0.2]); // wind, and the fire
+        drones.push(["triangle", 38, 0.05]); // the engines' propellers
+      } else noise.push([this.noise, "bandpass", 300, 0.08], [this.brown, "lowpass", 200, 0.2]);
+      for (const [buf, type, f, gv] of noise) {
+        const src = c.createBufferSource();
+        src.buffer = buf;
+        src.loop = true;
+        const flt = c.createBiquadFilter();
+        flt.type = type;
+        flt.frequency.value = f;
+        const g = c.createGain();
+        g.gain.value = gv;
+        src.connect(flt).connect(g).connect(this.master);
+        src.start();
+        this.bed.push(src);
+      }
+      for (const [type, f, gv] of drones) {
+        const o = c.createOscillator();
+        o.type = type;
+        o.frequency.value = f;
+        const flt = c.createBiquadFilter();
+        flt.type = "lowpass";
+        flt.frequency.value = 240;
+        const g = c.createGain();
+        g.gain.value = gv;
+        o.connect(flt).connect(g).connect(this.master);
+        o.start();
+        this.bed.push(o);
+      }
+    }
+    if (this.crowd) return;
     const crowd = c.createBufferSource();
     crowd.buffer = this.noise;
     crowd.loop = true;
@@ -208,11 +305,14 @@ export class Sfx {
   cue(cues: Cue[], w: World): void {
     const c = this.ctx;
     if (!c || c.state !== "running") return;
-    if (!this.crowd) this.startAmbient();
+    if (!this.crowd || this.bedStage !== w.s.stage) this.startAmbient(w.s.stage);
     const t = c.currentTime + 0.005;
     const perKind: Record<string, number> = {};
     for (const q of cues) {
-      const voice = this.voices[q.kind];
+      // a stage's own take on a cue: the hazard that struck, a win that is not a flush
+      const what = (q as { what?: string }).what;
+      const key = q.kind === "geyser" && what && what !== "geyser" ? `geyser:${what}` : q.kind === "win" && w.s.stage !== "hell-toilet" ? "win:other" : q.kind;
+      const voice = this.voices[key];
       if (!voice) continue;
       // eight fighters can land a lot at once: at most three voices of a kind per step
       if ((perKind[q.kind] = (perKind[q.kind] ?? 0) + 1) > 3) continue;
@@ -224,9 +324,11 @@ export class Sfx {
       let k = 0;
       if (q.kind === "hit") k = Math.min(1, ((q as { dmg?: number }).dmg ?? 4) / 12);
       if (q.kind === "swing") k = (q as { heavy: boolean }).heavy ? 1 : 0;
+      if (q.kind === "wind") k = what === "gust" ? 1 : 0;
+      if (q.kind === "crash") k = Math.min(1, ((q as { dmg?: number }).dmg ?? 4) / 12);
       voice(t, pan, k);
-      this.played[q.kind] = (this.played[q.kind] ?? 0) + 1;
-      if (q.kind === "ko" || q.kind === "reversal" || q.kind === "crowd" || q.kind === "special" || q.kind === "win") this.hype = Math.min(1, this.hype + 0.5);
+      this.played[key] = (this.played[key] ?? 0) + 1;
+      if (["ko", "reversal", "crowd", "special", "win", "fall", "wreck", "impact"].includes(q.kind)) this.hype = Math.min(1, this.hype + 0.5);
       if (q.kind === "hit") this.hype = Math.min(1, this.hype + 0.04 * k);
     }
     if (this.crowd) {

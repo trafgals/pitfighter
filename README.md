@@ -5,16 +5,20 @@ stage decides the arena and how a match is won.
 
 ## Stages
 
-| Stage | Status | How it plays |
+| Stage | How it plays | How you win |
 |---|---|---|
-| **Hell Toilet** | playable | Everyone spawns around the edge of a ring of hellfire. In the middle stands the last toilet in hell. Sit on it for 15 seconds in total to win. Progress is kept between sittings, and any hit knocks you off. |
-| **Construction Site** | planned | Everyone starts in a different construction vehicle. |
-| **Collapsing Tower** | planned | The floor gives way under the fight. |
-| **Hindenburg Blimp** | planned | A fight aboard the doomed airship. |
-| **Castle Under Siege** | planned | Brawl on the walls while the siege rages around you. |
+| **Hell Toilet** | A ring of hellfire with the last toilet in hell in the middle. Hellfire geysers erupt across the floor. Any hit knocks the sitter off the throne. | Sit on the toilet for 15 seconds in total (progress is kept between sittings). |
+| **Construction Site** | Everyone starts in a different construction vehicle: bulldozer, excavator, dump truck, forklift, steamroller, cement mixer, loader and crane truck. Steer with the stick, boost with high strike, get out (or into a free machine) with USE. Machines crash into each other, run people over and get wrecked by crashes and by strikes; a wreck throws its driver out. The crane drops steel beams. | First to 4 KOs. KO'd fighters come back. |
+| **Collapsing Tower** | A rooftop of 8 x 8 tiles high above the city. Tiles crack and fall, mostly from the edges in, faster as the match goes on; the centre four never fall. You cannot walk off an edge, but a knockdown or a throw can send you over. | Last one standing. Nobody comes back. |
+| **Hindenburg Blimp** | On top of the burning airship: the fire creeps forward from the tail and gusts of wind push everyone toward the edge. Knock someone over the edge and they are gone. After 30 seconds it hits the ground: the impact throws everyone flat, the wreck is walled in by twisted frame, and the fire burns everyone a little more every second until nobody is left. | Last one standing. Nobody comes back. |
+| **Castle Under Siege** | The wall walk of a besieged castle. The parapet stops you, except at the two breaches the siege has knocked in it, which are a long way down. Catapult stones knock you down, arrow volleys sting. | Raise your banner at the flagpole: the fighter nearest the pole raises theirs, 10 seconds alone wins, and it rises at half speed while someone else is in the circle. KO'd fighters come back. |
 
-Planned stages are listed on the select screen as *coming soon* and cannot be
-picked yet. Stages live in `src/sim/stages.ts`; a match is started with
+Every stage is picked on the select screen with `[` / `]`, or started
+directly with `?auto=1&stage=<id>` (`hell-toilet`, `construction-site`,
+`collapsing-tower`, `hindenburg-blimp`, `castle-under-siege`). The list of
+stages is `src/sim/stages.ts`, their rules are `src/sim/arena.ts` (one
+`Arena` per stage, which the World asks at fixed points of every step) and
+their look is `src/render/stageviews.ts`. A match is started with
 `new World({ ..., stage })`, which defaults to Hell Toilet.
 
 The combat is modelled on the feel of Namco's *Urban Reign*:
@@ -124,7 +128,7 @@ On the character select:
 - join with the high-strike button;
 - pick a fighter with the stick, confirm with high strike, back out with grab;
 - set the number of fighters with `-` / `+` (or L1 / R1 on a pad);
-- pick the stage with `[` / `]` (only Hell Toilet is playable so far);
+- pick the stage with `[` / `]`;
 - start with Enter or Start.
 
 Up to 8 gamepads work, and CPU fighters fill any empty slots.
@@ -158,7 +162,7 @@ This runs the Vitest unit tests for the simulation:
 - limbs, hopping and crawling;
 - spawns for 2–8 players;
 - toilet rules;
-- stages (`tests/stages.test.ts`);
+- stages (`tests/stages.test.ts`): each stage's rules, and a deterministic 8-bot match on every stage that ends with a winner;
 - hitstop, fury and specials (`tests/hitfeel.test.ts`);
 - crowd AI attack tokens (`tests/ai.test.ts`);
 - the jointed bodies' poses (`tests/body.test.ts`);
@@ -171,13 +175,14 @@ npm run test:browser
 
 This runs headless Chrome against the Vite dev server:
 
-- checks the Pitfighter title and the stage list (Hell Toilet selected, the planned stages coming soon);
+- checks the Pitfighter title and the stage list (all five playable, Hell Toilet selected, `[` / `]` cycle them);
 - joins on the keyboard, picks a fighter and starts an 8-fighter match on Hell Toilet;
 - checks that the keyboard controls P1;
 - plays more than 3600 frames;
 - checks that hitstop froze fighters, impacts spawned sparks and rings, bloom is on, and audio played hit and swing sounds;
 - checks that the CPUs used specials and the HUD shows 8 fury bars;
-- checks that the canvas renders, the HUD shows 8 cards and the page logs no errors.
+- checks that the canvas renders, the HUD shows 8 cards and the page logs no errors;
+- then starts an 8-CPU match on each of the other four stages with `?stage=`, plays it, and checks the stage's own events (machines crashing, the roof falling, the fire and the crash, the siege engines), the HUD headline, the canvas and the console.
 
 Screenshots go to `test-output/`.
 
@@ -189,8 +194,8 @@ This runs the same browser checks against the published GitHub Pages site.
 
 ## Layout
 
-- `src/sim/`: the deterministic simulation (fixed 60 Hz steps, seeded RNG, no clock and no `Math.random`). `world.ts` holds the rules, `moves.ts` the frame data, `styles.ts` the roster and `ai.ts` the CPU fighters.
-- `src/render/`: the Three.js scene and the DOM HUD. They only read the simulation.
+- `src/sim/`: the deterministic simulation (fixed 60 Hz steps, seeded RNG, no clock and no `Math.random`). `world.ts` holds the rules of the fight, `arena.ts` the rules of each stage, `moves.ts` the frame data, `styles.ts` the roster and `ai.ts` the CPU fighters.
+- `src/render/`: the Three.js scene (`scene.ts`), the stages' arenas (`stageviews.ts`), the bodies (`body.ts`), effects, sound and the DOM HUD. They only read the simulation.
 - `src/input.ts`, `src/select.ts`, `src/main.ts`: devices, the character select and the game loop.
 
 The frame data is calibrated against *Urban Reign*: startup, string timing,

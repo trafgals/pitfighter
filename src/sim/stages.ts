@@ -1,6 +1,6 @@
 // The stages of Pitfighter. A stage sets the arena and the way a match is
-// won. Only playable stages can start a match; planned ones are listed on the
-// select screen as "coming soon" so the roadmap is visible in the game.
+// won; its rules live in arena.ts. A stage that is not playable is listed on
+// the select screen as "coming soon" and cannot start a match.
 
 export type StageId = "hell-toilet" | "construction-site" | "collapsing-tower" | "hindenburg-blimp" | "castle-under-siege";
 
@@ -21,26 +21,26 @@ export const STAGES: readonly Stage[] = [
   {
     id: "construction-site",
     name: "Construction Site",
-    blurb: "Everyone starts in a different construction vehicle.",
-    playable: false,
+    blurb: "Everyone starts in a different construction vehicle. Run people over, wreck the machines and dodge the crane's falling steel. First to 4 KOs owns the yard.",
+    playable: true,
   },
   {
     id: "collapsing-tower",
     name: "Collapsing Tower",
-    blurb: "The floor gives way under the fight.",
-    playable: false,
+    blurb: "A rooftop that falls apart tile by tile, from the edges in. Knock people off; nobody comes back. Last one standing wins.",
+    playable: true,
   },
   {
     id: "hindenburg-blimp",
     name: "Hindenburg Blimp",
-    blurb: "A fight aboard the doomed airship.",
-    playable: false,
+    blurb: "On top of the doomed airship: gusts blow you to the edge and the fire creeps forward. Then it hits the ground, and the burning wreck finishes off whoever is left. Last one standing wins.",
+    playable: true,
   },
   {
     id: "castle-under-siege",
     name: "Castle Under Siege",
-    blurb: "Brawl on the walls while the siege rages around you.",
-    playable: false,
+    blurb: "Brawl on the walls under catapult stones and arrow volleys. Stand at the keep's flagpole to raise your banner: 10 seconds alone wins, slower while it is contested; the breaches in the wall are a long way down.",
+    playable: true,
   },
 ];
 

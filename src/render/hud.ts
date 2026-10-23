@@ -1,9 +1,11 @@
 // DOM HUD: one card per fighter with a body silhouette (each part coloured by
-// its health, greyed out when it is lying on the floor), throne progress, and
-// a banner for big moments.
-import { PARTS, TOILET_FRAMES, type Fighter, type PartId } from "../sim/types";
+// its health, greyed out when it is lying on the floor), the stage's score
+// (throne time, KOs, banner) per fighter, the stage's headline (who holds the
+// objective) and a banner for big moments.
+import { PARTS, type Fighter, type PartId } from "../sim/types";
 import { FURY } from "../sim/moves";
 import { STYLES } from "../sim/styles";
+import { VEHICLES } from "../sim/arena";
 import { World } from "../sim/world";
 import { PLAYER_COLORS } from "./scene";
 
@@ -36,6 +38,7 @@ export class Hud {
   }
 
   attach(world: World): void {
+    this.root.dataset.stage = world.s.stage;
     const wrap = this.root.querySelector(".cards")!;
     wrap.innerHTML = "";
     this.cards = world.fighters.map((f) => {
@@ -68,28 +71,34 @@ export class Hud {
 
   update(world: World): void {
     const s = world.s;
-    s.fighters.forEach((f, i) => this.updateCard(f, this.cards[i]));
-    const occ = s.fighters[s.toiletOccupant];
-    if (occ) {
+    s.fighters.forEach((f, i) => this.updateCard(world, f, this.cards[i]));
+    const h = world.arena.headline(world);
+    if (h) {
       this.throne.classList.add("show");
-      this.throneName.textContent = `P${occ.id + 1} ${STYLES[occ.style].name} is on the throne!`;
-      this.throneFill.style.width = `${(100 * occ.toilet) / TOILET_FRAMES}%`;
-      this.throneFill.style.background = hex(PLAYER_COLORS[occ.id]);
+      this.throneName.textContent = h.text;
+      this.throneFill.style.width = `${100 * Math.max(0, Math.min(1, h.frac))}%`;
+      this.throneFill.style.background = h.who >= 0 ? hex(PLAYER_COLORS[h.who]) : "#c8a040";
     } else this.throne.classList.remove("show");
 
     for (const e of s.events) {
       const nm = (id: number) => `P${id + 1}`;
-      if (e.kind === "ko") this.say(e.b !== undefined && e.b >= 0 ? `${nm(e.b)} TORE ${nm(e.a)} APART` : `${nm(e.a)} WAS CONSUMED BY HELL`);
+      if (e.kind === "ko") this.say(koLine(s.stage, e.what, e.a, e.b), 70);
+      else if (e.kind === "fall") this.say(e.b !== undefined && e.b >= 0 ? `${nm(e.b)} SENT ${nm(e.a)} OVER THE EDGE` : `${nm(e.a)} WENT OVER THE EDGE`, 70);
+      else if (e.kind === "wreck") this.say(e.b !== undefined && e.b >= 0 ? `${nm(e.b)} WRECKED THE ${(VEHICLES[e.what as keyof typeof VEHICLES]?.name ?? "MACHINE").toUpperCase()}` : "WRECKED!", 60);
+      else if (e.kind === "collapse") this.say("THE ROOF IS GIVING WAY!", 40);
+      else if (e.kind === "wind" && e.what === "warn") this.say("GUST INCOMING!", 45);
+      else if (e.kind === "impact") this.say("THE BLIMP HITS THE GROUND!", 110);
+      else if (e.kind === "capture") this.say(`${nm(e.a)} TAKES THE FLAGPOLE`, 45);
       else if (e.kind === "reversal") this.say(`${nm(e.a)} REVERSAL!`, 45);
       else if (e.kind === "detach" && e.part) this.say(`${nm(e.a)} LOST ${e.part.startsWith("arm") ? "AN ARM" : "A LEG"}!`, 50);
       else if (e.kind === "crowd") this.say(`${nm(e.a)} ESCAPES THE DOGPILE`, 50);
       else if (e.kind === "special") this.say(`${nm(e.a)} ${World.specialName(STYLES[s.fighters[e.a].style].special)}!`, 50);
-      else if (e.kind === "win") this.say(`${nm(e.a)} FINALLY GETS TO GO`, 100000);
+      else if (e.kind === "win") this.say(winLine(s.stage, e.a), 100000);
     }
     if (this.bannerT > 0 && --this.bannerT === 0) this.banner.classList.remove("show");
   }
 
-  private updateCard(f: Fighter, c: (typeof this.cards)[number]): void {
+  private updateCard(world: World, f: Fighter, c: (typeof this.cards)[number]): void {
     for (const p of PARTS) {
       const part = f.parts[p];
       const el = c.parts[p];
@@ -101,11 +110,49 @@ export class Hud {
         el.classList.remove("gone");
       }
     }
-    c.bar.style.width = `${(100 * f.toilet) / TOILET_FRAMES}%`;
+    const prog = world.arena.progress(f);
+    c.bar.parentElement!.style.display = prog === null ? "none" : "";
+    if (prog !== null) c.bar.style.width = `${100 * Math.min(1, prog)}%`;
     c.fury.style.width = `${(100 * f.fury) / FURY.max}%`;
     c.fury.classList.toggle("ready", f.fury >= FURY.cost);
     c.kos.textContent = `☠ ${f.kos}`;
-    c.state.textContent = f.state === "ko" ? "DEAD" : f.state === "seated" ? "ON THE THRONE" : f.state === "dizzy" ? "DIZZY" : "";
-    c.el.classList.toggle("dead", f.state === "ko");
+    c.state.textContent = cardState(world, f);
+    c.el.classList.toggle("dead", f.state === "ko" || f.out);
   }
+}
+
+const P = (id: number) => `P${id + 1}`;
+
+function koLine(stage: string, what: string | undefined, a: number, b: number | undefined): string {
+  if (b !== undefined && b >= 0) return `${P(b)} TORE ${P(a)} APART`;
+  if (what === "fall") return `${P(a)} FELL TO THEIR DOOM`;
+  if (stage === "hell-toilet") return `${P(a)} WAS CONSUMED BY HELL`;
+  if (stage === "hindenburg-blimp") return `${P(a)} WENT UP IN FLAMES`;
+  return `${P(a)} IS DOWN FOR GOOD`;
+}
+
+export function winLine(stage: string, a: number): string {
+  switch (stage) {
+    case "construction-site":
+      return `${P(a)} OWNS THE YARD`;
+    case "collapsing-tower":
+      return `${P(a)} IS THE LAST ONE ON THE ROOF`;
+    case "hindenburg-blimp":
+      return `${P(a)} SURVIVES THE CRASH`;
+    case "castle-under-siege":
+      return `${P(a)} HOLDS THE CASTLE`;
+    default:
+      return `${P(a)} FINALLY GETS TO GO`;
+  }
+}
+
+function cardState(w: World, f: Fighter): string {
+  if (f.out) return "OUT";
+  if (f.state === "falling") return "FALLING";
+  if (f.state === "ko") return "DEAD";
+  if (f.state === "seated") return "ON THE THRONE";
+  if (f.state === "driving") return VEHICLES[w.s.arena.vehicles[f.vehicle]?.kind ?? "bulldozer"].name.toUpperCase();
+  if (f.state === "dizzy") return "DIZZY";
+  if (w.s.stage === "castle-under-siege" && w.s.toiletOccupant === f.id) return "AT THE POLE";
+  return "";
 }
