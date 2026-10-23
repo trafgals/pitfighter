@@ -17,7 +17,7 @@ import { STYLES } from "../sim/styles";
 import { legs, type World } from "../sim/world";
 import { painted, surface, type Surface } from "./textures";
 import { armRecipe, faceRecipe, jawRecipe, lookOf, torsoRecipe } from "./anatomy";
-import { GRAB_TIMING, REACTIONS, REVERSAL_TIMING, clipFor, hitClip, loadFrame, mirror, sampleClip, stateTiming, type Clip, type Timing } from "./motion";
+import { CLINCH, DOWN_LANDED, GRAB_TIMING, HELD, KNEE_TIMING, REACTIONS, REVERSAL_TIMING, THROWER, THROWN, THROW_TIMING, clinchKnee, clipFor, hitClip, loadFrame, mirror, sampleClip, stateTiming, type Clip, type Timing } from "./motion";
 
 export const PLAYER_COLORS = [0xff3b3b, 0x3b8bff, 0x4cff6a, 0xffd23b, 0xff6bf0, 0x3bf0ff, 0xff9a3b, 0xb07bff];
 
@@ -211,6 +211,8 @@ export interface Body {
   vel: number[]; // the joint springs' velocities, in the order of flat()
   /** the body part the last hit landed on, and how fresh that is (seconds) */
   hurt: { part: PartId; age: number };
+  /** what the body was doing before its current state, and how long ago (seconds) it last threw someone */
+  cue: Cue;
   flash: number; // white hit flash, 0..1
 }
 
@@ -453,15 +455,25 @@ export function buildBody(f: Fighter): Body {
     cur: stance(),
     vel: new Array(N_DOF).fill(0),
     hurt: { part: "torso", age: 99 },
+    cue: noCue(),
     flash: 0,
   };
 }
 
+/** Render-side memory of the fighter's last moves, for the motions that follow on from them. */
+export interface Cue {
+  last: Fighter["state"] | null;
+  from: Fighter["state"] | null;
+  throwAge: number;
+}
+export const noCue = (): Cue => ({ last: null, from: null, throwAge: 99 });
+
 /** The pose a fighter should be in right now. */
-export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"]): { p: Pose; rate: number; snap: boolean } {
+export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"], cue: Cue = noCue()): { p: Pose; rate: number; snap: boolean; impact: boolean } {
   const p = stance();
   let rate = 22; // 1/s: how fast the body eases toward the target
   let snap = false;
+  let impact = false; // jump onto the pose even in hitstop: the blow it lands is what froze the body
   const t = f.t;
   const sw = Math.sin(time * 9);
   const nLegs = legs(f);
@@ -479,16 +491,22 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
   };
   // play a keyframed clip (src/render/motion.ts) from the bladed stance; a strike
   // thrown with a limb the fighter has lost is thrown with the other one
-  const play = (clip: Clip, at: number, T: Timing) => {
-    blade();
-    let q = sampleClip(clip, at, T, { ...p, armL: [...p.armL], armR: [...p.armR], legL: [...p.legL], legR: [...p.legR] });
+  const play = (clip: Clip, at: number, T: Timing, from?: Pose) => {
+    if (!from) blade();
+    let q = sampleClip(clip, at, T, from ?? { ...p, armL: [...p.armL], armR: [...p.armR], legL: [...p.legL], legR: [...p.legR] });
     const lost = (a: "armL" | "armR" | "legL" | "legR", b: "armL" | "armR" | "legL" | "legR") => !f.parts[a].attached && f.parts[b].attached;
     if ((clip.limb === "armL" && lost("armL", "armR")) || (clip.limb === "armR" && lost("armR", "armL")) || (clip.limb === "legL" && lost("legL", "legR")) || (clip.limb === "legR" && lost("legR", "legL"))) q = mirror(q);
     Object.assign(p, q);
     rate = clip.rate ?? rate;
   };
 
-  switch (f.state) {
+  // the thrower turns through the throw and comes back up, whatever it does next
+  const throwing = cue.throwAge < 0.6 && (f.state === "idle" || f.state === "walk") && t < THROW_TIMING.end;
+  switch (throwing ? "throwing" : f.state) {
+    case "throwing":
+      play(THROWER, t, THROW_TIMING);
+      impact = f.stop > 0; // held on the throw through its freeze
+      break;
     case "idle": {
       blade();
       const bob = Math.abs(Math.sin(time * 4.2));
@@ -661,36 +679,38 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
     case "reversed":
       play(REACTIONS.deflected, t, stateTiming(f.dur || 15));
       break;
-    case "holding":
-      p.armL = [-1.3, 0, 0.1];
-      p.armR = [-1.3, 0, -0.1];
-      p.elbowL = p.elbowR = -0.7;
-      p.spineX = 0.25;
-      if (f.holdCool > 10) {
-        p.legR = [-1.3, 0];
-        p.kneeR = 1.6;
+    case "holding": {
+      play(CLINCH, t, stateTiming(f.dur || 100));
+      p.spineZ += Math.sin(time * 3.1) * 0.04; // the two bodies wrestle for balance
+      // a knee: up on the frame it lands (the hitstop then holds it there), down again over its
+      // cooldown; the knees alternate legs
+      if (f.holdStrikes > 0 && f.holdCool > 0) {
+        const k = KNEE_TIMING.end - f.holdCool;
+        play(clinchKnee(f.holdStrikes % 2 === 1 ? "R" : "L"), k, KNEE_TIMING, { ...p, armL: [...p.armL], armR: [...p.armR], legL: [...p.legL], legR: [...p.legR] });
+        impact = f.stop > 0;
       }
       break;
-    case "held":
-      p.spineX = 0.5;
-      p.headX = 0.3;
-      p.y = 0.05;
-      p.armL = [-0.2, 0, 0.2];
-      p.armR = [-0.2, 0, -0.2];
-      p.elbowL = p.elbowR = -0.3;
+    }
+    case "held": {
+      play(HELD, t, stateTiming(f.dur || 100));
+      p.headZ = Math.sin(time * 4.3) * 0.12; // struggling to pull the head free
+      // a knee in the belly jolts the body up and folds it over: held through the freeze, then eased off
+      const fresh = hurt.age < 0.3 && f.stop > 0;
+      const j = fresh ? 1 : Math.max(0, 1 - Math.max(0, hurt.age - 0.1) / 0.3);
+      impact = fresh;
+      p.spineX += 0.3 * j;
+      p.y += 0.07 * j;
+      p.kneeL += 0.35 * j;
+      p.kneeR += 0.35 * j;
       break;
+    }
     case "thrown":
-      p.rx = -Math.PI / 2 + Math.sin(t * 0.5) * 0.3;
-      p.rz = t * 0.5;
-      p.y = 0.8 + Math.sin((t / 24) * Math.PI) * 1.2;
-      p.armL = [-2.5, 0, 0.6];
-      p.armR = [-2.5, 0, -0.6];
-      p.kneeL = p.kneeR = 0.6;
-      snap = true;
+      play(THROWN, t, stateTiming(f.dur || 24));
       break;
     case "down":
     case "ko":
-      play(REACTIONS.down, f.state === "ko" ? Math.max(t, 30) : t, stateTiming(DOWN.dur));
+      // off the back of a throw the body is already on the floor: only the bounce
+      play(cue.from === "thrown" ? DOWN_LANDED : REACTIONS.down, f.state === "ko" ? Math.max(t, 30) : t, stateTiming(DOWN.dur));
       break;
     case "wakeup":
       play(REACTIONS.wakeup, t, stateTiming(f.dur || DOWN.wake));
@@ -769,7 +789,7 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
     p.y += -0.78;
     p.spineX += 0.6;
   }
-  return { p, rate, snap };
+  return { p, rate, snap, impact };
 }
 
 /** A pose as one list of numbers: the scalars in KEYS order, then armL, armR, legL, legR. */

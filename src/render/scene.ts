@@ -255,6 +255,7 @@ export class Scene {
           break;
         }
         case "throw":
+          if (this.fighters[q.a]) this.fighters[q.a].cue.throwAge = 0;
           this.shake = Math.min(1, this.shake + 0.3);
           this.hype = Math.min(1, this.hype + 0.2);
           break;
@@ -418,13 +419,19 @@ export class Scene {
       }
       syncLimbs(v, f);
       v.hurt.age += dt;
+      v.cue.throwAge += dt;
+      if (v.cue.last !== f.state) {
+        v.cue.from = v.cue.last;
+        v.cue.last = f.state;
+      }
       v.flash = Math.max(0, v.flash - dt * 9);
-      const { p, rate, snap } = targetPose(f, w, time, v.hurt);
+      const { p, rate, snap, impact } = targetPose(f, w, time, v.hurt, v.cue);
       if (f.state === "ko") p.y -= Math.min(1.2, f.t / 120);
       // the victim of a hit shudders while the hitstop holds it
       const jitter = f.stop > 0 && v.hurt.age < 0.3 ? 0.07 : 0;
       // nothing moves during a hitstop: the pose holds too
-      applyPose(v, p, f.stop > 0 ? 0 : rate, snap && f.stop === 0, dt, jitter);
+      // (a knee or a throw jumps onto its landing pose, so the freeze holds the blow, not the wind-up)
+      applyPose(v, p, f.stop > 0 ? 0 : rate, (snap && f.stop === 0) || impact, dt, jitter);
 
       const aura = v.aura.material as THREE.MeshBasicMaterial;
       aura.opacity = 0;

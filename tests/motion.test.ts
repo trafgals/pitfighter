@@ -4,6 +4,7 @@
 // the sim gives them.
 import { describe, expect, it } from "vitest";
 import { applyPose, buildBody, targetPose, type Body, type Pose } from "../src/render/body";
+import { BTN, type PlayerInput } from "../src/sim/types";
 import { FAMILIES, FAMILY_OF, REACTIONS, clipFor, familyOf, loadFrame, sampleClip, stateTiming, type Clip, type Timing } from "../src/render/motion";
 import { DOWN } from "../src/sim/moves";
 import { STYLES } from "../src/sim/styles";
@@ -167,5 +168,99 @@ describe("the move set", () => {
     expect(at(2).armL[2]).toBeGreaterThan(0.5); // the lead forearm sweeping out
     expect(at(14).armL[2]).toBeGreaterThan(0.5);
     expect(at(78).armL[2]).toBeLessThan(0.3); // back in the stance
+  });
+});
+
+describe("the grapple", () => {
+  /** Step the sim and pose every body the way the scene does: hits, throws, state changes, hitstop. */
+  function rig(w: World) {
+    const bodies = w.fighters.map((f) => buildBody(f));
+    const frame = (inp: PlayerInput[]) => {
+      w.step(inp);
+      for (const e of w.s.events) {
+        if (e.kind === "hit" && e.b !== undefined) bodies[e.b].hurt = { part: e.part ?? "torso", age: 0 };
+        if (e.kind === "throw") bodies[e.a].cue.throwAge = 0;
+      }
+      w.fighters.forEach((f, i) => {
+        const v = bodies[i];
+        v.hurt.age += 1 / 60;
+        v.cue.throwAge += 1 / 60;
+        if (v.cue.last !== f.state) {
+          v.cue.from = v.cue.last;
+          v.cue.last = f.state;
+        }
+        const { p, rate, snap, impact } = targetPose(f, w, w.s.frame / 60, v.hurt, v.cue);
+        applyPose(v, p, f.stop > 0 ? 0 : rate, (snap && f.stop === 0) || impact, 1 / 60, 0);
+      });
+    };
+    const none = () => w.fighters.map(() => ({ x: 0, y: 0, buttons: 0 }));
+    const tap = (b: number) => {
+      const inp = none();
+      inp[0].buttons = b;
+      frame(inp);
+    };
+    const run = (n: number, watch: () => void = () => {}) => {
+      for (let i = 0; i < n; i++) {
+        frame(none());
+        watch();
+      }
+    };
+    return { bodies, tap, run };
+  }
+
+  it("the clinch, knees that are up on the frame they land, alternating legs, and a throw over onto the back", () => {
+    const w = new World({ seed: 9, styles: [5, 0] });
+    w.s.nextGeyser = 1e9;
+    const [a, b] = w.fighters;
+    Object.assign(a, { x: 0, y: 3, facing: 0 });
+    Object.assign(b, { x: 0.8, y: 3, facing: Math.PI });
+    const { bodies, tap, run } = rig(w);
+    const [A, B] = bodies;
+    run(30);
+    tap(BTN.GRAB);
+    run(20);
+    expect(a.state).toBe("holding");
+    expect(b.state).toBe("held");
+    // locked up: the holder's hands round the neck, the victim bent over with the head down
+    expect(A.cur.armL[0]).toBeLessThan(-1.1);
+    expect(A.cur.armR[0]).toBeLessThan(-1.1);
+    expect(B.cur.spineX).toBeGreaterThan(0.45);
+    // the first knee is up on its press frame, and the freeze holds it up there
+    tap(BTN.HIGH);
+    expect(a.stop).toBeGreaterThan(0);
+    expect(A.cur.kneeR).toBeGreaterThan(1.8);
+    expect(A.cur.legR[0]).toBeLessThan(-1.3);
+    run(a.stop - 1);
+    expect(A.cur.kneeR).toBeGreaterThan(1.8);
+    // after the freeze it comes down again, and the knee jolts the victim
+    let jolt = 0;
+    run(20, () => (jolt = Math.max(jolt, B.cur.spineX)));
+    expect(jolt).toBeGreaterThan(0.75);
+    expect(A.cur.kneeR).toBeLessThan(1.0);
+    // the second knee comes off the other leg
+    tap(BTN.HIGH);
+    expect(A.cur.kneeL).toBeGreaterThan(1.8);
+    run(a.stop + 20);
+    // the throw: the thrower bent over the hip through the freeze, the body thrown up and over
+    tap(BTN.GRAB);
+    expect(b.state).toBe("thrown");
+    expect(a.state).toBe("idle");
+    expect(A.cur.spineX).toBeGreaterThan(0.4);
+    let top = 0;
+    let rxAtTop = 0;
+    run(b.stop + 24, () => {
+      if (b.state === "thrown" && B.cur.y > top) {
+        top = B.cur.y;
+        rxAtTop = B.cur.rx;
+      }
+    });
+    expect(top).toBeGreaterThan(0.7); // up off the floor
+    expect(rxAtTop).toBeLessThan(-0.7); // turning over onto the back on the way
+    expect(b.state).toBe("down");
+    // it lands flat and stays flat: the knockdown after a throw only bounces, it does not stand up to fall again
+    let highest = -Infinity;
+    run(30, () => (highest = Math.max(highest, B.cur.rx)));
+    expect(highest).toBeLessThan(-1.1);
+    expect(A.cur.spineX).toBeLessThan(0.3); // and the thrower is back up
   });
 });

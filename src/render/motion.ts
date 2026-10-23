@@ -30,7 +30,7 @@
 // string structure of the sim: high string jab1 > jab2 > jab3 > punchFin, low
 // string kick1 > kick2 > sweep.
 import type { Pose } from "./body";
-import { GRAB, REVERSAL } from "../sim/moves";
+import { GRAB, HOLD, REVERSAL } from "../sim/moves";
 import { STYLES } from "../sim/styles";
 
 export type Phase = "s" | "up" | "load" | "snap" | "hit" | "act" | "rec" | "end";
@@ -605,6 +605,80 @@ export const REACTIONS: Record<string, Clip> = {
       { at: ["s", 45], p: { rx: 0, y: -0.12, spineX: 0.18, kneeL: 0.75, kneeR: 0.6 }, ease: "io" },
     ],
   },
+};
+
+// ------------------------------------------------------------ the grapple
+// Triangle catches on its first frame and the two fighters lock up for up to
+// 101 frames: the holder has the victim by the back of the neck, head pulled
+// down, and drives knees up into the body (each knee lands on its press frame
+// and the hitstop holds it up there), or turns and throws. The thrown body
+// goes up and over for 24 frames and lands on its back.
+
+/** The clinch: both hands round the back of the victim's neck, the elbows in, the chest over the head. */
+export const CLINCH: Clip = {
+  limb: "both",
+  rate: 30,
+  hold: true,
+  keys: [
+    { at: ["s", 2], p: all(arm("L", -1.45, 0.1, -0.5), arm("R", -1.45, 0.1, -0.5), { spineX: 0.3, z: 0.1, y: -0.06 }), ease: "out" },
+    { at: ["s", 7], p: all(arm("L", -1.3, -0.22, -1.25), arm("R", -1.3, -0.22, -1.25), { spineX: 0.24, headX: 0.12, z: 0.05, y: -0.05, hipY: 0.12, spineY: 0, kneeL: 0.55, kneeR: 0.45 }), ease: "io" },
+  ],
+};
+/** The knee timing: up on the press frame, held through the hitstop, down again before the next one is allowed. */
+export const KNEE_TIMING: Timing = { hit: 0, act: 3, end: HOLD.kneeCool };
+/** A knee from the clinch, played on top of it: the hands yank the head down onto the rising knee. */
+export const clinchKnee = (s: Side): Clip => ({
+  limb: `leg${s}` as Limb,
+  rate: STRIKE_RATE,
+  keys: [
+    { at: ["hit", 0], p: all(leg(s, -1.6, 0.05, 2.3), leg(other(s), 0.2, 0.04, 0.2), arm("L", -1.0, -0.2, -1.55), arm("R", -1.0, -0.2, -1.55), { spineX: -0.08, headX: 0.3, y: 0.07, z: 0.04 }, turn(s, 0.3, -0.2)), ease: "lin" },
+    { at: ["act", 0], p: {} },
+    { at: ["rec", 0.45], p: leg(s, -0.7, 0.05, 1.2), ease: "io" },
+  ],
+});
+/** Held: bent over at the waist with the head trapped, the hands clawing at the holder's forearms. */
+export const HELD: Clip = {
+  limb: "body",
+  rate: 30,
+  hold: true,
+  keys: [
+    { at: ["s", 3], p: { spineX: 0.35, headX: 0.25, y: -0.02 }, ease: "out" },
+    { at: ["s", 8], p: all({ spineX: 0.6, headX: 0.38, y: -0.08, hipY: 0.15, spineY: 0 }, arm("L", -1.15, -0.15, -1.0), arm("R", -1.15, -0.15, -1.0), leg("L", -0.2, 0.08, 0.75), leg("R", 0.25, -0.08, 0.65)), ease: "io" },
+  ],
+};
+export const THROW_TIMING: Timing = { hit: 0, act: 4, end: 30 };
+/** The thrower's follow-through: a hip turned in and the body bent over the throw, then up again. */
+export const THROWER: Clip = {
+  limb: "both",
+  rate: 40,
+  keys: [
+    { at: ["hit", 0], p: all(arm("L", -0.7, -0.6, -0.6), arm("R", -0.5, 0.5, -0.4), { spineX: 0.6, headX: 0.2, hipY: -0.5, spineY: -0.4, y: -0.2, z: 0.1, kneeL: 0.95, kneeR: 0.75 }), ease: "lin" },
+    { at: ["act", 0], p: {} },
+    { at: ["rec", 0.45], p: { spineX: 0.25, hipY: 0.1, spineY: -0.2, y: -0.08 }, ease: "io" },
+  ],
+};
+/** Thrown: up off the feet, over onto the back at the top of the arc, and down flat on it. */
+export const THROWN: Clip = {
+  limb: "body",
+  rate: 40,
+  hold: true,
+  keys: [
+    { at: ["s", 3], p: all({ rx: -0.45, y: 0.3, spineX: -0.35, headX: -0.3 }, arm("L", -2.3, 0.6, -0.4), arm("R", -2.3, 0.6, -0.4), leg("L", -0.6, 0.15, 0.7), leg("R", -0.3, 0.15, 0.5)), ease: "out" },
+    { at: ["s", 10], p: all({ rx: -1.15, y: 0.95, rz: 0.25 }, leg("L", -1.4, 0.15, 0.4), leg("R", -1.1, 0.2, 0.3), arm("L", -2.7, 0.9, -0.3), arm("R", -2.6, 0.9, -0.3)), ease: "out" },
+    { at: ["s", 18], p: { rx: -1.4, y: 0.65, rz: 0.15 }, ease: "lin" },
+    { at: ["end", 0], p: all({ rx: -Math.PI / 2, y: 0.18, z: -0.3, rz: 0, spineX: 0, headX: 0.35 }, arm("L", -0.5, 1.1, -0.3), arm("R", -0.5, 1.1, -0.3), leg("L", -0.35, 0.15, 0.4), leg("R", -0.2, 0.15, 0.2)), ease: "in" },
+  ],
+};
+/** Landing from a throw: already flat, so only the bounce and the settle of a knockdown. */
+export const DOWN_LANDED: Clip = {
+  limb: "body",
+  rate: 30,
+  hold: true,
+  keys: [
+    { at: ["s", 0], p: all({ rx: -Math.PI / 2, y: 0.17, z: -0.32, headX: 0.35 }, arm("L", -0.5, 1.1, -0.3), arm("R", -0.5, 1.1, -0.3), leg("L", -0.35, 0.15, 0.4), leg("R", -0.2, 0.15, 0.2)) },
+    { at: ["s", 4], p: { rx: -1.36, y: 0.25, headX: 0.1 }, ease: "out" },
+    { at: ["s", 10], p: all({ rx: -Math.PI / 2, y: 0.18, z: -0.3, headX: 0.2 }, arm("L", -0.3, 1.0, -0.4), arm("R", -0.3, 1.0, -0.4), leg("L", 0, 0.15, 0.15), leg("R", 0, 0.15, 0.4)), ease: "in" },
+  ],
 };
 
 /** The clip of a hit reaction, by the part that took the blow. */
