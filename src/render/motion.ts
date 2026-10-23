@@ -464,8 +464,106 @@ export const familyOf = (style: number): Family => FAMILY_OF[STYLES[style]?.styl
 /** The clip a style throws a move with, or null for the moves drawn by formula (the specials). */
 export function clipFor(style: number, move: string): Clip | null {
   const f = FAMILIES[familyOf(style)] as Record<string, Clip>;
-  return f[move] ?? REACTIONS[move] ?? null;
+  return f[move] ?? SPECIALS[move] ?? REACTIONS[move] ?? null;
 }
+
+// ------------------------------------------------------------ the specials
+// Pitfighter's own fury moves (Urban Reign has no such thing), keyed to their
+// frame data like the strikes: they gather on the startup, do their work over
+// the active frames - a spin of all of them, a charge that runs, a flurry
+// that lands a fist on every rehit frame - and recover.
+
+/** Keys that run the legs: a stride every `step` frames from `from` to `to` frames after the hit frame. */
+function strides(from: number, to: number, step: number, lean: number): Key[] {
+  const ks: Key[] = [];
+  for (let n = from, i = 0; n <= to; n += step, i++) {
+    const s: Side = i % 2 === 0 ? "L" : "R";
+    ks.push({ at: ["hit", n], p: all(leg(s, -1.0, 0.04, 0.55), leg(other(s), 0.55, 0.04, 1.25), { spineX: lean, y: i % 2 === 0 ? -0.1 : -0.04 }), ease: "io" });
+  }
+  return ks;
+}
+
+/** Fists on every rehit frame of the active frames, the hands alternating, retracting in between. */
+function flurry(): Clip {
+  const ks: Key[] = [{ at: ["load", 0.6], p: all(arm("L", -0.9, -0.2, -2.3), arm("R", -0.9, -0.2, -2.3), { y: -0.12, spineX: 0.18, kneeL: 0.7, kneeR: 0.6, hipY: 0.2, spineY: 0 }), ease: "out" }];
+  const REHIT = 4;
+  for (let k = 0; k < 6; k++) {
+    const s: Side = k % 2 === 0 ? "L" : "R";
+    // out in two frames as the other hand comes back, held out over the frame it lands on
+    ks.push({ at: ["hit", REHIT * k - LEAD], p: all(arm(s, -1.56, 0.06, -0.08), arm(other(s), -1.0, -0.25, -2.2), turn(s, 0.35, 0.3), { z: 0.06 + 0.02 * (k % 2), spineX: 0.22 }), ease: "in" });
+    ks.push({ at: ["hit", REHIT * k], p: {} });
+  }
+  ks.push({ at: ["rec", 0.4], p: {}, reset: true });
+  return { limb: "both", rate: STRIKE_RATE, keys: ks };
+}
+
+export const SPECIALS: Record<string, Clip> = {
+  // HELLSPIN: a crouch, then a whole turn on the active frames with the leg swung out like a roundhouse
+  spSpin: {
+    limb: "legR",
+    rate: STRIKE_RATE,
+    keys: [
+      { at: ["load", 0.6], p: all({ ry: -0.5, y: -0.12, kneeL: 0.8, kneeR: 0.7, spineX: 0.15 }, arm("L", -1.1, -0.3, -2.0), arm("R", -1.1, -0.3, -2.0)), ease: "out" },
+      { at: ["snap", 0], p: {} },
+      { at: ["hit", -LEAD], p: all({ ry: 1.2, y: 0.1, spineX: -0.1, spineZ: 0.2, kneeL: 0.3 }, leg("R", -0.4, 1.35, 0.12), arm("L", -0.3, 1.2, -0.3), arm("R", -0.3, 1.2, -0.3)), ease: "in" },
+      { at: ["hit", 3], p: { ry: 2.6 }, ease: "lin" },
+      { at: ["hit", 6], p: { ry: 4.1 }, ease: "lin" },
+      { at: ["act", 0], p: { ry: 5.6 }, ease: "lin" },
+      { at: ["rec", 0.3], p: { ry: 6.28, y: -0.08, spineZ: 0 }, ease: "out", reset: true },
+    ],
+  },
+  // BRIMSTONE CHARGE: the shoulder lowered and the feet pawing, then a flat-out run behind the shoulder
+  spCharge: {
+    limb: "body",
+    rate: 40,
+    keys: [
+      { at: ["load", 0.6], p: all({ spineX: 0.5, headX: -0.35, y: -0.2, kneeL: 1.0, kneeR: 0.9, hipY: 0.55, spineY: 0.1 }, arm("L", -1.0, 0.9, -1.5), arm("R", -0.2, 0.5, -0.4), leg("L", -0.7, 0.06, 0.9), leg("R", 0.4, -0.06, 0.6)), ease: "out" },
+      ...strides(0, 15, 3, 0.65),
+      { at: ["act", 0], p: all(leg("L", -0.8, 0.06, 0.6), leg("R", 0.4, 0.06, 0.8), { spineX: 0.5 }) },
+      // the brakes: the lead foot planted, the body straightening up behind it
+      { at: ["rec", 0.35], p: all(leg("L", -0.75, 0.06, 0.45), leg("R", 0.35, -0.06, 0.4), { spineX: 0.15, y: -0.1, headX: 0 }), ease: "out", reset: true },
+    ],
+  },
+  // INFERNAL FLURRY: a fist on every rehit frame
+  spFlurry: flurry(),
+  // PIT SLAM: a crouch, up into the air with both fists over the head, and down into the floor on the hit frame
+  spSlam: {
+    limb: "both",
+    rate: 40,
+    keys: [
+      { at: ["up", 0.25], p: all({ y: -0.28, kneeL: 1.2, kneeR: 1.1, spineX: 0.35 }, arm("L", 0.5, 0.3, -0.5), arm("R", 0.5, 0.3, -0.5), leg("L", -0.8, 0.1, 1.2), leg("R", -0.5, 0.1, 1.1)), ease: "out" },
+      { at: ["up", 0.65], p: all({ y: 0.75, kneeL: 1.1, kneeR: 1.1, spineX: -0.2, headX: -0.15 }, arm("L", -2.9, 0.15, -0.4), arm("R", -2.9, 0.15, -0.4), leg("L", -0.7, 0.15, 1.1), leg("R", -0.6, 0.15, 1.0)), ease: "out" },
+      { at: ["hit", -LEAD], p: all({ y: -0.35, spineX: 0.6, headX: 0.15 }, arm("L", -1.0, 0.1, -0.35), arm("R", -1.0, 0.1, -0.35), leg("L", -0.9, 0.2, 1.3), leg("R", -0.9, 0.2, 1.3)), ease: "in" },
+      { at: ["act", 0], p: {} },
+      { at: ["rec", 0.5], p: all({ y: -0.2, spineX: 0.3 }, leg("L", -0.6, 0.1, 0.9), leg("R", -0.3, 0.1, 0.8)), ease: "io", reset: true },
+    ],
+  },
+  // PITCHFORK ARC: wound right round to the far side, then a wide sweep across the front on the active frames
+  spBlade: {
+    limb: "armR",
+    rate: STRIKE_RATE,
+    keys: [
+      { at: ["load", 0.6], p: all(arm("R", -1.45, 0.15, -0.15), arm("L", -1.0, -0.6, -1.4), { spineY: 1.1, ry: 0.4, y: -0.12, kneeL: 0.8, kneeR: 0.5 }), ease: "out" },
+      { at: ["snap", 0], p: {} },
+      { at: ["hit", -LEAD], p: { spineY: 0.2, ry: 0.0, spineX: 0.15 }, ease: "in" },
+      { at: ["act", 0], p: { spineY: -1.3, ry: -0.6 }, ease: "lin" },
+      { at: ["rec", 0.3], p: { spineY: -1.45, ry: -0.7 }, ease: "out" },
+      { at: ["rec", 0.7], p: { spineY: -0.5, ry: -0.2 }, reset: true },
+    ],
+  },
+  // HELLFIRE FLICK: the fingers cocked back by the ear, then flicked out at the target as the fire leaves them
+  spFire: {
+    limb: "armR",
+    rate: STRIKE_RATE,
+    keys: [
+      { at: ["load", 0.6], p: all(arm("R", 0.2, 0.35, -2.25), arm("L", -1.3, -0.4, -1.2), { spineY: 0.6, hipY: 0.5, y: -0.08, headX: 0.05 }), ease: "out" },
+      { at: ["snap", 0], p: {} },
+      { at: ["hit", -LEAD], p: all(arm("R", -1.6, 0.05, -0.02), arm("L", -0.6, 0.4, -1.5), turn("R", 0.55, 0.3), { z: 0.06, spineX: 0.15 }), ease: "in" },
+      { at: ["act", 0], p: {} },
+      { at: ["rec", 0.4], p: {}, reset: true },
+    ],
+  },
+};
 
 // ------------------------------------------------------------ being hit, and the rest
 /** The timing of a state that has no move: everything happens from frame 0, `act` frames in, over `dur`. */

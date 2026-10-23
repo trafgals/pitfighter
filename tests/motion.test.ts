@@ -74,7 +74,7 @@ describe("the move set", () => {
 
   it("every style's strikes land their contact pose on the move's hit frame, not before", () => {
     for (let style = 0; style < STYLES.length; style++)
-      for (const move of STRING) {
+      for (const move of [...STRING, STYLES[style].special]) {
         const { w, f, b } = settled(style);
         const clip = clipFor(style, move)!;
         const m = w.eff(f, move);
@@ -90,7 +90,9 @@ describe("the move set", () => {
         const atHit = limbGap(clip.limb, b.cur, contact);
         const why = `${STYLES[style].style} (${familyOf(style)}) ${move}: ${early.toFixed(2)} -> ${atHit.toFixed(2)}`;
         expect(atHit, why).toBeLessThan(0.45); // out on the hit frame
-        expect(early, why).toBeGreaterThan(atHit + 0.4); // and still on its way 4 frames before
+        // and still on its way 4 frames before (a dash is already running at its target and the sword arm stays out while
+        // the trunk swings it: their own tests check the strides and the swing)
+        if (!m.dash && move !== "spBlade") expect(early, why).toBeGreaterThan(atHit + 0.4);
       }
   });
 
@@ -168,6 +170,84 @@ describe("the move set", () => {
     expect(at(2).armL[2]).toBeGreaterThan(0.5); // the lead forearm sweeping out
     expect(at(14).armL[2]).toBeGreaterThan(0.5);
     expect(at(78).armL[2]).toBeLessThan(0.3); // back in the stance
+  });
+});
+
+describe("the specials", () => {
+  /** The target pose of a fighter of `style` on frame t of `move`. */
+  const poseAt = (style: number, move: string) => {
+    const { w, f, b } = settled(style);
+    Object.assign(f, { state: "attack", move, chargeHeld: false });
+    const m = w.eff(f, move);
+    return {
+      m,
+      at: (t: number) => {
+        f.t = t;
+        return targetPose(f, w, 0, b.hurt).p;
+      },
+    };
+  };
+  const style = (sp: string) => STYLES.findIndex((s) => s.special === sp);
+
+  it("every special has a clip, and every style throws its own", () => {
+    for (const sp of ["spSpin", "spCharge", "spFlurry", "spSlam", "spBlade", "spFire"]) {
+      expect(style(sp)).toBeGreaterThanOrEqual(0);
+      expect(clipFor(style(sp), sp), sp).not.toBeNull();
+    }
+  });
+
+  it("HELLSPIN turns a whole circle over its active frames with the leg out", () => {
+    const { m, at } = poseAt(style("spSpin"), "spSpin");
+    let turned = 0;
+    let prev = at(m.startup - 1).ry;
+    for (let t = m.startup; t <= m.startup + m.active; t++) {
+      const ry = at(t).ry;
+      turned += Math.atan2(Math.sin(ry - prev), Math.cos(ry - prev));
+      prev = ry;
+    }
+    expect(turned).toBeGreaterThan(Math.PI * 1.2); // most of a turn on the active frames, the rest on the way in and out
+    expect(at(m.startup).legR[1]).toBeGreaterThan(1.2);
+  });
+
+  it("BRIMSTONE CHARGE runs: the legs swap over and over through the dash", () => {
+    const { m, at } = poseAt(style("spCharge"), "spCharge");
+    let swaps = 0;
+    let lead = Math.sign(at(m.startup).legL[0] - at(m.startup).legR[0]);
+    for (let t = m.startup; t < m.startup + m.active; t++) {
+      const s = Math.sign(at(t).legL[0] - at(t).legR[0]);
+      if (s !== lead && s !== 0) swaps++;
+      lead = s;
+    }
+    expect(swaps).toBeGreaterThanOrEqual(4);
+    expect(at(m.startup + 5).spineX).toBeGreaterThan(0.5); // behind the shoulder
+  });
+
+  it("INFERNAL FLURRY lands a fist on every rehit frame, the hands alternating", () => {
+    const { m, at } = poseAt(style("spFlurry"), "spFlurry");
+    const hands: string[] = [];
+    for (let t = m.startup; t < m.startup + m.active; t += m.rehit!) {
+      const p = at(t);
+      hands.push(p.elbowL > -0.3 ? "L" : p.elbowR > -0.3 ? "R" : "-");
+    }
+    expect(hands).toEqual(["L", "R", "L", "R", "L", "R"]);
+  });
+
+  it("PIT SLAM is in the air before its hit frame and down on the floor on it", () => {
+    const { m, at } = poseAt(style("spSlam"), "spSlam");
+    const air = Math.max(...Array.from({ length: m.startup }, (_, t) => at(t).y));
+    expect(air).toBeGreaterThan(0.5);
+    expect(at(m.startup).y).toBeLessThan(-0.3);
+    expect(at(Math.round(m.startup * 0.65)).armL[0]).toBeLessThan(-2.5); // both fists over the head
+  });
+
+  it("PITCHFORK ARC sweeps from the far side across the front; HELLFIRE FLICK is cocked back, then flicked out", () => {
+    const b = poseAt(style("spBlade"), "spBlade");
+    expect(b.at(b.m.startup - 6).spineY).toBeGreaterThan(0.8);
+    expect(b.at(b.m.startup + b.m.active).spineY).toBeLessThan(-1.0);
+    const f = poseAt(style("spFire"), "spFire");
+    expect(f.at(f.m.startup - 6).elbowR).toBeLessThan(-2);
+    expect(f.at(f.m.startup).elbowR).toBeGreaterThan(-0.3);
+    expect(f.at(f.m.startup).armR[0]).toBeLessThan(-1.4);
   });
 });
 
