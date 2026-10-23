@@ -1,0 +1,171 @@
+// The keyframed moves: every style throws its strings with its own family of
+// strikes, every strike lands its contact pose on the hit frame the sim uses
+// (Urban Reign's measured timing), and the reactions play out over the frames
+// the sim gives them.
+import { describe, expect, it } from "vitest";
+import { applyPose, buildBody, targetPose, type Body, type Pose } from "../src/render/body";
+import { FAMILIES, FAMILY_OF, REACTIONS, clipFor, familyOf, loadFrame, sampleClip, stateTiming, type Clip, type Timing } from "../src/render/motion";
+import { DOWN } from "../src/sim/moves";
+import { STYLES } from "../src/sim/styles";
+import { World } from "../src/sim/world";
+import type { Fighter } from "../src/sim/types";
+
+const STRING = ["jab1", "jab2", "jab3", "punchFin", "kick1", "kick2", "sweep"] as const;
+
+/** How far the striking limb of a pose is from where it is in another, in radians summed over its joints. */
+function limbGap(limb: Clip["limb"], a: Pose, b: Pose): number {
+  const d = (x: number, y: number) => Math.abs(x - y);
+  const arm = (s: "L" | "R") => d(a[`arm${s}`][0], b[`arm${s}`][0]) + d(a[`arm${s}`][2], b[`arm${s}`][2]) + d(a[`elbow${s}`], b[`elbow${s}`]);
+  const leg = (s: "L" | "R") => d(a[`leg${s}`][0], b[`leg${s}`][0]) + d(a[`leg${s}`][1], b[`leg${s}`][1]) + d(a[`knee${s}`], b[`knee${s}`]);
+  switch (limb) {
+    case "armL":
+      return arm("L");
+    case "armR":
+      return arm("R");
+    case "legL":
+      return leg("L");
+    case "legR":
+      return leg("R");
+    case "both":
+      return Math.max(arm("L"), arm("R"));
+    case "head":
+      return d(a.headX, b.headX) + d(a.spineX, b.spineX);
+    case "body":
+      return d(a.spineX, b.spineX) + 3 * d(a.z, b.z);
+  }
+}
+
+/** Run a fighter through `frames` sim frames on the joint springs, from a settled stance. */
+function drive(b: Body, f: Fighter, w: World, from: number, to: number): void {
+  for (let t = from; t <= to; t++) {
+    f.t = t;
+    const { p, rate, snap } = targetPose(f, w, t / 60, b.hurt);
+    applyPose(b, p, rate, snap, 1 / 60, 0);
+  }
+}
+function settled(style: number): { w: World; f: Fighter; b: Body } {
+  const w = new World({ seed: 3, styles: [style, 0], humans: [true, true] });
+  const f = w.fighters[0];
+  const b = buildBody(f);
+  f.state = "idle";
+  for (let i = 0; i < 90; i++) {
+    const { p, rate } = targetPose(f, w, 0, b.hurt);
+    applyPose(b, p, rate, false, 1 / 60, 0);
+  }
+  return { w, f, b };
+}
+
+describe("the move set", () => {
+  it("every Urban Reign style fights in a family, and every family throws every move of the strings", () => {
+    for (const st of STYLES) expect(FAMILY_OF[st.style], st.style).toBeDefined();
+    for (const [name, fam] of Object.entries(FAMILIES)) for (const m of [...STRING, "headbutt"]) expect((fam as Record<string, Clip>)[m], `${name} ${m}`).toBeDefined();
+    // the families are really different: each differs from every other in most of its strikes
+    const names = Object.keys(FAMILIES) as (keyof typeof FAMILIES)[];
+    const T: Timing = { hit: 12, act: 15, end: 43 };
+    const base = targetPose(settled(0).f, settled(0).w, 0, settled(0).b.hurt).p;
+    const contact = (n: keyof typeof FAMILIES, m: string) => JSON.stringify(sampleClip((FAMILIES[n] as Record<string, Clip>)[m], 12, T, base));
+    for (let i = 0; i < names.length; i++)
+      for (let j = i + 1; j < names.length; j++) {
+        const differ = STRING.filter((m) => contact(names[i], m) !== contact(names[j], m)).length;
+        expect(differ, `${names[i]} vs ${names[j]}`).toBeGreaterThanOrEqual(3);
+      }
+  });
+
+  it("every style's strikes land their contact pose on the move's hit frame, not before", () => {
+    for (let style = 0; style < STYLES.length; style++)
+      for (const move of STRING) {
+        const { w, f, b } = settled(style);
+        const clip = clipFor(style, move)!;
+        const m = w.eff(f, move);
+        Object.assign(f, { state: "attack", move, chargeHeld: false, charge: 0 });
+        drive(b, f, w, 0, m.startup - 4);
+        const target = (t: number) => {
+          f.t = t;
+          return targetPose(f, w, 0, b.hurt).p;
+        };
+        const contact = target(m.startup);
+        const early = limbGap(clip.limb, b.cur, contact);
+        drive(b, f, w, m.startup - 3, m.startup);
+        const atHit = limbGap(clip.limb, b.cur, contact);
+        const why = `${STYLES[style].style} (${familyOf(style)}) ${move}: ${early.toFixed(2)} -> ${atHit.toFixed(2)}`;
+        expect(atHit, why).toBeLessThan(0.45); // out on the hit frame
+        expect(early, why).toBeGreaterThan(atHit + 0.4); // and still on its way 4 frames before
+      }
+  });
+
+  it("a slower style's strike lands later: the clip follows the style's frame data", () => {
+    const { w, f } = settled(1); // Power: +4 frames on every strike
+    const fast = settled(3); // Karate: -2
+    const T = (x: { w: World; f: Fighter }) => x.w.eff(x.f, "jab2").startup;
+    expect(T({ w, f })).toBeGreaterThan(T(fast));
+    const clip = clipFor(1, "jab2")!;
+    const base = targetPose(f, w, 0, settled(1).b.hurt).p;
+    const e = w.eff(f, "jab2");
+    const Tm: Timing = { hit: e.startup, act: e.startup + e.active, end: e.total };
+    const at = (t: number) => limbGap(clip.limb, sampleClip(clip, t, Tm, base), sampleClip(clip, e.startup, Tm, base));
+    expect(at(T(fast))).toBeGreaterThan(0.3); // on Karate's hit frame Power's fist is still coming
+    expect(at(e.startup)).toBe(0);
+  });
+
+  it("a charged opener waits in its gathered pose until it is let go", () => {
+    const { w, f, b } = settled(6); // Boxing: jab1 is the lead jab
+    const m = w.eff(f, "jab1");
+    const clip = clipFor(6, "jab1")!;
+    Object.assign(f, { state: "attack", move: "jab1", chargeHeld: true, charge: 30, t: m.startup - 1 });
+    const held = targetPose(f, w, 0, b.hurt).p;
+    const Tm: Timing = { hit: m.startup, act: m.startup + m.active, end: m.total };
+    const load = sampleClip(clip, loadFrame(clip, Tm, held), Tm, held);
+    expect(held.armL[0]).toBeCloseTo(load.armL[0], 5);
+    expect(held.elbowL).toBeLessThan(-2); // the fist drawn in, not out
+    expect(held.kneeL).toBeGreaterThan(load.kneeL); // and sinking with the charge
+    f.chargeHeld = false;
+    f.t = m.startup;
+    expect(targetPose(f, w, 0, b.hurt).p.elbowL).toBeGreaterThan(-0.3); // released: it snaps out
+  });
+
+  it("a fighter without the arm a strike is thrown with throws it with the other arm", () => {
+    const { w, f, b } = settled(6);
+    Object.assign(f, { state: "attack", move: "jab1", chargeHeld: false, t: w.eff(f, "jab1").startup });
+    expect(targetPose(f, w, 0, b.hurt).p.armL[0]).toBeLessThan(-1.4);
+    f.parts.armL.attached = false;
+    f.t = w.eff(f, "jab1").startup; // one-armed punches are slower
+    const p = targetPose(f, w, 0, b.hurt).p;
+    expect(p.armR[0]).toBeLessThan(-1.4);
+    expect(p.elbowR).toBeGreaterThan(-0.3);
+  });
+
+  it("the reactions: a head shot snaps the head back, a knockdown hits the floor and bounces, the get-up stands", () => {
+    const { w, f, b } = settled(0);
+    b.hurt = { part: "head", age: 0 };
+    Object.assign(f, { state: "hitstun", dur: 41 });
+    drive(b, f, w, 0, 4);
+    expect(b.cur.headX).toBeLessThan(-0.4);
+    // the knockdown
+    const T = stateTiming(DOWN.dur);
+    const base = targetPose(settled(0).f, w, 0, b.hurt).p;
+    const down = (t: number) => sampleClip(REACTIONS.down, t, T, base);
+    expect(down(14).rx).toBeCloseTo(-Math.PI / 2, 5); // on the floor
+    expect(down(18).rx).toBeGreaterThan(-1.45); // bounced up off it
+    expect(down(18).y).toBeGreaterThan(down(14).y);
+    expect(down(DOWN.dur).rx).toBeCloseTo(-Math.PI / 2, 5); // and lies there
+    const up = (t: number) => sampleClip(REACTIONS.wakeup, t, stateTiming(DOWN.wake), base);
+    expect(up(0).rx).toBeCloseTo(-Math.PI / 2, 5);
+    expect(up(36).y).toBeLessThan(-0.3); // crouched, feet under the body
+    expect(up(DOWN.wake).rx).toBe(0); // and standing
+    // a fighter knocked out stays down
+    Object.assign(f, { state: "ko", t: 400 });
+    expect(targetPose(f, w, 0, b.hurt).p.rx).toBeCloseTo(-Math.PI / 2, 5);
+  });
+
+  it("the deflection is out over the reversal window, frames 2..14", () => {
+    const { w, f, b } = settled(0);
+    Object.assign(f, { state: "reversal", dur: 78, revHeight: "high" });
+    const at = (t: number) => {
+      f.t = t;
+      return targetPose(f, w, 0, b.hurt).p;
+    };
+    expect(at(2).armL[2]).toBeGreaterThan(0.5); // the lead forearm sweeping out
+    expect(at(14).armL[2]).toBeGreaterThan(0.5);
+    expect(at(78).armL[2]).toBeLessThan(0.3); // back in the stance
+  });
+});

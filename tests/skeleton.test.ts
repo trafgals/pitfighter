@@ -95,13 +95,13 @@ describe("the skeleton", () => {
     expect(b.cur.headX).toBeCloseTo(p.headX, 3); // and recovered
   });
 
-  it("a punch turns the hips into it and steps in", () => {
+  it("a rear-hand punch turns the hips into it and steps in", () => {
     const w = new World({ seed: 1, styles: [0, 0], humans: [true, true] });
     const f = w.fighters[0];
     const b = buildBody(f);
     const idle = targetPose(f, w, 0, b.hurt).p;
-    const m = w.eff(f, "jab1");
-    Object.assign(f, { state: "attack", move: "jab1", t: m.startup });
+    const m = w.eff(f, "jab2"); // the cross, the second strike of the string
+    Object.assign(f, { state: "attack", move: "jab2", t: m.startup });
     const out = targetPose(f, w, 0, b.hurt).p;
     expect(out.hipY).toBeLessThan(idle.hipY - 0.3); // the right hip drives through
     expect(out.z).toBeGreaterThan(0.05); // the body steps into it

@@ -17,6 +17,7 @@ import { STYLES } from "../sim/styles";
 import { legs, type World } from "../sim/world";
 import { painted, surface, type Surface } from "./textures";
 import { armRecipe, faceRecipe, jawRecipe, lookOf, torsoRecipe } from "./anatomy";
+import { GRAB_TIMING, REACTIONS, REVERSAL_TIMING, clipFor, hitClip, loadFrame, mirror, sampleClip, stateTiming, type Clip, type Timing } from "./motion";
 
 export const PLAYER_COLORS = [0xff3b3b, 0x3b8bff, 0x4cff6a, 0xffd23b, 0xff6bf0, 0x3bf0ff, 0xff9a3b, 0xb07bff];
 
@@ -476,6 +477,16 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
     p.elbowL = lerp(p.elbowL, -1.7, k);
     p.elbowR = lerp(p.elbowR, -1.7, k);
   };
+  // play a keyframed clip (src/render/motion.ts) from the bladed stance; a strike
+  // thrown with a limb the fighter has lost is thrown with the other one
+  const play = (clip: Clip, at: number, T: Timing) => {
+    blade();
+    let q = sampleClip(clip, at, T, { ...p, armL: [...p.armL], armR: [...p.armR], legL: [...p.legL], legR: [...p.legR] });
+    const lost = (a: "armL" | "armR" | "legL" | "legR", b: "armL" | "armR" | "legL" | "legR") => !f.parts[a].attached && f.parts[b].attached;
+    if ((clip.limb === "armL" && lost("armL", "armR")) || (clip.limb === "armR" && lost("armR", "armL")) || (clip.limb === "legL" && lost("legL", "legR")) || (clip.limb === "legR" && lost("legR", "legL"))) q = mirror(q);
+    Object.assign(p, q);
+    rate = clip.rate ?? rate;
+  };
 
   switch (f.state) {
     case "idle": {
@@ -518,18 +529,24 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
     case "attack": {
       if (!f.move) break;
       rate = 34;
-      if (f.move === "grab") {
-        p.armL = [-1.45, 0, 0.15];
-        p.armR = [-1.45, 0, -0.15];
-        p.elbowL = p.elbowR = -0.35;
-        p.spineX = 0.3;
+      const clip = clipFor(f.style, f.move);
+      if (clip) {
+        const e = f.move === "grab" ? null : w.eff(f, f.move);
+        const T = e ? { hit: e.startup, act: e.startup + e.active, end: e.total } : GRAB_TIMING;
+        // a string opener whose button is still held waits in its gathered pose,
+        // sinking lower the longer it charges
+        const lf = f.chargeHeld ? loadFrame(clip, T, p) : -1;
+        play(clip, lf >= 0 ? Math.min(t, lf) : t, T);
+        const charging = f.chargeHeld && f.charge > 0 ? Math.min(1, f.charge / CHARGE.max) : 0;
+        p.y -= 0.06 * charging;
+        p.kneeL += 0.25 * charging;
+        p.kneeR += 0.25 * charging;
         break;
       }
       const m = w.eff(f, f.move);
       const chamber = t < m.startup ? Math.min(1, t / Math.max(1, m.startup)) : 0;
       const ext = t < m.startup ? 0 : t < m.startup + m.active ? 1 : Math.max(0, 1 - (t - m.startup - m.active) / Math.max(1, m.recovery * 0.6));
       const act = t >= m.startup && t < m.startup + m.active ? (t - m.startup) / Math.max(1, m.active) : t >= m.startup + m.active ? 1 : 0;
-      const charging = f.chargeHeld && f.charge > 0 ? Math.min(1, f.charge / CHARGE.max) : 0;
       const punch = (right: boolean, k: number, c: number, hook = 0) => {
         const a: [number, number, number] = [lerp(lerp(-0.5, 0.35, c), -1.55 - hook * 0.2, k), 0, (right ? -1 : 1) * lerp(0.2, 0.05 + hook * 0.9, k)];
         const e = lerp(lerp(-1.9, -2.4, c), -0.08 - hook * 0.9, k);
@@ -552,55 +569,6 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
         p.kneeR = lerp(0.35, 0.65, k);
       };
       switch (f.move) {
-        case "jab1":
-        case "jab3":
-          punch(true, ext, chamber + charging * 0.5);
-          break;
-        case "jab2":
-          punch(false, ext, chamber);
-          break;
-        case "punchFin":
-          punch(true, ext, chamber, 1);
-          p.ry = -0.35 * ext;
-          p.y = -0.08 * ext;
-          break;
-        case "kick1":
-        case "kick2": {
-          const left = f.move === "kick2";
-          const c = chamber + charging * 0.4;
-          const lx = lerp(lerp(-0.38, -1.2, c), -1.5, ext);
-          const kn = lerp(lerp(0.4, 1.9, c), 0.1, ext);
-          if (left) {
-            p.legL = [lx, 0.05];
-            p.kneeL = kn;
-            p.kneeR = 0.3;
-          } else {
-            p.legR = [lx, -0.05];
-            p.kneeR = kn;
-            p.kneeL = 0.3;
-          }
-          p.spineX = -0.25 * Math.max(c, ext);
-          guardArms(0.6);
-          // the hips open into the kick, the arm on the kicking side swings back to balance it
-          p.hipY = (left ? 0.45 : -0.45) * Math.max(c, ext);
-          if (left) p.armL[0] += 0.5 * ext;
-          else p.armR[0] += 0.5 * ext;
-          p.y = -0.04 - 0.05 * c;
-          break;
-        }
-        case "sweep":
-          p.y = -0.42 * Math.max(chamber, ext);
-          p.legR = [-0.3, 1.35 * ext];
-          p.kneeR = 0.1;
-          p.kneeL = 1.6 * Math.max(chamber, ext);
-          p.legL = [-1.0 * Math.max(chamber, ext), 0];
-          p.ry = act * Math.PI * 2 * (ext > 0 ? 1 : 0);
-          p.spineX = 0.35;
-          break;
-        case "headbutt":
-          p.spineX = lerp(-0.3 * chamber, 0.6, ext);
-          p.headX = 0.4 * ext;
-          break;
         case "spSpin":
           // a full turn on the active frames, the leading leg out like a roundhouse
           p.ry = t < m.startup ? -0.5 * chamber : act * Math.PI * 2;
@@ -681,61 +649,17 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
       }
       break;
     }
-    case "hitstun": {
-      rate = 30;
-      const k = t < 6 ? 1 : Math.max(0.25, 1 - (t - 6) / 30);
-      if (hurt.part === "head") {
-        p.headX = -0.7 * k;
-        p.spineX = -0.35 * k;
-        p.headZ = 0.25 * k;
-      } else if (hurt.part === "legL" || hurt.part === "legR") {
-        p.y = -0.12 * k;
-        if (hurt.part === "legL") p.kneeL = 1.2 * k;
-        else p.kneeR = 1.2 * k;
-        p.spineZ = (hurt.part === "legL" ? -0.2 : 0.2) * k;
-      } else if (hurt.part === "armL" || hurt.part === "armR") {
-        p.spineY = (hurt.part === "armL" ? 0.5 : -0.5) * k;
-        p.spineX = -0.2 * k;
-      } else {
-        // doubled over
-        p.spineX = 0.55 * k;
-        p.headX = 0.3 * k;
-        p.armL = [-0.6, 0, -0.5];
-        p.armR = [-0.6, 0, 0.5];
-        p.elbowL = p.elbowR = -1.4;
-      }
-      p.legL = [-0.1, 0.06];
-      p.legR = [0.35, -0.06];
+    case "hitstun":
+      play(hitClip(hurt.part), t, stateTiming(f.dur || 41));
       break;
-    }
     case "blockstun":
-      guardArms();
-      p.spineX = -0.15;
-      p.y = -0.1;
-      rate = 30;
+      play(REACTIONS.block, t, stateTiming(f.dur || 20));
       break;
     case "reversal":
-      p.armL = [-1.35, 0, -0.65];
-      p.armR = [-1.35, 0, 0.65];
-      p.elbowL = p.elbowR = -0.6;
-      p.spineX = 0.05;
-      if (f.revHeight === "low") {
-        p.y = -0.25;
-        p.kneeL = p.kneeR = 1.0;
-        p.legL = [-0.7, 0.1];
-        p.legR = [-0.2, -0.1];
-      }
-      rate = 40;
+      play(f.revHeight === "low" ? REACTIONS.parryLow : REACTIONS.parry, t, REVERSAL_TIMING(f.dur));
       break;
     case "reversed":
-      p.spineX = -0.5;
-      p.headX = -0.4;
-      p.armL = [-0.6, 0, 1.3];
-      p.armR = [-0.6, 0, -1.3];
-      p.elbowL = p.elbowR = -0.3;
-      p.legL = [0.3, 0.1];
-      p.legR = [-0.3, -0.1];
-      rate = 30;
+      play(REACTIONS.deflected, t, stateTiming(f.dur || 15));
       break;
     case "holding":
       p.armL = [-1.3, 0, 0.1];
@@ -766,29 +690,11 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
       break;
     case "down":
     case "ko":
-      p.rx = -Math.PI / 2;
-      p.y = 0.18; // the body pivots on its feet, so this lifts it onto the floor
-      p.z = -0.3;
-      p.spineX = 0;
-      p.headX = 0.2;
-      p.armL = [-0.3, 0, 1.0];
-      p.armR = [-0.3, 0, -1.0];
-      p.elbowL = p.elbowR = -0.4;
-      p.legL = [0, 0.15];
-      p.legR = [0, -0.15];
-      p.kneeL = 0.15;
-      p.kneeR = 0.4;
-      rate = 14;
+      play(REACTIONS.down, f.state === "ko" ? Math.max(t, 30) : t, stateTiming(DOWN.dur));
       break;
-    case "wakeup": {
-      const k = 1 - t / DOWN.wake;
-      p.rx = (-Math.PI / 2) * k;
-      p.y = 0.18 * k - 0.25 * Math.sin(k * Math.PI);
-      p.kneeL = p.kneeR = 1.2 * Math.sin(k * Math.PI) + 0.3;
-      p.legL = [-0.9 * Math.sin(k * Math.PI), 0.1];
-      p.legR = [-0.5 * Math.sin(k * Math.PI), -0.1];
+    case "wakeup":
+      play(REACTIONS.wakeup, t, stateTiming(f.dur || DOWN.wake));
       break;
-    }
     case "dizzy":
       p.headZ = Math.sin(time * 6) * 0.35;
       p.rz = Math.sin(time * 3) * 0.1;
