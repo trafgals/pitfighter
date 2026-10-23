@@ -15,7 +15,7 @@ import { HAZARDS } from "../sim/arena";
 import type { StageId } from "../sim/stages";
 import { STYLES } from "../sim/styles";
 import { alive, type World } from "../sim/world";
-import { PLAYER_COLORS, applyPose, buildBody, limbGeometry, syncLimbs, targetPose, type Body } from "./body";
+import { PLAYER_COLORS, applyPose, buildBody, impulse, limbGeometry, syncLimbs, targetPose, type Body } from "./body";
 import type { Cue } from "./cues";
 import { Fx } from "./fx";
 import { canvasTexture, makeStageView, toV, yaw, type StageView } from "./stageviews";
@@ -218,6 +218,8 @@ export class Scene {
           if (v) {
             v.flash = Math.max(v.flash, heavy ? 1 : 0.7);
             v.hurt = { part: q.part ?? "torso", age: 0 };
+            // the blow whips the body; a burn from the arena only makes it flinch
+            impulse(v, q.part ?? "torso", a ? (heavy ? 1 : 0.55) : 0.15);
           }
           this.shake = Math.min(1, this.shake + (heavy ? 0.45 : 0.15));
           if (heavy) this.punchIn(p, 0.6);
