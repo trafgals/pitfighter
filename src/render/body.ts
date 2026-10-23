@@ -15,7 +15,8 @@ import { LIMBS, type Fighter, type PartId } from "../sim/types";
 import { CHARGE, DOWN, HOP_AIR, HOP_CYCLE } from "../sim/moves";
 import { STYLES } from "../sim/styles";
 import { legs, type World } from "../sim/world";
-import { surface } from "./textures";
+import { painted, surface, type Surface } from "./textures";
+import { armRecipe, faceRecipe, jawRecipe, lookOf, torsoRecipe } from "./anatomy";
 
 export const PLAYER_COLORS = [0xff3b3b, 0x3b8bff, 0x4cff6a, 0xffd23b, 0xff6bf0, 0x3bf0ff, 0xff9a3b, 0xb07bff];
 
@@ -218,6 +219,9 @@ export function buildBody(f: Fighter): Body {
   const skin = new THREE.MeshStandardMaterial({ color: st.color, roughness: 0.62, emissive: 0x000000, ...surface("skin", 2, 1), bumpScale: 0.7 });
   const accent = new THREE.MeshStandardMaterial({ color: st.accent, roughness: 0.75, emissive: 0x000000, ...surface("cloth", 3, 2), bumpScale: 1.5 });
   const eyeMat = new THREE.MeshBasicMaterial({ color: 0xffee55 });
+  // the trunk, the arms and the head have their own skin, with the style's anatomy painted on it
+  const look = lookOf(f.style, st);
+  const painting = (s: Surface) => new THREE.MeshStandardMaterial({ color: st.color, roughness: 0.6, emissive: 0x000000, ...s, bumpScale: 2.5 });
   const big = st.torso > 1.1 ? 1.15 : st.torso < 0.9 ? 0.88 : 1;
   const root = new THREE.Group();
   const body = new THREE.Group();
@@ -277,6 +281,7 @@ export function buildBody(f: Fighter): Body {
     28,
   );
   // an arm hanging from its shoulder: the biceps swell the upper arm, the forearm tapers to the wrist
+  const armRings: Record<number, Ring[]> = {};
   const armGeo = (side: number, shoulder: number, elbow: number) => {
     const rings: Ring[] = [];
     const len = UPPER + FORE;
@@ -290,6 +295,7 @@ export function buildBody(f: Fighter): Body {
       const wElbow = smooth(UPPER - 0.06, UPPER + 0.05, d);
       rings.push({ y: SH - d, x: side * SHOULDER_X, z: 0, rx: r, rz: r * 0.92, w: [[B.spine, wSpine], [shoulder, Math.max(0, 1 - wSpine - wElbow)], [elbow, wElbow]] });
     }
+    armRings[side] = rings;
     return skinTube(rings, 18);
   };
   // a leg from the hip joint: the thigh tapers to the knee, the calf swells high on the shin
@@ -315,10 +321,22 @@ export function buildBody(f: Fighter): Body {
     body.add(s);
     return s;
   };
+  const armLGeo = armGeo(-1, B.armL, B.elbowL);
+  const armRGeo = armGeo(1, B.armR, B.elbowR);
+  const torsoSkin = painting(painted(`torso:${f.style}`, 256, 256, torsoRecipe(trunk.map((t) => t[0]), trunk.map((t) => t[1]), look)));
+  const armSkin = (side: number) => {
+    const rings = armRings[side];
+    const recipe = armRecipe(rings.map((r) => SH - r.y), rings.map((r) => r.rx), UPPER, UPPER + FORE, side, look);
+    return painting(painted(`arm${side}:${f.style}`, 128, 256, recipe));
+  };
+  const armSkinL = armSkin(-1);
+  const armSkinR = armSkin(1);
+  const headSkin = painting(painted(`face:${f.style}`, 256, 128, faceRecipe(look)));
+  const jawSkin = painting(painted(`jaw:${f.style}`, 128, 64, jawRecipe(look)));
   const skins = {
-    torso: skinned(torsoGeo, skin),
-    armL: skinned(armGeo(-1, B.armL, B.elbowL), skin),
-    armR: skinned(armGeo(1, B.armR, B.elbowR), skin),
+    torso: skinned(torsoGeo, torsoSkin),
+    armL: skinned(armLGeo, armSkinL),
+    armR: skinned(armRGeo, armSkinR),
     legL: skinned(legGeo(-1, B.legL, B.kneeL), accent),
     legR: skinned(legGeo(1, B.legR, B.kneeR), accent),
   };
@@ -337,7 +355,7 @@ export function buildBody(f: Fighter): Body {
   belt.scale.set(1.15, 0.85, 1);
   belt.position.y = 0.08;
   spine.add(belt);
-  // pecs, shoulder blades and a hint of abs on the trunk
+  // pecs and shoulder blades on the trunk (the six-pack is painted on its skin)
   for (const s of [-1, 1]) {
     const pec = mesh(new THREE.SphereGeometry(0.1, 16, 12), skin);
     pec.scale.set(1.1, 0.62, 0.42);
@@ -349,17 +367,13 @@ export function buildBody(f: Fighter): Body {
     blade.position.set(0.09 * s, 0.4, -0.095);
     spine.add(blade);
   }
-  const abs = mesh(new THREE.SphereGeometry(0.11, 16, 12), skin);
-  abs.scale.set(0.95, 1.25, 0.55);
-  abs.position.set(0, 0.2, 0.07);
-  spine.add(abs);
 
   // the head
-  const skull = mesh(new THREE.SphereGeometry(0.155, 28, 20), skin);
+  const skull = mesh(new THREE.SphereGeometry(0.155, 28, 20), headSkin);
   skull.scale.set(1, 1.08, 1);
   skull.position.y = 0.15;
   head.add(skull);
-  const jaw = mesh(new THREE.SphereGeometry(0.11, 20, 14), skin);
+  const jaw = mesh(new THREE.SphereGeometry(0.11, 20, 14), jawSkin);
   jaw.scale.set(1, 0.6, 1.05);
   jaw.position.set(0, 0.07, 0.04);
   head.add(jaw);
@@ -434,7 +448,7 @@ export function buildBody(f: Fighter): Body {
     joints: { elbowL, elbowR, kneeL, kneeR },
     skeleton,
     skins,
-    mats: [skin, accent],
+    mats: [skin, accent, torsoSkin, armSkinL, armSkinR, headSkin, jawSkin],
     cur: stance(),
     vel: new Array(N_DOF).fill(0),
     hurt: { part: "torso", age: 99 },

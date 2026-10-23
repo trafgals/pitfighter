@@ -5,7 +5,7 @@
 // pixels, and a stage only bakes the surfaces it uses.
 import * as THREE from "three";
 
-const hash = (x: number, y: number, s: number) => {
+export const hash = (x: number, y: number, s: number) => {
   let h = (Math.imul(x, 374761393) + Math.imul(y, 668265263) + Math.imul(s, 1274126177)) | 0;
   h = Math.imul(h ^ (h >>> 13), 1103515245);
   return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
@@ -87,23 +87,24 @@ export interface Texel {
 export type Recipe = (u: number, v: number, o: Texel) => void;
 
 export interface Baked {
-  size: number;
+  size: number; // width
+  rows: number; // height
   color: Uint8Array; // RGBA
   height: Uint8Array; // RGBA, grey
   glow: Uint8Array | null; // RGBA, only when the recipe glows
 }
 
-export function bake(size: number, recipe: Recipe): Baked {
-  const n = size * size * 4;
+export function bake(size: number, recipe: Recipe, rows = size): Baked {
+  const n = size * rows * 4;
   const color = new Uint8Array(n);
   const height = new Uint8Array(n);
   const glow = new Uint8Array(n);
   let glows = false;
   const o: Texel = { r: 0, g: 0, b: 0, h: 0, er: 0, eg: 0, eb: 0 };
-  for (let y = 0; y < size; y++)
+  for (let y = 0; y < rows; y++)
     for (let x = 0; x < size; x++) {
       o.r = o.g = o.b = o.h = o.er = o.eg = o.eb = 0;
-      recipe(x / size, y / size, o);
+      recipe(x / size, y / rows, o);
       const i = (y * size + x) * 4;
       color[i] = clamp01(o.r) * 255;
       color[i + 1] = clamp01(o.g) * 255;
@@ -117,7 +118,7 @@ export function bake(size: number, recipe: Recipe): Baked {
       glow[i + 2] = clamp01(o.eb) * 255;
       glow[i + 3] = 255;
     }
-  return { size, color, height, glow: glows ? glow : null };
+  return { size, rows, color, height, glow: glows ? glow : null };
 }
 
 // ---- the recipes. Fighter surfaces are near white: the material's colour tints them.
@@ -135,7 +136,7 @@ export const RECIPES = {
     const mottle = fbm(u, v, 6, 3, 1, 4);
     const pore = 1 - smoothstep(0.05, 0.22, worley(u, v, 40, 2).f1);
     const vein = smoothstep(0.03, 0, Math.abs(fbm(u, v, 4, 2, 3, 3) - 0.5)) * 0.06;
-    const k = 0.84 + 0.16 * mottle - 0.1 * pore - vein;
+    const k = 0.84 + 0.16 * mottle - 0.05 * pore - vein;
     set(o, k, k * 0.98, k * 0.96, 0.6 + 0.25 * mottle - 0.45 * pore);
   },
   /** cloth: a tight plain weave of threads going over and under each other */
@@ -247,8 +248,8 @@ const SIZE: Record<SurfaceId, number> = { skin: 256, cloth: 256, basalt: 512, di
 
 const baked = new Map<SurfaceId, { map: THREE.DataTexture; bump: THREE.DataTexture; glow: THREE.DataTexture | null }>();
 
-function dataTexture(px: Uint8Array, size: number, srgb: boolean): THREE.DataTexture {
-  const t = new THREE.DataTexture(px, size, size, THREE.RGBAFormat);
+function dataTexture(px: Uint8Array, size: number, srgb: boolean, rows = size): THREE.DataTexture {
+  const t = new THREE.DataTexture(px, size, rows, THREE.RGBAFormat);
   t.wrapS = t.wrapT = THREE.RepeatWrapping;
   t.magFilter = THREE.LinearFilter;
   t.minFilter = THREE.LinearMipmapLinearFilter;
@@ -283,4 +284,21 @@ export function surface(id: SurfaceId, rx = 1, ry = rx): Surface {
     return c;
   };
   return { map: rep(b.map), bumpMap: rep(b.bump), ...(b.glow ? { emissiveMap: rep(b.glow) } : {}) };
+}
+
+const paintedCache = new Map<string, Surface>();
+
+/**
+ * A surface painted for one part of one body (see anatomy.ts), baked once per
+ * key and shared: it covers its part's UVs once, so it is not repeated.
+ */
+export function painted(key: string, size: number, rows: number, recipe: Recipe): Surface {
+  let s = paintedCache.get(key);
+  if (!s) {
+    const px = bake(size, recipe, rows);
+    s = { map: dataTexture(px.color, size, true, rows), bumpMap: dataTexture(px.height, size, false, rows) };
+    s.map.wrapT = s.bumpMap.wrapT = THREE.ClampToEdgeWrapping; // round the part it wraps, not along it
+    paintedCache.set(key, s);
+  }
+  return s;
 }

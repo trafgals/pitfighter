@@ -305,23 +305,38 @@ async function main() {
     { id: "hindenburg-blimp", frames: 1200, from: 1500 },
     { id: "castle-under-siege", frames: 1500 },
   ];
+  // note who drives on the match's first frame. The ticker is queued before the game's own loop,
+  // so it runs first in every animation frame and sees frame 0 before any step: a later evaluate on
+  // the slow software renderer sees the match many frames on, when a bot may have hopped out
+  await page.evaluateOnNewDocument(() => {
+    const tick = () => {
+      const g = window.__game;
+      if (g && g.mode === "match") {
+        window.__start = { frame: g.world.s.frame, driving: g.world.fighters.filter((f) => f.state === "driving").length };
+        return;
+      }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
   for (const [i, run] of STAGE_RUNS.entries()) {
     errors.length = 0;
     await withTimeout(page.goto(`${SITE}/?auto=1&fighters=8&seed=${11 + i}&stage=${run.id}`, { waitUntil: "load" }), 20_000, `load ${run.id}`);
-    await page.waitForFunction(() => window.__game && window.__game.mode === "match", { timeout: 10_000 });
+    await page.waitForFunction(() => window.__start, { timeout: 10_000 });
     const start = await page.evaluate(() => {
       const w = window.__game.world;
       return {
         stage: w.s.stage,
         view: window.__game.scene.stage,
         n: w.fighters.length,
-        driving: w.fighters.filter((f) => f.state === "driving").length,
+        driving: window.__start.driving,
+        frame: window.__start.frame,
         vehicles: w.s.arena.vehicles.length,
         banner: document.querySelector(".banner")?.textContent,
       };
     });
     check(start.stage === run.id && start.view === run.id && start.n === 8, `${run.id}: an 8-fighter match starts on the stage and its view (${JSON.stringify(start)})`);
-    if (run.id === "construction-site") check(start.driving === 8 && start.vehicles === 8, `construction-site: everyone starts in their own vehicle (${start.driving} driving, ${start.vehicles} vehicles)`);
+    if (run.id === "construction-site") check(start.driving === 8 && start.vehicles === 8, `construction-site: everyone starts in their own vehicle (${start.driving} driving, ${start.vehicles} vehicles, at frame ${start.frame})`);
     await new Promise((r) => setTimeout(r, 1200));
     await page.screenshot({ path: path.join(OUT, `6_${run.id}_start.png`) });
     const after = await withTimeout(
