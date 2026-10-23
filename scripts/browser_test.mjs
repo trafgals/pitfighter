@@ -250,6 +250,36 @@ async function main() {
 
   check(errors.length === 0, `no page errors${errors.length ? ": " + errors.slice(0, 3).join(" | ") : ""}`);
 
+  // a gamepad joins with Start, readies with Start and starts with Start: Start on a
+  // pad that has not joined must never start an all-CPU match. The pad is a fake
+  // standard-mapping controller (an Xbox pad's Menu button is button 9) behind
+  // navigator.getGamepads, installed before the page's scripts run
+  await page.evaluateOnNewDocument(() => {
+    const pad = { id: "Xbox Wireless Controller (STANDARD GAMEPAD)", index: 0, connected: true, mapping: "standard", axes: [0, 0, 0, 0], buttons: Array.from({ length: 17 }, () => ({ pressed: false, value: 0 })) };
+    window.__pad = pad;
+    navigator.getGamepads = () => [pad, null, null, null];
+  });
+  await withTimeout(page.goto(`${SITE}/?seed=5`, { waitUntil: "load" }), 20_000, "reload with a gamepad");
+  await page.waitForFunction(() => window.__game && window.__game.mode === "select", { timeout: 10_000 });
+  const padPress = async (i) => {
+    await page.evaluate((i) => (window.__pad.buttons[i] = { pressed: true, value: 1 }), i);
+    await frames();
+    await page.evaluate((i) => (window.__pad.buttons[i] = { pressed: false, value: 0 }), i);
+    await frames();
+  };
+  const padState = () => page.evaluate(() => ({ mode: window.__game.mode, slots: window.__game.select.slots.map((s) => [s.device, s.ready]) }));
+  await padPress(9);
+  const joined = await padState();
+  check(joined.mode === "select" && JSON.stringify(joined.slots) === JSON.stringify([["pad0", false]]), `Start on a new pad joins it instead of starting the match (${JSON.stringify(joined)})`);
+  await padPress(15); // d-pad right: the next style
+  await padPress(9);
+  const readied = await padState();
+  check(readied.mode === "select" && JSON.stringify(readied.slots) === JSON.stringify([["pad0", true]]), `a second Start readies the pad (${JSON.stringify(readied)})`);
+  await padPress(9);
+  await page.waitForFunction(() => window.__game.mode === "match", { timeout: 10_000 });
+  const padMatch = await page.evaluate(() => window.__game.world.fighters.map((f) => f.human));
+  check(padMatch.length === 8 && padMatch[0] && padMatch.slice(1).every((h) => !h), `a third Start starts the match with the pad as P1 and 7 CPUs (${JSON.stringify(padMatch)})`);
+
   // every other stage: start an 8-CPU match with ?stage=, play it, look at it
   const litCanvas = () =>
     page.evaluate(() => {

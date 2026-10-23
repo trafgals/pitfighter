@@ -1,6 +1,8 @@
-// Character select: any device joins with its high-strike button, moves a
-// cursor over the 21 styles, confirms with high strike, backs out with grab.
-// Empty slots are filled with CPU fighters up to the chosen fighter count.
+// Character select: any device joins with its high-strike button or Start,
+// moves a cursor over the 21 styles, confirms with high strike or Start, backs
+// out with grab. Start on a device that is in and ready starts the match once
+// everyone who joined is ready. Empty slots are filled with CPU fighters up to
+// the chosen fighter count.
 import { BTN } from "./sim/types";
 import { STYLES } from "./sim/styles";
 import { CONTROLS_HELP, type DeviceId, type DeviceRead, type Input } from "./input";
@@ -8,6 +10,7 @@ import { PLAYER_COLORS } from "./render/scene";
 import { DEFAULT_STAGE, PLAYABLE_STAGES, STAGES, stageById, type StageId } from "./sim/stages";
 
 const COLS = 7;
+const RELEASED: DeviceRead = { x: 0, y: 0, buttons: 0, start: false, left: false, right: false, up: false, down: false };
 const hex = (c: number) => "#" + c.toString(16).padStart(6, "0");
 
 export interface Slot {
@@ -50,7 +53,7 @@ export class Select {
       <div class="slots"></div>
       <div class="count"></div>
       <div class="help">${CONTROLS_HELP.map((l) => `<div>${l}</div>`).join("")}
-        <div>Join: J / Num4 / □ · Move: stick · Confirm: J / □ · Back: L / ○ · Fighters: - / + (L1 / R1) · Stage: [ / ] · Start: Enter / Start</div></div>`;
+        <div>Join: J / Num4 / □ / Start · Move: stick · Confirm: J / □ / Start · Back: L / ○ · Fighters: - / + (L1 / R1) · Stage: [ / ] · Start: Enter / Start</div></div>`;
     this.render();
   }
 
@@ -64,14 +67,18 @@ export class Select {
     let changed = false;
     for (const dev of this.input.devices()) {
       const now = this.input.read(dev);
-      const was = this.prev.get(dev) ?? now;
+      // a device seen for the first time counts as released: a gamepad only shows
+      // up once a button is pressed, and that press must not be lost
+      const was = this.prev.get(dev) ?? RELEASED;
       this.prev.set(dev, now);
       const edge = (k: keyof DeviceRead) => !!now[k] && !was[k];
       const bedge = (b: number) => (now.buttons & b) !== 0 && (was.buttons & b) === 0;
       const slot = this.slots.find((s) => s.device === dev);
-      if (edge("start")) start = true;
+      // Start never starts the match from a device that is not in it: it joins
+      // that device (and readies it, a second time) instead of filling the pit with CPUs
+      if (edge("start") && slot?.ready) start = true;
       if (!slot) {
-        if (bedge(BTN.HIGH) && this.slots.length < 8) {
+        if ((bedge(BTN.HIGH) || edge("start")) && this.slots.length < 8) {
           this.slots.push({ device: dev, style: (this.slots.length * 3) % STYLES.length, ready: false });
           this.fighters = Math.max(this.fighters, this.slots.length);
           changed = true;
@@ -86,7 +93,7 @@ export class Select {
         if (edge("right")) slot.style = (slot.style + 1) % n;
         if (edge("up")) slot.style = (slot.style + n - COLS) % n;
         if (edge("down")) slot.style = (slot.style + COLS) % n;
-        if (bedge(BTN.HIGH)) slot.ready = true;
+        if (bedge(BTN.HIGH) || edge("start")) slot.ready = true;
         else if (bedge(BTN.GRAB)) this.slots = this.slots.filter((s) => s !== slot);
       } else if (bedge(BTN.GRAB)) slot.ready = false;
       changed = true;
@@ -151,7 +158,7 @@ export class Select {
       const s = this.slots[p];
       const c = hex(PLAYER_COLORS[p]);
       if (s) return `<div class="slot" style="border-color:${c}"><b style="color:${c}">P${p + 1}</b> ${STYLES[s.style].name}<br><small>${s.device} · ${s.ready ? "READY" : "choosing"}</small></div>`;
-      if (p < this.fighters) return `<div class="slot cpu" style="border-color:${c}"><b style="color:${c}">P${p + 1}</b> CPU<br><small>press □ / J to join</small></div>`;
+      if (p < this.fighters) return `<div class="slot cpu" style="border-color:${c}"><b style="color:${c}">P${p + 1}</b> CPU<br><small>press □ / Start / J to join</small></div>`;
       return `<div class="slot off"><b>P${p + 1}</b> -</div>`;
     }).join("");
     el.querySelector(".count")!.textContent = `${this.fighters} fighters · press Enter / Start when everyone is ready`;
