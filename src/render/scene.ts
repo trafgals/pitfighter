@@ -15,7 +15,7 @@ import { HAZARDS } from "../sim/arena";
 import type { StageId } from "../sim/stages";
 import { STYLES } from "../sim/styles";
 import { alive, type World } from "../sim/world";
-import { PLAYER_COLORS, applyPose, buildBody, syncLimbs, targetPose, type Body } from "./body";
+import { PLAYER_COLORS, applyPose, buildBody, limbGeometry, syncLimbs, targetPose, type Body } from "./body";
 import type { Cue } from "./cues";
 import { Fx } from "./fx";
 import { canvasTexture, makeStageView, toV, yaw, type StageView } from "./stageviews";
@@ -531,10 +531,13 @@ export class Scene {
     const st = STYLES[f.style];
     const isLeg = p.part.startsWith("leg");
     const g = new THREE.Group();
+    // the same turned limb the body wears, whole: shoulder (or hip) to wrist (or ankle)
+    const len = isLeg ? 0.82 : 0.59;
     const m = new THREE.Mesh(
-      new THREE.CapsuleGeometry(isLeg ? 0.08 : 0.065, isLeg ? 0.66 : 0.46, 4, 10),
+      isLeg ? limbGeometry(len, 0.09, 0.05, 0.014, 0.25) : limbGeometry(len, 0.068, 0.046, 0.012, 0.25),
       new THREE.MeshStandardMaterial({ color: isLeg ? st.accent : st.color, roughness: 0.7 }),
     );
+    m.position.y = len / 2;
     m.castShadow = true;
     const stump = new THREE.Mesh(new THREE.SphereGeometry(isLeg ? 0.095 : 0.08, 10, 8), new THREE.MeshStandardMaterial({ color: 0x8a0000, emissive: 0x300000 }));
     stump.position.y = (isLeg ? 0.66 : 0.46) / 2 + 0.06;

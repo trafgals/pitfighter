@@ -75,6 +75,54 @@ function stance(): Pose {
 }
 
 const lerp = (a: number, b: number, k: number) => a + (b - a) * k;
+
+/**
+ * A limb segment turned on a lathe, hanging from y = 0 down to y = -len:
+ * radius r0 at the top tapering to r1 at the bottom, a muscle that swells
+ * by bulge around the fraction at of the way down, and rounded ends.
+ */
+export function limbGeometry(len: number, r0: number, r1: number, bulge = 0, at = 0.35): THREE.LatheGeometry {
+  const pts: THREE.Vector2[] = [];
+  const cap = 5;
+  // the bottom cap, then the shaft, then the top cap: bottom to top, so the normals face out
+  for (let k = 0; k <= cap; k++) {
+    const a = (k / cap) * (Math.PI / 2);
+    pts.push(new THREE.Vector2(r1 * Math.sin(a), -len - r1 * Math.cos(a) + r1 * 0.35));
+  }
+  const n = 14;
+  for (let k = 1; k < n; k++) {
+    const t = 1 - k / n; // 0 at the top
+    const swell = bulge * Math.exp(-(((t - at) / 0.22) ** 2));
+    pts.push(new THREE.Vector2(lerp(r0, r1, t) + swell, -t * len));
+  }
+  for (let k = cap; k >= 0; k--) {
+    const a = (k / cap) * (Math.PI / 2);
+    pts.push(new THREE.Vector2(r0 * Math.sin(a), r0 * Math.cos(a) * 0.6));
+  }
+  return new THREE.LatheGeometry(pts, 20);
+}
+
+/** The torso, turned on a lathe: a narrow waist widening to the chest and the shoulders, closing at the neck. */
+function torsoGeometry(): THREE.LatheGeometry {
+  const prof: [number, number][] = [
+    [0, -0.04],
+    [0.1, -0.035],
+    [0.15, 0.0],
+    [0.155, 0.08], // the waist
+    [0.165, 0.18],
+    [0.19, 0.3], // the ribs
+    [0.205, 0.4], // the chest
+    [0.2, 0.47],
+    [0.17, 0.53], // the shoulders' slope
+    [0.11, 0.575],
+    [0.065, 0.59],
+    [0, 0.595],
+  ];
+  return new THREE.LatheGeometry(
+    prof.map(([r, y]) => new THREE.Vector2(r, y)),
+    28,
+  );
+}
 const wrapPi = (a: number) => Math.atan2(Math.sin(a), Math.cos(a));
 
 export interface Body {
@@ -118,14 +166,25 @@ export function buildBody(f: Fighter): Body {
 
   const spine = new THREE.Group();
   hips.add(spine);
-  const chest = mesh(new THREE.CapsuleGeometry(0.17, 0.26, 6, 14), skin);
-  chest.scale.set(1.35, 1, 0.8);
-  chest.position.y = 0.3;
+  // a V-tapered trunk with pecs, the shoulder blades and a hint of abs
+  const chest = mesh(torsoGeometry(), skin);
+  chest.scale.set(1.3, 1, 0.78);
   spine.add(chest);
-  const belly = mesh(new THREE.SphereGeometry(0.15, 14, 10), skin);
-  belly.scale.set(1.2, 0.9, 0.85);
-  belly.position.set(0, 0.12, 0.02);
-  spine.add(belly);
+  for (const s of [-1, 1]) {
+    const pec = mesh(new THREE.SphereGeometry(0.1, 16, 12), skin);
+    pec.scale.set(1.1, 0.62, 0.42);
+    pec.position.set(0.085 * s, 0.39, 0.095);
+    pec.rotation.z = 0.25 * s;
+    spine.add(pec);
+    const blade = mesh(new THREE.SphereGeometry(0.09, 12, 10), skin);
+    blade.scale.set(1.1, 1.2, 0.45);
+    blade.position.set(0.09 * s, 0.4, -0.1);
+    spine.add(blade);
+  }
+  const abs = mesh(new THREE.SphereGeometry(0.11, 16, 12), skin);
+  abs.scale.set(0.95, 1.25, 0.6);
+  abs.position.set(0, 0.17, 0.075);
+  spine.add(abs);
   const belt = mesh(new THREE.TorusGeometry(0.19, 0.035, 8, 24), accent);
   belt.rotation.x = Math.PI / 2;
   belt.scale.set(1.15, 0.85, 1);
@@ -135,19 +194,19 @@ export function buildBody(f: Fighter): Body {
   const head = new THREE.Group();
   head.position.y = 0.62;
   spine.add(head);
-  const neck = mesh(new THREE.CylinderGeometry(0.06, 0.075, 0.1, 10), skin);
+  const neck = mesh(new THREE.CylinderGeometry(0.06, 0.08, 0.12, 14), skin);
   neck.position.y = 0.0;
   head.add(neck);
-  const skull = mesh(new THREE.SphereGeometry(0.155, 18, 14), skin);
+  const skull = mesh(new THREE.SphereGeometry(0.155, 28, 20), skin);
   skull.scale.set(1, 1.08, 1);
   skull.position.y = 0.15;
   head.add(skull);
-  const jaw = mesh(new THREE.SphereGeometry(0.11, 12, 8), skin);
+  const jaw = mesh(new THREE.SphereGeometry(0.11, 20, 14), skin);
   jaw.scale.set(1, 0.6, 1.05);
   jaw.position.set(0, 0.07, 0.04);
   head.add(jaw);
   for (const s of [-1, 1]) {
-    const horn = mesh(new THREE.ConeGeometry(0.04, 0.22, 8), accent);
+    const horn = mesh(new THREE.ConeGeometry(0.04, 0.22, 14), accent);
     horn.position.set(0.1 * s, 0.3, 0);
     horn.rotation.z = -0.5 * s;
     head.add(horn);
@@ -158,25 +217,35 @@ export function buildBody(f: Fighter): Body {
     brow.position.set(0.055 * s, 0.205, 0.14);
     brow.rotation.z = 0.35 * s;
     head.add(brow);
+    // pointed ears
+    const ear = mesh(new THREE.ConeGeometry(0.03, 0.09, 8), skin);
+    ear.scale.set(1, 1, 0.45);
+    ear.position.set(0.152 * s, 0.17, -0.01);
+    ear.rotation.z = -1.1 * s;
+    head.add(ear);
   }
 
   // a limb: pivot -> upper segment -> joint -> lower segment -> hand / foot
-  const segment = (len: number, r: number, mat: THREE.Material) => {
-    const m = mesh(new THREE.CapsuleGeometry(r, Math.max(0.01, len - 2 * r), 4, 10), mat);
-    m.position.y = -len / 2;
-    return m;
-  };
+  const segment = (len: number, r0: number, r1: number, mat: THREE.Material, bulge = 0, at = 0.35) => mesh(limbGeometry(len, r0, r1, bulge, at), mat);
+  const joint = (r: number, mat: THREE.Material) => mesh(new THREE.SphereGeometry(r, 14, 10), mat);
   const arm = (side: number) => {
     const pivot = new THREE.Group();
     pivot.position.set(side * SHOULDER_X, SHOULDER_Y, 0);
-    const shoulder = mesh(new THREE.SphereGeometry(0.085, 12, 8), skin);
-    pivot.add(shoulder, segment(UPPER, 0.068, skin));
+    // the deltoid caps the shoulder; the biceps swell the upper arm, the forearm tapers to the wrist
+    const shoulder = mesh(new THREE.SphereGeometry(0.09, 16, 12), skin);
+    shoulder.scale.set(1.05, 0.95, 1);
+    pivot.add(shoulder, segment(UPPER, 0.07, 0.056, skin, 0.014, 0.45));
     const elbow = new THREE.Group();
     elbow.position.y = -UPPER;
-    elbow.add(segment(FORE, 0.058, skin));
-    const fist = mesh(new THREE.SphereGeometry(0.068, 12, 8), accent);
-    fist.position.y = -FORE - 0.02;
-    elbow.add(fist);
+    elbow.add(joint(0.056, skin), segment(FORE, 0.06, 0.045, skin, 0.01, 0.25));
+    // a wrapped fist: a squared-off knuckle ball with a thumb
+    const fist = mesh(new THREE.SphereGeometry(0.066, 16, 12), accent);
+    fist.scale.set(0.9, 0.95, 1.15);
+    fist.position.y = -FORE - 0.03;
+    const thumb = mesh(new THREE.CapsuleGeometry(0.018, 0.03, 4, 8), accent);
+    thumb.position.set(-side * 0.045, -FORE - 0.02, 0.03);
+    thumb.rotation.z = side * 0.6;
+    elbow.add(fist, thumb);
     pivot.add(elbow);
     spine.add(pivot);
     return { pivot, elbow };
@@ -184,13 +253,18 @@ export function buildBody(f: Fighter): Body {
   const leg = (side: number) => {
     const pivot = new THREE.Group();
     pivot.position.set(side * 0.11, 0, 0);
-    pivot.add(segment(THIGH, 0.085, accent));
+    // the thigh tapers to the knee, the calf swells high on the shin
+    pivot.add(segment(THIGH, 0.092, 0.066, accent, 0.012, 0.3));
     const knee = new THREE.Group();
     knee.position.y = -THIGH;
-    knee.add(segment(SHIN, 0.07, accent));
-    const foot = mesh(new THREE.BoxGeometry(0.11, 0.07, 0.24), skin);
-    foot.position.set(0, -SHIN - 0.02, 0.06);
-    knee.add(foot);
+    knee.add(joint(0.066, accent), segment(SHIN, 0.066, 0.045, accent, 0.016, 0.28));
+    // a rounded boot with a toe cap
+    const foot = mesh(new THREE.SphereGeometry(0.075, 16, 12), skin);
+    foot.scale.set(0.8, 0.5, 1.7);
+    foot.position.set(0, -SHIN - 0.03, 0.05);
+    const sole = mesh(new THREE.BoxGeometry(0.12, 0.02, 0.25), accent);
+    sole.position.set(0, -SHIN - 0.065, 0.05);
+    knee.add(foot, sole);
     pivot.add(knee);
     hips.add(pivot);
     return { pivot, knee };
@@ -204,8 +278,8 @@ export function buildBody(f: Fighter): Body {
   const tail = new THREE.Group();
   tail.position.set(0, 0.02, -0.13);
   const curve = new THREE.CatmullRomCurve3([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, -0.18, -0.15), new THREE.Vector3(0, -0.2, -0.38), new THREE.Vector3(0, 0.02, -0.5)]);
-  tail.add(mesh(new THREE.TubeGeometry(curve, 12, 0.022, 6), accent));
-  const tip = mesh(new THREE.ConeGeometry(0.05, 0.1, 4), accent);
+  tail.add(mesh(new THREE.TubeGeometry(curve, 24, 0.022, 10), accent));
+  const tip = mesh(new THREE.ConeGeometry(0.05, 0.1, 4), accent); // the spade stays four-sided
   tip.position.set(0, 0.07, -0.5);
   tail.add(tip);
   hips.add(tail);
