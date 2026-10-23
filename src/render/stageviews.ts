@@ -10,6 +10,7 @@ import { BLIMP, CASTLE, TOWER, YARD, onDeck, tileCentre } from "../sim/arena";
 import type { StageId } from "../sim/stages";
 import type { World } from "../sim/world";
 import { PLAYER_COLORS } from "./body";
+import { surface } from "./textures";
 
 export const toV = (x: number, y: number, h = 0) => new THREE.Vector3(x, h, -y);
 export const yaw = (facing: number) => Math.atan2(Math.cos(facing), -Math.sin(facing));
@@ -23,20 +24,6 @@ export function canvasTexture(w: number, h: number, draw: (g: CanvasRenderingCon
   t.colorSpace = THREE.SRGBColorSpace;
   t.wrapS = t.wrapT = THREE.RepeatWrapping;
   return t;
-}
-
-/** Speckled noise on a base colour: concrete, gravel, stone. */
-function speckle(base: string, n: number, lo: number, hi: number, size = 8, extra?: (g: CanvasRenderingContext2D) => void): THREE.CanvasTexture {
-  return canvasTexture(512, 512, (g) => {
-    g.fillStyle = base;
-    g.fillRect(0, 0, 512, 512);
-    for (let i = 0; i < n; i++) {
-      const v = lo + Math.random() * (hi - lo);
-      g.fillStyle = `rgba(${v},${v},${v},0.35)`;
-      g.fillRect(Math.random() * 512, Math.random() * 512, 1 + Math.random() * size, 1 + Math.random() * size);
-    }
-    extra?.(g);
-  });
 }
 
 function shadowed<T extends THREE.Object3D>(o: T, cast = true, receive = true): T {
@@ -120,33 +107,11 @@ class HellToiletView extends StageView {
     const sc = this.group;
     this.lights(0xff8866, 0x220000, 0.55, 0xffc0a0, 1.4, 13);
 
-    // cracked basalt floor with glowing veins
-    const floorTex = canvasTexture(1024, 1024, (g) => {
-      g.fillStyle = "#2b1d1a";
-      g.fillRect(0, 0, 1024, 1024);
-      for (let i = 0; i < 3500; i++) {
-        const v = 20 + Math.random() * 30;
-        g.fillStyle = `rgb(${v + 10},${v},${v - 5})`;
-        g.fillRect(Math.random() * 1024, Math.random() * 1024, 3 + Math.random() * 10, 3 + Math.random() * 10);
-      }
-      g.strokeStyle = "rgba(255,90,20,0.55)";
-      g.lineWidth = 3;
-      for (let i = 0; i < 40; i++) {
-        let x = Math.random() * 1024;
-        let y = Math.random() * 1024;
-        g.beginPath();
-        g.moveTo(x, y);
-        for (let k = 0; k < 8; k++) {
-          x += (Math.random() - 0.5) * 120;
-          y += (Math.random() - 0.5) * 120;
-          g.lineTo(x, y);
-        }
-        g.stroke();
-      }
-    });
+    // cracked basalt floor, molten rock glowing in the cracks
+    const basalt = surface("basalt", 2);
     const floor = new THREE.Mesh(
       new THREE.CylinderGeometry(RING_R, RING_R + 0.2, 0.6, 72),
-      new THREE.MeshStandardMaterial({ map: floorTex, roughness: 0.95, emissive: 0x220500, emissiveMap: floorTex, emissiveIntensity: 0.6 }),
+      new THREE.MeshStandardMaterial({ ...basalt, roughness: 0.9, emissive: 0xffffff, emissiveIntensity: 1.4, bumpScale: 2 }),
     );
     floor.position.y = -0.3;
     floor.receiveShadow = true;
@@ -484,19 +449,8 @@ class ConstructionView extends StageView {
     this.lights(0xdde8ff, 0x6a5a40, 0.75, 0xfff2d8, 1.9, 16, 0xa0c0ff, 0.4);
 
     // the yard: packed dirt and gravel inside, mud outside
-    const dirt = speckle("#7a6248", 9000, 40, 170, 6, (c) => {
-      c.strokeStyle = "rgba(60,45,30,0.5)";
-      c.lineWidth = 10;
-      for (let i = 0; i < 12; i++) {
-        c.beginPath();
-        const y = Math.random() * 512;
-        c.moveTo(0, y);
-        c.bezierCurveTo(170, y + 60, 340, y - 60, 512, y + 20);
-        c.stroke();
-      }
-    });
-    dirt.repeat.set(3, 2);
-    const yard = new THREE.Mesh(new THREE.BoxGeometry(YARD.hx * 2, 0.4, YARD.hy * 2), new THREE.MeshStandardMaterial({ map: dirt, roughness: 1 }));
+    const dirt = surface("dirt", 3, 2);
+    const yard = new THREE.Mesh(new THREE.BoxGeometry(YARD.hx * 2, 0.4, YARD.hy * 2), new THREE.MeshStandardMaterial({ ...dirt, roughness: 1, bumpScale: 2 }));
     yard.position.y = -0.2;
     yard.receiveShadow = true;
     g.add(yard);
@@ -507,7 +461,7 @@ class ConstructionView extends StageView {
     g.add(mud);
 
     // jersey barriers all round: the yard's walls
-    const conc = new THREE.MeshStandardMaterial({ map: speckle("#b8b2a6", 5000, 120, 220, 3), roughness: 0.95 });
+    const conc = new THREE.MeshStandardMaterial({ ...surface("concrete", 2, 1), roughness: 0.95 });
     const stripe = new THREE.MeshStandardMaterial({ color: 0xff5a10, roughness: 0.6 });
     const barrier = (x: number, z: number, along: boolean, len: number) => {
       const b = new THREE.Group();
@@ -702,15 +656,11 @@ class TowerView extends StageView {
     const g = this.group;
     this.lights(0x8090c0, 0x201810, 0.5, 0xc0d0ff, 1.3, 11, 0xff9050, 0.8);
 
-    const tex = speckle("#8c8a86", 6000, 60, 200, 4, (c) => {
-      c.strokeStyle = "rgba(40,40,40,0.8)";
-      c.lineWidth = 6;
-      c.strokeRect(3, 3, 506, 506);
-    });
+    const roof = surface("roof");
     const half = (TOWER.tile * TOWER.n) / 2;
     for (let k = 0; k < TOWER.n * TOWER.n; k++) {
       const c = tileCentre(k);
-      const mat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.9, emissive: 0x000000 });
+      const mat = new THREE.MeshStandardMaterial({ ...roof, roughness: 0.9, emissive: 0x000000, bumpScale: 1.5 });
       const m = new THREE.Mesh(new THREE.BoxGeometry(TOWER.tile - 0.04, 1.2, TOWER.tile - 0.04), mat);
       const home = toV(c.x, c.y, -0.6);
       m.position.copy(home);
@@ -930,18 +880,8 @@ class BlimpView extends StageView {
     deckShape.absarc(SEG, 0, BLIMP.width, -Math.PI / 2, Math.PI / 2, false);
     deckShape.lineTo(-SEG, BLIMP.width);
     deckShape.absarc(-SEG, 0, BLIMP.width, Math.PI / 2, (3 * Math.PI) / 2, false);
-    const deckTex = canvasTexture(512, 128, (c) => {
-      c.fillStyle = "#6a5236";
-      c.fillRect(0, 0, 512, 128);
-      for (let x = 0; x < 512; x += 16) {
-        c.fillStyle = `rgba(0,0,0,${0.15 + Math.random() * 0.15})`;
-        c.fillRect(x, 0, 2, 128);
-        c.fillStyle = `rgba(255,220,170,${Math.random() * 0.08})`;
-        c.fillRect(x + 2, 0, 14, 128);
-      }
-    });
-    deckTex.repeat.set(0.08, 0.15);
-    const deck = new THREE.Mesh(new THREE.ExtrudeGeometry(deckShape, { depth: 0.15, bevelEnabled: false }), new THREE.MeshStandardMaterial({ map: deckTex, roughness: 0.85 }));
+    const deckTex = surface("planks", 0.32, 0.25);
+    const deck = new THREE.Mesh(new THREE.ExtrudeGeometry(deckShape, { depth: 0.15, bevelEnabled: false }), new THREE.MeshStandardMaterial({ ...deckTex, roughness: 0.6, bumpScale: 1.5 }));
     deck.rotation.x = -Math.PI / 2;
     deck.position.y = -0.15;
     deck.receiveShadow = true;
@@ -1147,35 +1087,13 @@ class CastleView extends StageView {
     const g = this.group;
     this.lights(0xd0dcf0, 0x404830, 0.7, 0xffe8c8, 1.6, 12, 0xffa060, 0.5);
 
-    const stoneTex = speckle("#7c766c", 7000, 60, 190, 5, (c) => {
-      c.strokeStyle = "rgba(40,36,30,0.7)";
-      c.lineWidth = 3;
-      for (let y = 0; y < 512; y += 64) {
-        c.beginPath();
-        c.moveTo(0, y);
-        c.lineTo(512, y);
-        c.stroke();
-        for (let x = (y / 64) % 2 ? 0 : 64; x < 512; x += 128) {
-          c.beginPath();
-          c.moveTo(x, y);
-          c.lineTo(x, y + 64);
-          c.stroke();
-        }
-      }
-    });
-    const floorTex = stoneTex.clone();
-    floorTex.repeat.set(CASTLE.hx / 2, CASTLE.hy / 2);
-    floorTex.needsUpdate = true;
-    const stone = new THREE.MeshStandardMaterial({ map: stoneTex, roughness: 0.95 });
-    const floor = new THREE.Mesh(new THREE.BoxGeometry(CASTLE.hx * 2, 0.4, CASTLE.hy * 2), new THREE.MeshStandardMaterial({ map: floorTex, roughness: 0.95 }));
+    const stone = new THREE.MeshStandardMaterial({ ...surface("stone"), roughness: 0.95, bumpScale: 2 });
+    const floor = new THREE.Mesh(new THREE.BoxGeometry(CASTLE.hx * 2, 0.4, CASTLE.hy * 2), new THREE.MeshStandardMaterial({ ...surface("stone", CASTLE.hx / 2, CASTLE.hy / 2), roughness: 0.95, bumpScale: 2 }));
     floor.position.y = -0.2;
     floor.receiveShadow = true;
     g.add(floor);
     // the curtain wall below the walkway, a long way down
-    const wallTex = stoneTex.clone();
-    wallTex.repeat.set(CASTLE.hx, 8);
-    wallTex.needsUpdate = true;
-    const wallMat = new THREE.MeshStandardMaterial({ map: wallTex, roughness: 1 });
+    const wallMat = new THREE.MeshStandardMaterial({ ...surface("stone", CASTLE.hx, 8), roughness: 1, bumpScale: 2 });
     const wall = box(CASTLE.hx * 2 + 0.6, 18, CASTLE.hy * 2 + 0.6, wallMat, 0, -9.4, 0);
     g.add(wall);
 

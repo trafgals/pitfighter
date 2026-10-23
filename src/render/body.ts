@@ -15,6 +15,7 @@ import { LIMBS, type Fighter, type PartId } from "../sim/types";
 import { CHARGE, DOWN, HOP_AIR, HOP_CYCLE } from "../sim/moves";
 import { STYLES } from "../sim/styles";
 import { legs, type World } from "../sim/world";
+import { surface } from "./textures";
 
 export const PLAYER_COLORS = [0xff3b3b, 0x3b8bff, 0x4cff6a, 0xffd23b, 0xff6bf0, 0x3bf0ff, 0xff9a3b, 0xb07bff];
 
@@ -213,8 +214,9 @@ export interface Body {
 
 export function buildBody(f: Fighter): Body {
   const st = STYLES[f.style];
-  const skin = new THREE.MeshStandardMaterial({ color: st.color, roughness: 0.62, emissive: 0x000000 });
-  const accent = new THREE.MeshStandardMaterial({ color: st.accent, roughness: 0.5, emissive: 0x000000 });
+  // pores and mottling on the skin, a woven fabric on the shorts, wraps and boots
+  const skin = new THREE.MeshStandardMaterial({ color: st.color, roughness: 0.62, emissive: 0x000000, ...surface("skin", 2, 1), bumpScale: 0.7 });
+  const accent = new THREE.MeshStandardMaterial({ color: st.accent, roughness: 0.75, emissive: 0x000000, ...surface("cloth", 3, 2), bumpScale: 1.5 });
   const eyeMat = new THREE.MeshBasicMaterial({ color: 0xffee55 });
   const big = st.torso > 1.1 ? 1.15 : st.torso < 0.9 ? 0.88 : 1;
   const root = new THREE.Group();
