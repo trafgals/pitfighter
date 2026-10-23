@@ -1,10 +1,32 @@
 // CPU fighters. A bot only ever produces a PlayerInput, exactly like a pad, so
 // the simulation cannot tell bots and humans apart. Each bot owns its own
 // seeded RNG, which keeps matches with bots deterministic.
+//
+// Like Urban Reign's crowds, bots take turns: only the few fighters nearest a
+// target close in on it (its "attack tokens"); the rest circle at a distance
+// and wait for an opening instead of all piling in at once.
 import { BTN, RING_R, type Fighter, type PlayerInput } from "./types";
-import { GEYSER, MOVES } from "./moves";
+import { FURY, GEYSER, MOVES } from "./moves";
+import { STYLES } from "./styles";
 import { Rng } from "./rng";
 import { actionable, alive, arms, dist, legs, type World } from "./world";
+
+/** how many fighters may close in on one target at once */
+export const TOKENS = { normal: 2, throne: 3 };
+export const CIRCLE_R = 2.6;
+
+/** Whether `me` is one of the fighters nearest `tgt`, so it may attack it now. */
+export function hasToken(w: World, me: Fighter, tgt: Fighter): boolean {
+  const k = w.s.toiletOccupant === tgt.id ? TOKENS.throne : TOKENS.normal;
+  const mine = dist(me, tgt);
+  let closer = 0;
+  for (const o of w.s.fighters) {
+    if (o.id === me.id || o.id === tgt.id || !alive(o) || o.state === "down" || o.state === "ko") continue;
+    const d = dist(o, tgt);
+    if (d < mine || (d === mine && o.id < me.id)) closer++;
+  }
+  return closer < k;
+}
 
 export class Bot {
   private rng: Rng;
@@ -120,6 +142,13 @@ export class Bot {
         occ && occ.id !== me.id ? occ : enemies.reduce<Fighter | undefined>((a, b) => (!a || dist(me, b) < dist(me, a) ? b : a), undefined);
       if (tgt) {
         const d = dist(me, tgt);
+        // a special when it can reach
+        const sp = MOVES[STYLES[me.style].special];
+        if (me.fury >= FURY.cost && d < sp.reach * 0.9 + 0.3 && this.rng.chance(0.05 + 0.1 * this.skill)) {
+          press(BTN.SPECIAL);
+          return out;
+        }
+        if (!hasToken(w, me, tgt)) return this.circle(out, me, tgt);
         if (d > 1.15) goal = tgt;
         else {
           if (--this.planT <= 0) {
@@ -140,6 +169,23 @@ export class Bot {
 
     if (goal) this.steer(out, me, goal);
     if (use) press(BTN.USE);
+    return out;
+  }
+
+  /** Wait for a turn: orbit the target at CIRCLE_R, guarding now and then. */
+  private circle(out: PlayerInput, me: Fighter, tgt: Fighter): PlayerInput {
+    const dir = me.id % 2 === 0 ? 1 : -1;
+    const a = Math.atan2(me.y - tgt.y, me.x - tgt.x) + dir * 0.45;
+    let gx = tgt.x + Math.cos(a) * CIRCLE_R;
+    let gy = tgt.y + Math.sin(a) * CIRCLE_R;
+    // stay on the floor
+    const r = Math.hypot(gx, gy);
+    if (r > RING_R - 0.8) {
+      gx *= (RING_R - 0.8) / r;
+      gy *= (RING_R - 0.8) / r;
+    }
+    this.steer(out, me, { x: gx, y: gy });
+    if (dist(me, tgt) < 1.6 && arms(me) > 0 && legs(me) === 2 && this.rng.chance(0.3)) out.buttons |= BTN.GUARD;
     return out;
   }
 

@@ -21,6 +21,7 @@ export const BTN = {
   GUARD: 16, // R1
   TARGET: 32, // L1: switch soft-lock target
   USE: 64, // R2: pick up limb / sit on the toilet
+  SPECIAL: 128, // L2 (or Square + Cross together): the style's special, costs fury
 } as const;
 
 export interface PlayerInput {
@@ -84,6 +85,8 @@ export interface Fighter {
   chain: boolean; // a follow-up of the current string is buffered
   chargeHeld: boolean; // the string opener's button has stayed down since the press, so it can still charge
   charge: number; // frames the current strike was charged (0..CHARGE.max)
+  stop: number; // hitstop: frames this fighter stays frozen after a hit it gave or took
+  fury: number; // special meter, 0..FURY.max; filled by landing and taking hits
   revHeight: Height;
   target: number;
   parts: Record<PartId, Part>;
@@ -144,11 +147,13 @@ export interface GameEvent {
     | "win"
     | "crowd"
     | "punt"
-    | "dizzy";
+    | "dizzy"
+    | "special";
   a: number; // actor
   b?: number; // other party
   part?: PartId;
   dmg?: number;
+  stop?: number; // the hitstop the event froze both parties for
 }
 
 export interface WorldState {

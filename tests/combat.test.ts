@@ -199,12 +199,12 @@ describe("grapples", () => {
     run(w, 14); // past the escape window
     tap(w, 0, BTN.HIGH);
     expect(b.parts.torso.hp).toBeLessThan(b.parts.torso.max);
-    run(w, 2);
+    run(w, a.stop + 2); // through the knee's hitstop
     const before = b.parts.torso.hp;
     tap(w, 0, BTN.GRAB, (inp) => (inp[0].y = 1)); // throw north, into c
     expect(b.state).toBe("thrown");
     expect(b.parts.torso.hp).toBeCloseTo(before - THROW.dmg * 0.85, 0);
-    run(w, THROW.dur);
+    run(w, THROW.dur + b.stop); // the throw's hitstop first
     expect(["down", "wakeup"]).toContain(c.state);
     expect(["down", "wakeup"]).toContain(b.state);
   });

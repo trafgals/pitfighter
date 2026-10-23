@@ -5,12 +5,17 @@ import { World } from "./sim/world";
 import { Input, type DeviceId } from "./input";
 import { Scene } from "./render/scene";
 import { Hud } from "./render/hud";
+import { CueTracker } from "./render/cues";
+import { Sfx } from "./render/sfx";
 import { Select, type SelectResult } from "./select";
 
 const params = new URLSearchParams(location.search);
 const canvas = document.querySelector<HTMLCanvasElement>("#view")!;
 const input = new Input();
-const scene = new Scene(canvas);
+// ?lofi=1: no bloom and no shadows, for slow machines
+const scene = new Scene(canvas, params.get("lofi") === "1");
+const sfx = new Sfx();
+const cues = new CueTracker();
 const hud = new Hud(document.querySelector<HTMLElement>("#hud")!);
 const overEl = document.querySelector<HTMLElement>("#over")!;
 
@@ -39,6 +44,9 @@ function startMatch(r: SelectResult, seed = Number(params.get("seed") ?? Date.no
   devices = r.devices;
   scene.attach(world);
   hud.attach(world);
+  cues.reset();
+  sfx.unlock();
+  sfx.startAmbient();
   select.show(false);
   overEl.classList.remove("show");
   document.body.classList.add("playing");
@@ -56,6 +64,9 @@ function stepOnce(): void {
     return bots[i]?.think(w) ?? NO_INPUT;
   });
   w.step(inputs);
+  const c = cues.collect(w);
+  scene.cue(c, w);
+  sfx.cue(c, w);
   hud.update(w);
   if (w.s.winner >= 0 && mode === "match") {
     mode = "over";
@@ -92,6 +103,7 @@ function frame(now: number): void {
     lastStart = anyStart;
   }
   scene.render(now / 1000, dt);
+  input.endFrame();
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
@@ -117,6 +129,7 @@ window.__game = {
   select,
   input,
   scene,
+  sfx,
   /** advance the simulation synchronously (tests) */
   step(n: number) {
     for (let i = 0; i < n && mode === "match"; i++) stepOnce();

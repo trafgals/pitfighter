@@ -20,7 +20,7 @@ const KEYMAPS: Record<string, { up: string; down: string; left: string; right: s
     left: "KeyA",
     right: "KeyD",
     start: "Enter",
-    btn: { KeyJ: BTN.HIGH, KeyK: BTN.LOW, KeyL: BTN.GRAB, KeyI: BTN.REV, ShiftLeft: BTN.GUARD, KeyU: BTN.TARGET, KeyO: BTN.USE },
+    btn: { KeyJ: BTN.HIGH, KeyK: BTN.LOW, KeyL: BTN.GRAB, KeyI: BTN.REV, ShiftLeft: BTN.GUARD, KeyU: BTN.TARGET, KeyO: BTN.USE, KeyH: BTN.SPECIAL },
   },
   kb2: {
     up: "ArrowUp",
@@ -28,7 +28,7 @@ const KEYMAPS: Record<string, { up: string; down: string; left: string; right: s
     left: "ArrowLeft",
     right: "ArrowRight",
     start: "NumpadEnter",
-    btn: { Numpad4: BTN.HIGH, Numpad5: BTN.LOW, Numpad6: BTN.GRAB, Numpad8: BTN.REV, Numpad0: BTN.GUARD, Numpad7: BTN.TARGET, Numpad9: BTN.USE },
+    btn: { Numpad4: BTN.HIGH, Numpad5: BTN.LOW, Numpad6: BTN.GRAB, Numpad8: BTN.REV, Numpad0: BTN.GUARD, Numpad7: BTN.TARGET, Numpad9: BTN.USE, Numpad1: BTN.SPECIAL },
   },
 };
 
@@ -41,25 +41,36 @@ const PAD_BTN: [number, number][] = [
   [5, BTN.GUARD],
   [4, BTN.TARGET],
   [7, BTN.USE],
-  [6, BTN.USE],
+  [6, BTN.SPECIAL],
 ];
 
 export class Input {
   private keys = new Set<string>();
+  // keys pressed since the last frame: a tap shorter than one frame still reads as held for that frame
+  private tapped = new Set<string>();
+  private view = { has: (code: string) => this.keys.has(code) || this.tapped.has(code) };
 
   constructor(target: Window = window) {
     target.addEventListener("keydown", (e) => {
       this.keys.add(e.code);
+      this.tapped.add(e.code);
       if (e.code.startsWith("Arrow") || e.code === "Space") e.preventDefault();
     });
     target.addEventListener("keyup", (e) => this.keys.delete(e.code));
     target.addEventListener("blur", () => this.keys.clear());
   }
 
+  /** Call once per rendered frame, after everything has read the input. */
+  endFrame(): void {
+    this.tapped.clear();
+  }
+
   /** Inject key state (used by automated tests). */
   setKey(code: string, down: boolean): void {
-    if (down) this.keys.add(code);
-    else this.keys.delete(code);
+    if (down) {
+      this.keys.add(code);
+      this.tapped.add(code);
+    } else this.keys.delete(code);
   }
 
   devices(): DeviceId[] {
@@ -73,7 +84,7 @@ export class Input {
     const r: DeviceRead = { x: 0, y: 0, buttons: 0, start: false, left: false, right: false, up: false, down: false };
     const km = KEYMAPS[dev];
     if (km) {
-      const k = this.keys;
+      const k = this.view;
       r.left = k.has(km.left);
       r.right = k.has(km.right);
       r.up = k.has(km.up);
@@ -107,7 +118,7 @@ export class Input {
 }
 
 export const CONTROLS_HELP = [
-  "P1 keys: WASD move · J high · K low · L grab/throw · I reversal (Shift+I low reversal) · Shift guard · U switch target · O pick up / sit",
-  "P2 keys: arrows · Num4 high · Num5 low · Num6 grab · Num8 reversal · Num0 guard · Num7 target · Num9 pick up / sit",
-  "Pads: □ high · ✕ low · ○ grab/throw · △ reversal (R1+△ low) · R1 guard · L1 target · R2 pick up / sit",
+  "P1 keys: WASD move · J high · K low · L grab/throw · I reversal (Shift+I low reversal) · Shift guard · U switch target · O pick up / sit · H (or J+K) special",
+  "P2 keys: arrows · Num4 high · Num5 low · Num6 grab · Num8 reversal · Num0 guard · Num7 target · Num9 pick up / sit · Num1 (or Num4+Num5) special",
+  "Pads: □ high · ✕ low · ○ grab/throw · △ reversal (R1+△ low) · R1 guard · L1 target · R2 pick up / sit · L2 (or □+✕) special",
 ];

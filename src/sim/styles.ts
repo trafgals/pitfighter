@@ -4,7 +4,8 @@
 //
 // A style is a set of modifiers on the shared frame data, so every fighter
 // keeps the same core feel (strings, reversals, grapples) and differs in
-// tempo, reach and where its damage comes from.
+// tempo, reach and where its damage comes from, plus one special move.
+import type { SpecialId } from "./moves";
 
 export interface Style {
   style: string; // Urban Reign style label
@@ -21,11 +22,22 @@ export interface Style {
   string: number; // high-string length before the finisher (1..3 jabs)
   torso: number; // torso HP multiplier
   grabReach: number;
+  special: SpecialId; // the style's special (L2 / Square + Cross)
 }
 
 const base = { speed: 1, startup: 0, punch: 1, kick: 1, grab: 1, reach: 1, string: 2, torso: 1, grabReach: 1 };
+// Each style's special, by the kind of fighting it is.
+const SPECIAL_OF: Record<string, SpecialId> = {
+  "All-Round": "spFlurry", Power: "spCharge", Street: "spFlurry", Karate: "spSpin", Wrestling: "spSlam",
+  "Muay Thai": "spFlurry", Boxing: "spFlurry", Rush: "spCharge", Speed: "spSpin", "Kung Fu": "spSpin",
+  Mighty: "spSlam", Submission: "spSlam", Military: "spCharge", Capoeira: "spSpin", "Tae Kwon Do": "spSpin",
+  "Samurai Sword": "spBlade", Master: "spBlade", Gun: "spFire", "Martial Arts": "spFlurry", "Judo Based": "spSlam",
+  Amateur: "spCharge",
+};
+
 const s = (style: string, name: string, blurb: string, color: number, accent: number, mods: Partial<typeof base>): Style => ({
   style,
+  special: SPECIAL_OF[style],
   name,
   blurb,
   color,

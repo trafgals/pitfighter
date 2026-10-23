@@ -2,8 +2,9 @@
 // its health, greyed out when it is lying on the floor), throne progress, and
 // a banner for big moments.
 import { PARTS, TOILET_FRAMES, type Fighter, type PartId } from "../sim/types";
+import { FURY } from "../sim/moves";
 import { STYLES } from "../sim/styles";
-import type { World } from "../sim/world";
+import { World } from "../sim/world";
 import { PLAYER_COLORS } from "./scene";
 
 const hex = (c: number) => "#" + c.toString(16).padStart(6, "0");
@@ -16,7 +17,7 @@ function hpColor(frac: number): string {
 }
 
 export class Hud {
-  private cards: { el: HTMLElement; parts: Record<PartId, HTMLElement>; bar: HTMLElement; kos: HTMLElement; state: HTMLElement }[] = [];
+  private cards: { el: HTMLElement; parts: Record<PartId, HTMLElement>; bar: HTMLElement; fury: HTMLElement; kos: HTMLElement; state: HTMLElement }[] = [];
   private banner: HTMLElement;
   private bannerT = 0;
   private throne: HTMLElement;
@@ -50,11 +51,12 @@ export class Hud {
           </div>
           <div class="side"><div class="sty">${st.style}</div><div class="kos"></div><div class="state"></div></div>
         </div>
-        <div class="tbar"><div class="tfill"></div></div>`;
+        <div class="tbar"><div class="tfill"></div></div>
+        <div class="fbar" title="fury"><div class="ffill"></div></div>`;
       wrap.appendChild(el);
       const parts = {} as Record<PartId, HTMLElement>;
       for (const p of PARTS) parts[p] = el.querySelector(`.${p}`)!;
-      return { el, parts, bar: el.querySelector(".tfill")!, kos: el.querySelector(".kos")!, state: el.querySelector(".state")! };
+      return { el, parts, bar: el.querySelector(".tfill")!, fury: el.querySelector(".ffill")!, kos: el.querySelector(".kos")!, state: el.querySelector(".state")! };
     });
   }
 
@@ -81,6 +83,7 @@ export class Hud {
       else if (e.kind === "reversal") this.say(`${nm(e.a)} REVERSAL!`, 45);
       else if (e.kind === "detach" && e.part) this.say(`${nm(e.a)} LOST ${e.part.startsWith("arm") ? "AN ARM" : "A LEG"}!`, 50);
       else if (e.kind === "crowd") this.say(`${nm(e.a)} ESCAPES THE DOGPILE`, 50);
+      else if (e.kind === "special") this.say(`${nm(e.a)} ${World.specialName(STYLES[s.fighters[e.a].style].special)}!`, 50);
       else if (e.kind === "win") this.say(`${nm(e.a)} FINALLY GETS TO GO`, 100000);
     }
     if (this.bannerT > 0 && --this.bannerT === 0) this.banner.classList.remove("show");
@@ -99,6 +102,8 @@ export class Hud {
       }
     }
     c.bar.style.width = `${(100 * f.toilet) / TOILET_FRAMES}%`;
+    c.fury.style.width = `${(100 * f.fury) / FURY.max}%`;
+    c.fury.classList.toggle("ready", f.fury >= FURY.cost);
     c.kos.textContent = `☠ ${f.kos}`;
     c.state.textContent = f.state === "ko" ? "DEAD" : f.state === "seated" ? "ON THE THRONE" : f.state === "dizzy" ? "DIZZY" : "";
     c.el.classList.toggle("dead", f.state === "ko");

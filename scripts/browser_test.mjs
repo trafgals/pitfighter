@@ -59,7 +59,7 @@ async function startServer() {
 async function main() {
   if (!BASE_URL) await startServer();
   browser = await withTimeout(
-    puppeteer.launch({ executablePath: CHROME, headless: true, args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--window-size=1280,800"] }),
+    puppeteer.launch({ executablePath: CHROME, headless: true, args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--window-size=1280,800", "--autoplay-policy=no-user-gesture-required"] }),
     20_000,
     "launch chrome",
   );
@@ -154,6 +154,70 @@ async function main() {
   check(!stats.nan, "no NaN in fighter state");
   check(stats.kos > 0 || stats.throne > 0, `fighting happened (KOs ${stats.kos}, best throne time ${stats.throne}f)`);
   check(stats.cards === 8, `HUD shows 8 fighter cards (${stats.cards})`);
+
+  // hit feel: hitstop in the sim, sparks and rings in the scene, sound from the synth
+  const feel = await withTimeout(
+    page.evaluate(() => {
+      const g = window.__game;
+      let frozen = 0;
+      let specials = 0;
+      let heavy = null;
+      for (let i = 0; i < 1800 && g.mode === "match"; i++) {
+        g.step(1);
+        const w = g.world;
+        if (w.fighters.some((f) => f.stop > 0)) frozen++;
+        specials += w.s.events.filter((e) => e.kind === "special").length;
+        // stop on a big hit, so the screenshot catches its sparks
+        const big = w.s.events.find((e) => e.kind === "hit" && (e.dmg ?? 0) >= 8 && e.a >= 0);
+        if (big && i > 600) {
+          heavy = big;
+          break;
+        }
+      }
+      return {
+        frozen,
+        specials,
+        heavy,
+        fx: { ...g.scene.fx.stats },
+        bloom: g.scene.bloomOn,
+        audio: g.sfx.ctx ? g.sfx.ctx.state : "none",
+        played: { ...g.sfx.played },
+        fury: [...document.querySelectorAll(".ffill")].length,
+        maxFury: Math.max(...g.world.fighters.map((f) => f.fury)),
+      };
+    }),
+    30_000,
+    "play for hit feel",
+  );
+  console.log("      hit feel:", JSON.stringify(feel));
+  check(feel.frozen > 0, `hitstop froze fighters on ${feel.frozen} frames`);
+  check(feel.fx.bursts > 20 && feel.fx.rings > 10, `impact sparks and rings were spawned (${feel.fx.bursts} bursts, ${feel.fx.rings} rings)`);
+  check(feel.bloom, "bloom post-processing is on");
+  check(feel.audio === "running", `the audio context is running (${feel.audio})`);
+  check((feel.played.hit ?? 0) > 0 && (feel.played.swing ?? 0) > 0, `hits and swings made sounds (${feel.played.hit ?? 0} hits, ${feel.played.swing ?? 0} swings)`);
+  check(feel.fury === 8, `HUD shows 8 fury bars (${feel.fury})`);
+  check(!!feel.heavy, `a heavy hit landed (${JSON.stringify(feel.heavy)})`);
+  await new Promise((r) => setTimeout(r, 60));
+  await page.screenshot({ path: path.join(OUT, "4_heavy_hit.png") });
+  const sp = await withTimeout(
+    page.evaluate(() => {
+      const g = window.__game;
+      let n = 0;
+      for (let i = 0; i < 5400 && g.mode === "match" && n === 0; i++) {
+        g.step(1);
+        n += g.world.s.events.filter((e) => e.kind === "special").length;
+      }
+      return { n, played: g.sfx.played.special ?? 0, frame: g.world.s.frame };
+    }),
+    40_000,
+    "wait for a special",
+  );
+  check(sp.n + feel.specials > 0 && sp.played > 0, `the CPUs used their specials, with sound (${sp.n + feel.specials} seen, ${sp.played} played, frame ${sp.frame})`);
+  if (sp.n) {
+    await withTimeout(page.evaluate(() => window.__game.step(14)), 5000, "special active frames");
+    await new Promise((r) => setTimeout(r, 60));
+    await page.screenshot({ path: path.join(OUT, "5_special.png") });
+  }
 
   // the canvas actually renders a lit 3D scene (not a black frame)
   await new Promise((r) => setTimeout(r, 500));

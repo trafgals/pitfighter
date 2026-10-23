@@ -75,6 +75,34 @@ A style is a set of modifiers on the shared frame data: tempo, reach, string
 length, and damage split between punches, kicks and grapples. Every fighter
 keeps the same core feel. See `src/sim/styles.ts`.
 
+Each style also has a special, paid for with fury:
+
+| Special | Styles |
+|---|---|
+| Flurry (four quick hits) | All-Round, Street, Muay Thai, Boxing, Martial Arts |
+| Charge (a dash through the crowd) | Power, Rush, Military, Amateur |
+| Spin (hits all round) | Karate, Speed, Kung Fu, Capoeira, Tae Kwon Do |
+| Slam (a low shockwave) | Wrestling, Mighty, Submission, Judo Based |
+| Blade (a long sweep) | Samurai Sword, Master |
+| Fire (a long jet) | Gun |
+
+## Combat feel
+
+- **Hitstop:** a landed hit freezes the attacker and the victim for the same
+  number of frames, so frame advantage stays as calibrated. Heavier hits,
+  reversals, throws and KOs freeze longer. A button pressed during the freeze
+  stays buffered and comes out after it.
+- **Fury:** the bar under each HUD card fills when you land hits, take hits,
+  reverse and throw, and empties on a KO. A special costs half the bar, so a
+  full bar holds two. Specials cannot be reversed.
+- **Crowd AI:** each target hands out two attack tokens (three for whoever is
+  on the throne). CPU fighters without a token circle at a distance and wait
+  their turn instead of all piling in.
+- **Feedback:** sparks, dust and flash rings on impacts, a hit flash on the
+  victim, camera shake with a punch-in on heavy hits, bloom, and synthesised
+  sound (Web Audio, no sample files): impacts, swings, a lava rumble, and a
+  crowd that swells on big moments.
+
 ## Controls
 
 | Action | Pad | Keyboard P1 | Keyboard P2 |
@@ -88,6 +116,8 @@ keeps the same core feel. See `src/sim/styles.ts`.
 | guard | R1 | Shift | Num0 |
 | switch target | L1 | U | Num7 |
 | pick up limb / sit / stand | R2 | O | Num9 |
+| special (costs fury) | L2, or □ + ✕ together | H, or J + K | Num1, or Num4 + Num5 |
+| mute | | M | |
 
 On the character select:
 
@@ -107,6 +137,7 @@ npm run dev
 ```
 
 Then open http://localhost:5173. Add `?auto=1&seed=3` to skip straight into an 8-CPU match.
+Add `?lofi=1` to turn off bloom on slow machines, and `?mute=1` to start muted.
 
 The game is published at https://trafgals.github.io/pitfighter/. Every push to
 `main` runs the unit tests, builds the game and deploys it to GitHub Pages
@@ -128,6 +159,9 @@ This runs the Vitest unit tests for the simulation:
 - spawns for 2–8 players;
 - toilet rules;
 - stages (`tests/stages.test.ts`);
+- hitstop, fury and specials (`tests/hitfeel.test.ts`);
+- crowd AI attack tokens (`tests/ai.test.ts`);
+- the jointed bodies' poses (`tests/body.test.ts`);
 - determinism;
 - full 8-bot matches.
 
@@ -141,6 +175,8 @@ This runs headless Chrome against the Vite dev server:
 - joins on the keyboard, picks a fighter and starts an 8-fighter match on Hell Toilet;
 - checks that the keyboard controls P1;
 - plays more than 3600 frames;
+- checks that hitstop froze fighters, impacts spawned sparks and rings, bloom is on, and audio played hit and swing sounds;
+- checks that the CPUs used specials and the HUD shows 8 fury bars;
 - checks that the canvas renders, the HUD shows 8 cards and the page logs no errors.
 
 Screenshots go to `test-output/`.

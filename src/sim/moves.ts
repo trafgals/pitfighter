@@ -42,7 +42,9 @@ export interface Move {
   push: number; // knockback distance on hit
   knockdown: boolean;
   next?: string; // string follow-up, cancellable once this move has connected
-  kind: "punch" | "kick" | "head";
+  kind: "punch" | "kick" | "head" | "special";
+  dash?: number; // metres per frame the attacker travels during the active frames
+  rehit?: number; // the move can hit the same fighter again every `rehit` active frames
 }
 
 export const MOVES: Record<string, Move> = {
@@ -55,7 +57,41 @@ export const MOVES: Record<string, Move> = {
   sweep: { id: "sweep", startup: 26, active: 4, recovery: 30, dmg: 7, hitstun: 0, blockstun: 29, height: "low", reach: 1.6, arc: 0.35, push: 0.8, knockdown: true, kind: "kick" },
   // No arms: Square becomes a slow headbutt.
   headbutt: { id: "headbutt", startup: 18, active: 3, recovery: 26, dmg: 6, hitstun: 41, blockstun: 24, height: "high", reach: 0.95, arc: 0.6, push: 0.5, knockdown: false, kind: "head" },
+  // The style specials (L2, or Square + Cross together), paid for with fury.
+  // They are Pitfighter's own: a reversal cannot catch them, so they are the
+  // answer to a fighter who sits in reversal.
+  spSpin: { id: "spSpin", startup: 10, active: 10, recovery: 26, dmg: 10, hitstun: 0, blockstun: 28, height: "high", reach: 1.7, arc: -1, push: 1.6, knockdown: true, kind: "special" },
+  spCharge: { id: "spCharge", startup: 12, active: 18, recovery: 28, dmg: 9, hitstun: 0, blockstun: 26, height: "high", reach: 1.0, arc: 0.3, push: 1.8, knockdown: true, kind: "special", dash: 0.16 },
+  spFlurry: { id: "spFlurry", startup: 8, active: 24, recovery: 24, dmg: 2.5, hitstun: 30, blockstun: 12, height: "high", reach: 1.3, arc: 0.5, push: 0.08, knockdown: false, kind: "special", rehit: 4 },
+  spSlam: { id: "spSlam", startup: 22, active: 3, recovery: 30, dmg: 11, hitstun: 0, blockstun: 30, height: "low", reach: 2.0, arc: -1, push: 1.4, knockdown: true, kind: "special" },
+  spBlade: { id: "spBlade", startup: 14, active: 5, recovery: 28, dmg: 12, hitstun: 0, blockstun: 28, height: "high", reach: 2.3, arc: 0, push: 1.4, knockdown: true, kind: "special" },
+  spFire: { id: "spFire", startup: 16, active: 6, recovery: 30, dmg: 10, hitstun: 0, blockstun: 26, height: "high", reach: 4.5, arc: 0.93, push: 1.2, knockdown: true, kind: "special" },
 };
+
+export type SpecialId = "spSpin" | "spCharge" | "spFlurry" | "spSlam" | "spBlade" | "spFire";
+export const SPECIAL_NAMES: Record<SpecialId, string> = {
+  spSpin: "HELLSPIN",
+  spCharge: "BRIMSTONE CHARGE",
+  spFlurry: "INFERNAL FLURRY",
+  spSlam: "PIT SLAM",
+  spBlade: "PITCHFORK ARC",
+  spFire: "HELLFIRE FLICK",
+};
+
+// Fury: the special meter. Landing a hit, taking one, reversing and throwing
+// fill it; a special costs `cost`, so a full bar holds two. A KO empties it.
+export const FURY = { max: 100, cost: 50, hit: 6, taken: 3, reversal: 20, throw: 12 };
+// Square + Cross count as one special press when they arrive this close
+// together; a string opener started by the first of the two is cancelled.
+export const SPECIAL_CHORD = 3;
+
+// Hitstop: a landed hit freezes the attacker and the victim for a few frames
+// (both by the same amount, so frame advantage is unchanged). Pitfighter's
+// own feel layer: the calibration tests switch it off to compare raw timings.
+export const HITSTOP = { base: 3, perDmg: 0.5, knock: 3, max: 12, block: 3, reversal: 10, grab: 3, throw: 6, ko: 16 };
+export function hitstopFor(dmg: number, knockdown: boolean): number {
+  return Math.min(HITSTOP.max, Math.round(HITSTOP.base + dmg * HITSTOP.perDmg) + (knockdown ? HITSTOP.knock : 0));
+}
 
 export const STRING_STARTS = { high: "jab1", low: "kick1" } as const;
 

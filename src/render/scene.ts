@@ -1,28 +1,38 @@
 // Three.js view of a World. Reads the simulation state each frame and never
-// writes to it. Fighters are built from primitives with every limb a separate
-// mesh, so a limb that falls off simply hides on the body and appears as a
-// pickup on the floor.
+// writes to it. The fighters' bodies and poses live in body.ts; this file
+// builds the arena (hellfire, rocks, the last toilet, a crowd of the damned),
+// places everything each frame, runs the camera, and turns each step's cues
+// into impact effects: hit sparks, flash rings, dust, white hit flashes, a
+// shaking and punching-in camera, and hitstop jitter on the victim.
 import * as THREE from "three";
-import { LAVA_R, LIMBS, RING_R, type Fighter, type PartId, type Pickup } from "../sim/types";
-import { CHARGE, DOWN, GEYSER, HOP_AIR, HOP_CYCLE, MOVES } from "../sim/moves";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
+import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
+import { LAVA_R, RING_R, type Fighter, type PartId, type Pickup } from "../sim/types";
+import { FURY, GEYSER } from "../sim/moves";
 import { STYLES } from "../sim/styles";
-import { legs, type World } from "../sim/world";
+import { alive, type World } from "../sim/world";
+import { PLAYER_COLORS, applyPose, buildBody, syncLimbs, targetPose, type Body } from "./body";
+import type { Cue } from "./cues";
+import { Fx } from "./fx";
 
-export const PLAYER_COLORS = [0xff3b3b, 0x3b8bff, 0x4cff6a, 0xffd23b, 0xff6bf0, 0x3bf0ff, 0xff9a3b, 0xb07bff];
+export { PLAYER_COLORS };
 
 const toV = (x: number, y: number, h = 0) => new THREE.Vector3(x, h, -y);
 const yaw = (facing: number) => Math.atan2(Math.cos(facing), -Math.sin(facing));
 
-interface FighterView {
-  root: THREE.Group;
-  body: THREE.Group;
-  torso: THREE.Mesh;
-  head: THREE.Group;
-  limbs: Record<PartId, THREE.Object3D>;
+// where on the body a hit on each part lands (metres above the floor)
+const PART_H: Record<PartId, number> = { head: 1.62, torso: 1.2, armL: 1.3, armR: 1.3, legL: 0.5, legR: 0.5 };
+const SPECIAL_COLOR: Record<string, number> = { spSpin: 0xffd040, spCharge: 0xff5020, spFlurry: 0xffa030, spSlam: 0xff3010, spBlade: 0xfff0a0, spFire: 0xff6000 };
+
+interface FighterView extends Body {
   ring: THREE.Mesh;
+  fury: THREE.Mesh;
   label: THREE.Sprite;
   stars: THREE.Group;
-  flash: THREE.Mesh;
+  aura: THREE.Mesh;
+  marker: THREE.Mesh | null; // a human's lock-on chevron, floating over their target
 }
 
 function canvasTexture(w: number, h: number, draw: (g: CanvasRenderingContext2D) => void): THREE.CanvasTexture {
@@ -57,35 +67,63 @@ export class Scene {
   readonly renderer: THREE.WebGLRenderer;
   readonly scene = new THREE.Scene();
   readonly camera = new THREE.PerspectiveCamera(42, 1, 0.1, 200);
+  readonly fx = new Fx();
+  private composer: EffectComposer | null = null;
+  private bloom: UnrealBloomPass | null = null;
   private fighters: FighterView[] = [];
   private pickups = new Map<number, THREE.Group>();
   private geysers: THREE.Group[] = [];
   private lavaTex!: THREE.CanvasTexture;
+  private lavaLight!: THREE.PointLight;
   private embers!: THREE.Points;
   private toiletGlow!: THREE.PointLight;
   private halo!: THREE.Mesh;
+  private crowd!: THREE.InstancedMesh;
+  private crowdBase: { x: number; y: number; z: number; ph: number; sp: number }[] = [];
   private camTarget = new THREE.Vector3(0, 0, 0);
   private camDist = 22;
   private world: World | null = null;
-  private shake = 0;
+  private shake = 0; // trauma, 0..1: the offset is trauma squared
+  private punch = 0; // camera punch-in toward `punchAt`, 0..1
+  private punchAt = new THREE.Vector3();
+  private hype = 0; // how loud the crowd is, 0..1
+  private dummy = new THREE.Object3D();
 
-  constructor(readonly canvas: HTMLCanvasElement) {
+  constructor(
+    readonly canvas: HTMLCanvasElement,
+    lofi = false,
+  ) {
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
     this.renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
-    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.enabled = !lofi;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.scene.background = new THREE.Color(0x140303);
     this.scene.fog = new THREE.Fog(0x2a0505, 26, 60);
     this.buildArena();
+    this.buildCrowd();
+    this.scene.add(this.fx.group);
+    if (!lofi) {
+      // bloom makes the hellfire, the sparks and the halo glow
+      this.composer = new EffectComposer(this.renderer);
+      this.composer.addPass(new RenderPass(this.scene, this.camera));
+      this.bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.55, 0.5, 0.82);
+      this.composer.addPass(this.bloom);
+      this.composer.addPass(new OutputPass());
+    }
     this.resize();
     window.addEventListener("resize", () => this.resize());
+  }
+
+  get bloomOn(): boolean {
+    return !!this.bloom;
   }
 
   resize(): void {
     const w = this.canvas.clientWidth || window.innerWidth;
     const h = this.canvas.clientHeight || window.innerHeight;
     this.renderer.setSize(w, h, false);
+    this.composer?.setSize(w, h);
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
   }
@@ -102,6 +140,10 @@ export class Scene {
     sh.left = sh.bottom = -13;
     sh.right = sh.top = 13;
     sc.add(key);
+    // a cold rim light from behind picks the fighters out of the red
+    const rim = new THREE.DirectionalLight(0x6080ff, 0.7);
+    rim.position.set(4, 8, -14);
+    sc.add(rim);
 
     // cracked basalt floor with glowing veins
     const floorTex = canvasTexture(1024, 1024, (g) => {
@@ -158,9 +200,9 @@ export class Scene {
     lava.rotation.x = -Math.PI / 2;
     lava.position.y = -0.45;
     sc.add(lava);
-    const lavaLight = new THREE.PointLight(0xff4a10, 60, 30, 1.6);
-    lavaLight.position.set(0, 0.5, 0);
-    sc.add(lavaLight);
+    this.lavaLight = new THREE.PointLight(0xff4a10, 60, 30, 1.6);
+    this.lavaLight.position.set(0, 0.5, 0);
+    sc.add(this.lavaLight);
 
     // jagged rocks at the outer wall
     const rockMat = new THREE.MeshStandardMaterial({ color: 0x1a0d0b, roughness: 1 });
@@ -226,71 +268,55 @@ export class Scene {
     sc.add(this.embers);
   }
 
+  /** Tiers of rock behind the hellfire, packed with the damned. They bounce harder the louder it gets. */
+  private buildCrowd(): void {
+    const tierMat = new THREE.MeshStandardMaterial({ color: 0x140806, roughness: 1 });
+    for (let i = 0; i < 3; i++) {
+      const r0 = LAVA_R + 3.2 + i * 1.4;
+      const tier = new THREE.Mesh(new THREE.CylinderGeometry(r0 + 1.4, r0 + 1.4, 0.6 + i * 0.9, 64, 1, true), tierMat);
+      tier.position.y = (0.6 + i * 0.9) / 2 - 0.4;
+      tier.material.side = THREE.DoubleSide;
+      this.scene.add(tier);
+      const top = new THREE.Mesh(new THREE.RingGeometry(r0, r0 + 1.4, 64), tierMat);
+      top.rotation.x = -Math.PI / 2;
+      top.position.y = 0.2 + i * 0.9 - 0.4 + 0.2;
+      this.scene.add(top);
+    }
+    const geo = new THREE.CapsuleGeometry(0.2, 0.55, 3, 8);
+    const mat = new THREE.MeshStandardMaterial({ roughness: 0.8, emissive: 0x300000 });
+    const n = 220;
+    this.crowd = new THREE.InstancedMesh(geo, mat, n);
+    const col = new THREE.Color();
+    for (let i = 0; i < n; i++) {
+      const tierI = i % 3;
+      const a = (i / n) * Math.PI * 2 * 3 + tierI * 0.37;
+      const r = LAVA_R + 3.9 + tierI * 1.4;
+      this.crowdBase.push({ x: Math.cos(a) * r, y: 0.55 + tierI * 0.9, z: Math.sin(a) * r, ph: (i * 2.39) % (Math.PI * 2), sp: 5 + (i % 5) });
+      col.setHSL(0.0 + ((i * 37) % 10) / 120, 0.6, 0.12 + ((i * 13) % 7) / 60);
+      this.crowd.setColorAt(i, col);
+    }
+    this.scene.add(this.crowd);
+  }
+
   // ---------------------------------------------------------------- fighters
   private buildFighter(f: Fighter): FighterView {
-    const st = STYLES[f.style];
+    const b = buildBody(f);
     const pc = PLAYER_COLORS[f.id % PLAYER_COLORS.length];
-    const skin = new THREE.MeshStandardMaterial({ color: st.color, roughness: 0.7 });
-    const accent = new THREE.MeshStandardMaterial({ color: st.accent, roughness: 0.5 });
-    const big = st.torso > 1.1 ? 1.15 : st.torso < 0.9 ? 0.88 : 1;
-    const root = new THREE.Group();
-    const body = new THREE.Group();
-    body.scale.setScalar(big);
-    root.add(body);
-    const mesh = (g: THREE.BufferGeometry, m: THREE.Material) => {
-      const x = new THREE.Mesh(g, m);
-      x.castShadow = true;
-      return x;
-    };
-    const torso = mesh(new THREE.BoxGeometry(0.52, 0.62, 0.3), skin);
-    torso.position.y = 1.08;
-    const belt = mesh(new THREE.BoxGeometry(0.54, 0.1, 0.32), accent);
-    belt.position.y = -0.26;
-    torso.add(belt);
-    body.add(torso);
-
-    const head = new THREE.Group();
-    head.position.y = 1.55;
-    const skull = mesh(new THREE.SphereGeometry(0.17, 16, 12), skin);
-    head.add(skull);
-    for (const s of [-1, 1]) {
-      const horn = mesh(new THREE.ConeGeometry(0.045, 0.2, 8), accent);
-      horn.position.set(0.1 * s, 0.15, 0);
-      horn.rotation.z = -0.5 * s;
-      head.add(horn);
-      const eye = new THREE.Mesh(new THREE.SphereGeometry(0.03, 8, 6), new THREE.MeshBasicMaterial({ color: 0xffee55 }));
-      eye.position.set(0.06 * s, 0.03, 0.15);
-      head.add(eye);
-    }
-    body.add(head);
-
-    const limb = (len: number, r: number, mat: THREE.Material) => {
-      const pivot = new THREE.Group();
-      const m = mesh(new THREE.CapsuleGeometry(r, len, 4, 10), mat);
-      m.position.y = -len / 2 - r;
-      pivot.add(m);
-      return pivot;
-    };
-    const limbs = {} as Record<PartId, THREE.Object3D>;
-    limbs.armL = limb(0.48, 0.07, skin);
-    limbs.armL.position.set(-0.33, 1.33, 0);
-    limbs.armR = limb(0.48, 0.07, skin);
-    limbs.armR.position.set(0.33, 1.33, 0);
-    limbs.legL = limb(0.55, 0.085, accent);
-    limbs.legL.position.set(-0.14, 0.77, 0);
-    limbs.legR = limb(0.55, 0.085, accent);
-    limbs.legR.position.set(0.14, 0.77, 0);
-    limbs.head = head;
-    limbs.torso = torso;
-    for (const p of LIMBS) body.add(limbs[p]);
-
     const ring = new THREE.Mesh(new THREE.RingGeometry(0.38, 0.48, 32), new THREE.MeshBasicMaterial({ color: pc, transparent: true, opacity: 0.85 }));
     ring.rotation.x = -Math.PI / 2;
     ring.position.y = 0.02;
-    root.add(ring);
+    b.root.add(ring);
+    // a ring of fire under a fighter whose special is ready
+    const fury = new THREE.Mesh(
+      new THREE.RingGeometry(0.5, 0.62, 32),
+      new THREE.MeshBasicMaterial({ color: 0xff7a10, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }),
+    );
+    fury.rotation.x = -Math.PI / 2;
+    fury.position.y = 0.03;
+    b.root.add(fury);
     const label = labelSprite(`P${f.id + 1}${f.human ? "" : "·cpu"}`, pc);
-    label.position.y = 2.1;
-    root.add(label);
+    label.position.y = 2.15;
+    b.root.add(label);
 
     const stars = new THREE.Group();
     for (let i = 0; i < 3; i++) {
@@ -298,21 +324,32 @@ export class Scene {
       s.position.set(Math.cos((i * Math.PI * 2) / 3) * 0.25, 0, Math.sin((i * Math.PI * 2) / 3) * 0.25);
       stars.add(s);
     }
-    stars.position.y = 1.85;
-    root.add(stars);
-    const flash = new THREE.Mesh(
-      new THREE.SphereGeometry(0.7, 16, 12),
-      new THREE.MeshBasicMaterial({ color: 0x80e0ff, transparent: true, opacity: 0, depthWrite: false }),
+    stars.position.y = 1.95;
+    b.root.add(stars);
+    // the charge / reversal / special glow around the body
+    const aura = new THREE.Mesh(
+      new THREE.SphereGeometry(0.75, 16, 12),
+      new THREE.MeshBasicMaterial({ color: 0x80e0ff, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending }),
     );
-    flash.position.y = 1.1;
-    root.add(flash);
+    aura.position.y = 1.1;
+    b.root.add(aura);
 
-    this.scene.add(root);
-    return { root, body, torso, head, limbs, ring, label, stars, flash };
+    let marker: THREE.Mesh | null = null;
+    if (f.human) {
+      marker = new THREE.Mesh(new THREE.ConeGeometry(0.13, 0.26, 4), new THREE.MeshBasicMaterial({ color: pc, transparent: true, opacity: 0.9, depthTest: false }));
+      marker.rotation.x = Math.PI; // point down
+      marker.renderOrder = 11;
+      this.scene.add(marker);
+    }
+    this.scene.add(b.root);
+    return { ...b, ring, fury, label, stars, aura, marker };
   }
 
   attach(world: World): void {
-    for (const v of this.fighters) this.scene.remove(v.root);
+    for (const v of this.fighters) {
+      this.scene.remove(v.root);
+      if (v.marker) this.scene.remove(v.marker);
+    }
     for (const p of this.pickups.values()) this.scene.remove(p);
     for (const g of this.geysers) this.scene.remove(g);
     this.fighters = world.fighters.map((f) => this.buildFighter(f));
@@ -322,155 +359,154 @@ export class Scene {
     this.camTarget.set(0, 0, 0);
   }
 
-  private pose(v: FighterView, f: Fighter, time: number): void {
-    const L = v.limbs;
-    // reset
-    for (const p of LIMBS) L[p].rotation.set(0, 0, 0);
-    v.body.rotation.set(0, 0, 0);
-    v.body.position.set(0, 0, 0);
-    v.head.rotation.set(0, 0, 0);
-    v.torso.rotation.set(0, 0, 0);
-    v.stars.visible = false;
-    (v.flash.material as THREE.MeshBasicMaterial).opacity = 0;
-    const t = f.t;
-    const sw = Math.sin(time * 9);
-    const nLegs = legs(f);
-    const lift = nLegs === 0 ? -0.7 : 0;
-
-    switch (f.state) {
-      case "walk": {
-        if (nLegs === 2) {
-          L.legL.rotation.x = sw * 0.6;
-          L.legR.rotation.x = -sw * 0.6;
-          L.armL.rotation.x = -sw * 0.4;
-          L.armR.rotation.x = sw * 0.4;
-        }
-        break;
-      }
-      case "guard":
-        L.armL.rotation.set(-1.7, 0, 0.5);
-        L.armR.rotation.set(-1.7, 0, -0.5);
-        v.body.rotation.x = 0.1;
-        break;
-      case "attack": {
-        if (!f.move) break;
-        // a charging opener glows brighter the longer it is held
-        if (f.chargeHeld && f.charge > 0) (v.flash.material as THREE.MeshBasicMaterial).opacity = 0.1 + (0.4 * f.charge) / CHARGE.max;
-        if (f.move === "grab") {
-          L.armL.rotation.x = L.armR.rotation.x = -1.5;
-          v.body.rotation.x = 0.2;
+  // ---------------------------------------------------------------- cues
+  /** Turn one simulation step's cues into effects. Called once per step, before the next. */
+  cue(cues: Cue[], w: World): void {
+    const fs = w.s.fighters;
+    const at = (f: Fighter, h: number) => toV(f.x, f.y, h);
+    for (const q of cues) {
+      switch (q.kind) {
+        case "hit": {
+          const d = fs[q.b ?? -1];
+          if (!d) break;
+          const a = fs[q.a];
+          const dmg = q.dmg ?? 4;
+          const heavy = dmg >= 8 || (q.stop ?? 0) >= 9;
+          const p = at(d, PART_H[q.part ?? "torso"]);
+          if (a) {
+            // the contact point: on the victim's side facing the attacker
+            const dx = a.x - d.x;
+            const dy = a.y - d.y;
+            const dd = Math.hypot(dx, dy) || 1;
+            p.add(toV((dx / dd) * 0.3, (dy / dd) * 0.3));
+          }
+          this.fx.burst(p, { count: Math.round(8 + dmg * 2.5), speed: 3 + dmg * 0.4, color: heavy ? 0xffe0a0 : 0xffa040, life: 0.3, gravity: 6 });
+          this.fx.ring(p, heavy ? 0xfff0c0 : 0xff9a40, heavy ? 1.1 : 0.6, heavy ? 0.25 : 0.16);
+          if (!a) this.fx.burst(at(d, 0.4), { count: 10, speed: 2.5, color: 0xff5010, life: 0.5, up: 2 }); // burnt by the arena
+          const v = this.fighters[d.id];
+          if (v) {
+            v.flash = Math.max(v.flash, heavy ? 1 : 0.7);
+            v.hurt = { part: q.part ?? "torso", age: 0 };
+          }
+          this.shake = Math.min(1, this.shake + (heavy ? 0.45 : 0.15));
+          if (heavy) this.punchIn(p, 0.6);
+          this.hype = Math.min(1, this.hype + dmg * 0.01);
           break;
         }
-        const m = MOVES[f.move];
-        const phase = Math.min(1, t / Math.max(1, m.startup));
-        const out = t < m.startup ? phase : t < m.startup + m.active ? 1 : Math.max(0, 1 - (t - m.startup - m.active) / m.recovery);
-        if (m.kind === "punch") {
-          const right = f.move === "jab1" || f.move === "jab3" || f.move === "punchFin";
-          const arm = right ? L.armR : L.armL;
-          arm.rotation.x = -1.6 * out;
-          if (f.move === "punchFin") {
-            arm.rotation.z = (right ? 0.6 : -0.6) * out;
-            v.body.rotation.y = (right ? -0.5 : 0.5) * out;
-          }
-          v.body.rotation.x = 0.12 * out;
-        } else if (m.kind === "kick") {
-          const leg = f.move === "kick2" ? L.legL : L.legR;
-          if (f.move === "sweep") {
-            leg.rotation.set(-0.4 * out, 0, 1.3 * out);
-            v.body.position.y = -0.25 * out;
-            v.body.rotation.y = out * 2;
-          } else leg.rotation.x = -1.3 * out;
-          v.body.rotation.x = -0.15 * out;
-        } else {
-          v.body.rotation.x = 0.5 * out;
+        case "block": {
+          const d = fs[q.b ?? -1];
+          const a = fs[q.a];
+          if (!d || !a) break;
+          const p = at(d, 1.2).lerp(at(a, 1.2), 0.3);
+          this.fx.burst(p, { count: 8, speed: 2.5, color: 0x70b0ff, life: 0.2, gravity: 3 });
+          this.fx.ring(p, 0x80c0ff, 0.5, 0.14);
+          this.shake = Math.min(1, this.shake + 0.08);
+          break;
         }
-        break;
-      }
-      case "hitstun":
-      case "blockstun":
-        v.body.rotation.x = -0.25;
-        if (f.state === "blockstun") {
-          L.armL.rotation.set(-1.7, 0, 0.5);
-          L.armR.rotation.set(-1.7, 0, -0.5);
+        case "reversal": {
+          const d = fs[q.a];
+          const a = fs[q.b ?? -1];
+          if (!d) break;
+          const p = a ? at(d, 1.2).lerp(at(a, 1.2), 0.5) : at(d, 1.2);
+          this.fx.ring(p, 0x80f0ff, 1.6, 0.3);
+          this.fx.ring(at(d, 0.05), 0x60d0ff, 2.6, 0.35, true);
+          this.fx.burst(p, { count: 30, speed: 5, color: 0xa0f0ff, life: 0.35, gravity: 2 });
+          this.shake = Math.min(1, this.shake + 0.4);
+          this.punchIn(p, 0.7);
+          this.hype = Math.min(1, this.hype + 0.35);
+          break;
         }
-        break;
-      case "reversal": {
-        L.armL.rotation.set(-1.4, 0, -0.6);
-        L.armR.rotation.set(-1.4, 0, 0.6);
-        if (f.revHeight === "low") v.body.position.y = -0.2;
-        if (t < 8) (v.flash.material as THREE.MeshBasicMaterial).opacity = 0.25;
-        break;
-      }
-      case "reversed":
-        v.body.rotation.x = -0.45;
-        L.armL.rotation.z = -1.2;
-        L.armR.rotation.z = 1.2;
-        break;
-      case "holding":
-        L.armL.rotation.x = L.armR.rotation.x = -1.3;
-        if (f.holdCool > 10) L.legR.rotation.x = -1.4;
-        break;
-      case "held":
-        v.body.rotation.x = 0.4;
-        v.body.position.y = 0.1;
-        break;
-      case "thrown":
-        v.body.rotation.x = -Math.PI / 2 + Math.sin(t * 0.5) * 0.3;
-        v.body.rotation.z = t * 0.5;
-        v.body.position.y = 0.8 + Math.sin((t / 24) * Math.PI) * 1.2;
-        break;
-      case "down":
-      case "ko":
-        v.body.rotation.x = -Math.PI / 2;
-        v.body.position.y = 0.2;
-        v.body.position.z = -0.6;
-        break;
-      case "wakeup": {
-        const k = 1 - t / DOWN.wake;
-        v.body.rotation.x = (-Math.PI / 2) * k;
-        v.body.position.y = 0.2 * k;
-        break;
-      }
-      case "dizzy":
-        v.stars.visible = true;
-        v.stars.rotation.y = time * 5;
-        v.head.rotation.z = Math.sin(time * 6) * 0.3;
-        v.body.rotation.z = Math.sin(time * 3) * 0.1;
-        break;
-      case "reattach":
-        v.body.position.y = -0.35;
-        L.armL.rotation.x = L.armR.rotation.x = -0.9;
-        break;
-      case "sitting":
-      case "seated":
-        L.legL.rotation.x = L.legR.rotation.x = -1.5;
-        v.body.position.y = -0.3;
-        if (f.state === "seated") {
-          L.armL.rotation.set(-0.3, 0, -0.3);
-          L.armR.rotation.set(-0.3, 0, 0.3);
-          v.head.rotation.x = -0.2 + Math.sin(time * 2) * 0.05;
+        case "grab": {
+          const a = fs[q.a];
+          if (a) this.fx.ring(at(a, 1.1), 0xffffff, 0.5, 0.12);
+          break;
         }
-        break;
-      default: {
-        // idle breathing
-        v.torso.position.y = 1.08 + Math.sin(time * 2.5) * 0.01;
-        L.armL.rotation.set(-0.5, 0, 0.15);
-        L.armR.rotation.set(-0.5, 0, -0.15);
+        case "throw":
+          this.shake = Math.min(1, this.shake + 0.3);
+          this.hype = Math.min(1, this.hype + 0.2);
+          break;
+        case "land": {
+          const f = fs[q.a];
+          if (!f) break;
+          this.fx.burst(at(f, 0.1), { count: 14, speed: 1.6, color: 0x3a2a24, life: 0.6, gravity: 0.5, up: 0.6, dust: true });
+          this.fx.ring(at(f, 0.04), 0xff7040, 1.2, 0.25, true);
+          this.shake = Math.min(1, this.shake + 0.2);
+          break;
+        }
+        case "detach": {
+          const f = fs[q.a];
+          if (!f) break;
+          this.fx.burst(at(f, q.part?.startsWith("arm") ? 1.3 : 0.6), { count: 26, speed: 3.5, color: 0xc01000, life: 0.6, gravity: 9, up: 1.5 });
+          this.shake = Math.min(1, this.shake + 0.3);
+          break;
+        }
+        case "ko": {
+          const f = fs[q.a];
+          if (!f) break;
+          this.fx.burst(at(f, 1.1), { count: 70, speed: 7, color: 0xff4010, life: 0.8, gravity: 5, up: 1 });
+          this.fx.ring(at(f, 1.1), 0xff6020, 2.4, 0.4);
+          this.fx.ring(at(f, 0.05), 0xff3000, 3.5, 0.5, true);
+          this.shake = 1;
+          this.punchIn(at(f, 1), 1);
+          this.hype = 1;
+          break;
+        }
+        case "special": {
+          const f = fs[q.a];
+          if (!f) break;
+          const c = SPECIAL_COLOR[STYLES[f.style].special] ?? 0xffa030;
+          this.fx.ring(at(f, 0.05), c, 2.2, 0.35, true);
+          this.fx.burst(at(f, 1), { count: 30, speed: 3, color: c, life: 0.5, gravity: -2 });
+          this.punchIn(at(f, 1), 0.5);
+          this.hype = Math.min(1, this.hype + 0.3);
+          break;
+        }
+        case "geyser":
+          this.shake = Math.min(1, this.shake + 0.35);
+          break;
+        case "burn": {
+          const p = w.s.pickups.find((x) => x.owner === q.a && x.part === q.part);
+          if (p) this.fx.burst(toV(p.x, p.y, 0.1), { count: 16, speed: 1.5, color: 0xff6010, life: 0.7, gravity: -2 });
+          break;
+        }
+        case "crowd":
+        case "win":
+          this.hype = 1;
+          break;
+        default:
+          break;
       }
     }
-    if (nLegs === 1 && (f.state === "walk" || f.state === "idle" || f.state === "guard")) {
-      const ph = f.hopPhase % HOP_CYCLE;
-      v.body.position.y += ph < HOP_AIR ? Math.sin((ph / HOP_AIR) * Math.PI) * 0.22 : 0;
-      (f.parts.legL.attached ? L.legL : L.legR).rotation.x = -0.15;
-      (f.parts.legL.attached ? L.legL : L.legR).position.x = 0;
-    } else {
-      L.legL.position.x = -0.14;
-      L.legR.position.x = 0.14;
+    // the specials' own effects, on their active frames
+    for (const f of fs) {
+      if (f.state !== "attack" || !f.move?.startsWith("sp") || f.stop > 0) continue;
+      const m = w.eff(f, f.move);
+      const at0 = f.t - 1 === m.startup;
+      const active = f.t - 1 >= m.startup && f.t - 1 < m.startup + m.active;
+      const c = SPECIAL_COLOR[f.move] ?? 0xffa030;
+      if (f.move === "spFire" && at0) {
+        // a jet of hellfire along the strike's reach
+        for (let i = 1; i <= 8; i++) {
+          const r = (m.reach * i) / 8;
+          this.fx.burst(toV(f.x + Math.cos(f.facing) * r, f.y + Math.sin(f.facing) * r, 1.3), { count: 6, speed: 1.2, color: c, life: 0.4, gravity: -3 });
+        }
+      } else if (f.move === "spSlam" && at0) {
+        this.fx.ring(at(f, 0.05), c, m.reach * 2.2, 0.35, true);
+        this.fx.burst(at(f, 0.1), { count: 30, speed: 2.5, color: 0x3a2a24, life: 0.7, gravity: 0.5, up: 1, dust: true });
+        this.shake = Math.min(1, this.shake + 0.5);
+      } else if (f.move === "spSpin" && at0) {
+        this.fx.ring(at(f, 0.9), c, m.reach * 2, 0.3, true);
+      } else if (f.move === "spBlade" && at0) {
+        this.fx.ring(at(f, 1.2), c, m.reach * 2, 0.25, true);
+      } else if (f.move === "spCharge" && active && f.t % 3 === 0) {
+        this.fx.burst(at(f, 0.1), { count: 4, speed: 1, color: 0x3a2a24, life: 0.5, gravity: 0, up: 0.5, dust: true });
+      }
     }
-    if (nLegs === 0 && !["down", "ko", "thrown", "held", "wakeup"].includes(f.state)) {
-      v.body.position.y += lift;
-      v.body.rotation.x += 0.6;
-    }
+  }
+
+  private punchIn(p: THREE.Vector3, k: number): void {
+    if (k >= this.punch) this.punchAt.copy(p);
+    this.punch = Math.max(this.punch, k);
   }
 
   // ---------------------------------------------------------------- per frame
@@ -480,6 +516,7 @@ export class Scene {
     // lava flow and embers
     this.lavaTex.offset.x = time * 0.02;
     this.lavaTex.offset.y = time * 0.05;
+    this.lavaLight.intensity = 55 + Math.sin(time * 7.3) * 5 + Math.sin(time * 3.1) * 4;
     const pos = this.embers.geometry.getAttribute("position") as THREE.BufferAttribute;
     for (let i = 0; i < pos.count; i++) {
       let y = pos.getY(i) + dt * (0.6 + (i % 7) * 0.15);
@@ -490,34 +527,72 @@ export class Scene {
     this.halo.position.y = 1.55 + Math.sin(time * 2) * 0.06;
     this.halo.rotation.z = time;
     this.toiletGlow.intensity = 20 + Math.sin(time * 3) * 6;
-    this.renderer.render(this.scene, this.camera);
+    // the crowd bounces with the hype
+    this.hype *= Math.exp(-dt * 0.6);
+    const amp = 0.04 + 0.3 * this.hype;
+    this.crowdBase.forEach((c, i) => {
+      this.dummy.position.set(c.x, c.y + Math.abs(Math.sin(time * c.sp + c.ph)) * amp, c.z);
+      this.dummy.rotation.set(0, -Math.atan2(c.z, c.x), Math.sin(time * 2 + c.ph) * 0.1);
+      this.dummy.updateMatrix();
+      this.crowd.setMatrixAt(i, this.dummy.matrix);
+    });
+    this.crowd.instanceMatrix.needsUpdate = true;
+    this.fx.update(dt, this.camera);
+    if (this.composer) this.composer.render(dt);
+    else this.renderer.render(this.scene, this.camera);
   }
 
   private sync(w: World, time: number, dt: number): void {
     const s = w.s;
-    // fighters
     const centre = new THREE.Vector3();
     let n = 0;
     s.fighters.forEach((f, i) => {
       const v = this.fighters[i];
       v.root.position.copy(toV(f.x, f.y));
       v.root.rotation.y = yaw(f.facing);
-      for (const p of LIMBS) v.limbs[p].visible = f.parts[p].attached;
-      this.pose(v, f, time);
+      syncLimbs(v, f);
+      v.hurt.age += dt;
+      v.flash = Math.max(0, v.flash - dt * 9);
+      const { p, rate, snap } = targetPose(f, w, time, v.hurt);
+      if (f.state === "ko") p.y -= Math.min(1.2, f.t / 120);
+      // the victim of a hit shudders while the hitstop holds it
+      const jitter = f.stop > 0 && v.hurt.age < 0.3 ? 0.07 : 0;
+      // nothing moves during a hitstop: the pose holds too
+      applyPose(v, p, f.stop > 0 ? 0 : rate, snap && f.stop === 0, dt, jitter);
+
+      const aura = v.aura.material as THREE.MeshBasicMaterial;
+      aura.opacity = 0;
+      if (f.state === "attack" && f.chargeHeld && f.charge > 0) {
+        aura.color.set(0x80e0ff);
+        aura.opacity = 0.08 + (0.3 * f.charge) / 60;
+      } else if (f.state === "reversal" && f.t < 8) {
+        aura.color.set(0x80e0ff);
+        aura.opacity = 0.2;
+      } else if (f.state === "attack" && f.move?.startsWith("sp")) {
+        aura.color.set(SPECIAL_COLOR[f.move] ?? 0xffa030);
+        aura.opacity = 0.25;
+      }
+      v.stars.visible = f.state === "dizzy";
+      v.stars.rotation.y = time * 5;
+      const ready = f.fury >= FURY.cost && f.state !== "ko";
+      const fm = v.fury.material as THREE.MeshBasicMaterial;
+      fm.opacity = ready ? 0.45 + 0.35 * Math.sin(time * 8) : 0;
+      v.fury.scale.setScalar(f.fury >= FURY.max ? 1.15 : 1);
+
       const flicker = f.invuln > 0 && f.state !== "down" && f.state !== "wakeup" && Math.floor(s.frame / 4) % 2 === 0;
       v.body.visible = !flicker;
       v.label.visible = f.state !== "ko";
       v.ring.visible = f.state !== "ko";
-      if (f.state === "ko") v.body.position.y = -Math.min(1.2, f.t / 120);
+      if (v.marker) {
+        const tg = s.fighters[f.target];
+        v.marker.visible = !!tg && tg.id !== f.id && alive(tg) && alive(f);
+        if (tg) v.marker.position.copy(toV(tg.x, tg.y, 2.5 + Math.sin(time * 6) * 0.06));
+      }
       if (f.state !== "ko") {
         centre.add(v.root.position);
         n++;
       }
     });
-    for (const e of s.events) {
-      if (e.kind === "hit" && (e.dmg ?? 0) >= 8) this.shake = Math.max(this.shake, 0.18);
-      if (e.kind === "reversal" || e.kind === "throw" || e.kind === "ko" || e.kind === "geyser") this.shake = Math.max(this.shake, 0.3);
-    }
 
     // pickups
     const seen = new Set<number>();
@@ -568,7 +643,7 @@ export class Scene {
       col.scale.y = col.visible ? 0.3 + Math.min(1, (gs.t - GEYSER.warn) / 5) : 1;
     });
 
-    // camera frames everyone still standing
+    // camera: frames everyone still standing, punches in on big hits, shakes with trauma
     if (n) centre.divideScalar(n);
     let spread = 4;
     for (const f of s.fighters) if (f.state !== "ko") spread = Math.max(spread, Math.hypot(f.x - centre.x, -f.y - centre.z));
@@ -576,14 +651,22 @@ export class Scene {
     const k = 1 - Math.exp(-dt * 3);
     this.camTarget.lerp(centre, k);
     this.camDist += (Math.min(26, 9 + spread * 1.5) - this.camDist) * k;
-    const sh = this.shake;
-    this.shake *= Math.exp(-dt * 8);
-    this.camera.position.set(
-      this.camTarget.x + (Math.random() - 0.5) * sh,
-      this.camDist * 0.78 + (Math.random() - 0.5) * sh,
-      this.camTarget.z + this.camDist * 0.72,
-    );
-    this.camera.lookAt(this.camTarget.x, 0.8, this.camTarget.z);
+    this.punch *= Math.exp(-dt * 4);
+    const pk = this.punch * this.punch;
+    const tx = this.camTarget.x + (this.punchAt.x - this.camTarget.x) * pk * 0.35;
+    const tz = this.camTarget.z + (this.punchAt.z - this.camTarget.z) * pk * 0.35;
+    const dist = this.camDist * (1 - pk * 0.12);
+    const sh = this.shake * this.shake * 0.5;
+    this.shake = Math.max(0, this.shake - dt * 2.2);
+    const jx = (Math.random() - 0.5) * sh;
+    const jy = (Math.random() - 0.5) * sh;
+    this.camera.position.set(tx + jx, dist * 0.78 + jy, tz + dist * 0.72);
+    this.camera.lookAt(tx + jx * 0.5, 0.8 + jy * 0.5, tz);
+    const fov = 42 - pk * 3;
+    if (Math.abs(this.camera.fov - fov) > 0.01) {
+      this.camera.fov = fov;
+      this.camera.updateProjectionMatrix();
+    }
   }
 
   private buildPickup(p: Pickup, w: World): THREE.Group {
@@ -592,12 +675,12 @@ export class Scene {
     const isLeg = p.part.startsWith("leg");
     const g = new THREE.Group();
     const m = new THREE.Mesh(
-      new THREE.CapsuleGeometry(isLeg ? 0.085 : 0.07, isLeg ? 0.55 : 0.48, 4, 10),
+      new THREE.CapsuleGeometry(isLeg ? 0.08 : 0.065, isLeg ? 0.66 : 0.46, 4, 10),
       new THREE.MeshStandardMaterial({ color: isLeg ? st.accent : st.color, roughness: 0.7 }),
     );
     m.castShadow = true;
     const stump = new THREE.Mesh(new THREE.SphereGeometry(isLeg ? 0.095 : 0.08, 10, 8), new THREE.MeshStandardMaterial({ color: 0x8a0000, emissive: 0x300000 }));
-    stump.position.y = (isLeg ? 0.55 : 0.48) / 2 + 0.05;
+    stump.position.y = (isLeg ? 0.66 : 0.46) / 2 + 0.06;
     const tag = new THREE.Mesh(new THREE.RingGeometry(0.28, 0.34, 24), new THREE.MeshBasicMaterial({ color: PLAYER_COLORS[p.owner], side: THREE.DoubleSide }));
     g.add(m, stump);
     const holder = new THREE.Group();

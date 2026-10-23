@@ -121,6 +121,32 @@ body.playing #hud {
   width: 0;
   background: var(--gold);
 }
+/* fury: two segments, one per special */
+.fbar {
+  position: relative;
+  height: 5px;
+  margin-top: 3px;
+  background: #2a0c04;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.fbar::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #000;
+}
+.ffill {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, #ff3000, #ffb000);
+}
+.ffill.ready {
+  box-shadow: 0 0 6px #ff8000;
+}
 .throne {
   position: absolute;
   top: 14px;

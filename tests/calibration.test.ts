@@ -13,10 +13,13 @@ const ALL_ROUND = STYLES.findIndex((s) => s.startup === 0 && s.string === 2);
 const hitOn = (w: World, b = 1) => w.s.events.some((e) => e.kind === "hit" && e.b === b);
 const reversedBy = (w: World, a = 1) => w.s.events.some((e) => e.kind === "reversal" && e.a === a);
 const within = (v: number, [lo, hi]: number[]) => v >= lo && v <= hi;
+// Hitstop is Pitfighter's feel layer on top of Urban Reign's motions (like the
+// pad latency, it is not part of what was measured), so these worlds run without it.
+const RAW = false;
 
 describe("Urban Reign calibration", () => {
   it("a lone strike lands on frame 12, lasts as long as Urban Reign's and leaves the attacker ahead", () => {
-    const w = duel(1.0, [ALL_ROUND, ALL_ROUND]);
+    const w = duel(1.0, [ALL_ROUND, ALL_ROUND], RAW);
     const press = w.s.frame + 1;
     tap(w, 0, BTN.HIGH);
     let landed = -1;
@@ -39,7 +42,7 @@ describe("Urban Reign calibration", () => {
   it("a four-hit string spaces its hits 12 / 14 / 20 frames apart", () => {
     const style = STYLES.findIndex((s) => s.string === 3);
     const st = STYLES[style].startup; // the style's tempo shifts every startup alike
-    const w = duel(1.0, [style, ALL_ROUND]);
+    const w = duel(1.0, [style, ALL_ROUND], RAW);
     const hits: number[] = [];
     run(w, 120, (inp, i) => {
       if (i % 6 === 0) inp[0].buttons = BTN.HIGH;
@@ -74,7 +77,7 @@ describe("Urban Reign calibration", () => {
     // `lead`: the reversal's motion frame on which the jab lands
     const S = MOVES.jab1.startup;
     for (let lead = 0; lead <= 24; lead++) {
-      const w = duel(1.0, [ALL_ROUND, ALL_ROUND]);
+      const w = duel(1.0, [ALL_ROUND, ALL_ROUND], RAW);
       if (lead < S) {
         // pressed during the jab's startup
         tap(w, 0, BTN.HIGH);
@@ -100,7 +103,7 @@ describe("Urban Reign calibration", () => {
 
   it("a deflection leaves the defender about 15 frames ahead", () => {
     expect(REVERSAL.stun).toBe(ur.deflection.defenderAdvantage);
-    const w = duel(1.0, [ALL_ROUND, ALL_ROUND]);
+    const w = duel(1.0, [ALL_ROUND, ALL_ROUND], RAW);
     tap(w, 0, BTN.HIGH);
     run(w, MOVES.jab1.startup - 9);
     tap(w, 1, BTN.REV); // the jab lands on the reversal's frame 8
@@ -126,7 +129,7 @@ describe("Urban Reign calibration", () => {
     expect(GRAB.startup).toBeLessThanOrEqual(1);
     expect(within(GRAB.startup + GRAB.active + GRAB.whiff, ur.grapple.whiffTotal)).toBe(true);
     expect(Math.abs(HOLD.dur - ur.grapple.hold)).toBeLessThanOrEqual(2);
-    const w = duel(0.8, [ALL_ROUND, ALL_ROUND]);
+    const w = duel(0.8, [ALL_ROUND, ALL_ROUND], RAW);
     tap(w, 0, BTN.GRAB);
     run(w, GRAB.startup + 1);
     expect(w.fighters[0].state).toBe("holding");

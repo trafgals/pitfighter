@@ -41,7 +41,12 @@ import {
   REVERSAL,
   REVERSAL_WHIFF_TOTAL,
   CHARGE,
+  FURY,
+  HITSTOP,
+  hitstopFor,
   SIT_FRAMES,
+  SPECIAL_CHORD,
+  SPECIAL_NAMES,
   SPEED,
   STRING_STARTS,
   THROW,
@@ -56,10 +61,11 @@ export interface MatchConfig {
   styles: number[]; // one entry per fighter, 2..8 fighters
   humans?: boolean[];
   stage?: StageId; // default: Hell Toilet
+  hitstop?: boolean; // default true; the calibration tests switch it off to compare raw timings
 }
 
 export const BASE_HP: Record<PartId, number> = { head: 40, torso: 100, armL: 30, armR: 30, legL: 35, legR: 35 };
-const BUTTONS = [BTN.HIGH, BTN.LOW, BTN.GRAB, BTN.REV, BTN.GUARD, BTN.TARGET, BTN.USE];
+const BUTTONS = [BTN.HIGH, BTN.LOW, BTN.GRAB, BTN.REV, BTN.GUARD, BTN.TARGET, BTN.USE, BTN.SPECIAL];
 const BIT_INDEX: Record<number, number> = Object.fromEntries(BUTTONS.map((b, i) => [b, i]));
 const LIMB_TORSO_SHARE = 0.35; // part of every limb/head hit that also lands on the torso
 const GUARD_ARC = Math.cos((75 * Math.PI) / 180);
@@ -101,6 +107,9 @@ function freshParts(style: number): Fighter["parts"] {
 export class World {
   s: WorldState;
   rng: Rng;
+  readonly hitstop: boolean;
+  /** fighters frozen by hitstop on the current step: they neither act nor slide nor hit */
+  private frozen: boolean[] = [];
 
   constructor(cfg: MatchConfig) {
     const n = cfg.styles.length;
@@ -108,6 +117,7 @@ export class World {
     const stage = cfg.stage ?? DEFAULT_STAGE;
     if (!stageById(stage).playable) throw new Error(`stage ${stage} is not playable yet`);
     this.rng = new Rng(cfg.seed);
+    this.hitstop = cfg.hitstop ?? true;
     const sp = spawnPoints(n);
     this.s = {
       frame: 0,
@@ -133,6 +143,8 @@ export class World {
         chain: false,
         chargeHeld: false,
         charge: 0,
+        stop: 0,
+        fury: 0,
         revHeight: "high",
         target: -1,
         parts: freshParts(style),
@@ -174,10 +186,17 @@ export class World {
     const fs = s.fighters;
 
     for (const f of fs) this.latchInput(f, inputs[f.id] ?? NO_INPUT);
-    for (const f of fs) this.updateFighter(f, inputs[f.id] ?? NO_INPUT);
-    for (const f of fs) this.resolveStrikes(f);
-    for (const f of fs) this.resolveGrab(f);
-    for (const f of fs) this.resolveThrown(f);
+    // a fighter in hitstop sits this step out entirely; its presses stay buffered
+    this.frozen = fs.map((f) => f.stop > 0);
+    // the input buffer is paused while frozen, so a press made in the freeze still comes out after it
+    for (const f of fs) if (this.frozen[f.id]) for (let i = 0; i < f.pressed.length; i++) if (f.pressed[i] > -1000 && f.pressed[i] < s.frame) f.pressed[i]++;
+    for (const f of fs) {
+      if (f.stop > 0) f.stop--;
+      else this.updateFighter(f, inputs[f.id] ?? NO_INPUT);
+    }
+    for (const f of fs) if (!this.frozen[f.id]) this.resolveStrikes(f);
+    for (const f of fs) if (!this.frozen[f.id]) this.resolveGrab(f);
+    for (const f of fs) if (!this.frozen[f.id]) this.resolveThrown(f);
     this.physics();
     this.updatePickups();
     this.updateGeysers();
@@ -186,6 +205,45 @@ export class World {
 
   private ev(e: Omit<GameEvent, "f">): void {
     this.s.events.push({ f: this.s.frame, ...e });
+  }
+
+  /** Freeze both parties of a contact for `frames` (never shortening a freeze already running). */
+  private freeze(a: Fighter | undefined, b: Fighter | undefined, frames: number): number {
+    if (!this.hitstop) return 0;
+    for (const f of [a, b]) if (f) f.stop = Math.max(f.stop, frames);
+    return frames;
+  }
+
+  private addFury(f: Fighter | undefined, n: number): void {
+    if (f && f.state !== "ko") f.fury = Math.min(FURY.max, f.fury + n);
+  }
+
+  /**
+   * L2, or Square + Cross pressed within SPECIAL_CHORD frames of each other.
+   * `opener` is the button whose string opener is already running (its press was consumed).
+   */
+  private specialPressed(f: Fighter, opener = 0): boolean {
+    if (this.buffered(f, BTN.SPECIAL)) return true;
+    if (opener) return this.buffered(f, opener === BTN.HIGH ? BTN.LOW : BTN.HIGH, this.s.frame - SPECIAL_CHORD);
+    const hi = f.pressed[BIT_INDEX[BTN.HIGH]];
+    const lo = f.pressed[BIT_INDEX[BTN.LOW]];
+    return this.buffered(f, BTN.HIGH) && this.buffered(f, BTN.LOW) && Math.abs(hi - lo) <= SPECIAL_CHORD;
+  }
+
+  /** Start the style's special if the fighter asked for it and has the fury and a limb to do it with. */
+  private trySpecial(f: Fighter, opener = 0): boolean {
+    if (f.fury < FURY.cost || !this.specialPressed(f, opener)) return false;
+    if (arms(f) === 0 && legs(f) < 2) return false;
+    for (const b of [BTN.SPECIAL, BTN.HIGH, BTN.LOW]) this.consume(f, b);
+    f.fury -= FURY.cost;
+    this.startMove(f, STYLES[f.style].special);
+    this.ev({ kind: "special", a: f.id });
+    return true;
+  }
+
+  /** The name of a special, for banners. */
+  static specialName(id: string): string {
+    return SPECIAL_NAMES[id as keyof typeof SPECIAL_NAMES] ?? id;
   }
 
   // ---------------------------------------------------------------- input
@@ -228,7 +286,8 @@ export class World {
     let startup = m.startup + st.startup;
     if (m.kind === "punch" && arms(f) === 1) startup += 2;
     startup = Math.max(3, startup);
-    const mult = m.kind === "punch" ? st.punch : m.kind === "kick" ? st.kick : 1;
+    // a special scales with the style's best damage multiplier
+    const mult = m.kind === "punch" ? st.punch : m.kind === "kick" ? st.kick : m.kind === "special" ? Math.max(st.punch, st.kick, st.grab) : 1;
     let dmg = m.dmg * mult * (m.kind === "punch" && arms(f) === 1 ? 0.8 : 1);
     let push = m.push;
     let knockdown = m.knockdown;
@@ -297,7 +356,9 @@ export class World {
           this.release(f);
           this.setState(h, "reversed", REVERSAL.stun);
           f.invuln = 12;
-          this.ev({ kind: "reversal", a: f.id, b: h.id });
+          const stop = this.freeze(f, h, HITSTOP.reversal);
+          this.addFury(f, FURY.reversal);
+          this.ev({ kind: "reversal", a: f.id, b: h.id, stop });
         }
         break;
       case "seated":
@@ -388,6 +449,7 @@ export class World {
         return;
       }
     }
+    if (this.trySpecial(f)) return;
     if (this.buffered(f, BTN.GRAB) && nArms > 0) {
       this.consume(f, BTN.GRAB);
       this.startMove(f, "grab");
@@ -436,7 +498,14 @@ export class World {
   private updateAttack(f: Fighter, inp: PlayerInput): void {
     if (!f.move) return;
     if (f.move === "grab") return;
+    // the first button of a Square + Cross chord already started an opener: the special replaces it
+    const opener = f.move === STRING_STARTS.high ? BTN.HIGH : f.move === STRING_STARTS.low ? BTN.LOW : 0;
+    if (opener && f.t <= SPECIAL_CHORD && this.trySpecial(f, opener)) return;
     const m = this.eff(f, f.move);
+    if (m.dash && f.t >= m.startup && f.t < m.startup + m.active) {
+      f.x += Math.cos(f.facing) * m.dash;
+      f.y += Math.sin(f.facing) * m.dash;
+    }
     // charge: the opener waits on its last startup frame while its button is held
     if (f.chargeHeld) {
       const held = (inp.buttons & (m.height === "high" ? BTN.HIGH : BTN.LOW)) !== 0;
@@ -482,7 +551,9 @@ export class World {
       const dmg = HOLD.knee * STYLES[f.style].grab * this.comboScale(p);
       p.combo++;
       this.damage(p, "torso", dmg, f.id);
-      this.ev({ kind: "hit", a: f.id, b: p.id, part: "torso", dmg });
+      this.addFury(f, FURY.hit);
+      const stop = this.freeze(f, p, !alive(p) ? HITSTOP.ko : hitstopFor(dmg, false));
+      this.ev({ kind: "hit", a: f.id, b: p.id, part: "torso", dmg, stop });
       return;
     }
     if (f.t >= 6 && this.buffered(f, BTN.GRAB)) {
@@ -497,7 +568,9 @@ export class World {
       p.slideY = (Math.sin(dir) * THROW.dist) / THROW.dur;
       p.partner = f.id; // remembered as the thrower for splash damage credit
       this.damage(p, "torso", dmg, f.id);
-      this.ev({ kind: "throw", a: f.id, b: p.id, dmg });
+      this.addFury(f, FURY.throw);
+      const stop = this.freeze(f, p, HITSTOP.throw);
+      this.ev({ kind: "throw", a: f.id, b: p.id, dmg, stop });
       this.setState(f, "idle");
       f.invuln = 6;
     }
@@ -583,6 +656,7 @@ export class World {
     if (f.state !== "attack" || !f.move || f.move === "grab") return;
     const m = this.eff(f, f.move);
     if (f.t - 1 < m.startup || f.t - 1 >= m.startup + m.active) return; // t was advanced this frame
+    if (m.rehit && (f.t - 1 - m.startup) % m.rehit === 0) f.moveHits = [];
     for (const d of this.s.fighters) {
       if (d.id === f.id || f.moveHits.includes(d.id) || !this.inCone(f, d, m.reach, m.arc)) continue;
       if (!this.hittable(d, m.height)) continue;
@@ -617,7 +691,8 @@ export class World {
 
   private strike(a: Fighter, d: Fighter, m: Move & { total: number }): void {
     // reversal: right height, inside the window, facing the attacker
-    if (d.state === "reversal" && this.inReversalWindow(d) && d.revHeight === m.height && this.facingDot(d, a) > 0) {
+    // (a special cannot be reversed)
+    if (m.kind !== "special" && d.state === "reversal" && this.inReversalWindow(d) && d.revHeight === m.height && this.facingDot(d, a) > 0) {
       this.reverse(d, a);
       return;
     }
@@ -628,7 +703,8 @@ export class World {
       d.slideX = (dx * m.push * 0.5) / 8;
       d.slideY = (dy * m.push * 0.5) / 8;
       a.moveLanded = true; // strings stay cancellable on block, like UR's pressure strings
-      this.ev({ kind: "block", a: a.id, b: d.id });
+      const stop = this.freeze(a, d, HITSTOP.block);
+      this.ev({ kind: "block", a: a.id, b: d.id, stop });
       return;
     }
     a.moveLanded = true;
@@ -637,13 +713,17 @@ export class World {
     const part = this.pickPart(d, m.height);
     d.combo++;
     d.recentHits.push({ by: a.id, f: this.s.frame });
-    this.ev({ kind: "hit", a: a.id, b: d.id, part, dmg });
+    const crowd = new Set(d.recentHits.map((h) => h.by)).size >= CROWD.attackers;
+    const knock = m.knockdown || crowd || d.state === "seated" || d.state === "sitting";
+    const hit: GameEvent = { f: this.s.frame, kind: "hit", a: a.id, b: d.id, part, dmg };
+    this.s.events.push(hit);
+    this.addFury(a, FURY.hit);
+    this.addFury(d, FURY.taken);
     this.damage(d, part, dmg, a.id);
+    hit.stop = this.freeze(a, d, d.state === "ko" ? HITSTOP.ko : hitstopFor(dmg, knock && !otg));
     if (d.state === "ko") return;
     if (otg) return;
 
-    const crowd = new Set(d.recentHits.map((h) => h.by)).size >= CROWD.attackers;
-    const knock = m.knockdown || crowd || d.state === "seated" || d.state === "sitting";
     if (d.state === "holding" || d.state === "held") this.release(d);
     if (d.state === "reattach") this.dropReattach(d);
     if (knock) {
@@ -681,7 +761,9 @@ export class World {
     this.setState(d, "idle");
     d.invuln = 12;
     d.facing = Math.atan2(a.y - d.y, a.x - d.x);
-    this.ev({ kind: "reversal", a: d.id, b: a.id });
+    const stop = this.freeze(a, d, HITSTOP.reversal);
+    this.addFury(d, FURY.reversal);
+    this.ev({ kind: "reversal", a: d.id, b: a.id, stop });
     // kinetic pushback: clear the crowd around the reverser
     for (const o of this.s.fighters) {
       if (o.id === d.id || o.id === a.id || !alive(o)) continue;
@@ -788,6 +870,7 @@ export class World {
     if (d.state === "holding" || d.state === "held") this.release(d);
     if (d.state === "reattach") this.dropReattach(d);
     d.parts.torso.hp = 0;
+    d.fury = 0;
     this.setState(d, "ko", KO_FRAMES);
     d.deaths++;
     const killer = this.s.fighters[by];
@@ -852,7 +935,8 @@ export class World {
     f.holdStrikes = 0;
     f.holdCool = 8;
     f.facing = Math.atan2(best.y - f.y, best.x - f.x);
-    this.ev({ kind: "grab", a: f.id, b: best.id });
+    const stop = this.freeze(f, best, HITSTOP.grab);
+    this.ev({ kind: "grab", a: f.id, b: best.id, stop });
   }
 
   private resolveThrown(f: Fighter): void {
@@ -875,7 +959,7 @@ export class World {
   private physics(): void {
     const fs = this.s.fighters;
     for (const f of fs) {
-      if (f.state === "seated") continue;
+      if (f.state === "seated" || this.frozen[f.id]) continue;
       f.x += f.slideX;
       f.y += f.slideY;
       const decay = f.state === "thrown" ? 1 : 0.85;
@@ -1038,6 +1122,8 @@ export class World {
       mix(f.invuln);
       mix(f.toilet);
       mix(f.charge);
+      mix(f.stop);
+      mix(f.fury);
       for (const p of PARTS) mix(f.parts[p].hp + (f.parts[p].attached ? 1000 : 0));
     }
     for (const p of s.pickups) {
