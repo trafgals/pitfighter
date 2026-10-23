@@ -1,14 +1,24 @@
-# The Last Toilet in Hell
+# Pitfighter
 
-An 8-player local brawler for the browser. Eight damned souls spawn around the
-edge of a ring of hellfire. In the middle stands the last toilet in hell. Sit
-on it for 15 seconds in total to win. Progress is kept between sittings, and
-any hit knocks you off.
+An 8-player local brawler for the browser. Up to eight fighters, one pit; the
+stage decides the arena and how a match is won.
+
+## Stages
+
+| Stage | Status | How it plays |
+|---|---|---|
+| **Hell Toilet** | playable | Everyone spawns around the edge of a ring of hellfire. In the middle stands the last toilet in hell. Sit on it for 15 seconds in total to win. Progress is kept between sittings, and any hit knocks you off. |
+| **Construction Site** | planned | Everyone starts in a different construction vehicle. |
+| **Collapsing Tower** | planned | The floor gives way under the fight. |
+
+Planned stages are listed on the select screen as *coming soon* and cannot be
+picked yet. Stages live in `src/sim/stages.ts`; a match is started with
+`new World({ ..., stage })`, which defaults to Hell Toilet.
 
 The combat is modelled on the feel of Namco's *Urban Reign*:
 
 - frame-data strikes measured from the real game: a 12f jab, strings that combo on hit, and heavy enders that knock down;
-- high/low reversals that catch a strike landing on their frames 2–14;
+- high/low reversals that catch a strike landing on their frames 2ï¿½14;
 - grapples with knees and directional throws;
 - guard, combo damage scaling and wake-up invulnerability;
 - soft lock-on;
@@ -71,6 +81,7 @@ On the character select:
 - join with the high-strike button;
 - pick a fighter with the stick, confirm with high strike, back out with grab;
 - set the number of fighters with `-` / `+` (or L1 / R1 on a pad);
+- pick the stage with `[` / `]` (only Hell Toilet is playable so far);
 - start with Enter or Start.
 
 Up to 8 gamepads work, and CPU fighters fill any empty slots.
@@ -99,6 +110,7 @@ This runs the Vitest unit tests for the simulation:
 - limbs, hopping and crawling;
 - spawns for 2â€“8 players;
 - toilet rules;
+- stages (`tests/stages.test.ts`);
 - determinism;
 - full 8-bot matches.
 
@@ -108,7 +120,8 @@ npm run test:browser
 
 This runs headless Chrome against the Vite dev server:
 
-- joins on the keyboard, picks a fighter and starts an 8-fighter match;
+- checks the Pitfighter title and the stage list (Hell Toilet selected, the planned stages coming soon);
+- joins on the keyboard, picks a fighter and starts an 8-fighter match on Hell Toilet;
 - checks that the keyboard controls P1;
 - plays more than 3600 frames;
 - checks that the canvas renders, the HUD shows 8 cards and the page logs no errors.

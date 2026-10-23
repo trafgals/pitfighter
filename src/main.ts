@@ -29,10 +29,12 @@ window.addEventListener("keydown", (e) => {
   if (mode !== "select") return;
   if (e.code === "Minus" || e.code === "NumpadSubtract") select.setCount(select.fighters - 1);
   if (e.code === "Equal" || e.code === "NumpadAdd") select.setCount(select.fighters + 1);
+  if (e.code === "BracketLeft") select.cycleStage(-1);
+  if (e.code === "BracketRight") select.cycleStage(1);
 });
 
 function startMatch(r: SelectResult, seed = Number(params.get("seed") ?? Date.now() >>> 0)): void {
-  world = new World({ seed, styles: r.styles, humans: r.humans });
+  world = new World({ seed, styles: r.styles, humans: r.humans, stage: r.stage });
   bots = r.humans.map((h, i) => (h ? null : new Bot(i, seed, 0.55 + 0.1 * ((i * 7) % 4))));
   devices = r.devices;
   scene.attach(world);

@@ -1,11 +1,13 @@
 // Shared simulation types and constants. Everything here is plain data so a
 // world can be hashed, cloned and replayed.
 
+import type { StageId } from "./stages";
+
 export const FPS = 60;
 
 // Sim space is a 2D plane: x to the right, y "north" (away from the camera).
 export const RING_R = 9; // fighting floor radius
-export const LAVA_R = 10.6; // outer wall; between RING_R and LAVA_R is hellfire
+export const LAVA_R = 10.6; // outer wall; between RING_R and LAVA_R is hellfire (Hell Toilet stage)
 export const SPAWN_R = 8;
 export const TOILET_R = 0.95; // how close you must be to sit down
 export const TOILET_FRAMES = 900; // seated frames needed to win (15 s in total; progress is kept between sittings)
@@ -150,6 +152,7 @@ export interface GameEvent {
 export interface WorldState {
   frame: number;
   seed: number;
+  stage: StageId;
   fighters: Fighter[];
   pickups: Pickup[];
   nextPickupId: number;

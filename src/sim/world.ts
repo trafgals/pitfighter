@@ -47,11 +47,13 @@ import {
 } from "./moves";
 import { STYLES } from "./styles";
 import { Rng } from "./rng";
+import { DEFAULT_STAGE, stageById, type StageId } from "./stages";
 
 export interface MatchConfig {
   seed: number;
   styles: number[]; // one entry per fighter, 2..8 fighters
   humans?: boolean[];
+  stage?: StageId; // default: Hell Toilet
 }
 
 export const BASE_HP: Record<PartId, number> = { head: 40, torso: 100, armL: 30, armR: 30, legL: 35, legR: 35 };
@@ -101,11 +103,14 @@ export class World {
   constructor(cfg: MatchConfig) {
     const n = cfg.styles.length;
     if (n < 2 || n > 8) throw new Error(`2..8 fighters, got ${n}`);
+    const stage = cfg.stage ?? DEFAULT_STAGE;
+    if (!stageById(stage).playable) throw new Error(`stage ${stage} is not playable yet`);
     this.rng = new Rng(cfg.seed);
     const sp = spawnPoints(n);
     this.s = {
       frame: 0,
       seed: cfg.seed,
+      stage,
       fighters: cfg.styles.map((style, id) => ({
         id,
         style,

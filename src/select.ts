@@ -5,6 +5,7 @@ import { BTN } from "./sim/types";
 import { STYLES } from "./sim/styles";
 import { CONTROLS_HELP, type DeviceId, type DeviceRead, type Input } from "./input";
 import { PLAYER_COLORS } from "./render/scene";
+import { DEFAULT_STAGE, PLAYABLE_STAGES, STAGES, stageById, type StageId } from "./sim/stages";
 
 const COLS = 7;
 const hex = (c: number) => "#" + c.toString(16).padStart(6, "0");
@@ -19,11 +20,13 @@ export interface SelectResult {
   styles: number[];
   humans: boolean[];
   devices: (DeviceId | null)[];
+  stage: StageId;
 }
 
 export class Select {
   slots: Slot[] = [];
   fighters = 8;
+  stage: StageId = DEFAULT_STAGE;
   private prev = new Map<DeviceId, DeviceRead>();
   private el: HTMLElement;
 
@@ -34,8 +37,11 @@ export class Select {
   ) {
     this.el = root;
     root.innerHTML = `
-      <h1>THE LAST TOILET IN HELL</h1>
-      <p class="sub">Eight damned souls. One toilet. Fight your way to the throne and sit on it for 15 seconds in total.</p>
+      <h1>PITFIGHTER</h1>
+      <p class="sub">Up to eight fighters, one pit. Pick a fighter and a stage.</p>
+      <div class="stages">${STAGES.map(
+        (st) => `<div class="stage${st.playable ? "" : " soon"}" data-stage="${st.id}"><b>${st.name}</b>${st.playable ? "" : " <small>coming soon</small>"}<br><small>${st.blurb}</small></div>`,
+      ).join("")}</div>
       <div class="grid">${STYLES.map(
         (s, i) => `<div class="sc" data-i="${i}"><div class="sw" style="background:${hex(s.color)};border-color:${hex(s.accent)}"></div>
           <div class="sn">${s.name}</div><div class="ss">${s.style}</div><div class="cur"></div></div>`,
@@ -44,7 +50,7 @@ export class Select {
       <div class="slots"></div>
       <div class="count"></div>
       <div class="help">${CONTROLS_HELP.map((l) => `<div>${l}</div>`).join("")}
-        <div>Join: J / Num4 / □ · Move: stick · Confirm: J / □ · Back: L / ○ · Fighters: - / + (L1 / R1) · Start: Enter / Start</div></div>`;
+        <div>Join: J / Num4 / □ · Move: stick · Confirm: J / □ · Back: L / ○ · Fighters: - / + (L1 / R1) · Stage: [ / ] · Start: Enter / Start</div></div>`;
     this.render();
   }
 
@@ -94,6 +100,20 @@ export class Select {
     this.render();
   }
 
+  /** Step through the playable stages; planned stages cannot be picked. */
+  cycleStage(dir: number): void {
+    const n = PLAYABLE_STAGES.length;
+    const i = PLAYABLE_STAGES.findIndex((s) => s.id === this.stage);
+    this.stage = PLAYABLE_STAGES[(i + dir + n) % n].id;
+    this.render();
+  }
+
+  setStage(id: StageId): void {
+    if (!stageById(id).playable) throw new Error(`stage ${id} is not playable yet`);
+    this.stage = id;
+    this.render();
+  }
+
   start(seed = Date.now() >>> 0): void {
     const styles: number[] = [];
     const humans: boolean[] = [];
@@ -110,11 +130,12 @@ export class Select {
       humans.push(false);
       devices.push(null);
     }
-    this.onStart({ styles, humans, devices });
+    this.onStart({ styles, humans, devices, stage: this.stage });
   }
 
   private render(): void {
     const el = this.el;
+    el.querySelectorAll<HTMLElement>(".stage").forEach((c) => c.classList.toggle("on", c.dataset.stage === this.stage));
     el.querySelectorAll<HTMLElement>(".sc").forEach((c) => {
       const i = Number(c.dataset.i);
       const here = this.slots.map((s, p) => ({ s, p })).filter(({ s }) => s.style === i);

@@ -184,6 +184,30 @@ body.playing #hud {
   margin: 4px 0 14px;
   opacity: 0.85;
 }
+.stages {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  max-width: 1100px;
+  margin: 0 auto 12px;
+}
+.stage {
+  flex: 1 1 220px;
+  max-width: 360px;
+  background: rgba(30, 5, 5, 0.85);
+  border: 1px solid #4a1a10;
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 13px;
+}
+.stage.on {
+  border-color: var(--gold);
+  box-shadow: 0 0 10px #f40;
+}
+.stage.soon {
+  opacity: 0.45;
+}
 .grid {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));

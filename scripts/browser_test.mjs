@@ -72,6 +72,18 @@ async function main() {
   check(true, "page boots to the character select");
   const cards = await page.$$eval(".sc", (els) => els.length);
   check(cards === 21, `select shows one fighter per Urban Reign style (${cards})`);
+  const title = await page.evaluate(() => ({ doc: document.title, h1: document.querySelector("#select h1")?.textContent }));
+  check(title.doc === "Pitfighter" && title.h1 === "PITFIGHTER", `the game is called Pitfighter (${JSON.stringify(title)})`);
+  const stages = await page.$$eval(".stage", (els) => els.map((e) => ({ id: e.dataset.stage, on: e.classList.contains("on"), soon: e.classList.contains("soon") })));
+  check(
+    JSON.stringify(stages) ===
+      JSON.stringify([
+        { id: "hell-toilet", on: true, soon: false },
+        { id: "construction-site", on: false, soon: true },
+        { id: "collapsing-tower", on: false, soon: true },
+      ]),
+    `stage list: Hell Toilet selected, Construction Site and Collapsing Tower coming soon (${JSON.stringify(stages)})`,
+  );
   await page.screenshot({ path: path.join(OUT, "1_select.png") });
 
   // P1 joins on the keyboard, moves the cursor two styles right, confirms, starts
@@ -87,10 +99,15 @@ async function main() {
   const chosen = await page.evaluate(() => window.__game.select.slots.map((s) => [s.device, s.style, s.ready]));
   check(JSON.stringify(chosen) === JSON.stringify([["kb1", 2, false]]), `kb1 joined and picked style 2 (${JSON.stringify(chosen)})`);
   await press("KeyJ");
+  await press("BracketRight");
+  const stageAfter = await page.evaluate(() => window.__game.select.stage);
+  check(stageAfter === "hell-toilet", `] skips the planned stages (${stageAfter})`);
   await press("Enter");
   await page.waitForFunction(() => window.__game.mode === "match", { timeout: 10_000 });
   const setup = await page.evaluate(() => window.__game.world.fighters.map((f) => ({ style: f.style, human: f.human, x: f.spawnX, y: f.spawnY })));
   check(setup.length === 8, `match starts with 8 fighters (${setup.length})`);
+  const worldStage = await page.evaluate(() => window.__game.world.s.stage);
+  check(worldStage === "hell-toilet", `the match is played on Hell Toilet (${worldStage})`);
   check(setup[0].human && setup[0].style === 2 && setup.slice(1).every((f) => !f.human), "P1 is the human with the chosen style, 7 CPUs fill the rest");
   const radii = setup.map((f) => Math.hypot(f.x, f.y).toFixed(2));
   check(new Set(radii).size === 1, `everyone spawns on the edge circle (${radii[0]} m)`);

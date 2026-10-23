@@ -1,8 +1,8 @@
 {
-  "name": "last-toilet",
+  "name": "pitfighter",
   "version": "0.1.0",
   "private": true,
-  "description": "THE LAST TOILET IN HELL - an 8-player browser pit fighter",
+  "description": "PITFIGHTER - an 8-player browser pit fighter",
   "type": "module",
   "scripts": {
     "dev": "vite",
