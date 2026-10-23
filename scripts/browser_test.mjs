@@ -1,4 +1,5 @@
-// End-to-end browser test. Builds nothing: it serves the repo with Vite, drives
+// End-to-end browser test. Builds nothing: it serves the repo with Vite (or,
+// with a URL in BASE_URL or as the first argument, tests that deployed site instead, e.g. GitHub Pages), drives
 // real headless Chrome through the character select with the keyboard into an
 // 8-fighter match, plays it, and checks the canvas, the HUD and the sim state.
 // Every step has a timeout and a global watchdog tears everything down.
@@ -9,6 +10,8 @@ import puppeteer from "puppeteer-core";
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/(\w:)/, "$1")), "..");
 const PORT = 5199;
+const BASE_URL = (process.env.BASE_URL || process.argv[2] || "").replace(/\/+$/, "");
+const SITE = BASE_URL || `http://127.0.0.1:${PORT}`;
 const OUT = path.join(ROOT, "test-output");
 const CHROME = process.env.CHROME_PATH || "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
 fs.mkdirSync(OUT, { recursive: true });
@@ -54,7 +57,7 @@ async function startServer() {
 }
 
 async function main() {
-  await startServer();
+  if (!BASE_URL) await startServer();
   browser = await withTimeout(
     puppeteer.launch({ executablePath: CHROME, headless: true, args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--window-size=1280,800"] }),
     20_000,
@@ -67,7 +70,7 @@ async function main() {
   page.on("pageerror", (e) => errors.push(String(e)));
   page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
 
-  await withTimeout(page.goto(`http://127.0.0.1:${PORT}/?seed=5`, { waitUntil: "load" }), 20_000, "load page");
+  await withTimeout(page.goto(`${SITE}/?seed=5`, { waitUntil: "load" }), 20_000, "load page");
   await page.waitForFunction(() => window.__game && window.__game.mode === "select", { timeout: 10_000 });
   check(true, "page boots to the character select");
   const cards = await page.$$eval(".sc", (els) => els.length);

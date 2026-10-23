@@ -9,7 +9,8 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:browser": "node scripts/browser_test.mjs"
+    "test:browser": "node scripts/browser_test.mjs",
+    "test:live": "node scripts/browser_test.mjs https://trafgals.github.io/pitfighter"
   },
   "dependencies": {
     "three": "^0.169.0"

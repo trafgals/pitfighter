@@ -108,6 +108,10 @@ npm run dev
 
 Then open http://localhost:5173. Add `?auto=1&seed=3` to skip straight into an 8-CPU match.
 
+The game is published at https://trafgals.github.io/pitfighter/. Every push to
+`main` runs the unit tests, builds the game and deploys it to GitHub Pages
+(`.github/workflows/pages.yml`); a failing test publishes nothing.
+
 ## Tests
 
 ```bash
@@ -140,6 +144,12 @@ This runs headless Chrome against the Vite dev server:
 - checks that the canvas renders, the HUD shows 8 cards and the page logs no errors.
 
 Screenshots go to `test-output/`.
+
+```bash
+npm run test:live
+```
+
+This runs the same browser checks against the published GitHub Pages site.
 
 ## Layout
 
