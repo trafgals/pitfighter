@@ -128,7 +128,8 @@ On the character select:
 - join with the high-strike button;
 - pick a fighter with the stick, confirm with high strike, back out with grab;
 - set the number of fighters with `-` / `+` (or L1 / R1 on a pad);
-- pick the stage with `[` / `]`;
+- pick the stage by clicking the arrows or a stage name on the banner, with `[` / `]` or `H` / `O`, or with L2 / R2 on a pad; a CPU brawl on that stage plays behind the menu;
+- or click a fighter to join on it with the keyboard, and click FIGHT! to start;
 - turn the blood on or off with `G` (the game remembers your choice);
 - start with Enter or Start.
 

@@ -6,6 +6,7 @@ import { Input, type DeviceId } from "./input";
 import { Scene } from "./render/scene";
 import { Hud, winLine } from "./render/hud";
 import { STAGES, type StageId } from "./sim/stages";
+import { STYLES } from "./sim/styles";
 import { CueTracker } from "./render/cues";
 import { Sfx } from "./render/sfx";
 import { Select, type SelectResult } from "./select";
@@ -81,6 +82,22 @@ window.addEventListener("keydown", (e) => {
   }
 });
 select.setGore(scene.gore);
+select.onStage = () => attract();
+
+/** Behind the menu, a CPU brawl on the chosen stage: what the stage looks like, and the pit alive. Silent, and nobody's score. */
+let demoSeed = 1;
+function attract(): void {
+  const stage = select.stage;
+  demoSeed = (Math.imul(demoSeed, 1103515245) + 12345) >>> 0;
+  const styles = Array.from({ length: 6 }, (_, i) => ((demoSeed >>> 8) + i * 5) % STYLES.length);
+  world = new World({ seed: demoSeed, styles, humans: styles.map(() => false), stage });
+  bots = styles.map((_, i) => new Bot(i, demoSeed, 0.6 + 0.08 * (i % 3)));
+  devices = styles.map(() => null);
+  scene.attach(world);
+  scene.setInset(0);
+  cues.reset();
+  acc = 0;
+}
 
 function startMatch(r: SelectResult, seed = Number(params.get("seed") ?? Date.now() >>> 0)): void {
   world = new World({ seed, styles: r.styles, humans: r.humans, stage: r.stage });
@@ -129,6 +146,11 @@ function stepOnce(): void {
   w.step(inputs);
   const c = cues.collect(w);
   scene.cue(c, w);
+  if (mode === "select") {
+    // the brawl behind the menu: once it is won, another starts
+    if (w.s.winner >= 0) attract();
+    return;
+  }
   sfx.cue(c, w);
   hud.update(w);
   if (w.s.winner >= 0 && mode === "match") {
@@ -140,26 +162,32 @@ function stepOnce(): void {
   }
 }
 
+/** Step the sim at FPS on real time, catching up at most five steps a frame. */
+function run(dt: number): void {
+  acc += dt;
+  let n = 0;
+  while (acc >= 1 / FPS && n < 5) {
+    stepOnce();
+    acc -= 1 / FPS;
+    n++;
+  }
+  if (n === 5) acc = 0;
+}
+
 let last = performance.now();
 function frame(now: number): void {
   const dt = Math.min(0.1, (now - last) / 1000);
   last = now;
-  if (mode === "select") select.poll();
-  else if (mode === "countdown") {
+  if (mode === "select") {
+    select.poll();
+    if (mode === "select") run(dt);
+  } else if (mode === "countdown") {
     countT += dt;
     const n = 3 - Math.floor(countT / BEAT);
     if (n >= 1) hud.countdown(String(n));
     else go();
-  } else if (mode === "match") {
-    acc += dt;
-    let n = 0;
-    while (acc >= 1 / FPS && n < 5) {
-      stepOnce();
-      acc -= 1 / FPS;
-      n++;
-    }
-    if (n === 5) acc = 0;
-  } else if (mode === "over") {
+  } else if (mode === "match") run(dt);
+  else if (mode === "over") {
     overT += dt;
     const anyStart = input.devices().some((d) => input.read(d).start);
     if (overT > 1.5 && anyStart && !lastStart) {
@@ -169,6 +197,7 @@ function frame(now: number): void {
       hud.countdown(null);
       scene.setInset(0);
       select.show(true);
+      attract();
     }
     lastStart = anyStart;
   }
@@ -184,7 +213,7 @@ if (params.get("auto")) {
   const st = params.get("stage");
   if (st && STAGES.some((x) => x.id === st)) select.setStage(st as StageId);
   select.start(Number(params.get("seed") ?? 1));
-}
+} else attract();
 
 // test / debugging hook
 declare global {

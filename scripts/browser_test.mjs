@@ -103,6 +103,20 @@ async function main() {
   const on = await line();
   check(before.opacity === "1" && /blood ON/.test(before.text) && before.gore, `the menu shows the fighter count and blood ON (${JSON.stringify(before)})`);
   check(/blood OFF/.test(off.text) && !off.gore && /blood ON/.test(on.text) && on.gore, `G turns the blood off and on again (${off.text} / ${on.text})`);
+  // stages are picked by clicking, and the CPU brawl behind the menu moves to the chosen stage
+  const behind = () => page.evaluate(() => ({ pick: window.__game.select.stage, world: window.__game.world?.s.stage, frame: window.__game.world?.s.frame, name: document.querySelector(".stname").textContent }));
+  const b0 = await behind();
+  await new Promise((r) => setTimeout(r, 400));
+  const b1 = await behind();
+  check(b0.world === "hell-toilet" && b1.frame > b0.frame, `a CPU brawl plays on the chosen stage behind the menu (${JSON.stringify(b0)} -> frame ${b1.frame})`);
+  await page.click(".stagepick .next");
+  const b2 = await behind();
+  check(b2.pick === "construction-site" && b2.world === "construction-site" && b2.name === "Construction Site", `the stage banner's arrow picks the next stage, and the pit behind follows (${JSON.stringify(b2)})`);
+  await page.click('.stage[data-stage="castle-under-siege"]');
+  const b3 = await behind();
+  check(b3.pick === "castle-under-siege" && b3.world === "castle-under-siege", `clicking a stage picks it (${JSON.stringify(b3)})`);
+  await page.click('.stage[data-stage="hell-toilet"]');
+  await page.screenshot({ path: path.join(OUT, "1b_select_live.png") });
 
   // P1 joins on the keyboard, moves the cursor two styles right, confirms, starts
   // the game reads the keyboard once per animation frame, and a slow software

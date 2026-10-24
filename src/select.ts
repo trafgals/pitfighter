@@ -3,6 +3,11 @@
 // out with grab. Start on a device that is in and ready starts the match once
 // everyone who joined is ready. Empty slots are filled with CPU fighters up to
 // the chosen fighter count.
+//
+// The stage is picked with the arrows or pips on the stage banner (mouse), [ / ]
+// or H / O (keyboard), or L2 / R2 (pad); main.ts plays a CPU brawl on it behind
+// the menu. A fighter card clicked joins the keyboard player on it, and FIGHT!
+// readies everyone and starts.
 import { BTN } from "./sim/types";
 import { STYLES } from "./sim/styles";
 import { CONTROLS_HELP, type DeviceId, type DeviceRead, type Input } from "./input";
@@ -32,6 +37,8 @@ export class Select {
   /** blood on or off (main.ts keeps it; the menu shows it) */
   gore = true;
   stage: StageId = DEFAULT_STAGE;
+  /** told when the stage changes (main.ts shows it behind the menu) */
+  onStage: ((id: StageId) => void) | null = null;
   private prev = new Map<DeviceId, DeviceRead>();
   private el: HTMLElement;
 
@@ -42,20 +49,35 @@ export class Select {
   ) {
     this.el = root;
     root.innerHTML = `
-      <h1>PITFIGHTER</h1>
-      <p class="sub">Up to eight fighters, one pit. Pick a fighter and a stage.</p>
+      <header><h1>PITFIGHTER</h1><p class="sub">Up to eight devils. One pit. No rules.</p></header>
+      <section class="stagepick">
+        <button class="arrow prev" aria-label="Previous stage">&#9664;</button>
+        <div class="stagecard"><div class="kicker"></div><h2 class="stname"></h2><p class="stblurb"></p></div>
+        <button class="arrow next" aria-label="Next stage">&#9654;</button>
+      </section>
       <div class="stages">${STAGES.map(
-        (st) => `<div class="stage${st.playable ? "" : " soon"}" data-stage="${st.id}"><b>${st.name}</b>${st.playable ? "" : " <small>coming soon</small>"}<br><small>${st.blurb}</small></div>`,
+        (st) => `<button class="stage${st.playable ? "" : " soon"}" data-stage="${st.id}"${st.playable ? "" : " disabled"}>${st.name}</button>`,
       ).join("")}</div>
+      <div class="stagehint">Change stage: click &#9664; &#9654; · [ / ] or H / O · L2 / R2</div>
       <div class="grid">${STYLES.map(
-        (s, i) => `<div class="sc" data-i="${i}"><div class="sw" style="background:${hex(s.color)};border-color:${hex(s.accent)}"></div>
-          <div class="sn">${s.name}</div><div class="ss">${s.style}</div><div class="cur"></div></div>`,
+        (s, i) => `<button class="sc" data-i="${i}" style="--body:${hex(s.color)};--acc:${hex(s.accent)}"><div class="sw"></div>
+          <div class="sn">${s.name}</div><div class="ss">${s.style}</div><div class="cur"></div></button>`,
       ).join("")}</div>
       <div class="info"></div>
       <div class="slots"></div>
-      <div class="count"></div>
+      <div class="bar"><div class="count"></div><button class="fight">FIGHT!</button></div>
       <div class="help">${CONTROLS_HELP.map((l) => `<div>${l}</div>`).join("")}
-        <div>Join: J / Num4 / □ / Start · Move: stick · Confirm: J / □ / Start · Back: L / ○ · Fighters: - / + (L1 / R1) · Stage: [ / ] · Blood: G · Start: Enter / Start</div></div>`;
+        <div>Join: J / Num4 / □ / Start · Move: stick · Confirm: J / □ / Start · Back: L / ○ · Fighters: - / + (L1 / R1) · Stage: [ / ] (L2 / R2) · Blood: G · Start: Enter / Start</div></div>`;
+    root.querySelector(".prev")!.addEventListener("click", () => this.cycleStage(-1));
+    root.querySelector(".next")!.addEventListener("click", () => this.cycleStage(1));
+    root.querySelectorAll<HTMLElement>(".stage").forEach((b) => b.addEventListener("click", () => this.setStage(b.dataset.stage as StageId)));
+    root.querySelectorAll<HTMLElement>(".sc").forEach((b) => {
+      b.addEventListener("click", () => this.pick(Number(b.dataset.i)));
+      b.addEventListener("mouseenter", () => this.describe(Number(b.dataset.i)));
+    });
+    root.querySelector(".fight")!.addEventListener("click", () => this.fight());
+    // buttons are for the mouse: keys and pads drive the menu through poll(), and a focused button must not eat Enter or Space
+    root.querySelectorAll("button").forEach((b) => b.addEventListener("keydown", (e) => e.preventDefault()));
     this.render();
   }
 
@@ -76,6 +98,9 @@ export class Select {
       const edge = (k: keyof DeviceRead) => !!now[k] && !was[k];
       const bedge = (b: number) => (now.buttons & b) !== 0 && (was.buttons & b) === 0;
       const slot = this.slots.find((s) => s.device === dev);
+      // anyone can flip through the stages, joined or not
+      if (bedge(BTN.SPECIAL)) this.cycleStage(-1);
+      if (bedge(BTN.USE)) this.cycleStage(1);
       // Start never starts the match from a device that is not in it: it joins
       // that device (and readies it, a second time) instead of filling the pit with CPUs
       if (edge("start") && slot?.ready) start = true;
@@ -118,14 +143,39 @@ export class Select {
   cycleStage(dir: number): void {
     const n = PLAYABLE_STAGES.length;
     const i = PLAYABLE_STAGES.findIndex((s) => s.id === this.stage);
-    this.stage = PLAYABLE_STAGES[(i + dir + n) % n].id;
-    this.render();
+    this.setStage(PLAYABLE_STAGES[(i + dir + n) % n].id);
   }
 
   setStage(id: StageId): void {
     if (!stageById(id).playable) throw new Error(`stage ${id} is not playable yet`);
+    const changed = id !== this.stage;
     this.stage = id;
     this.render();
+    if (changed) this.onStage?.(id);
+  }
+
+  /** A fighter card clicked: the keyboard player (P1's keys) joins on it, or switches to it. */
+  pick(style: number): void {
+    const s = this.slots.find((x) => x.device === "kb1");
+    if (s) {
+      s.style = style;
+      s.ready = false;
+    } else if (this.slots.length < 8) {
+      this.slots.push({ device: "kb1", style, ready: false });
+      this.fighters = Math.max(this.fighters, this.slots.length);
+    }
+    this.render();
+  }
+
+  /** FIGHT!: everyone who joined is ready, and the match starts (all CPUs if nobody joined). */
+  fight(): void {
+    for (const s of this.slots) s.ready = true;
+    this.start();
+  }
+
+  private describe(style: number): void {
+    const st = STYLES[style];
+    this.el.querySelector(".info")!.innerHTML = `<b>${st.name}</b> - ${st.style}<br><i>${st.blurb}</i>`;
   }
 
   start(seed = Date.now() >>> 0): void {
@@ -150,6 +200,11 @@ export class Select {
   private render(): void {
     const el = this.el;
     el.querySelectorAll<HTMLElement>(".stage").forEach((c) => c.classList.toggle("on", c.dataset.stage === this.stage));
+    const stage = stageById(this.stage);
+    const k = PLAYABLE_STAGES.findIndex((x) => x.id === this.stage);
+    el.querySelector(".kicker")!.textContent = `STAGE ${k + 1} / ${PLAYABLE_STAGES.length}`;
+    el.querySelector(".stname")!.textContent = stage.name;
+    el.querySelector(".stblurb")!.textContent = stage.blurb;
     el.querySelectorAll<HTMLElement>(".sc").forEach((c) => {
       const i = Number(c.dataset.i);
       const here = this.slots.map((s, p) => ({ s, p })).filter(({ s }) => s.style === i);
@@ -159,15 +214,14 @@ export class Select {
       c.classList.toggle("on", here.length > 0);
     });
     const focus = this.slots[this.slots.length - 1];
-    const st = STYLES[focus ? focus.style : 0];
-    el.querySelector(".info")!.innerHTML = `<b>${st.name}</b> - ${st.style}<br><i>${st.blurb}</i>`;
+    this.describe(focus ? focus.style : 0);
     el.querySelector(".slots")!.innerHTML = Array.from({ length: 8 }, (_, p) => {
       const s = this.slots[p];
       const c = hex(PLAYER_COLORS[p]);
       if (s) return `<div class="slot" style="border-color:${c}"><b style="color:${c}">P${p + 1}</b> ${STYLES[s.style].name}<br><small>${s.device} · ${s.ready ? "READY" : "choosing"}</small></div>`;
-      if (p < this.fighters) return `<div class="slot cpu" style="border-color:${c}"><b style="color:${c}">P${p + 1}</b> CPU<br><small>press □ / Start / J to join</small></div>`;
+      if (p < this.fighters) return `<div class="slot cpu" style="border-color:${c}"><b style="color:${c}">P${p + 1}</b> CPU<br><small>press □ / Start / J, or click a fighter</small></div>`;
       return `<div class="slot off"><b>P${p + 1}</b> -</div>`;
     }).join("");
-    el.querySelector(".count")!.textContent = `${this.fighters} fighters · blood ${this.gore ? "ON" : "OFF"} (G) · press Enter / Start when everyone is ready`;
+    el.querySelector(".count")!.textContent = `${this.fighters} fighters · blood ${this.gore ? "ON" : "OFF"} (G) · Enter / Start when everyone is ready`;
   }
 }
