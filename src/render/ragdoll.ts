@@ -9,9 +9,11 @@
 //
 // The blow that started the fall throws the points (the upper body harder, so
 // the body tips over), gravity pulls them down, the floor stops them, and a
-// motor pulls each toward where the clip has it: weak at the start of the
-// fall, full on its landing frame, so the body tumbles and its limbs flail but
-// it is always on its clip, every bone of it, when the sim says it lands.
+// motor pulls each toward where the clip has it. On the trunk the motor is
+// weak at the start of the fall and full on its landing frame, so the body
+// tumbles but is on the floor when the sim says it lands. On the arms and legs
+// it never gets strong: they flail through the fall, land where they land and
+// lie there through the knockdown, and the get-up blends out of that pose.
 // The bones are then turned to lie along the ragdoll's points. The ragdoll
 // works in the root's frame, so the sim's own slide along the floor carries it.
 import * as THREE from "three";
@@ -24,6 +26,13 @@ const G = -9.8;
 export const POWER_MIN = 0.06;
 /** The speed (m/s, root frame) a knockdown starts with, for a blow from in front: back and up. */
 const KICK = new THREE.Vector3(0, 1.8, -3.4);
+/** How strongly the motor pulls the arms and legs toward the clip on the landing frame, and after it, lying on the floor. */
+export const LIMB_LAND = 0.3;
+export const LIMP = 0.015;
+/** Frames after landing the arms and legs take to come to rest. */
+export const SETTLE = 10;
+/** Frames the get-up takes to blend out of the pose the body lay in. */
+export const WAKE_BLEND = 12;
 /** Constraint passes per frame. */
 const ITER = 8;
 
@@ -33,6 +42,8 @@ export const RAGDOLL = { on: true };
 /** The points, in order. */
 export const POINTS = ["hipL", "hipR", "pelvisF", "shL", "shR", "neck", "head", "elbowL", "handL", "elbowR", "handR", "kneeL", "ankleL", "kneeR", "ankleR"] as const;
 const P = Object.fromEntries(POINTS.map((n, i) => [n, i])) as Record<(typeof POINTS)[number], number>;
+/** The trunk's points (the pelvis, the chest, the head) come first: the rest are the arms' and legs'. */
+export const TRUNK = 7;
 /** The points' radii (m, at body scale 1): what keeps each off the floor. */
 const RADIUS = [0.1, 0.1, 0.1, 0.09, 0.09, 0.07, 0.11, 0.05, 0.05, 0.05, 0.05, 0.06, 0.05, 0.06, 0.05];
 
@@ -101,13 +112,25 @@ export interface Rag {
   shape: Record<"pelvis" | "chest", THREE.Vector3[]>;
   /** each hinge's axis this frame (root frame), for the tests */
   axes: THREE.Vector3[];
-  /** the state it started in */
+  /** the fall it started with */
   key: string;
+  /** the body's and the bones' turn (and the body's place) as the ragdoll last laid them: what a get-up blends out of */
+  snap: Settle | null;
+  /** at rest: each point in the frame of what it lies on (the arms on the chest, the legs on the pelvis), or null while it moves */
+  rest: THREE.Vector3[] | null;
+  restAxes: THREE.Vector3[] | null;
+}
+
+/** A get-up (or a KO) blending out of the pose the body lay in: the body's and the bones' turn, and the body's place. */
+export interface Settle {
+  q: THREE.Quaternion[];
+  pos: THREE.Vector3;
 }
 
 /** The frames a fall is on the ragdoll, and the frame it lands: null when the body is on its clip alone. */
 export function ragWindow(f: Fighter, tp: Target, from: Fighter["state"] | null): { land: number; floor: boolean } | null {
-  if (f.state === "down" && from !== "thrown" && f.t <= FALL_LAND) return { land: FALL_LAND, floor: true };
+  // a knockdown lands partway in; off the back of a throw the body is already down
+  if (f.state === "down") return { land: from === "thrown" ? 0 : FALL_LAND, floor: true };
   if (f.state === "thrown" && tp.T) return { land: tp.T.end, floor: true };
   if (f.state === "falling") return { land: Infinity, floor: false };
   return null;
@@ -121,6 +144,7 @@ const qa = new THREE.Quaternion();
 const qb = new THREE.Quaternion();
 const m4 = new THREE.Matrix4();
 const X = new THREE.Vector3(1, 0, 0);
+const UP = new THREE.Vector3(0, 1, 0);
 const f1 = new THREE.Vector3();
 const f2 = new THREE.Vector3();
 const f3 = new THREE.Vector3();
@@ -208,12 +232,17 @@ function stick(x: THREE.Vector3[], a: number, c: number, lo: number, hi: number)
 export function ragdoll(b: Body, f: Fighter, tp: Target, dt: number, from: Fighter["state"] | null, side: number, face: number): number {
   const win = RAGDOLL.on ? ragWindow(f, tp, from) : null;
   if (!win || dt <= 0) {
-    b.rag = null;
+    // getting up (or out cold) from where it lay: blend out of that pose
+    if (b.rag?.snap && (f.state === "wakeup" || f.state === "ko")) b.settle = b.rag.snap;
+    if (dt > 0) b.rag = null;
+    settle(b, f);
     return 0;
   }
+  b.settle = null;
   const target = ragPoints(b);
   const sc = b.body.scale.x;
-  const key = `${f.state}`;
+  // a throw and the knockdown it ends in are one fall
+  const key = f.state === "down" && from === "thrown" ? "thrown" : f.state;
   if (!b.rag || b.rag.key !== key) {
     // it starts where the body is, with the blow's push: the higher the point, the harder, so the body tips over
     const kick = f.state === "down" ? KICK.clone().set(KICK.x - 0.6 * side, KICK.y, KICK.z * face) : new THREE.Vector3();
@@ -226,12 +255,18 @@ export function ragdoll(b: Body, f: Fighter, tp: Target, dt: number, from: Fight
       shape: { pelvis: shapeOf(target, "pelvis"), chest: shapeOf(target, "chest") },
       axes: HINGES.map(() => new THREE.Vector3()),
       key,
+      snap: null,
+      rest: null,
+      restAxes: null,
     };
   }
   const r = b.rag;
   const x = r.x;
-  const u = Math.min(1, f.t / win.land);
-  const power = f.t >= win.land ? 1 : POWER_MIN + (1 - POWER_MIN) * u * u * (3 - 2 * u) * u;
+  const u = win.land > 0 ? Math.min(1, f.t / win.land) : 1;
+  const ramp = u * u * (3 - 2 * u) * u;
+  const landed = f.t >= win.land;
+  const power = landed ? 1 : POWER_MIN + (1 - POWER_MIN) * ramp;
+  const limb = landed ? LIMP : POWER_MIN + (LIMB_LAND - POWER_MIN) * ramp;
 
   // each hinge's axis: the clip's own, carried round by how far the ragdoll has turned its upper bone
   const fit = (c: "pelvis" | "chest") => clusterFrame(x, c, new THREE.Quaternion()).multiply(clusterFrame(target, c).invert());
@@ -248,29 +283,93 @@ export function ragdoll(b: Body, f: Fighter, tp: Target, dt: number, from: Fight
   if (f.stop === 0) {
     // verlet: carry on, fall
     for (let i = 0; i < x.length; i++) {
-      const vel = v1.subVectors(x[i], r.prev[i]).multiplyScalar(0.995);
+      // lying on the floor, the limbs come to rest
+      const vel = v1.subVectors(x[i], r.prev[i]).multiplyScalar(landed ? 0.85 : 0.995);
       r.prev[i].copy(x[i]);
       x[i].add(vel).y += G * dt * dt;
     }
-    if (power >= 1) {
-      // landed: on the clip, every bone of it
-      for (let i = 0; i < x.length; i++) {
-        r.prev[i].copy(target[i]);
+    // the motor pulls each point toward the clip (moving the point drags its velocity with it only in part)
+    for (let i = 0; i < x.length; i++) {
+      const k = i < TRUNK ? power : limb;
+      const pull = v1.subVectors(target[i], x[i]).multiplyScalar(k);
+      x[i].add(pull);
+      r.prev[i].addScaledVector(pull, 1 - k * 0.5);
+    }
+    for (let it = 0; it < ITER; it++) constrain(r, win.floor, sc);
+    // landed, the trunk is on its clip, and the limbs within their limits on it
+    if (landed) {
+      for (let i = 0; i < TRUNK; i++) {
         x[i].copy(target[i]);
+        r.prev[i].copy(target[i]);
       }
-    } else {
-      // the motor pulls each point toward the clip (moving the point drags its velocity with it only in part)
-      for (let i = 0; i < x.length; i++) {
-        const pull = v1.subVectors(target[i], x[i]).multiplyScalar(power);
-        x[i].add(pull);
-        r.prev[i].addScaledVector(pull, 1 - power * 0.5);
-      }
-      for (let it = 0; it < ITER; it++) constrain(r, win.floor, sc);
-      // last, the head and limbs' bones exactly their length, parents first, each moving only the end further out
-      for (let i = LIMB; i < STICKS.length; i++) {
-        const [a, c] = STICKS[i];
-        x[c].sub(x[a]).setLength(r.len[i]).add(x[a]);
-      }
+      limits(r);
+    }
+    // last, the head and limbs' bones exactly their length, parents first, each moving only the end further out
+    // (a correction, not a push: its velocity stays)
+    for (let i = LIMB; i < STICKS.length; i++) {
+      const [a, c] = STICKS[i];
+      const was = v3.copy(x[c]);
+      x[c].sub(x[a]).setLength(r.len[i]).add(x[a]);
+      r.prev[c].add(v2.subVectors(x[c], was));
+    }
+    // come to rest: a while after landing the arms lie still on the chest and the legs on the pelvis, wherever they fell
+    if (landed && f.t >= win.land + SETTLE) {
+      const qp = clusterFrame(x, "pelvis", new THREE.Quaternion());
+      const qc = clusterFrame(x, "chest", new THREE.Quaternion());
+      const op = centre(x, "pelvis");
+      const oc = centre(x, "chest");
+      const on = (i: number) => (i >= P.kneeL ? { q: qp, o: op } : { q: qc, o: oc });
+      const rest = (r.rest ??= x.map((p, i) => p.clone().sub(on(i).o).applyQuaternion(on(i).q.clone().invert())));
+      // the hinges' axes lie still with their limbs
+      const onHinge = (h: Hinge) => on(h.joint);
+      const restAxes = (r.restAxes ??= HINGES.map((h, i) => r.axes[i].clone().applyQuaternion(onHinge(h).q.clone().invert())));
+      HINGES.forEach((h, i) => r.axes[i].copy(restAxes[i]).applyQuaternion(onHinge(h).q));
+      for (let i = TRUNK; i < x.length; i++) x[i].copy(rest[i]).applyQuaternion(on(i).q).add(on(i).o);
+      // the trunk settling on the floor would carry an elbow or a knee through it: the whole limb turned up off it at the
+      // shoulder or the hip, as far as its cone lets it
+      CONES.forEach((c) => {
+        if (c.child === P.head) return;
+        const end = c.child + 1; // the hand below the elbow, the ankle below the knee
+        const rad = RADIUS[c.child] * sc;
+        if (!win.floor || x[c.child].y >= rad) return;
+        const bone = x[c.child].clone().sub(x[c.joint]);
+        const tip = x[end].clone().sub(x[c.joint]);
+        const n = new THREE.Vector3().crossVectors(bone, UP).normalize();
+        const q = new THREE.Quaternion();
+        const place = (k: number) => {
+          q.setFromAxisAngle(n, 0.05 * k); // toward straight up
+          x[c.child].copy(bone).applyQuaternion(q).add(x[c.joint]);
+          x[end].copy(tip).applyQuaternion(q).add(x[c.joint]);
+        };
+        for (let k = 1; k <= 30; k++) {
+          place(k);
+          if (coneAngle(x, c) > c.max) {
+            place(k - 1);
+            break;
+          }
+          if (x[c.child].y >= rad) break;
+        }
+        for (const i of [c.child, end]) rest[i].copy(x[i]).sub(on(i).o).applyQuaternion(on(i).q.clone().invert());
+      });
+      // the trunk settling on the floor would carry a hand or a foot through it: turned back up on its hinge, within its limits
+      HINGES.forEach((h, i) => {
+        const rad = RADIUS[h.lower] * sc;
+        if (!win.floor || x[h.lower].y >= rad) return;
+        const bend = bendOf(x, h, r.axes[i]);
+        const bone = v1.subVectors(x[h.lower], x[h.joint]);
+        let best = 0;
+        for (let k = 1; k <= 20 && x[h.joint].y + v2.copy(bone).applyAxisAngle(r.axes[i], best).y < rad; k++)
+          for (const turn of [0.05 * k, -0.05 * k]) {
+            if (bend + turn < h.lo || bend + turn > h.hi) continue;
+            if (x[h.joint].y + v2.copy(bone).applyAxisAngle(r.axes[i], turn).y > x[h.joint].y + v2.copy(bone).applyAxisAngle(r.axes[i], best).y) best = turn;
+          }
+        const was = x[h.lower].clone();
+        x[h.lower].copy(x[h.joint]).add(bone.applyAxisAngle(r.axes[i], best));
+        const now = bendOf(x, h, r.axes[i]);
+        if (now < h.lo || now > h.hi) x[h.lower].copy(was);
+        rest[h.lower].copy(x[h.lower]).sub(on(h.lower).o).applyQuaternion(on(h.lower).q.clone().invert());
+      });
+      for (let i = TRUNK; i < x.length; i++) r.prev[i].copy(x[i]);
     }
   }
   pose(b, r, target);
@@ -310,6 +409,12 @@ function constrain(r: Rag, floor: boolean, sc: number): void {
   const half = o.clone().sub(centre(x, "chest")).multiplyScalar(0.5);
   CLUSTER.chest.forEach((i, k) => x[i].copy(r.shape.chest[k]).applyQuaternion(qc).add(o).sub(half));
   for (const i of CLUSTER.pelvis) x[i].sub(half);
+  limits(r);
+}
+
+/** The joints' limits: each cone and hinge moves only the bone below it. */
+function limits(r: Rag): void {
+  const x = r.x;
   for (const c of CONES) {
     const axis = v3.set(...c.axis).normalize().applyQuaternion(clusterFrame(x, c.cluster, qb));
     const bone = v1.subVectors(x[c.child], x[c.joint]);
@@ -365,4 +470,20 @@ function pose(b: Body, r: Rag, target: THREE.Vector3[]): void {
     const want = v2.subVectors(x[c], x[a]).normalize();
     turnBone(b, bone, new THREE.Quaternion().setFromUnitVectors(was, want));
   }
+  r.snap = { q: [b.body.quaternion.clone(), ...b.skeleton.bones.map((o) => o.quaternion.clone())], pos: b.body.position.clone() };
+}
+
+/** Blend the bones out of the pose the body lay in, over the first WAKE_BLEND frames of what follows. */
+function settle(b: Body, f: Fighter): void {
+  const s = b.settle;
+  if (!s) return;
+  if (f.t >= WAKE_BLEND) {
+    b.settle = null;
+    return;
+  }
+  const u = f.t / WAKE_BLEND;
+  const k = u * u * (3 - 2 * u);
+  [b.body, ...b.skeleton.bones].forEach((o, i) => o.quaternion.slerpQuaternions(s.q[i], o.quaternion.clone(), k));
+  b.body.position.lerpVectors(s.pos, b.body.position.clone(), k);
+  b.root.updateMatrixWorld(true);
 }

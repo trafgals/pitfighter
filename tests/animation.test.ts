@@ -6,7 +6,7 @@
 import { describe, expect, it } from "vitest";
 import * as THREE from "three";
 import { buildBody, stance, targetPose, type Body } from "../src/render/body";
-import { CONES, HINGES, RAGDOLL, SPINE_MAX, bendOf, coneAngle, spineBend, type Rag } from "../src/render/ragdoll";
+import { CONES, HINGES, RAGDOLL, SPINE_MAX, WAKE_BLEND, bendOf, coneAngle, spineBend, type Rag } from "../src/render/ragdoll";
 import { BLEND, animate, ankleOf, hitSide, onHit, strideOf } from "../src/render/animate";
 import { DOWN_BACK, DOWN_FRONT, FALL_LAND, REACTION_CLIPS, THROW_TIMING, WAKE_BACK, WAKE_FRONT, clipFor, familyOf, stateTiming, type Clip } from "../src/render/motion";
 import { DOWN, MOVES } from "../src/sim/moves";
@@ -345,71 +345,107 @@ describe("the ragdoll", () => {
     expect(rag[44].hips.distanceTo(clip[44].hips)).toBeLessThan(1e-3);
   });
 
-  /** Every bone's world position and the ragdoll's points, every frame of a fall. */
-  function chain(face: 1 | -1, state: "down" | "thrown", on: boolean, frames: number) {
+  type Stage = { state: "down" | "thrown" | "wakeup"; dur: number };
+  /** Every bone's world position, the hands and feet, the ragdoll's points and what plays, every frame of a fall and what follows it. */
+  function chain(face: 1 | -1, stages: Stage[], on: boolean) {
     RAGDOLL.on = on;
     try {
       const { w, f, b, time } = standing(0);
       b.cue.face = face;
       b.cue.side = 1;
-      Object.assign(f, { state, dur: state === "down" ? DOWN.dur : 44, stop: 0 });
-      const out: { bones: THREE.Vector3[]; hands: THREE.Vector3[]; rag: Rag | null }[] = [];
-      play(b, f, w, time, 0, frames, () => {
-        b.root.updateMatrixWorld(true);
-        const at = (o: THREE.Object3D) => b.root.worldToLocal(o.getWorldPosition(new THREE.Vector3()));
-        const bones = b.skeleton.bones.map(at);
-        // the hands and feet, in the pelvis's frame: what the limbs do on their own
-        const tips = [fistOf(b, "L"), fistOf(b, "R"), ankleOf(b, "L"), ankleOf(b, "R")].map((p) => b.hips.worldToLocal(p));
-        const rag = b.rag && { ...b.rag, x: b.rag.x.map((p) => p.clone()), axes: b.rag.axes.map((a) => a.clone()) };
-        out.push({ bones, hands: tips, rag });
-      });
+      const out: { state: string; bones: THREE.Vector3[]; hands: THREE.Vector3[]; rag: Rag | null; label: string }[] = [];
+      for (const { state, dur } of stages) {
+        Object.assign(f, { state, dur, stop: 0 });
+        for (let t = 0; t < dur; t++) {
+          f.t = t;
+          time.t += DT;
+          const tp = animate(b, f, w, time.t, DT);
+          b.root.updateMatrixWorld(true);
+          const at = (o: THREE.Object3D) => b.root.worldToLocal(o.getWorldPosition(new THREE.Vector3()));
+          // the hands and feet, in the pelvis's frame: what the limbs do on their own
+          const hands = [fistOf(b, "L"), fistOf(b, "R"), ankleOf(b, "L"), ankleOf(b, "R")].map((p) => b.hips.worldToLocal(p));
+          const rag = b.rag && { ...b.rag, x: b.rag.x.map((p) => p.clone()), axes: b.rag.axes.map((a) => a.clone()) };
+          out.push({ state, bones: b.skeleton.bones.map(at), hands, rag, label: tp.label });
+        }
+      }
       return out;
     } finally {
       RAGDOLL.on = true;
     }
   }
 
+  const KNOCKDOWN: Stage[] = [{ state: "down", dur: DOWN.dur }];
+  const THROW: Stage[] = [{ state: "thrown", dur: 44 }, { state: "down", dur: DOWN.dur }];
   const falls = [
-    { name: "a knockdown face up", face: 1, state: "down", land: FALL_LAND },
-    { name: "a knockdown face down", face: -1, state: "down", land: FALL_LAND },
-    { name: "a throw", face: 1, state: "thrown", land: 44 },
+    { name: "a knockdown face up", face: 1, stages: KNOCKDOWN, land: FALL_LAND },
+    { name: "a knockdown face down", face: -1, stages: KNOCKDOWN, land: FALL_LAND },
+    { name: "a throw", face: 1, stages: THROW, land: 44 },
   ] as const;
+  /** The bones the trunk carries: the hips, the spine, the head, and the shoulder and hip joints. */
+  const TRUNK_BONES = [0, 1, 2, 3, 5, 7, 9];
 
   for (const fall of falls) {
-    it(`${fall.name}: every bone keeps its length and every joint stays within its limits`, () => {
-      const run = chain(fall.face, fall.state, true, fall.land);
+    it(`${fall.name}: every bone keeps its length and every joint stays within its limits, through the fall and lying down`, () => {
+      const run = chain(fall.face, [...fall.stages], true);
       const first = run[0].rag!;
-      let worst = { cone: 0, hinge: 0 };
-      for (const { rag } of run.slice(0, fall.land)) {
+      const worst = { cone: 0, hinge: 0 };
+      for (const { rag } of run) {
         expect(rag).not.toBeNull();
         const x = rag!.x;
-        // the head, the limbs and the pelvis and chest are rigid (within a millimetre)
+        // the head, the limbs and the pelvis and chest are rigid (within a few millimetres)
         for (const [i, [a, c]] of [[0, 1], [0, 2], [3, 4], [5, 6], [3, 7], [7, 8], [11, 12]].entries())
           expect(Math.abs(x[a].distanceTo(x[c]) - first.x[a].distanceTo(first.x[c])), `stick ${i}`).toBeLessThan(2e-3);
-        // the chest bends and twists on the pelvis only within its range
-        expect(spineBend(rag!)).toBeLessThan(SPINE_MAX + 0.01);
         for (const c of CONES) worst.cone = Math.max(worst.cone, coneAngle(x, c) - c.max);
         HINGES.forEach((h, i) => {
           const bend = bendOf(x, h, rag!.axes[i]);
           worst.hinge = Math.max(worst.hinge, h.lo - bend, bend - h.hi);
         });
-        // nothing goes through the floor
-        for (const p of x) expect(p.y).toBeGreaterThan(0.03);
+        // nothing sinks into the floor (a joint's centre may touch it: the clip's own lying feet are 1 cm under)
+        for (const p of x) expect(p.y).toBeGreaterThan(-0.02);
       }
+      // the chest bends and twists on the pelvis only within its range while it falls (lying, it is on its clip)
+      for (const { rag } of run.slice(0, fall.land)) expect(spineBend(rag!)).toBeLessThan(SPINE_MAX + 0.01);
       expect(worst.cone, "outside a cone (rad)").toBeLessThan(0.03);
       expect(worst.hinge, "an elbow or knee bent the wrong way or too far (rad)").toBeLessThan(0.03);
     });
 
-    it(`${fall.name}: the arms and legs flail on their own, and on the landing frame every bone is on its clip`, () => {
-      const rag = chain(fall.face, fall.state, true, fall.land);
-      const clip = chain(fall.face, fall.state, false, fall.land);
+    it(`${fall.name}: the arms and legs flail on their own and lie where they land; on the landing frame the trunk is on its clip`, () => {
+      const rag = chain(fall.face, [...fall.stages], true);
+      const clip = chain(fall.face, [...fall.stages], false);
       // the hands and feet move against the pelvis, not just with the trunk
-      const flail = Math.max(...rag.map((r, t) => Math.max(...r.hands.map((p, i) => p.distanceTo(clip[t].hands[i])))));
-      expect(flail, "the limbs move off the clip (m)").toBeGreaterThan(0.05);
-      const land = rag[fall.land].bones.map((p, i) => p.distanceTo(clip[fall.land].bones[i]));
-      expect(Math.max(...land), "every bone on its clip on landing (m)").toBeLessThan(1e-3);
+      const off = (t: number) => Math.max(...rag[t].hands.map((p, i) => p.distanceTo(clip[t].hands[i])));
+      expect(Math.max(...rag.slice(0, fall.land).map((_, t) => off(t))), "the limbs move off the clip as it falls (m)").toBeGreaterThan(0.05);
+      const land = TRUNK_BONES.map((i) => rag[fall.land].bones[i].distanceTo(clip[fall.land].bones[i]));
+      expect(Math.max(...land), "the trunk on its clip on landing (m)").toBeLessThan(1e-3);
+      // lying there, the limbs are their own: still off the clip at the end of the knockdown, and still
+      const end = rag.length - 1;
+      expect(off(end), "the limbs lie where they fell (m)").toBeGreaterThan(0.03);
+      expect(Math.max(...rag[end].hands.map((p, i) => p.distanceTo(rag[end - 1].hands[i]))), "and lie still (m per frame)").toBeLessThan(0.01);
     });
   }
+
+  for (const fall of falls)
+    it(`${fall.name}: the get-up starts from the pose the body lay in and is on its clip by frame ${WAKE_BLEND}`, () => {
+      const stages = [...fall.stages, { state: "wakeup", dur: DOWN.wake } as Stage];
+      const rag = chain(fall.face, stages, true);
+      const clip = chain(fall.face, stages, false);
+      const wake = rag.findIndex((r) => r.state === "wakeup");
+      // the first frame up: the hands and feet where they lay
+      const moved = Math.max(...rag[wake].hands.map((p, i) => p.distanceTo(rag[wake - 1].hands[i])));
+      expect(moved, "no jump onto the get-up's first pose (m)").toBeLessThan(0.02);
+      // then blended onto the clip
+      const gap = (t: number) => Math.max(...rag[t].bones.map((p, i) => p.distanceTo(clip[t].bones[i])));
+      expect(gap(wake + WAKE_BLEND), "on the clip once blended (m)").toBeLessThan(1e-3);
+      for (let t = wake; t < wake + WAKE_BLEND; t++) expect(gap(t + 1), `blending out, frame ${t - wake}`).toBeLessThanOrEqual(gap(t) + 0.02);
+    });
+
+  it("the get-up goes by the way up the body lies, not the way the last blow came", () => {
+    // thrown onto the back, though the last blow came from behind
+    const run = chain(-1, [...THROW, { state: "wakeup", dur: 5 }], true);
+    expect(run[run.length - 1].label).toBe("get up back");
+    const front = chain(-1, [...KNOCKDOWN, { state: "wakeup", dur: 5 }], true);
+    expect(front[front.length - 1].label).toBe("get up front");
+  });
 });
 
 describe("timed to Urban Reign", () => {

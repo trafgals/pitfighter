@@ -51,7 +51,7 @@ A clip is a list of keys anchored to the move's **phases**, not to absolute fram
 
 - A reaction is chosen by **height** (head, body, legs), **side** (left or right of the victim, from the attacker's position) and **strength** (light, or heavy at 6+ damage or 9+ hitstop). That makes 12 additive clips, played on the pose the blow found.
 - Each reaction eases back to the stance on the frame the sim frees the fighter. A light reaction lasts 41 f, as measured.
-- Knockdowns land face up, or face down for a blow from behind, on frame 27 (the measured median). The get-ups match, face up or face down.
+- Knockdowns land face up, or face down for a blow from behind, on frame 27 (the measured median). The get-up matches the way the body lies.
 
 ## Ragdoll
 
@@ -63,13 +63,20 @@ During a knockdown fall, a throw and a fall off a ledge, the skeleton's 11 bones
   - The neck, shoulders and hips stay inside a cone (`CONES`).
   - The elbows and knees are hinges about the bone's own axis (`HINGES`). They bend one way only, at most 2.6 rad.
 - The blow throws the points back and up, the upper body harder so the body tips over. Gravity pulls them down, and the floor stops them without a bounce.
-- A motor pulls every point toward the clip. It starts weak, so the arms and legs flail on their own, and it is full on the landing frame. Every bone is then exactly on its clip, so the body is on the floor when the sim says and the get-up starts from its own first pose.
+- A motor pulls every point toward the clip:
+  - On the trunk (pelvis, chest and head) it starts weak and is full on the landing frame, so the body is on the floor when the sim says.
+  - On the arms and legs it never gets strong (`LIMB_LAND`, then `LIMP` once landed). They flail through the fall and land where they land.
+  - `SETTLE` (10) frames after landing they come to rest: the arms lie still on the chest and the legs on the pelvis. If the lying trunk would carry an elbow, knee, hand or foot through the floor, it is turned back up, within its limits.
+- The ragdoll stays on through the whole knockdown, and through the throw and the knockdown it ends in, as one fall.
+- **Get-ups** start from the pose the body lay in: the bones blend onto the get-up clip over its first `WAKE_BLEND` (12) frames. The face-up or face-down get-up is chosen by how the body actually lies, measured from its chest, so a throw that lands a fighter on its back gets the back get-up whichever way the last blow came.
 - The bones are then turned to lie along the points: the body on the pelvis, the spine on the chest, then the head and each bone of the limbs, parents first.
 - Tested, for both knockdowns and the throw:
-  - lengths within 2 mm and every joint within its limits on every frame;
-  - nothing goes through the floor;
-  - the hands and feet move off the clip, against the pelvis;
-  - every bone is within 1 mm of the clip on landing.
+  - lengths within 2 mm and every joint within its limits on every frame, falling and lying;
+  - no joint more than 2 cm into the floor (the clip's own lying feet are 1 cm in);
+  - the hands and feet move off the clip as it falls, and still lie off it, motionless, at the end of the knockdown;
+  - the trunk is within 1 mm of its clip on landing;
+  - the get-up's first frame doesn't jump, and every bone is on the get-up clip by frame 12;
+  - the get-up follows how the body lies.
 
 ## Seeing it
 

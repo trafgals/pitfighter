@@ -11,7 +11,7 @@
 // its own bone and its own piece of skin, so a limb that falls off simply hides
 // on the body and appears as a pickup on the floor.
 import * as THREE from "three";
-import type { Rag } from "./ragdoll";
+import type { Rag, Settle } from "./ragdoll";
 import { LIMBS, type Fighter, type PartId } from "../sim/types";
 import { CHARGE, DOWN, HOP_AIR, HOP_CYCLE } from "../sim/moves";
 import { STYLES } from "../sim/styles";
@@ -257,6 +257,8 @@ export interface Body {
   gait: { phase: number; prev: THREE.Vector3 | null; speed: number; on: boolean };
   /** the skeleton on the ragdoll through a fall (ragdoll.ts), or null */
   rag: Rag | null;
+  /** a get-up blending out of the pose the ragdoll left the body lying in, or null */
+  settle: Settle | null;
   skeleton: THREE.Skeleton;
   skins: Record<"torso" | "armL" | "armR" | "legL" | "legR", THREE.SkinnedMesh>;
   mats: THREE.MeshStandardMaterial[];
@@ -525,6 +527,7 @@ export function buildBody(f: Fighter): Body {
     feet: { L: newFoot(), R: newFoot() },
     gait: { phase: 0, prev: null, speed: 0, on: false },
     rag: null,
+    settle: null,
     skeleton,
     skins,
     mats: [skin, accent, torsoSkin, armSkinL, armSkinR, headSkin, jawSkin],
@@ -545,6 +548,8 @@ export interface Cue {
   react: { clip: Clip; mirror: boolean; from: Pose } | null;
   /** which way up a knockdown lands: 1 on the back, -1 on the front (a blow from behind) */
   face: 1 | -1;
+  /** which way up the body lies, measured from its chest: 1 on the back, -1 on the front, 0 standing. The get-up goes by it */
+  lie: 1 | -1 | 0;
   /** which side the last blow came from (1: the right) */
   side: 1 | -1;
   /** the state and move playing, the frame it started on, the last frame seen, and the pose the body was in when it started (blended out of) */
@@ -555,7 +560,7 @@ export interface Cue {
   age: number;
   blend: Pose | null;
 }
-export const noCue = (): Cue => ({ last: null, from: null, throwAge: 99, react: null, face: 1, side: 1, key: "", start: 0, at: 0, age: 0, blend: null });
+export const noCue = (): Cue => ({ last: null, from: null, throwAge: 99, react: null, face: 1, lie: 0, side: 1, key: "", start: 0, at: 0, age: 0, blend: null });
 
 /** What targetPose decided, besides the pose: which feet carry the weight, and what is playing (for the debug overlay and the strips). */
 export interface Target {
@@ -755,10 +760,13 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
         label = c === DOWN_LANDED ? "landed" : c === DOWN_BACK ? "down back" : "down front";
       }
       break;
-    case "wakeup":
-      play(cue.face > 0 ? WAKE_BACK : WAKE_FRONT, t, stateTiming(f.dur || DOWN.wake));
-      label = cue.face > 0 ? "get up back" : "get up front";
+    case "wakeup": {
+      // the way up the body actually lies (a throw lands it on its back, wherever the last blow came from)
+      const up = (cue.lie || cue.face) > 0;
+      play(up ? WAKE_BACK : WAKE_FRONT, t, stateTiming(f.dur || DOWN.wake));
+      label = up ? "get up back" : "get up front";
       break;
+    }
     case "dizzy":
       p.headZ = Math.sin(time * 6) * 0.35;
       p.rz = Math.sin(time * 3) * 0.1;

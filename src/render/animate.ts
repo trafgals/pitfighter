@@ -67,8 +67,13 @@ export function animate(v: Body, f: Fighter, w: World, time: number, dt: number,
   applyPose(v, tp.p, f.stop > 0 ? 0 : tp.rate, (tp.snap && f.stop === 0) || tp.impact, dt, jitter, tp.drive);
   footwork(v, tp.plant, dt, f.stop > 0);
   ragdoll(v, f, tp, dt, v.cue.from, v.cue.side, v.cue.face);
+  // lying down, which way up: the get-up goes by it
+  if (f.state === "down" || f.state === "ko") v.cue.lie = UP.set(0, 0, 1).transformDirection(v.spine.matrixWorld).y >= 0 ? 1 : -1;
+  else if (f.state !== "wakeup") v.cue.lie = 0;
   return tp;
 }
+
+const UP = new THREE.Vector3();
 
 /** A new state or move eases in from the pose the body was in over this many sim frames. */
 export const BLEND = 3;
