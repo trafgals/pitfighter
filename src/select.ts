@@ -29,6 +29,8 @@ export interface SelectResult {
 export class Select {
   slots: Slot[] = [];
   fighters = 8;
+  /** blood on or off (main.ts keeps it; the menu shows it) */
+  gore = true;
   stage: StageId = DEFAULT_STAGE;
   private prev = new Map<DeviceId, DeviceRead>();
   private el: HTMLElement;
@@ -53,7 +55,7 @@ export class Select {
       <div class="slots"></div>
       <div class="count"></div>
       <div class="help">${CONTROLS_HELP.map((l) => `<div>${l}</div>`).join("")}
-        <div>Join: J / Num4 / □ / Start · Move: stick · Confirm: J / □ / Start · Back: L / ○ · Fighters: - / + (L1 / R1) · Stage: [ / ] · Start: Enter / Start</div></div>`;
+        <div>Join: J / Num4 / □ / Start · Move: stick · Confirm: J / □ / Start · Back: L / ○ · Fighters: - / + (L1 / R1) · Stage: [ / ] · Blood: G · Start: Enter / Start</div></div>`;
     this.render();
   }
 
@@ -100,6 +102,11 @@ export class Select {
     }
     if (changed) this.render();
     if (start && this.slots.every((s) => s.ready)) this.start();
+  }
+
+  setGore(on: boolean): void {
+    this.gore = on;
+    this.render();
   }
 
   setCount(n: number): void {
@@ -161,6 +168,6 @@ export class Select {
       if (p < this.fighters) return `<div class="slot cpu" style="border-color:${c}"><b style="color:${c}">P${p + 1}</b> CPU<br><small>press □ / Start / J to join</small></div>`;
       return `<div class="slot off"><b>P${p + 1}</b> -</div>`;
     }).join("");
-    el.querySelector(".count")!.textContent = `${this.fighters} fighters · press Enter / Start when everyone is ready`;
+    el.querySelector(".count")!.textContent = `${this.fighters} fighters · blood ${this.gore ? "ON" : "OFF"} (G) · press Enter / Start when everyone is ready`;
   }
 }

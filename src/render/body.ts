@@ -249,6 +249,8 @@ export interface Body {
   head: THREE.Bone;
   tail: THREE.Group;
   limbs: Record<PartId, THREE.Object3D>; // arm / leg bones (plus head, torso) for visibility
+  /** the blood soaked into each part's skin, painted on as the part takes damage (paintWounds) */
+  wounds: Record<PartId, Wounds>;
   /** the raw end left at a shoulder or a hip when the limb is torn off, shown only then */
   stumps: Record<"armL" | "armR" | "legL" | "legR", THREE.Mesh>;
   joints: { elbowL: THREE.Bone; elbowR: THREE.Bone; kneeL: THREE.Bone; kneeR: THREE.Bone };
@@ -409,8 +411,18 @@ export function buildBody(f: Fighter): Body {
     torso: skinned(torsoGeo, torsoSkin),
     armL: skinned(armLGeo, armSkinL),
     armR: skinned(armRGeo, armSkinR),
-    legL: skinned(legGeo(-1, B.legL, B.kneeL), accent),
-    legR: skinned(legGeo(1, B.legR, B.kneeR), accent),
+    // each leg its own cloth, so its blood stays on it
+    legL: skinned(legGeo(-1, B.legL, B.kneeL), accent.clone()),
+    legR: skinned(legGeo(1, B.legR, B.kneeR), accent.clone()),
+  };
+  const wounded = (m: THREE.Material) => bleedInto(m as THREE.MeshStandardMaterial);
+  const wounds: Record<PartId, Wounds> = {
+    head: wounded(headSkin),
+    torso: wounded(torsoSkin),
+    armL: wounded(armSkinL),
+    armR: wounded(armSkinR),
+    legL: wounded(skins.legL.material as THREE.Material),
+    legR: wounded(skins.legR.material as THREE.Material),
   };
   root.updateMatrixWorld(true);
   const skeleton = new THREE.Skeleton(bones);
@@ -544,6 +556,7 @@ export function buildBody(f: Fighter): Body {
     head,
     tail,
     limbs,
+    wounds,
     stumps,
     joints: { elbowL, elbowR, kneeL, kneeR },
     ankles,
@@ -553,7 +566,7 @@ export function buildBody(f: Fighter): Body {
     settle: null,
     skeleton,
     skins,
-    mats: [skin, accent, torsoSkin, armSkinL, armSkinR, headSkin, jawSkin],
+    mats: [skin, accent, torsoSkin, armSkinL, armSkinR, headSkin, jawSkin, skins.legL.material as THREE.MeshStandardMaterial, skins.legR.material as THREE.MeshStandardMaterial],
     cur: stance(),
     vel: new Array(N_DOF).fill(0),
     hurt: { part: "torso", age: 99 },
@@ -985,6 +998,81 @@ export function applyPose(b: Body, target: Pose, rate: number, snap: boolean, dt
   for (const m of b.mats) {
     m.emissive.setScalar(b.flash);
   }
+}
+
+/** A part's blood: a mask, white where the skin is bloody, that darkens and wets the skin it is on. */
+export interface Wounds {
+  tex: THREE.DataTexture;
+  px: Uint8Array;
+  /** how many wounds are painted on it */
+  n: number;
+}
+
+/** The wound mask's size (round the part, along it), and how many wounds a part has at 0 HP. */
+const WOUND_W = 32;
+const WOUND_H = 64;
+export const WOUND_MAX = 16;
+
+/** Give a skin a wound mask: where it is white, the skin is dark, wet blood. */
+function bleedInto(m: THREE.MeshStandardMaterial): Wounds {
+  const px = new Uint8Array(WOUND_W * WOUND_H);
+  const tex = new THREE.DataTexture(px, WOUND_W, WOUND_H, THREE.RedFormat, THREE.UnsignedByteType);
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.magFilter = tex.minFilter = THREE.LinearFilter;
+  tex.needsUpdate = true;
+  m.defines = { ...m.defines, USE_UV: "" };
+  m.onBeforeCompile = (sh) => {
+    sh.uniforms.woundMap = { value: tex };
+    sh.fragmentShader =
+      "uniform sampler2D woundMap;\n" +
+      sh.fragmentShader
+        .replace(
+          "#include <map_fragment>",
+          "#include <map_fragment>\n  float wound = texture2D( woundMap, vUv ).r;\n  diffuseColor.rgb = mix( diffuseColor.rgb, vec3( 0.26, 0.0, 0.0 ), wound * 0.92 );",
+        )
+        .replace("#include <roughnessmap_fragment>", "#include <roughnessmap_fragment>\n  roughnessFactor = mix( roughnessFactor, 0.15, wound );");
+  };
+  m.customProgramCacheKey = () => "wounds";
+  return { tex, px, n: 0 };
+}
+
+const WOUND_PARTS: PartId[] = ["head", "torso", "armL", "armR", "legL", "legR"];
+
+/** Soak blood into each part's skin as it takes damage: a wound for every 1/WOUND_MAX of its HP gone; healed (respawned, regrown), it is clean again. */
+export function paintWounds(b: Body, f: Fighter): void {
+  WOUND_PARTS.forEach((part, pi) => {
+    const w = b.wounds[part];
+    const hp = f.parts[part];
+    const want = Math.round(Math.min(1, Math.max(0, 1 - hp.hp / hp.max)) * WOUND_MAX);
+    if (want < w.n - 2) {
+      w.px.fill(0);
+      w.n = 0;
+      w.tex.needsUpdate = true;
+    }
+    while (w.n < want) {
+      wound(w, f.id * 977 + pi * 131 + w.n * 17 + 1);
+      w.n++;
+      w.tex.needsUpdate = true;
+    }
+  });
+}
+
+/** One wound: a soft blot of blood (bigger as they pile up), wrapping round the part. */
+function wound(w: Wounds, seed: number): void {
+  let s = seed >>> 0;
+  const rnd = () => (s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 4294967296;
+  const cu = rnd() * WOUND_W;
+  const cv = (0.1 + 0.8 * rnd()) * WOUND_H;
+  const r = 2 + rnd() * 3 + w.n * 0.3;
+  for (let dy = -Math.ceil(r); dy <= Math.ceil(r); dy++)
+    for (let dx = -Math.ceil(r); dx <= Math.ceil(r); dx++) {
+      const y = Math.round(cv + dy);
+      if (y < 0 || y >= WOUND_H) continue;
+      const a = Math.min(1, Math.max(0, (r - Math.hypot(dx, dy)) / 1.5));
+      if (a <= 0) continue;
+      const i = y * WOUND_W + ((((Math.round(cu + dx) % WOUND_W) + WOUND_W) % WOUND_W) | 0);
+      w.px[i] = Math.max(w.px[i], Math.round(a * 255));
+    }
 }
 
 /** Show the limbs the fighter still has. */

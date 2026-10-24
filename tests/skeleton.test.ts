@@ -2,7 +2,7 @@
 // follow their targets on springs, and hits that whip the body.
 import * as THREE from "three";
 import { describe, expect, it } from "vitest";
-import { BONES, DAMPING, applyPose, buildBody, impulse, syncLimbs, targetPose, type Body } from "../src/render/body";
+import { BONES, DAMPING, WOUND_MAX, applyPose, buildBody, impulse, paintWounds, syncLimbs, targetPose, type Body } from "../src/render/body";
 import { World } from "../src/sim/world";
 
 const fighter = () => new World({ seed: 1, styles: [0, 0], humans: [true, true] }).fighters[0];
@@ -67,6 +67,30 @@ describe("the skeleton", () => {
     f.parts.armL.attached = true;
     syncLimbs(b, f);
     expect(b.stumps.armL.visible).toBe(false);
+  });
+
+  it("blood soaks into a part's skin as it takes damage, and is gone when it heals", () => {
+    const f = fighter();
+    const b = buildBody(f);
+    const blood = (p: "torso" | "head") => b.wounds[p].px.reduce((a, x) => a + x, 0);
+    paintWounds(b, f);
+    expect(blood("torso"), "unhurt, clean").toBe(0);
+    f.parts.torso.hp = f.parts.torso.max * 0.7;
+    paintWounds(b, f);
+    const some = blood("torso");
+    expect(some).toBeGreaterThan(0);
+    expect(blood("head"), "only where it was hurt").toBe(0);
+    f.parts.torso.hp = 0;
+    paintWounds(b, f);
+    expect(b.wounds.torso.n).toBe(WOUND_MAX);
+    expect(blood("torso")).toBeGreaterThan(some * 2);
+    // and the same every time: the wounds are seeded by fighter and part, not random
+    const again = buildBody(f);
+    paintWounds(again, f);
+    expect(again.wounds.torso.px).toEqual(b.wounds.torso.px);
+    f.parts.torso.hp = f.parts.torso.max;
+    paintWounds(b, f);
+    expect(blood("torso"), "healed").toBe(0);
   });
 
   it("the joints follow their targets on springs: a little overshoot, then they settle", () => {

@@ -129,7 +129,11 @@ On the character select:
 - pick a fighter with the stick, confirm with high strike, back out with grab;
 - set the number of fighters with `-` / `+` (or L1 / R1 on a pad);
 - pick the stage with `[` / `]`;
+- turn the blood on or off with `G` (the game remembers your choice);
 - start with Enter or Start.
+
+Each match opens with a 3, 2, 1 countdown. While it runs, every human's
+fighter stands in a column of their colour under a bouncing tag.
 
 Up to 8 gamepads work, and CPU fighters fill any empty slots.
 
@@ -141,7 +145,8 @@ npm run dev
 ```
 
 Then open http://localhost:5173. Add `?auto=1&seed=3` to skip straight into an 8-CPU match.
-Add `?lofi=1` to turn off bloom on slow machines, and `?mute=1` to start muted.
+Add `?lofi=1` to turn off bloom on slow machines, `?mute=1` to start muted, and `?gore=0` to play without blood.
+`?auto=1` skips the countdown unless you add `?countdown=1`.
 
 The game is published at https://trafgals.github.io/pitfighter/. Every push to
 `main` runs the unit tests, builds the game and deploys it to GitHub Pages

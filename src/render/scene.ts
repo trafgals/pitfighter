@@ -15,7 +15,7 @@ import { HAZARDS } from "../sim/arena";
 import type { StageId } from "../sim/stages";
 import { STYLES } from "../sim/styles";
 import { alive, type World } from "../sim/world";
-import { PLAYER_COLORS, buildBody, limbGeometry, syncLimbs, type Body, type Target } from "./body";
+import { PLAYER_COLORS, buildBody, limbGeometry, paintWounds, syncLimbs, type Body, type Target } from "./body";
 import { animate, onHit } from "./animate";
 import type { Cue } from "./cues";
 import { Fx } from "./fx";
@@ -532,7 +532,10 @@ export class Scene {
         v.root.position.y -= 0.5 * 0.012 * f.t * f.t;
       }
       syncLimbs(v, f);
-      if (this.gore) this.bleedOut(v, f, dt);
+      if (this.gore) {
+        this.bleedOut(v, f, dt);
+        paintWounds(v, f);
+      }
       v.flash = Math.max(0, v.flash - dt * 9);
       // the victim of a hit shudders while the hitstop holds it
       const jitter = f.stop > 0 && v.hurt.age < 0.3 ? 0.07 : 0;

@@ -191,7 +191,7 @@ body.playing #hud {
 }
 
 /* the countdown before a round: each number pops in big and fades */
-.count {
+.countdown {
   position: absolute;
   top: 38%;
   width: 100%;
@@ -204,11 +204,11 @@ body.playing #hud {
   opacity: 0;
   transform: translateY(-50%) scale(1.6);
 }
-.count.go {
+.countdown.go {
   color: var(--gold);
   font-size: clamp(56px, 12vw, 140px);
 }
-.count.show {
+.countdown.show {
   animation: count-pop 0.75s ease-out forwards;
 }
 @keyframes count-pop {

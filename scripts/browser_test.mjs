@@ -91,6 +91,18 @@ async function main() {
     `stage list: all five stages playable, Hell Toilet selected (${JSON.stringify(stages)})`,
   );
   await page.screenshot({ path: path.join(OUT, "1_select.png") });
+  // the menu's count line is shown, and G turns the blood off and on
+  const line = () => page.evaluate(() => {
+    const el = document.querySelector("#select .count");
+    return { text: el.textContent, opacity: getComputedStyle(el).opacity, gore: window.__game.scene.gore };
+  });
+  const before = await line();
+  await page.keyboard.press("KeyG");
+  const off = await line();
+  await page.keyboard.press("KeyG");
+  const on = await line();
+  check(before.opacity === "1" && /blood ON/.test(before.text) && before.gore, `the menu shows the fighter count and blood ON (${JSON.stringify(before)})`);
+  check(/blood OFF/.test(off.text) && !off.gore && /blood ON/.test(on.text) && on.gore, `G turns the blood off and on again (${off.text} / ${on.text})`);
 
   // P1 joins on the keyboard, moves the cursor two styles right, confirms, starts
   // the game reads the keyboard once per animation frame, and a slow software
@@ -118,7 +130,7 @@ async function main() {
   await press("Enter");
   // the countdown: the sim waits, a big number counts down, the human stands in a column of light under a bouncing tag
   await page.waitForFunction(() => window.__game.mode === "countdown", { timeout: 5_000 });
-  await page.waitForFunction(() => document.querySelector(".count.show")?.textContent === "2", { timeout: 5_000 });
+  await page.waitForFunction(() => document.querySelector(".countdown.show")?.textContent === "2", { timeout: 5_000 });
   const count = await page.evaluate(() => {
     const g = window.__game;
     const cards = document.querySelector("#hud .cards").getBoundingClientRect();
@@ -128,7 +140,7 @@ async function main() {
   check(count.inset > 40 && Math.abs(count.inset - count.cards) <= 2, `the camera frames the fight above the HUD cards (inset ${count.inset} px, cards ${count.cards} px)`);
   await page.screenshot({ path: path.join(OUT, "2_countdown.png") });
   await page.waitForFunction(() => window.__game.mode === "match", { timeout: 10_000 });
-  const went = await page.evaluate(() => [document.querySelector(".count").textContent, window.__game.scene.counting]);
+  const went = await page.evaluate(() => [document.querySelector(".countdown").textContent, window.__game.scene.counting]);
   check(went[0] === "START!" && !went[1], `then START! and the fight (${JSON.stringify(went)})`);
   const setup = await page.evaluate(() => window.__game.world.fighters.map((f) => ({ style: f.style, human: f.human, x: f.spawnX, y: f.spawnY })));
   check(setup.length === 8, `match starts with 8 fighters (${setup.length})`);
@@ -222,7 +234,8 @@ async function main() {
   await page.screenshot({ path: path.join(OUT, "4_heavy_hit.png") });
   // the blood those hits drew: drops thrown, and splats where they landed
   await new Promise((r) => setTimeout(r, 1200));
-  const gore = await page.evaluate(() => ({ ...window.__game.scene.fx.stats }));
+  const gore = await page.evaluate(() => ({ ...window.__game.scene.fx.stats, wounded: window.__game.scene.fighters.filter((v) => v.wounds.torso.n + v.wounds.head.n > 0).length }));
+  check(gore.wounded > 0, `the hurt are bloodied: ${gore.wounded} fighters' skins carry wounds`);
   check(gore.drops > 50 && gore.splats > 20, `hits draw blood that splats on the floor (${gore.drops} drops, ${gore.splats} splats)`);
   await page.screenshot({ path: path.join(OUT, "4b_blood.png") });
   const sp = await withTimeout(

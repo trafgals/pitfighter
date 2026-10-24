@@ -31,10 +31,10 @@ export class Hud {
     root.innerHTML = `
       <div class="throne"><div class="throne-name"></div><div class="throne-bar"><div class="throne-fill"></div></div></div>
       <div class="banner"></div>
-      <div class="count"></div>
+      <div class="countdown"></div>
       <div class="cards"></div>`;
     this.banner = root.querySelector(".banner")!;
-    this.count = root.querySelector(".count")!;
+    this.count = root.querySelector(".countdown")!;
     this.throne = root.querySelector(".throne")!;
     this.throneFill = root.querySelector(".throne-fill")!;
     this.throneName = root.querySelector(".throne-name")!;

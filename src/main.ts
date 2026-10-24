@@ -15,7 +15,18 @@ const canvas = document.querySelector<HTMLCanvasElement>("#view")!;
 const input = new Input();
 // ?lofi=1: no bloom and no shadows, for slow machines
 const scene = new Scene(canvas, params.get("lofi") === "1");
-scene.gore = params.get("gore") !== "0";
+const GORE_KEY = "pitfighter.gore";
+/** Blood on or off: ?gore=0 or 1 for this visit, else what G on the menu last chose. */
+function goreOn(): boolean {
+  const q = params.get("gore");
+  if (q !== null) return q !== "0";
+  try {
+    return localStorage.getItem(GORE_KEY) !== "0";
+  } catch {
+    return true;
+  }
+}
+scene.gore = goreOn();
 // ?debug=motion: the animation's state, per fighter, over the game
 if (params.get("debug") === "motion") {
   const el = document.createElement("pre");
@@ -59,7 +70,17 @@ window.addEventListener("keydown", (e) => {
   if (e.code === "Equal" || e.code === "NumpadAdd") select.setCount(select.fighters + 1);
   if (e.code === "BracketLeft") select.cycleStage(-1);
   if (e.code === "BracketRight") select.cycleStage(1);
+  if (e.code === "KeyG") {
+    scene.gore = !scene.gore;
+    select.setGore(scene.gore);
+    try {
+      localStorage.setItem(GORE_KEY, scene.gore ? "1" : "0");
+    } catch {
+      /* not remembered */
+    }
+  }
 });
+select.setGore(scene.gore);
 
 function startMatch(r: SelectResult, seed = Number(params.get("seed") ?? Date.now() >>> 0)): void {
   world = new World({ seed, styles: r.styles, humans: r.humans, stage: r.stage });
