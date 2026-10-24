@@ -62,6 +62,24 @@ frame of the sampler, and this game does not reproduce it.
 Enemy strike motions hit on frames 14–26. The thugs' jabs are slower than
 Brad's.
 
+## Reactions, knockdowns and throws
+
+`docs/calibration/urban-reign-reactions.json` holds the reaction motions read
+from EE RAM in the first story fight (probes 2–4, `an7.cjs`). It records frame
+numbers only. The renderer's clips are timed to it, and
+`tests/animation.test.ts` checks them against it.
+
+| | Urban Reign | Pitfighter |
+|---|---|---|
+| light hit reaction | one 41 f record per striking limb (actions 19, 20, 21) | hitstun 41; the reaction is chosen by height, side and strength |
+| heavy hit reactions | records of 46, 57, 59, 61 and 74 f (actions 24, 90, 179, 27, 256) | the sim's hitstun for the blow |
+| knockdown fall | reaches the floor on frame 11–38, median 27 (action 154) | `FALL_LAND` 27 |
+| on the floor | face up (action 170) or face down (177) | `DOWN_BACK` / `DOWN_FRONT`; face down after a blow from behind |
+| get-up | 50 f face up (168) or face down (175) | `DOWN.wake` 50, `WAKE_BACK` / `WAKE_FRONT` |
+| throw | the thrower's motion runs 48 f, the most common measurement (record 49) | `THROW_TIMING.end` 48 |
+
+Which heavy reaction goes with which height and direction is not measured yet.
+
 ## Every moveset, read from the executable
 
 The measurements above cover Brad and the first fight's thugs. The frame data of

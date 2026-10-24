@@ -78,7 +78,7 @@ The browser test checks that animating 8 fighters fits well inside a 60 fps fram
 ## Not done yet
 
 - **Clips for the decoded moveset actions** (the stick strings, the running strike, the ground attack) wait for the per-style movesets to be wired into the sim ([trafgals/pitfighter#1](https://github.com/trafgals/pitfighter/issues/1)). Today every style plays the shared string with its own timing.
-- **Reaction lengths by height and strength** beyond the light 41 f are not measured yet. Every reaction lasts the sim's hitstun for the blow, whatever its height and strength.
+- **Heavy reactions by height and direction.** Urban Reign's heavy reaction records (46–74 f) are measured (`docs/calibration.md`), but which one plays for which height and direction is not. Every reaction lasts the sim's hitstun for the blow.
 
 ## Timing table
 

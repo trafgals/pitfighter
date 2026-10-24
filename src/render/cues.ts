@@ -19,10 +19,15 @@ const LAND_AT = FALL_LAND;
 export class CueTracker {
   private moves: (string | null)[] = [];
   private starts: number[] = [];
+  /** each fighter's state on the previous step, and whether its "down" started from a throw (already on the floor) */
+  private states: string[] = [];
+  private thrown: boolean[] = [];
 
   reset(): void {
     this.moves = [];
     this.starts = [];
+    this.states = [];
+    this.thrown = [];
   }
 
   collect(w: World): Cue[] {
@@ -33,7 +38,10 @@ export class CueTracker {
       if (fresh && f.move) out.push({ kind: "swing", a: f.id, move: f.move, heavy: HEAVY.has(f.move) || f.charge > 20 });
       this.moves[f.id] = f.state === "attack" ? f.move : null;
       this.starts[f.id] = start;
-      if (f.state === "down" && f.t === LAND_AT && f.stop === 0) out.push({ kind: "land", a: f.id });
+      // a knockdown hits the floor partway into "down"; a thrown body hits it as "down" starts
+      if (f.state === "down" && this.states[f.id] !== "down") this.thrown[f.id] = this.states[f.id] === "thrown";
+      if (f.state === "down" && f.stop === 0 && f.t === (this.thrown[f.id] ? 0 : LAND_AT)) out.push({ kind: "land", a: f.id });
+      this.states[f.id] = f.state;
     }
     return out;
   }
