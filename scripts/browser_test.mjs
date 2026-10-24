@@ -116,7 +116,20 @@ async function main() {
   const stageAfter = await page.evaluate(() => window.__game.select.stage);
   check(stageAfter === "hell-toilet", `[ goes back to Hell Toilet (${stageAfter})`);
   await press("Enter");
+  // the countdown: the sim waits, a big number counts down, the human stands in a column of light under a bouncing tag
+  await page.waitForFunction(() => window.__game.mode === "countdown", { timeout: 5_000 });
+  await page.waitForFunction(() => document.querySelector(".count.show")?.textContent === "2", { timeout: 5_000 });
+  const count = await page.evaluate(() => {
+    const g = window.__game;
+    const cards = document.querySelector("#hud .cards").getBoundingClientRect();
+    return { frame: g.world.s.frame, inset: g.scene.inset, cards: Math.round(innerHeight - cards.top), counting: g.scene.counting };
+  });
+  check(count.frame === 0 && count.counting, `the countdown holds the sim at frame 0 with the beacons up (${JSON.stringify(count)})`);
+  check(count.inset > 40 && Math.abs(count.inset - count.cards) <= 2, `the camera frames the fight above the HUD cards (inset ${count.inset} px, cards ${count.cards} px)`);
+  await page.screenshot({ path: path.join(OUT, "2_countdown.png") });
   await page.waitForFunction(() => window.__game.mode === "match", { timeout: 10_000 });
+  const went = await page.evaluate(() => [document.querySelector(".count").textContent, window.__game.scene.counting]);
+  check(went[0] === "START!" && !went[1], `then START! and the fight (${JSON.stringify(went)})`);
   const setup = await page.evaluate(() => window.__game.world.fighters.map((f) => ({ style: f.style, human: f.human, x: f.spawnX, y: f.spawnY })));
   check(setup.length === 8, `match starts with 8 fighters (${setup.length})`);
   const worldStage = await page.evaluate(() => window.__game.world.s.stage);

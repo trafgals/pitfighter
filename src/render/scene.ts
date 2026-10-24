@@ -33,25 +33,39 @@ interface FighterView extends Body {
   ring: THREE.Mesh;
   fury: THREE.Mesh;
   label: THREE.Sprite;
+  /** a column of light over a human through the countdown, so each player finds their fighter */
+  beacon: THREE.Mesh | null;
   stars: THREE.Group;
   aura: THREE.Mesh;
   marker: THREE.Mesh | null; // a human's lock-on chevron, floating over their target
   fell: boolean; // went over the edge: stays out of sight until it respawns
 }
 
-function labelSprite(text: string, color: number): THREE.Sprite {
-  const tex = canvasTexture(128, 64, (g) => {
-    g.font = "bold 44px system-ui, sans-serif";
+/** The tag over a fighter's head: "P2·cpu" small, a human's "P1" twice the size with an arrow down to the head. */
+function labelSprite(text: string, color: number, human: boolean): THREE.Sprite {
+  const tex = canvasTexture(128, human ? 128 : 64, (g) => {
+    const css = "#" + color.toString(16).padStart(6, "0");
+    g.font = `900 ${human ? 52 : 44}px system-ui, sans-serif`;
     g.textAlign = "center";
     g.textBaseline = "middle";
     g.lineWidth = 8;
+    g.lineJoin = "round";
     g.strokeStyle = "#000";
     g.strokeText(text, 64, 34);
-    g.fillStyle = "#" + color.toString(16).padStart(6, "0");
+    g.fillStyle = css;
     g.fillText(text, 64, 34);
+    if (human) {
+      g.beginPath();
+      g.moveTo(40, 70);
+      g.lineTo(88, 70);
+      g.lineTo(64, 110);
+      g.closePath();
+      g.stroke();
+      g.fill();
+    }
   });
   const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false, transparent: true }));
-  s.scale.set(0.8, 0.4, 1);
+  s.scale.set(human ? 1.3 : 0.8, human ? 1.3 : 0.4, 1);
   s.renderOrder = 10;
   return s;
 }
@@ -75,6 +89,10 @@ export class Scene {
   private punchAt = new THREE.Vector3();
   private hype = 0; // how loud the crowd is, 0..1
   private motion: MotionDebug | null = null; // ?debug=motion
+  /** pixels at the bottom of the canvas the HUD covers: the camera frames the fight above them */
+  private inset = 0;
+  /** the countdown before a round: the humans' beacons are up */
+  private counting = false;
 
   constructor(
     readonly canvas: HTMLCanvasElement,
@@ -110,7 +128,24 @@ export class Scene {
     this.renderer.setSize(w, h, false);
     this.composer?.setSize(w, h);
     this.camera.aspect = w / h;
+    // the picture's centre is the middle of what the HUD leaves uncovered
+    const inset = Math.min(this.inset, h * 0.4);
+    if (inset > 0) this.camera.setViewOffset(w, h + inset, 0, inset, w, h);
+    else this.camera.clearViewOffset();
     this.camera.updateProjectionMatrix();
+  }
+
+  /** How many pixels at the bottom of the canvas the HUD covers. */
+  setInset(px: number): void {
+    const v = Math.max(0, Math.round(px));
+    if (v === this.inset) return;
+    this.inset = v;
+    this.resize();
+  }
+
+  /** The countdown before a round: up, every human's fighter stands in a column of their colour. */
+  countdown(on: boolean): void {
+    this.counting = on;
   }
 
   // ---------------------------------------------------------------- arena
@@ -148,9 +183,27 @@ export class Scene {
     fury.rotation.x = -Math.PI / 2;
     fury.position.y = 0.03;
     b.root.add(fury);
-    const label = labelSprite(`P${f.id + 1}${f.human ? "" : "·cpu"}`, pc);
-    label.position.y = 2.15;
+    const label = labelSprite(`P${f.id + 1}${f.human ? "" : "·cpu"}`, pc, f.human);
+    label.position.y = f.human ? 2.45 : 2.15;
     b.root.add(label);
+    let beacon: THREE.Mesh | null = null;
+    if (f.human) {
+      // bright at the floor, fading out above the head
+      const fade = canvasTexture(4, 64, (g) => {
+        const grad = g.createLinearGradient(0, 0, 0, 64);
+        grad.addColorStop(0, "rgba(255,255,255,0)");
+        grad.addColorStop(1, "rgba(255,255,255,1)");
+        g.fillStyle = grad;
+        g.fillRect(0, 0, 4, 64);
+      });
+      beacon = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.5, 0.6, 3.4, 24, 1, true),
+        new THREE.MeshBasicMaterial({ color: pc, alphaMap: fade, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }),
+      );
+      beacon.position.y = 1.7;
+      beacon.visible = false;
+      b.root.add(beacon);
+    }
 
     const stars = new THREE.Group();
     for (let i = 0; i < 3; i++) {
@@ -176,7 +229,7 @@ export class Scene {
       this.scene.add(marker);
     }
     this.scene.add(b.root);
-    return { ...b, ring, fury, label, stars, aura, marker, fell: false };
+    return { ...b, ring, fury, label, beacon, stars, aura, marker, fell: false };
   }
 
   attach(world: World): void {
@@ -460,6 +513,12 @@ export class Scene {
       else if (alive(f)) v.fell = false;
       v.root.visible = !(v.fell && f.state !== "falling") && v.root.position.y > -60;
       v.label.visible = !gone;
+      if (v.beacon) {
+        v.beacon.visible = this.counting;
+        (v.beacon.material as THREE.MeshBasicMaterial).opacity = 0.35 + 0.15 * Math.sin(time * 7);
+        // through the countdown the human's tag bounces
+        v.label.position.y = 2.45 + (this.counting ? Math.abs(Math.sin(time * 5)) * 0.35 : 0);
+      }
       v.ring.visible = !gone && f.state !== "driving" && f.state !== "falling";
       if (v.marker) {
         const tg = s.fighters[f.target];
@@ -517,7 +576,12 @@ export class Scene {
     centre.lerp(new THREE.Vector3(0, 0, 0), 0.35);
     const k = 1 - Math.exp(-dt * 3);
     this.camTarget.lerp(centre, k);
-    this.camDist += (Math.min(26, 9 + spread * 1.5) - this.camDist) * k;
+    // stand back by as much more as the HUD covers, so everyone stays in the picture above it
+    const h = this.canvas.clientHeight || window.innerHeight;
+    // (the view offset narrows the lens to h of h + inset, and the fight has h - inset of that)
+    const hud = Math.min(this.inset, h * 0.4);
+    const cover = h > 0 ? (h + hud) / (h - hud) : 1;
+    this.camDist += (Math.min(26 * cover, (9 + spread * 1.5) * cover) - this.camDist) * k;
     this.punch *= Math.exp(-dt * 4);
     const pk = this.punch * this.punch;
     const tx = this.camTarget.x + (this.punchAt.x - this.camTarget.x) * pk * 0.35;

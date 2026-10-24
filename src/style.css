@@ -190,6 +190,46 @@ body.playing #hud {
   transform: scale(1);
 }
 
+/* the countdown before a round: each number pops in big and fades */
+.count {
+  position: absolute;
+  top: 38%;
+  width: 100%;
+  text-align: center;
+  font-size: clamp(80px, 18vw, 200px);
+  font-weight: 900;
+  line-height: 1;
+  color: #fff;
+  text-shadow: 0 0 24px #f40, 0 6px 0 #000;
+  opacity: 0;
+  transform: translateY(-50%) scale(1.6);
+}
+.count.go {
+  color: var(--gold);
+  font-size: clamp(56px, 12vw, 140px);
+}
+.count.show {
+  animation: count-pop 0.75s ease-out forwards;
+}
+@keyframes count-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(-50%) scale(1.8);
+  }
+  15% {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+  75% {
+    opacity: 1;
+    transform: translateY(-50%) scale(0.95);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-50%) scale(0.9);
+  }
+}
+
 /* ------------------------------------------------------------ select */
 #select {
   position: fixed;

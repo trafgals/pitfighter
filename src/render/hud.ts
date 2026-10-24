@@ -22,6 +22,7 @@ export class Hud {
   private cards: { el: HTMLElement; parts: Record<PartId, HTMLElement>; bar: HTMLElement; fury: HTMLElement; kos: HTMLElement; state: HTMLElement }[] = [];
   private banner: HTMLElement;
   private bannerT = 0;
+  private count: HTMLElement;
   private throne: HTMLElement;
   private throneFill: HTMLElement;
   private throneName: HTMLElement;
@@ -30,8 +31,10 @@ export class Hud {
     root.innerHTML = `
       <div class="throne"><div class="throne-name"></div><div class="throne-bar"><div class="throne-fill"></div></div></div>
       <div class="banner"></div>
+      <div class="count"></div>
       <div class="cards"></div>`;
     this.banner = root.querySelector(".banner")!;
+    this.count = root.querySelector(".count")!;
     this.throne = root.querySelector(".throne")!;
     this.throneFill = root.querySelector(".throne-fill")!;
     this.throneName = root.querySelector(".throne-name")!;
@@ -61,6 +64,27 @@ export class Hud {
       for (const p of PARTS) parts[p] = el.querySelector(`.${p}`)!;
       return { el, parts, bar: el.querySelector(".tfill")!, fury: el.querySelector(".ffill")!, kos: el.querySelector(".kos")!, state: el.querySelector(".state")! };
     });
+  }
+
+  /** The countdown's big call in the middle of the screen ("3", "2", "1", "START!"), or nothing. */
+  countdown(text: string | null): void {
+    if (text === null) {
+      this.count.classList.remove("show");
+      return;
+    }
+    if (this.count.textContent === text && this.count.classList.contains("show")) return;
+    this.count.textContent = text;
+    this.count.classList.toggle("go", !/^\d$/.test(text));
+    // restart the pop for each number
+    this.count.classList.remove("show");
+    void this.count.offsetWidth;
+    this.count.classList.add("show");
+  }
+
+  /** The height (px) of the fighter cards along the bottom: what the camera must keep the fight above. */
+  get inset(): number {
+    const c = this.root.querySelector(".cards")!.getBoundingClientRect();
+    return c.height > 0 ? window.innerHeight - c.top : 0;
   }
 
   say(text: string, frames = 90): void {

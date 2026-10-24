@@ -27,13 +27,19 @@ const cues = new CueTracker();
 const hud = new Hud(document.querySelector<HTMLElement>("#hud")!);
 const overEl = document.querySelector<HTMLElement>("#over")!;
 
-type Mode = "select" | "match" | "over";
+type Mode = "select" | "countdown" | "match" | "over";
 let mode: Mode = "select";
 let world: World | null = null;
 let bots: (Bot | null)[] = [];
 let devices: (DeviceId | null)[] = [];
 let acc = 0;
 let overT = 0;
+let countT = 0;
+/** The countdown before each round: 3, 2, 1, each this long (s); then START! and the fight. The sim waits. */
+const BEAT = 0.75;
+// ?auto=1 (the tests, the demo) starts at once unless ?countdown=1
+const COUNTDOWN = params.get("countdown") === "1" || (params.get("countdown") !== "0" && !params.get("auto"));
+let opener = "";
 let lastStart = false;
 
 const OPENERS: Record<StageId, string> = {
@@ -66,10 +72,29 @@ function startMatch(r: SelectResult, seed = Number(params.get("seed") ?? Date.no
   select.show(false);
   overEl.classList.remove("show");
   document.body.classList.add("playing");
+  acc = 0;
+  opener = OPENERS[r.stage];
+  scene.setInset(hud.inset);
+  if (COUNTDOWN) {
+    mode = "countdown";
+    countT = 0;
+    scene.countdown(true);
+  } else go();
+}
+
+/** The round starts: START!, the stage's opener, and the sim runs. */
+function go(): void {
   mode = "match";
   acc = 0;
-  hud.say(OPENERS[r.stage], 120);
+  scene.countdown(false);
+  hud.countdown("START!");
+  hud.say(opener, 120);
 }
+
+// the camera keeps the fight above the fighter cards, however tall they wrap
+const fitHud = () => scene.setInset(mode === "select" ? 0 : hud.inset);
+window.addEventListener("resize", fitHud);
+new ResizeObserver(fitHud).observe(document.querySelector("#hud .cards")!);
 
 function stepOnce(): void {
   if (!world) return;
@@ -98,7 +123,12 @@ function frame(now: number): void {
   const dt = Math.min(0.1, (now - last) / 1000);
   last = now;
   if (mode === "select") select.poll();
-  else if (mode === "match") {
+  else if (mode === "countdown") {
+    countT += dt;
+    const n = 3 - Math.floor(countT / BEAT);
+    if (n >= 1) hud.countdown(String(n));
+    else go();
+  } else if (mode === "match") {
     acc += dt;
     let n = 0;
     while (acc >= 1 / FPS && n < 5) {
@@ -114,6 +144,8 @@ function frame(now: number): void {
       mode = "select";
       overEl.classList.remove("show");
       document.body.classList.remove("playing");
+      hud.countdown(null);
+      scene.setInset(0);
       select.show(true);
     }
     lastStart = anyStart;
