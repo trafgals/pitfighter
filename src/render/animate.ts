@@ -15,7 +15,7 @@ import * as THREE from "three";
 import type { Fighter, PartId } from "../sim/types";
 import type { World } from "../sim/world";
 import { LEG, applyPose, copyPose, impulse, targetPose, type Body, type Foot, type Target } from "./body";
-import { clipFor, heightOf, reactionFor, type HitStrength, type Plant } from "./motion";
+import { clipFor, heightOf, mix, reactionFor, type HitStrength, type Plant } from "./motion";
 
 /** Which side of the victim a blow comes from (1: its right, the +x side; -1: its left), and whether it comes from behind. */
 export function hitSide(a: Fighter | undefined, d: Fighter): { side: 1 | -1; behind: boolean } {
@@ -58,12 +58,45 @@ export function animate(v: Body, f: Fighter, w: World, time: number, dt: number,
   }
   if (f.state !== "hitstun") v.cue.react = null;
   const tp = targetPose(f, w, time, v.hurt, v.cue);
+  blendIn(v, f, tp, dt);
   if (f.state === "ko") tp.p.y -= Math.min(1.2, f.t / 120);
   // nothing moves during a hitstop: the pose holds too
   // (a knee or a throw jumps onto its landing pose, so the freeze holds the blow, not the wind-up)
   applyPose(v, tp.p, f.stop > 0 ? 0 : tp.rate, (tp.snap && f.stop === 0) || tp.impact, dt, jitter, tp.drive);
   footwork(v, tp.plant, dt, f.stop > 0);
   return tp;
+}
+
+/** A new state or move eases in from the pose the body was in over this many sim frames. */
+export const BLEND = 3;
+
+/**
+ * A cancel, a string's next blow or a change of state starts from wherever the
+ * body was, not from the stance: the target blends out of that pose over
+ * BLEND frames, and always lands on the clip by its contact frame. A reaction
+ * already plays on the pose the blow found, so it is left alone.
+ */
+function blendIn(v: Body, f: Fighter, tp: Target, dt: number): void {
+  const c = v.cue;
+  const key = `${f.state}:${f.move ?? ""}`;
+  if (key !== c.key || f.t < c.at) {
+    c.key = key;
+    c.start = f.t;
+    c.age = 0;
+    c.blend = f.state === "hitstun" || tp.impact ? null : copyPose(v.cur);
+  }
+  c.at = f.t;
+  if (!c.blend) return;
+  // a state whose clock the sim holds still (a seat, a ride) still blends in, on the render's clock; a hitstop holds it
+  if (f.stop === 0) c.age += dt * 60;
+  const n = tp.T ? Math.min(BLEND, tp.T.hit - c.start) : BLEND;
+  const e = Math.max(f.t - c.start, Math.floor(c.age + 1e-6) - 1);
+  if (n <= 0 || e >= n) {
+    c.blend = null;
+    return;
+  }
+  const k = e / n;
+  tp.p = mix(c.blend, tp.p, k * k * (3 - 2 * k));
 }
 
 // ---------------------------------------------------------------- the legs

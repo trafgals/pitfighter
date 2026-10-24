@@ -6,7 +6,7 @@
 import { describe, expect, it } from "vitest";
 import * as THREE from "three";
 import { buildBody, stance, targetPose, type Body } from "../src/render/body";
-import { animate, ankleOf, hitSide, onHit, strideOf } from "../src/render/animate";
+import { BLEND, animate, ankleOf, hitSide, onHit, strideOf } from "../src/render/animate";
 import { DOWN_BACK, DOWN_FRONT, FALL_LAND, REACTION_CLIPS, THROW_TIMING, WAKE_BACK, WAKE_FRONT, clipFor, familyOf, stateTiming, type Clip } from "../src/render/motion";
 import { DOWN, MOVES } from "../src/sim/moves";
 import { STYLES } from "../src/sim/styles";
@@ -318,5 +318,47 @@ describe("timed to Urban Reign", () => {
     const throws = REACT.grapple.throw.measured;
     expect(throws.filter((n) => n === THROW_TIMING.end).length).toBeGreaterThanOrEqual(throws.length / 2);
     expect(stateTiming(DOWN.wake).end).toBe(DOWN.wake);
+  });
+});
+
+describe("transitions", () => {
+  const flat = (p: object): number[] => Object.values(p).flatMap((x) => (Array.isArray(x) ? x : [x]));
+  const gap = (a: object, b: object) => Math.max(...flat(a).map((x, i) => Math.abs(x - flat(b)[i])));
+
+  it("a string's next blow starts from where the last one left the body, and is on its clip by the contact frame", () => {
+    for (let style = 0; style < STYLES.length; style++)
+      for (const [a, next] of [["jab1", "jab2"], ["jab2", "jab3"], ["kick1", "kick2"]] as const) {
+        const { w, f, b, time } = standing(style);
+        const ma = w.eff(f, a);
+        Object.assign(f, { state: "attack", move: a, chargeHeld: false, charge: 0 });
+        // cancelled on the first recovery frame
+        play(b, f, w, time, 0, ma.startup + ma.active);
+        const before = JSON.parse(JSON.stringify(b.cur));
+        f.move = next;
+        const m = w.eff(f, next);
+        const why = `${STYLES[style].style} ${a} > ${next}`;
+        for (let t = 0; t <= m.startup; t++) {
+          f.t = t;
+          time.t += DT;
+          const tp = animate(b, f, w, time.t, DT);
+          const clean = targetPose(f, w, time.t, b.hurt, b.cue).p;
+          if (t === 0) expect(gap(tp.p, before), why).toBeLessThan(1e-6);
+          if (t >= Math.min(BLEND, m.startup)) expect(gap(tp.p, clean), `${why} frame ${t}`).toBeLessThan(1e-6);
+          if (t > 0 && t < Math.min(BLEND, m.startup)) expect(gap(tp.p, clean), `${why} frame ${t}`).toBeGreaterThan(0);
+        }
+      }
+  });
+
+  it("standing, stalking or guarding, the head and the chest turn to the soft-lock target", () => {
+    for (const side of [1, -1]) {
+      const { w, f, b, time } = standing(0);
+      const o = w.fighters[1];
+      Object.assign(f, { state: "guard", t: 0, x: 0, y: 0, facing: 0, target: 1 });
+      Object.assign(o, { x: 0.8, y: 2 * side });
+      const base = targetPose({ ...f, target: -1 } as Fighter, w, time.t, b.hurt, b.cue).p;
+      for (let i = 0; i < 40; i++) step(b, f, w, time);
+      expect((b.cur.headY - base.headY) * side, `target on side ${side}`).toBeGreaterThan(0.4);
+      expect((b.cur.spineY - base.spineY) * side).toBeGreaterThan(0.2);
+    }
   });
 });

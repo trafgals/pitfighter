@@ -541,8 +541,15 @@ export interface Cue {
   react: { clip: Clip; mirror: boolean; from: Pose } | null;
   /** which way up a knockdown lands: 1 on the back, -1 on the front (a blow from behind) */
   face: 1 | -1;
+  /** the state and move playing, the frame it started on, the last frame seen, and the pose the body was in when it started (blended out of) */
+  key: string;
+  start: number;
+  at: number;
+  /** render frames since it started, hitstops left out */
+  age: number;
+  blend: Pose | null;
 }
-export const noCue = (): Cue => ({ last: null, from: null, throwAge: 99, react: null, face: 1 });
+export const noCue = (): Cue => ({ last: null, from: null, throwAge: 99, react: null, face: 1, key: "", start: 0, at: 0, age: 0, blend: null });
 
 /** What targetPose decided, besides the pose: which feet carry the weight, and what is playing (for the debug overlay and the strips). */
 export interface Target {
@@ -556,6 +563,14 @@ export interface Target {
   label: string;
   phase?: MovePhase;
   T?: Timing;
+}
+
+/** How far round (rad, + to the fighter's right) its soft-lock target stands from where it faces, held to what a neck and chest can turn. */
+export function lookAngle(f: Fighter, w: World): number {
+  const o = f.target >= 0 ? w.fighters[f.target] : undefined;
+  if (!o || o === f) return 0;
+  const a = wrapPi(Math.atan2(o.y - f.y, o.x - f.x) - f.facing);
+  return Math.max(-1.1, Math.min(1.1, a));
 }
 
 /** The pose a fighter should be in right now. */
@@ -802,6 +817,13 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
       break;
     default:
       break;
+  }
+
+  // the soft-lock target: standing, stalking or guarding, the head and the guard turn to it
+  if (f.state === "idle" || f.state === "walk" || f.state === "guard") {
+    const a = lookAngle(f, w);
+    p.headY += a * 0.55;
+    p.spineY += a * 0.3;
   }
 
   // one leg: hop; no legs: drag the torso along the floor
