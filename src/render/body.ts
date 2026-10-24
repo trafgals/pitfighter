@@ -17,7 +17,47 @@ import { STYLES } from "../sim/styles";
 import { legs, type World } from "../sim/world";
 import { painted, surface, type Surface } from "./textures";
 import { armRecipe, faceRecipe, jawRecipe, lookOf, torsoRecipe } from "./anatomy";
-import { CLINCH, DOWN_LANDED, GRAB_TIMING, HELD, KNEE_TIMING, REACTIONS, REVERSAL_TIMING, THROWER, THROWN, THROW_TIMING, clinchKnee, clipFor, hitClip, loadFrame, mirror, sampleClip, stateTiming, type Clip, type Timing } from "./motion";
+import {
+  CLINCH,
+  DOWN_BACK,
+  DOWN_FRONT,
+  DOWN_LANDED,
+  FALL_LAND,
+  GRAB_TIMING,
+  HELD,
+  IDLE,
+  KNEE_TIMING,
+  REACTIONS,
+  REVERSAL_TIMING,
+  STANCES,
+  THROWER,
+  THROWN,
+  THROW_TIMING,
+  WAKE_BACK,
+  WAKE_FRONT,
+  ZERO,
+  addPose,
+  clinchKnee,
+  clipFor,
+  familyOf,
+  heightOf,
+  loadFrame,
+  mirror,
+  mirrorOffset,
+  mix,
+  phaseOf,
+  plantAt,
+  reactionFor,
+  sampleClip,
+  sampleOverlap,
+  stateTiming,
+  type Clip,
+  type Family,
+  type Limb,
+  type MovePhase,
+  type Plant,
+  type Timing,
+} from "./motion";
 
 export const PLAYER_COLORS = [0xff3b3b, 0x3b8bff, 0x4cff6a, 0xffd23b, 0xff6bf0, 0x3bf0ff, 0xff9a3b, 0xb07bff];
 
@@ -41,6 +81,7 @@ export interface Pose {
   spineY: number; // twist
   spineZ: number;
   headX: number;
+  headY: number; // the head's own turn, on top of the half-turn that keeps it on the target
   headZ: number;
   armL: [number, number, number];
   armR: [number, number, number];
@@ -54,13 +95,14 @@ export interface Pose {
   tail: number;
 }
 
-const KEYS = ["y", "z", "rx", "ry", "rz", "spineX", "spineY", "spineZ", "headX", "headZ", "elbowL", "elbowR", "kneeL", "kneeR", "hipY", "tail"] as const;
+const KEYS = ["y", "z", "rx", "ry", "rz", "spineX", "spineY", "spineZ", "headX", "headY", "headZ", "elbowL", "elbowR", "kneeL", "kneeR", "hipY", "tail"] as const;
 const WRAP = new Set(["ry", "rz"]);
 /** Number of springs in a pose: the scalars, then armL, armR (3 each), legL, legR (2 each). */
 const N_DOF = KEYS.length + 10;
 
-function stance(): Pose {
-  return {
+/** The stance a family fights from: the bladed street stance with the family's guard laid over it. */
+export function stance(family?: Family): Pose {
+  const p: Pose = {
     y: -0.04,
     z: 0,
     rx: 0,
@@ -70,6 +112,7 @@ function stance(): Pose {
     spineY: 0,
     spineZ: 0,
     headX: -0.05,
+    headY: 0,
     headZ: 0,
     armL: [-0.8, 0, 0.18], // the lead hand, out in front
     armR: [-0.45, 0, -0.28], // the rear fist, back at the chin
@@ -82,7 +125,9 @@ function stance(): Pose {
     hipY: 0,
     tail: 0,
   };
+  return family ? copyPose(Object.assign(p, STANCES[family])) : p;
 }
+export const copyPose = (p: Pose): Pose => ({ ...p, armL: [...p.armL], armR: [...p.armR], legL: [...p.legL], legR: [...p.legR] });
 
 const lerp = (a: number, b: number, k: number) => a + (b - a) * k;
 
@@ -204,6 +249,11 @@ export interface Body {
   tail: THREE.Group;
   limbs: Record<PartId, THREE.Object3D>; // arm / leg bones (plus head, torso) for visibility
   joints: { elbowL: THREE.Bone; elbowR: THREE.Bone; kneeL: THREE.Bone; kneeR: THREE.Bone };
+  ankles: { L: THREE.Group; R: THREE.Group };
+  /** where each foot is on the floor (world space) while it carries weight, and how far the leg IK has it (animate.ts) */
+  feet: { L: Foot; R: Foot };
+  /** the walk cycle: its phase (one per stride of both feet), where the root was last frame, its speed (m/s) */
+  gait: { phase: number; prev: THREE.Vector3 | null; speed: number; on: boolean };
   skeleton: THREE.Skeleton;
   skins: Record<"torso" | "armL" | "armR" | "legL" | "legR", THREE.SkinnedMesh>;
   mats: THREE.MeshStandardMaterial[];
@@ -215,6 +265,18 @@ export interface Body {
   cue: Cue;
   flash: number; // white hit flash, 0..1
 }
+
+/** A foot on the IK: planted at `at`, or swinging from `from` to wherever it lands; w eases the IK in and out. */
+export interface Foot {
+  down: boolean;
+  at: THREE.Vector3;
+  swing: { from: THREE.Vector3; u: number; dur: number } | null;
+  w: number;
+}
+const newFoot = (): Foot => ({ down: false, at: new THREE.Vector3(), swing: null, w: 0 });
+
+/** Bone lengths and the ankle's height over the floor standing straight (body units, before the style's scale). */
+export const LEG = { thigh: THIGH, shin: SHIN, hipY: HIP_Y, ankle: HIP_Y - THIGH - SHIN, footX: 0.11 };
 
 export function buildBody(f: Fighter): Body {
   const st = STYLES[f.style];
@@ -418,15 +480,22 @@ export function buildBody(f: Fighter): Body {
     thumb.rotation.z = side * 0.6;
     el.add(fist, thumb);
   }
-  for (const kn of [kneeL, kneeR]) {
+  // the feet hang on ankles at the end of the shins, so a planted foot can lie flat on the floor
+  const ankles = { L: new THREE.Group(), R: new THREE.Group() };
+  for (const [kn, an] of [
+    [kneeL, ankles.L],
+    [kneeR, ankles.R],
+  ] as const) {
     kn.add(mesh(new THREE.SphereGeometry(0.06, 12, 10), accent));
+    an.position.y = -SHIN;
+    kn.add(an);
     // a rounded boot with a toe cap
     const foot = mesh(new THREE.SphereGeometry(0.075, 16, 12), skin);
     foot.scale.set(0.8, 0.5, 1.7);
-    foot.position.set(0, -SHIN - 0.03, 0.05);
+    foot.position.set(0, -0.03, 0.05);
     const sole = mesh(new THREE.BoxGeometry(0.12, 0.02, 0.25), accent);
-    sole.position.set(0, -SHIN - 0.065, 0.05);
-    kn.add(foot, sole);
+    sole.position.set(0, -0.065, 0.05);
+    an.add(foot, sole);
   }
 
   // the devil's tail
@@ -449,6 +518,9 @@ export function buildBody(f: Fighter): Body {
     tail,
     limbs,
     joints: { elbowL, elbowR, kneeL, kneeR },
+    ankles,
+    feet: { L: newFoot(), R: newFoot() },
+    gait: { phase: 0, prev: null, speed: 0, on: false },
     skeleton,
     skins,
     mats: [skin, accent, torsoSkin, armSkinL, armSkinR, headSkin, jawSkin],
@@ -465,12 +537,36 @@ export interface Cue {
   last: Fighter["state"] | null;
   from: Fighter["state"] | null;
   throwAge: number;
+  /** the reaction the last blow started: its offset clip (for a blow on the right), mirrored for the left, played on the pose the blow found */
+  react: { clip: Clip; mirror: boolean; from: Pose } | null;
+  /** which way up a knockdown lands: 1 on the back, -1 on the front (a blow from behind) */
+  face: 1 | -1;
 }
-export const noCue = (): Cue => ({ last: null, from: null, throwAge: 99 });
+export const noCue = (): Cue => ({ last: null, from: null, throwAge: 99, react: null, face: 1 });
+
+/** What targetPose decided, besides the pose: which feet carry the weight, and what is playing (for the debug overlay and the strips). */
+export interface Target {
+  p: Pose;
+  rate: number;
+  snap: boolean;
+  impact: boolean;
+  plant: Plant | "gait";
+  /** the striking limb, driven straight along its clip (no spring lag) from the fire to the end of the active frames */
+  drive: Limb | null;
+  label: string;
+  phase?: MovePhase;
+  T?: Timing;
+}
 
 /** The pose a fighter should be in right now. */
-export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"], cue: Cue = noCue()): { p: Pose; rate: number; snap: boolean; impact: boolean } {
-  const p = stance();
+export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"], cue: Cue = noCue()): Target {
+  const family = familyOf(f.style);
+  const p = stance(family);
+  let plant: Target["plant"] = "both";
+  let drive: Limb | null = null;
+  let label: string = f.state;
+  let phase: MovePhase | undefined;
+  let timing: Timing | undefined;
   let rate = 22; // 1/s: how fast the body eases toward the target
   let snap = false;
   let impact = false; // jump onto the pose even in hitstop: the blow it lands is what froze the body
@@ -491,42 +587,51 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
   };
   // play a keyframed clip (src/render/motion.ts) from the bladed stance; a strike
   // thrown with a limb the fighter has lost is thrown with the other one
-  const play = (clip: Clip, at: number, T: Timing, from?: Pose) => {
+  let limbOf: Limb = "body";
+  const play = (clip: Clip, at: number, T: Timing, from?: Pose, overlap = false) => {
     if (!from) blade();
-    let q = sampleClip(clip, at, T, from ?? { ...p, armL: [...p.armL], armR: [...p.armR], legL: [...p.legL], legR: [...p.legR] });
+    const base = from ?? copyPose(p);
+    let q = overlap ? sampleOverlap(clip, at, T, base) : sampleClip(clip, at, T, base);
+    plant = plantAt(clip, at, T, base);
+    timing = T;
     const lost = (a: "armL" | "armR" | "legL" | "legR", b: "armL" | "armR" | "legL" | "legR") => !f.parts[a].attached && f.parts[b].attached;
-    if ((clip.limb === "armL" && lost("armL", "armR")) || (clip.limb === "armR" && lost("armR", "armL")) || (clip.limb === "legL" && lost("legL", "legR")) || (clip.limb === "legR" && lost("legR", "legL"))) q = mirror(q);
+    const swap = (clip.limb === "armL" && lost("armL", "armR")) || (clip.limb === "armR" && lost("armR", "armL")) || (clip.limb === "legL" && lost("legL", "legR")) || (clip.limb === "legR" && lost("legR", "legL"));
+    if (swap) q = mirror(q);
+    limbOf = swap ? (({ armL: "armR", armR: "armL", legL: "legR", legR: "legL" }) as Record<string, Limb>)[clip.limb] : clip.limb;
     Object.assign(p, q);
     rate = clip.rate ?? rate;
   };
 
   // the thrower turns through the throw and comes back up, whatever it does next
-  const throwing = cue.throwAge < 0.6 && (f.state === "idle" || f.state === "walk") && t < THROW_TIMING.end;
+  const throwing = cue.throwAge < THROW_TIMING.end / 60 && (f.state === "idle" || f.state === "walk") && t < THROW_TIMING.end;
+  if (throwing) label = "throwing";
   switch (throwing ? "throwing" : f.state) {
     case "throwing":
       play(THROWER, t, THROW_TIMING);
       impact = f.stop > 0; // held on the throw through its freeze
       break;
     case "idle": {
+      // each family breathes in its own rhythm: the boxer bounces on the balls of the feet, the Thai fighter sways
       blade();
-      const bob = Math.abs(Math.sin(time * 4.2));
-      p.y = -0.06 - bob * 0.03;
-      p.kneeL = 0.5 + bob * 0.16;
-      p.kneeR = 0.35 + bob * 0.16;
+      const id = IDLE[family];
+      const bob = Math.abs(Math.sin(time * id.rate));
+      p.y += -0.02 - bob * id.bob;
+      p.kneeL += bob * id.bob * 5;
+      p.kneeR += bob * id.bob * 5;
+      p.hipY += Math.sin(time * id.rate * 0.5) * id.sway;
       p.spineX += 0.04 + Math.sin(time * 2.5) * 0.025;
-      p.armL[0] += Math.sin(time * 4.2 + 0.6) * 0.06; // the lead hand paws
-      p.armR[0] += Math.sin(time * 4.2) * 0.03;
+      p.armL[0] += Math.sin(time * id.rate + 0.6) * id.paw; // the lead hand paws
+      p.armR[0] += Math.sin(time * id.rate) * id.paw * 0.5;
       p.tail = Math.sin(time * 1.7) * 0.4;
       break;
     }
     case "walk":
-      if (nLegs === 2) {
-        p.legL = [-0.15 + sw * 0.55, 0.04];
-        p.legR = [-0.15 - sw * 0.55, -0.04];
-        p.kneeL = 0.25 + Math.max(0, -Math.cos(time * 9)) * 0.7;
-        p.kneeR = 0.25 + Math.max(0, Math.cos(time * 9)) * 0.7;
-        p.y = -0.03 + Math.abs(sw) * 0.03;
-      }
+      // the feet are stepped by the gait (animate.ts): the stance legs are where each foot lands under the hip
+      plant = nLegs === 2 ? "gait" : "both";
+      // walking, the feet come in under the hips, the lead foot only a little ahead
+      p.legL = [-0.14, 0.05];
+      p.legR = [0.02, -0.05];
+      p.y -= 0.02;
       // guard up while stalking: only a little arm swing, the hips sway with the stride
       blade();
       p.hipY = 0.22 + sw * 0.08;
@@ -536,6 +641,7 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
       p.tail = Math.sin(time * 6) * 0.5;
       break;
     case "guard":
+      plant = "gait"; // shuffling behind the guard
       blade();
       guardArms();
       p.spineX = 0.2;
@@ -554,7 +660,11 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
         // a string opener whose button is still held waits in its gathered pose,
         // sinking lower the longer it charges
         const lf = f.chargeHeld ? loadFrame(clip, T, p) : -1;
-        play(clip, lf >= 0 ? Math.min(t, lf) : t, T);
+        const at = lf >= 0 ? Math.min(t, lf) : t;
+        play(clip, at, T, undefined, true);
+        label = f.move;
+        phase = phaseOf(at, T);
+        if (phase === "fire" || phase === "active") drive = limbOf;
         const charging = f.chargeHeld && f.charge > 0 ? Math.min(1, f.charge / CHARGE.max) : 0;
         p.y -= 0.06 * charging;
         p.kneeL += 0.25 * charging;
@@ -563,9 +673,21 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
       }
       break;
     }
-    case "hitstun":
-      play(hitClip(hurt.part), t, stateTiming(f.dur || 41));
+    case "hitstun": {
+      // the reaction offset, on the pose the blow found, which eases back to the stance as the reaction plays out
+      blade();
+      const r = cue.react ?? { ...reactionFor(heightOf(hurt.part), 1, "light"), from: copyPose(p) };
+      const T = stateTiming(f.dur || 41);
+      const k = Math.min(1, t / (T.end * 0.85));
+      const base = mix(r.from, copyPose(p), k * k * (3 - 2 * k));
+      const off = sampleClip(r.clip, t, T, ZERO);
+      Object.assign(p, addPose(base, r.mirror ? mirrorOffset(off) : off));
+      rate = r.clip.rate ?? rate;
+      plant = "both";
+      timing = T;
+      label = `hit ${heightOf(hurt.part)}${r.mirror ? " L" : " R"}`;
       break;
+    }
     case "blockstun":
       play(REACTIONS.block, t, stateTiming(f.dur || 20));
       break;
@@ -606,10 +728,15 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
     case "down":
     case "ko":
       // off the back of a throw the body is already on the floor: only the bounce
-      play(cue.from === "thrown" ? DOWN_LANDED : REACTIONS.down, f.state === "ko" ? Math.max(t, 30) : t, stateTiming(DOWN.dur));
+      {
+        const c = cue.from === "thrown" ? DOWN_LANDED : cue.face > 0 ? DOWN_BACK : DOWN_FRONT;
+        play(c, f.state === "ko" ? Math.max(t, FALL_LAND + 10) : t, stateTiming(DOWN.dur));
+        label = c === DOWN_LANDED ? "landed" : c === DOWN_BACK ? "down back" : "down front";
+      }
       break;
     case "wakeup":
-      play(REACTIONS.wakeup, t, stateTiming(f.dur || DOWN.wake));
+      play(cue.face > 0 ? WAKE_BACK : WAKE_FRONT, t, stateTiming(f.dur || DOWN.wake));
+      label = cue.face > 0 ? "get up back" : "get up front";
       break;
     case "dizzy":
       p.headZ = Math.sin(time * 6) * 0.35;
@@ -620,6 +747,7 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
       p.elbowL = p.elbowR = -0.2;
       break;
     case "reattach":
+      plant = "none";
       p.y = -0.35;
       p.kneeL = p.kneeR = 1.4;
       p.legL = [-1.0, 0.15];
@@ -631,6 +759,7 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
       break;
     case "sitting":
     case "seated":
+      plant = "none";
       p.y = -0.36;
       p.legL = [-1.5, 0.12];
       p.legR = [-1.5, -0.12];
@@ -646,6 +775,7 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
       break;
     case "driving":
       // in the cab: seated, both hands on the wheel, rocking with the engine
+      plant = "none";
       p.y = -0.36 + Math.sin(time * 23) * 0.006;
       p.legL = [-1.45, 0.12];
       p.legR = [-1.45, -0.12];
@@ -658,6 +788,7 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
       break;
     case "falling":
       // over the edge: flailing as the body tumbles away (the scene drops the root)
+      plant = "none";
       p.rx = -0.5 - t * 0.04;
       p.rz = Math.sin(t * 0.3) * 0.4;
       p.armL = [-2.6 + Math.sin(t * 0.9) * 0.6, 0, 0.9];
@@ -681,11 +812,12 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
     p.legR = [-0.15, 0];
     p.kneeL = p.kneeR = 0.4;
   }
+  if (nLegs < 2) plant = "none"; // a hop or a drag: no foot stays put
   if (nLegs === 0 && !["down", "ko", "thrown", "held", "wakeup", "driving", "falling"].includes(f.state)) {
     p.y += -0.78;
     p.spineX += 0.6;
   }
-  return { p, rate, snap, impact };
+  return { p, rate, snap, impact, plant, drive, label, phase, T: timing };
 }
 
 /** A pose as one list of numbers: the scalars in KEYS order, then armL, armR, legL, legR. */
@@ -703,6 +835,33 @@ function unflat(a: number[], p: Pose): void {
 const WRAP_I = KEYS.flatMap((k, i) => (WRAP.has(k) ? [i] : []));
 /** How springy the joints are: under 1 overshoots a little and settles. */
 export const DAMPING = 0.72;
+/**
+ * Each joint's spring against the clip's: stiffness as a multiple of the
+ * clip's rate, and its damping ratio. The pelvis and the trunk are heavy and
+ * settle without wobble; the head rides loose on the neck and overshoots a
+ * blow; the tail trails everything. The limbs keep the clip's own spring, so
+ * a fist still lands on its frame. Anything not listed: 1 and DAMPING.
+ */
+export const JOINT_SPRINGS: Partial<Record<(typeof KEYS)[number] | "armL" | "armR" | "legL" | "legR", { k: number; damp: number }>> = {
+  y: { k: 1.1, damp: 0.85 },
+  hipY: { k: 1.1, damp: 0.8 },
+  spineX: { k: 1, damp: 0.78 },
+  spineY: { k: 1, damp: 0.78 },
+  spineZ: { k: 0.9, damp: 0.7 },
+  headX: { k: 0.9, damp: 0.6 },
+  headY: { k: 0.8, damp: 0.55 },
+  headZ: { k: 0.8, damp: 0.55 },
+  tail: { k: 0.45, damp: 0.3 },
+};
+/** The springs a striking limb's joints are on (indices into flat()). */
+const DRIVEN: Record<Limb, number[]> = (() => {
+  const n = KEYS.length;
+  const k = (key: (typeof KEYS)[number]) => KEYS.indexOf(key);
+  const armL = [n, n + 1, n + 2, k("elbowL")];
+  const armR = [n + 3, n + 4, n + 5, k("elbowR")];
+  return { armL, armR, legL: [n + 6, n + 7, k("kneeL")], legR: [n + 8, n + 9, k("kneeR")], both: [...armL, ...armR], head: [], body: [] };
+})();
+const SPRING = [...KEYS.map((k) => JOINT_SPRINGS[k]), ...(["armL", "armL", "armL", "armR", "armR", "armR", "legL", "legL", "legR", "legR"] as const).map((k) => JOINT_SPRINGS[k])].map((j) => j ?? { k: 1, damp: DAMPING });
 
 /**
  * Drive the joints toward `target` on damped springs and write the bones.
@@ -710,7 +869,7 @@ export const DAMPING = 0.72;
  * its velocity kept for when it lets go. snap jumps to the target, and the
  * speed of that jump carries on as a follow-through.
  */
-export function applyPose(b: Body, target: Pose, rate: number, snap: boolean, dt: number, jitter: number): void {
+export function applyPose(b: Body, target: Pose, rate: number, snap: boolean, dt: number, jitter: number, drive: Limb | null = null): void {
   const x = flat(b.cur);
   const t = flat(target);
   const v = b.vel;
@@ -725,13 +884,23 @@ export function applyPose(b: Body, target: Pose, rate: number, snap: boolean, dt
   } else if (rate > 0 && dt > 0) {
     const n = Math.ceil(dt * 120); // stable substeps
     const h = dt / n;
-    const w2 = rate * rate;
-    const c2 = 2 * DAMPING * rate;
-    for (let s = 0; s < n; s++)
-      for (let i = 0; i < x.length; i++) {
+    // the striking limb is driven along its clip, so it lands on the hit frame at full speed;
+    // the speed it has stays in its springs for the follow-through
+    const kin = drive ? DRIVEN[drive] : [];
+    for (const i of kin) {
+      v[i] = (t[i] - x[i]) / dt;
+      x[i] = t[i];
+    }
+    for (let i = 0; i < x.length; i++) {
+      if (kin.includes(i)) continue;
+      const r = rate * SPRING[i].k;
+      const w2 = r * r;
+      const c2 = 2 * SPRING[i].damp * r;
+      for (let s = 0; s < n; s++) {
         v[i] += (w2 * (t[i] - x[i]) - c2 * v[i]) * h;
         x[i] += v[i] * h;
       }
+    }
   }
   unflat(x, b.cur);
   const c = b.cur;
@@ -741,7 +910,7 @@ export function applyPose(b: Body, target: Pose, rate: number, snap: boolean, dt
   b.hips.rotation.set(0, c.hipY, 0);
   // the chest turns with the hips and on top of them (spineY), the head stays on the target
   b.spine.rotation.set(c.spineX, c.spineY, c.spineZ);
-  b.head.rotation.set(c.headX, -(c.hipY + c.spineY) * 0.5, c.headZ);
+  b.head.rotation.set(c.headX, c.headY - (c.hipY + c.spineY) * 0.5, c.headZ);
   b.limbs.armL.rotation.set(c.armL[0], c.armL[1], c.armL[2]);
   b.limbs.armR.rotation.set(c.armR[0], c.armR[1], c.armR[2]);
   // the legs turn back against the hips' twist so the feet stay planted
@@ -768,13 +937,16 @@ export function syncLimbs(b: Body, f: Fighter): void {
 
 /**
  * A hit lands: whip the joint springs the way the blow drives the body.
- * k is how hard (about 0.5 for a light hit, 1 for a heavy one).
+ * k is how hard (about 0.5 for a light hit, 1 for a heavy one); side is the
+ * side the blow comes from (1: the fighter's right, -1: its left).
  */
-export function impulse(b: Body, part: PartId, k: number): void {
+export function impulse(b: Body, part: PartId, k: number, side: number = 1): void {
   const i = (key: (typeof KEYS)[number]) => KEYS.indexOf(key);
   const v = b.vel;
   if (part === "head") {
     v[i("headX")] -= 14 * k; // the head snaps back
+    v[i("headY")] -= 12 * k * side; // and round, away from the fist
+    v[i("spineY")] -= 4 * k * side;
     v[i("spineX")] -= 5 * k;
   } else if (part === "armL" || part === "armR") {
     v[i("spineY")] += (part === "armL" ? 9 : -9) * k; // spun round by the shoulder
@@ -785,6 +957,7 @@ export function impulse(b: Body, part: PartId, k: number): void {
   } else {
     v[i("spineX")] += 10 * k; // folded over the blow
     v[i("headX")] += 6 * k;
+    v[i("spineY")] -= 4 * k * side;
   }
   v[i("y")] -= 0.8 * k; // and the knees give
 }

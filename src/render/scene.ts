@@ -15,7 +15,8 @@ import { HAZARDS } from "../sim/arena";
 import type { StageId } from "../sim/stages";
 import { STYLES } from "../sim/styles";
 import { alive, type World } from "../sim/world";
-import { PLAYER_COLORS, applyPose, buildBody, impulse, limbGeometry, syncLimbs, targetPose, type Body } from "./body";
+import { PLAYER_COLORS, buildBody, limbGeometry, syncLimbs, type Body, type Target } from "./body";
+import { animate, onHit } from "./animate";
 import type { Cue } from "./cues";
 import { Fx } from "./fx";
 import { canvasTexture, makeStageView, toV, yaw, type StageView } from "./stageviews";
@@ -27,6 +28,7 @@ const PART_H: Record<PartId, number> = { head: 1.62, torso: 1.2, armL: 1.3, armR
 const SPECIAL_COLOR: Record<string, number> = { spSpin: 0xffd040, spCharge: 0xff5020, spFlurry: 0xffa030, spSlam: 0xff3010, spBlade: 0xfff0a0, spFire: 0xff6000 };
 
 interface FighterView extends Body {
+  last?: Target; // what the animation decided last frame (the motion debug overlay reads it)
   ring: THREE.Mesh;
   fury: THREE.Mesh;
   label: THREE.Sprite;
@@ -217,9 +219,8 @@ export class Scene {
           const v = this.fighters[d.id];
           if (v) {
             v.flash = Math.max(v.flash, heavy ? 1 : 0.7);
-            v.hurt = { part: q.part ?? "torso", age: 0 };
-            // the blow whips the body; a burn from the arena only makes it flinch
-            impulse(v, q.part ?? "torso", a ? (heavy ? 1 : 0.55) : 0.15);
+            // the reaction starts on the pose the blow found; the blow whips the body
+            onHit(v, d, a, q.part ?? "torso", dmg, q.stop ?? 0);
           }
           this.shake = Math.min(1, this.shake + (heavy ? 0.45 : 0.15));
           if (heavy) this.punchIn(p, 0.6);
@@ -418,20 +419,10 @@ export class Scene {
         v.root.position.y -= 0.5 * 0.012 * f.t * f.t;
       }
       syncLimbs(v, f);
-      v.hurt.age += dt;
-      v.cue.throwAge += dt;
-      if (v.cue.last !== f.state) {
-        v.cue.from = v.cue.last;
-        v.cue.last = f.state;
-      }
       v.flash = Math.max(0, v.flash - dt * 9);
-      const { p, rate, snap, impact } = targetPose(f, w, time, v.hurt, v.cue);
-      if (f.state === "ko") p.y -= Math.min(1.2, f.t / 120);
       // the victim of a hit shudders while the hitstop holds it
       const jitter = f.stop > 0 && v.hurt.age < 0.3 ? 0.07 : 0;
-      // nothing moves during a hitstop: the pose holds too
-      // (a knee or a throw jumps onto its landing pose, so the freeze holds the blow, not the wind-up)
-      applyPose(v, p, f.stop > 0 ? 0 : rate, (snap && f.stop === 0) || impact, dt, jitter);
+      v.last = animate(v, f, w, time, dt, jitter);
 
       const aura = v.aura.material as THREE.MeshBasicMaterial;
       aura.opacity = 0;

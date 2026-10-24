@@ -5,6 +5,7 @@
 // render frame runs several steps.
 import type { GameEvent } from "../sim/types";
 import type { World } from "../sim/world";
+import { FALL_LAND } from "./motion";
 
 export type Cue =
   | GameEvent
@@ -12,8 +13,8 @@ export type Cue =
   | { kind: "land"; a: number };
 
 const HEAVY = new Set(["punchFin", "sweep", "spSpin", "spCharge", "spFlurry", "spSlam", "spBlade", "spFire"]);
-// frames into "down" at which the body reaches the floor
-const LAND_AT = 8;
+// frames into "down" at which the body reaches the floor (the knockdown clips land on it)
+const LAND_AT = FALL_LAND;
 
 export class CueTracker {
   private moves: (string | null)[] = [];

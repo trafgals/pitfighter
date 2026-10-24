@@ -35,12 +35,15 @@ import { STYLES } from "../sim/styles";
 
 export type Phase = "s" | "up" | "load" | "snap" | "hit" | "act" | "rec" | "end";
 export type Ease = "in" | "out" | "io" | "lin";
+/** Which feet carry the weight: a planted foot stays where it was put down until a key lifts it. */
+export type Plant = "L" | "R" | "both" | "none";
 export interface Key {
   at: [Phase, number];
   p: Partial<Pose>;
   ease?: Ease;
   reset?: boolean; // start this key from the stance rather than the key before
   load?: boolean; // the gathered pose a charged strike waits in
+  plant?: Plant; // the feet on the floor from this key on (carried forward like the pose)
 }
 export type Limb = "armL" | "armR" | "legL" | "legR" | "both" | "head" | "body";
 export interface Clip {
@@ -48,6 +51,10 @@ export interface Clip {
   limb: Limb; // what lands the blow
   hold?: boolean; // stay on the last key instead of coming back to the stance
   rate?: number; // joint spring rate (1/s) while the clip plays
+  plant?: Plant; // the feet before the first key that says otherwise (default: both, or the standing leg of a kick)
+  overlap?: boolean; // false: every joint on the clip's own time (no pelvis-first lead)
+  point?: "elbow" | "shoulderL" | "shoulderR"; // what lands, if not the fist or the foot of `limb`
+  lead?: number; // scales the pelvis-first lead (OVERLAP): an elbow is thrown with the trunk, so its trunk keeps the clip's time
 }
 /** The frames a clip is laid on: the first active frame, the end of the active frames, the end. */
 export interface Timing {
@@ -57,7 +64,9 @@ export interface Timing {
 }
 
 /** Frames the contact pose is keyed ahead of the hit frame, for the springs to catch up. */
-export const LEAD = 2;
+export const LEAD = 0;
+/** How far past the contact pose a strike drives through (a fraction of its fire), keyed just after the hit so the limb is still at full speed on contact. */
+export const THROUGH = 0.15;
 /** Frames a strike takes from its gathered pose to contact: Urban Reign's strikes wind up, then fire. */
 export const SNAP = 4;
 /** Spring rate of the strikes: fast enough that the fist lands on its frame. */
@@ -99,7 +108,8 @@ function merge(a: Pose, b: Partial<Pose>): Pose {
   return o;
 }
 
-function mix(a: Pose, b: Pose, k: number): Pose {
+/** a + (b - a) k for every joint (spins the short way round). */
+export function mix(a: Pose, b: Pose, k: number): Pose {
   const o = merge(a, {});
   for (const key of Object.keys(a) as (keyof Pose)[]) {
     const x = a[key];
@@ -110,17 +120,60 @@ function mix(a: Pose, b: Pose, k: number): Pose {
   return o;
 }
 
+/** The feet a clip starts on: both, or the standing leg of a kick. */
+const firstPlant = (clip: Clip): Plant => clip.plant ?? (clip.limb === "legL" ? "R" : clip.limb === "legR" ? "L" : "both");
+
 /** The poses of a clip's keys, on their frames: the stance first, the stance last unless it holds. */
-export function resolve(clip: Clip, T: Timing, base: Pose): { at: number; pose: Pose; ease: Ease; load: boolean }[] {
-  const out = [{ at: 0, pose: base, ease: "lin" as Ease, load: false }];
+export function resolve(clip: Clip, T: Timing, base: Pose): { at: number; pose: Pose; ease: Ease; load: boolean; plant: Plant }[] {
+  const out = [{ at: 0, pose: base, ease: "lin" as Ease, load: false, plant: firstPlant(clip) }];
   let cur = base;
   for (const k of clip.keys) {
     cur = merge(k.reset ? base : cur, k.p);
     const at = Math.min(T.end, Math.max(out[out.length - 1].at, frameOf(k.at, T)));
-    out.push({ at, pose: cur, ease: k.ease ?? "io", load: !!k.load });
+    out.push({ at, pose: cur, ease: k.ease ?? "io", load: !!k.load, plant: k.plant ?? out[out.length - 1].plant });
   }
-  if (!clip.hold) out.push({ at: Math.max(out[out.length - 1].at, T.end), pose: base, ease: "io", load: false });
+  if (!clip.hold) out.push({ at: Math.max(out[out.length - 1].at, T.end), pose: base, ease: "io", load: false, plant: "both" });
   return out;
+}
+
+/** The feet carrying the weight on frame t: a key puts its feet down (or lifts them) on its own frame. */
+export function plantAt(clip: Clip, t: number, T: Timing, base: Pose): Plant {
+  const ks = resolve(clip, T, base);
+  let pl = ks[0].plant;
+  for (const k of ks) if (k.at <= t) pl = k.plant;
+  return pl;
+}
+
+/** Where frame t falls in a move: gathering, firing (the last SNAP + LEAD frames before contact), out, or coming back. */
+export type MovePhase = "gather" | "fire" | "active" | "recovery";
+export function phaseOf(t: number, T: Timing): MovePhase {
+  return t < T.hit - LEAD - SNAP ? "gather" : t < T.hit ? "fire" : t < T.act ? "active" : "recovery";
+}
+
+/**
+ * Overlapping action: the joints of a strike do not all arrive together. The
+ * pelvis turns first, the trunk a frame after it, the shoulder and the arm on
+ * the clip's own time (they carry the contact pose onto the hit frame), and
+ * the head trails. Frames each group runs ahead of the clip:
+ */
+export const OVERLAP: [number, (keyof Pose)[]][] = [
+  [2, ["hipY"]],
+  [1, ["spineY", "spineZ", "ry"]],
+  [-1, ["headX", "headY", "headZ", "tail"]],
+];
+/** A clip sampled with every joint group on its own lead (see OVERLAP). */
+export function sampleOverlap(clip: Clip, t: number, T: Timing, base: Pose): Pose {
+  const p = sampleClip(clip, t, T, base);
+  if (clip.overlap === false) return p;
+  for (const [d, fields] of OVERLAP) {
+    // a head strike lands with the head, so the head keeps the clip's time
+    if (clip.limb === "head" && d < 0) continue;
+    const lead = d > 0 ? d * (clip.lead ?? 1) : d;
+    if (lead === 0) continue;
+    const q = sampleClip(clip, t + lead, T, base);
+    for (const k of fields) (p as unknown as Record<string, number>)[k] = q[k] as number;
+  }
+  return p;
 }
 
 /** The pose of a clip on frame t. */
@@ -149,6 +202,7 @@ export function mirror(p: Pose): Pose {
     ry: -p.ry,
     rz: -p.rz,
     spineZ: -p.spineZ,
+    headY: -p.headY,
     headZ: -p.headZ,
     // the twists mirror about the bladed stance
     hipY: 0.64 - p.hipY,
@@ -177,19 +231,42 @@ const other = (s: Side): Side => (s === "L" ? "R" : "L");
 /** The hand that is not striking stays up at the chin. */
 const cover = (s: Side): Partial<Pose> => arm(s, -1.15, -0.35, -2.1);
 const all = (...ps: Partial<Pose>[]): Partial<Pose> => Object.assign({}, ...ps);
+/** The pose `k` of the way on past `hit` from `load`: what a strike is driving through to. */
+function extend(load: Partial<Pose>, hit: Partial<Pose>, k: number): Partial<Pose> {
+  const o: Record<string, number | number[]> = {};
+  for (const [key, v] of Object.entries(hit) as [keyof Pose, number | number[]][]) {
+    const l = load[key] as number | number[] | undefined;
+    if (Array.isArray(v)) o[key] = Array.isArray(l) ? v.map((x, i) => x + (x - l[i]) * k) : [...v];
+    else o[key] = typeof l === "number" ? v + (v - l) * k : v;
+  }
+  return o as Partial<Pose>;
+}
 
-/** A strike: gather, land on the hit frame, stay out through the active frames, retract, settle. */
-function strike(limb: Limb, load: Partial<Pose>, hit: Partial<Pose>, o: { follow?: Partial<Pose>; back?: Partial<Pose>; gather?: number } = {}): Clip {
+/**
+ * A strike: gather, land on the hit frame, stay out through the active frames, retract, settle.
+ * The gather is a counter-movement - the hips and the chest wind the other way
+ * (each load pose turns them back) and the weight rocks back off the lead foot
+ * - so the fire comes off the hips. `step` is the foot that steps in with the
+ * blow: it comes off the floor on the gather, lands with the contact and steps
+ * back on the recovery; a kick stands on its other leg until it is back down.
+ */
+function strike(limb: Limb, load: Partial<Pose>, hit: Partial<Pose>, o: { follow?: Partial<Pose>; back?: Partial<Pose>; gather?: number; step?: Side } = {}): Clip {
+  const kick = limb === "legL" ? "R" : limb === "legR" ? "L" : null;
+  const lift: Plant = kick ?? (o.step ? other(o.step) : "both");
   return {
     limb,
     rate: STRIKE_RATE,
+    plant: kick ?? "both",
     keys: [
-      { at: ["load", o.gather ?? 0.55], p: load, ease: "out" },
+      { at: ["load", o.gather ?? 0.55], p: { z: -0.035, ...load }, ease: "out", plant: lift },
       { at: ["snap", 0], p: {}, load: true }, // held here while the button charges it
-      { at: ["hit", -LEAD], p: hit, ease: "in" },
-      { at: ["act", 0], p: o.follow ?? {}, ease: "out" },
+      { at: ["hit", -LEAD], p: hit, ease: "in", plant: kick ?? "both" },
+      // driving on through the target: still at speed on the hit frame
+      { at: ["hit", 2], p: extend(load, hit, THROUGH), ease: "out" },
+      // the stepping foot comes up again as the follow-through ends and goes back under the body
+      { at: ["act", 0], p: o.follow ?? hit, ease: "out", plant: o.step ? other(o.step) : undefined },
       // the limb comes back quickly, the body takes the rest of the recovery to settle
-      { at: ["rec", 0.4], p: o.back ?? {}, ease: "io", reset: true },
+      { at: ["rec", 0.4], p: o.back ?? {}, ease: "io", reset: true, plant: "both" },
     ],
   };
 }
@@ -211,7 +288,7 @@ const P = {
       `arm${s}` as Limb,
       all(arm(s, 0.3, 0.2, -2.4), turn(s, -0.25, -0.4), { y: -0.08, spineX: 0.06 }),
       all(arm(s, -1.56, 0.05, -0.08), cover(other(s)), turn(s, 0.6, 0.42), { z: step, y: -0.11, spineX: 0.22 }, leg("L", -0.6, 0.06, 0.4), { kneeR: 0.7 }),
-      { follow: turn(s, 0.7, 0.5) },
+      { follow: turn(s, 0.7, 0.5), step: "L" },
     ),
   /** a hook: the elbow comes up level with the fist and the whole trunk turns through it */
   hook: (s: Side, wide = 0) =>
@@ -254,27 +331,34 @@ const P = {
       { gather: 0.65, follow: { spineX: 0.8 } },
     ),
   /** a horizontal elbow: the forearm folded tight, the point of the elbow swung across with a big hip turn */
-  elbow: (s: Side) =>
-    strike(
+  elbow: (s: Side): Clip => ({
+    ...strike(
       `arm${s}` as Limb,
-      all(arm(s, -1.0, 0.85, -2.5), turn(s, -0.35, -0.3), { y: -0.06 }),
+      all(arm(s, -0.75, 0.3, -2.5), turn(s, -0.35, -0.3), { y: -0.06 }),
       all(arm(s, -1.5, 1.15, -2.55), cover(other(s)), turn(s, 0.48, 0.4), { z: 0.08, y: -0.08, spineX: 0.2, headX: 0.08 }),
       { follow: turn(s, 0.62, 0.52) },
     ),
+    point: "elbow",
+    lead: 0,
+  }),
   /** a downward elbow from a hop: the Thai finisher */
-  elbowDown: (s: Side) =>
-    strike(
+  elbowDown: (s: Side): Clip => ({
+    ...strike(
       `arm${s}` as Limb,
       all(arm(s, -2.6, 0.5, -2.55), turn(s, -0.15, -0.2), { y: 0.12, kneeL: 0.9, kneeR: 1.0, spineX: -0.15 }),
       all(arm(s, -1.25, 0.6, -2.55), cover(other(s)), turn(s, 0.5, 0.45), { z: 0.14, y: -0.15, spineX: 0.55, headX: 0.1, kneeL: 0.75 }),
       { gather: 0.6 },
     ),
+    point: "elbow",
+    lead: 0,
+  }),
   /** an open palm heel, the arm and the back leg in one line */
   palm: (s: Side) =>
     strike(
       `arm${s}` as Limb,
       all(arm(s, -0.4, 0.1, -2.3), turn(s, -0.2, -0.3), { y: -0.14, kneeL: 0.85, kneeR: 0.55 }),
       all(arm(s, -1.5, 0.0, -0.22), arm(other(s), -0.35, 0.2, -2.2), turn(s, 0.55, 0.35), { z: 0.12, y: -0.16, spineX: 0.12 }, leg("L", -0.75, 0.06, 0.75), { kneeR: 0.15 }),
+      { step: "L" },
     ),
   /** a backfist: the lead arm folded across the chest, then whipped out from the elbow */
   backfist: (s: Side) =>
@@ -290,7 +374,7 @@ const P = {
       "both",
       all(arm("L", 0.2, 0.25, -2.3), arm("R", 0.2, 0.25, -2.3), { y: -0.2, spineX: -0.05, kneeL: 1.0, kneeR: 0.8, hipY: 0.25, spineY: 0 }),
       all(arm("L", -1.5, 0.12, -0.15), arm("R", -1.5, 0.12, -0.15), { z: 0.2, y: -0.2, spineX: 0.2, hipY: 0.2, spineY: 0 }, leg("L", -0.85, 0.06, 0.8), leg("R", 0.35, -0.06, 0.1)),
-      { follow: { z: 0.24 } },
+      { follow: { z: 0.24 }, step: "L" },
     ),
   /** a lunging straight with a full step in, the back leg locked: the karate finisher */
   lunge: (s: Side) =>
@@ -298,7 +382,7 @@ const P = {
       `arm${s}` as Limb,
       all(arm(s, 0.35, 0.15, -2.4), turn(s, -0.2, -0.35), { y: -0.12, kneeL: 0.8 }),
       all(arm(s, -1.57, 0.02, -0.05), arm(other(s), 0.25, 0.25, -2.3), turn(s, 0.7, 0.45), { z: 0.28, y: -0.2, spineX: 0.12 }, leg("L", -0.95, 0.06, 0.95), leg("R", 0.5, -0.06, 0.05)),
-      { gather: 0.6, follow: { z: 0.32 } },
+      { gather: 0.6, follow: { z: 0.32 }, step: "L" },
     ),
   /** a haymaker: wound right back, slung round in a wide arc, the whole body turning after it */
   haymaker: (s: Side) =>
@@ -306,16 +390,18 @@ const P = {
       `arm${s}` as Limb,
       all(arm(s, 0.5, 0.9, -1.4), turn(s, -0.5, -0.55), { y: -0.06, spineX: -0.05, headX: -0.08 }),
       all(arm(s, -1.6, 1.1, -0.7), arm(other(s), -0.5, 0.5, -1.4), turn(s, 0.85, 0.75), { z: 0.15, y: -0.12, spineX: 0.3 }, leg("L", -0.65, 0.06, 0.55)),
-      { gather: 0.6, follow: { ...turn(s, 1.1, 1.0), ry: -0.35 * sgn(s), spineX: 0.38 } },
+      { gather: 0.6, follow: { ...turn(s, 1.1, 1.0), ry: -0.35 * sgn(s), spineX: 0.38 }, step: "L" },
     ),
   /** a shoulder barge: the body lowered and driven in behind the shoulder */
-  barge: (s: Side) =>
-    strike(
+  barge: (s: Side): Clip => ({
+    ...strike(
       "body",
       all(arm(s, -0.6, -0.2, -2.3), arm(other(s), -0.7, -0.3, -2.2), turn(s, -0.4, -0.3), { y: -0.2, kneeL: 1.0, kneeR: 0.8, spineX: 0.2 }),
       all(arm(s, -0.4, -0.3, -2.4), arm(other(s), -0.8, -0.3, -2.2), turn(s, 0.9, 0.4), { z: 0.32, y: -0.24, spineX: 0.55, headX: 0.25 }, leg("L", -0.9, 0.06, 0.9), leg("R", 0.55, -0.06, 0.15)),
-      { gather: 0.6 },
+      { gather: 0.6, step: "L" },
     ),
+    point: `shoulder${s}`,
+  }),
 };
 
 // The kicks of the low string: they land at the legs and the belly.
@@ -378,10 +464,10 @@ const K = {
     limb: `leg${s}` as Limb,
     rate: STRIKE_RATE,
     keys: [
-      { at: ["up", 0.4], p: all(leg(s, -0.4, 0.2, 0.9), { ry: sgn(s) * 1.4, y: -0.06 }), ease: "out", load: true },
+      { at: ["up", 0.4], p: all(leg(s, -0.4, 0.2, 0.9), { ry: sgn(s) * 1.4, y: -0.06 }), ease: "out", load: true, plant: "none" },
       { at: ["hit", -LEAD], p: all(leg(s, -0.85, 0.9, 0.1), { ry: sgn(s) * 3.6, spineZ: 0.25 * sgn(s), spineX: -0.1 }), ease: "in" },
       { at: ["act", 0], p: { ry: sgn(s) * 4.4 } },
-      { at: ["rec", 0.45], p: { ry: sgn(s) * 6.28, spineZ: 0 }, reset: true },
+      { at: ["rec", 0.45], p: { ry: sgn(s) * 6.28, spineZ: 0 }, reset: true, plant: "both" },
     ],
   }) as Clip,
 };
@@ -391,11 +477,11 @@ const sweep = (s: Side): Clip => ({
   limb: `leg${s}` as Limb,
   rate: STRIKE_RATE,
   keys: [
-    { at: ["up", 0.6], p: all(leg(other(s), -1.0, 0, 1.75), leg(s, -0.3, 0.6, 0.6), { y: -0.42, spineX: 0.35, ry: -0.5 * sgn(s) }, arm("L", -0.6, 0.6, -0.4), arm("R", -0.6, 0.6, -0.4)), ease: "out", load: true },
+    { at: ["up", 0.6], p: all(leg(other(s), -1.0, 0, 1.75), leg(s, -0.3, 0.6, 0.6), { y: -0.42, spineX: 0.35, ry: -0.5 * sgn(s) }, arm("L", -0.6, 0.6, -0.4), arm("R", -0.6, 0.6, -0.4)), ease: "out", load: true, plant: "none" },
     { at: ["hit", -LEAD], p: all(leg(s, -0.3, 1.4, 0.08), { ry: 1.1 * sgn(s) }), ease: "in" },
     { at: ["act", 0], p: { ry: 2.6 * sgn(s) } },
     { at: ["rec", 0.35], p: { ry: 4.3 * sgn(s) }, ease: "out" },
-    { at: ["rec", 0.7], p: { ry: 6.28 * sgn(s), y: -0.25 }, reset: true },
+    { at: ["rec", 0.7], p: { ry: 6.28 * sgn(s), y: -0.25 }, reset: true, plant: "both" },
   ],
 });
 /** A foot sweep: the sole hooks the opponent's ankle and reaps it out from under them. */
@@ -504,12 +590,12 @@ export const SPECIALS: Record<string, Clip> = {
     rate: STRIKE_RATE,
     keys: [
       { at: ["load", 0.6], p: all({ ry: -0.5, y: -0.12, kneeL: 0.8, kneeR: 0.7, spineX: 0.15 }, arm("L", -1.1, -0.3, -2.0), arm("R", -1.1, -0.3, -2.0)), ease: "out" },
-      { at: ["snap", 0], p: {} },
+      { at: ["snap", 0], p: {}, plant: "none" },
       { at: ["hit", -LEAD], p: all({ ry: 1.2, y: 0.1, spineX: -0.1, spineZ: 0.2, kneeL: 0.3 }, leg("R", -0.4, 1.35, 0.12), arm("L", -0.3, 1.2, -0.3), arm("R", -0.3, 1.2, -0.3)), ease: "in" },
       { at: ["hit", 3], p: { ry: 2.6 }, ease: "lin" },
       { at: ["hit", 6], p: { ry: 4.1 }, ease: "lin" },
       { at: ["act", 0], p: { ry: 5.6 }, ease: "lin" },
-      { at: ["rec", 0.3], p: { ry: 6.28, y: -0.08, spineZ: 0 }, ease: "out", reset: true },
+      { at: ["rec", 0.3], p: { ry: 6.28, y: -0.08, spineZ: 0 }, ease: "out", reset: true, plant: "both" },
     ],
   },
   // BRIMSTONE CHARGE: the shoulder lowered and the feet pawing, then a flat-out run behind the shoulder
@@ -517,11 +603,11 @@ export const SPECIALS: Record<string, Clip> = {
     limb: "body",
     rate: 40,
     keys: [
-      { at: ["load", 0.6], p: all({ spineX: 0.5, headX: -0.35, y: -0.2, kneeL: 1.0, kneeR: 0.9, hipY: 0.55, spineY: 0.1 }, arm("L", -1.0, 0.9, -1.5), arm("R", -0.2, 0.5, -0.4), leg("L", -0.7, 0.06, 0.9), leg("R", 0.4, -0.06, 0.6)), ease: "out" },
+      { at: ["load", 0.6], p: all({ spineX: 0.5, headX: -0.35, y: -0.2, kneeL: 1.0, kneeR: 0.9, hipY: 0.55, spineY: 0.1 }, arm("L", -1.0, 0.9, -1.5), arm("R", -0.2, 0.5, -0.4), leg("L", -0.7, 0.06, 0.9), leg("R", 0.4, -0.06, 0.6)), ease: "out", plant: "none" },
       ...strides(0, 15, 3, 0.65),
       { at: ["act", 0], p: all(leg("L", -0.8, 0.06, 0.6), leg("R", 0.4, 0.06, 0.8), { spineX: 0.5 }) },
       // the brakes: the lead foot planted, the body straightening up behind it
-      { at: ["rec", 0.35], p: all(leg("L", -0.75, 0.06, 0.45), leg("R", 0.35, -0.06, 0.4), { spineX: 0.15, y: -0.1, headX: 0 }), ease: "out", reset: true },
+      { at: ["rec", 0.35], p: all(leg("L", -0.75, 0.06, 0.45), leg("R", 0.35, -0.06, 0.4), { spineX: 0.15, y: -0.1, headX: 0 }), ease: "out", reset: true, plant: "both" },
     ],
   },
   // INFERNAL FLURRY: a fist on every rehit frame
@@ -532,8 +618,8 @@ export const SPECIALS: Record<string, Clip> = {
     rate: 40,
     keys: [
       { at: ["up", 0.25], p: all({ y: -0.28, kneeL: 1.2, kneeR: 1.1, spineX: 0.35 }, arm("L", 0.5, 0.3, -0.5), arm("R", 0.5, 0.3, -0.5), leg("L", -0.8, 0.1, 1.2), leg("R", -0.5, 0.1, 1.1)), ease: "out" },
-      { at: ["up", 0.65], p: all({ y: 0.75, kneeL: 1.1, kneeR: 1.1, spineX: -0.2, headX: -0.15 }, arm("L", -2.9, 0.15, -0.4), arm("R", -2.9, 0.15, -0.4), leg("L", -0.7, 0.15, 1.1), leg("R", -0.6, 0.15, 1.0)), ease: "out" },
-      { at: ["hit", -LEAD], p: all({ y: -0.35, spineX: 0.6, headX: 0.15 }, arm("L", -1.0, 0.1, -0.35), arm("R", -1.0, 0.1, -0.35), leg("L", -0.9, 0.2, 1.3), leg("R", -0.9, 0.2, 1.3)), ease: "in" },
+      { at: ["up", 0.65], p: all({ y: 0.75, kneeL: 1.1, kneeR: 1.1, spineX: -0.2, headX: -0.15 }, arm("L", -2.9, 0.15, -0.4), arm("R", -2.9, 0.15, -0.4), leg("L", -0.7, 0.15, 1.1), leg("R", -0.6, 0.15, 1.0)), ease: "out", plant: "none" },
+      { at: ["hit", -LEAD], p: all({ y: -0.35, spineX: 0.6, headX: 0.15 }, arm("L", -1.0, 0.1, -0.35), arm("R", -1.0, 0.1, -0.35), leg("L", -0.9, 0.2, 1.3), leg("R", -0.9, 0.2, 1.3)), ease: "in", plant: "both" },
       { at: ["act", 0], p: {} },
       { at: ["rec", 0.5], p: all({ y: -0.2, spineX: 0.3 }, leg("L", -0.6, 0.1, 0.9), leg("R", -0.3, 0.1, 0.8)), ease: "io", reset: true },
     ],
@@ -584,62 +670,6 @@ export const REACTIONS: Record<string, Clip> = {
       { at: ["rec", 0.6], p: { spineX: 0.2, z: 0.05 }, reset: true },
     ],
   },
-  // a blow to the head snaps it back and walks the fighter back a step
-  hitHead: {
-    limb: "head",
-    rate: 34,
-    keys: [
-      { at: ["s", 3], p: all({ headX: -0.75, spineX: -0.4, headZ: 0.25, y: -0.06, z: -0.06 }, arm("L", -0.55, 0.4, -1.2), arm("R", -0.5, 0.35, -1.4), leg("R", 0.4, -0.06, 0.3), leg("L", -0.15, 0.06, 0.35)), ease: "out" },
-      { at: ["s", 10], p: { headX: -0.55, spineX: -0.3, z: -0.12 } },
-      { at: ["rec", 0.55], p: all({ headX: -0.15, spineX: 0, headZ: 0.08 }, arm("L", -1.0, 0.0, -1.7), arm("R", -0.8, 0.1, -2.0)), ease: "io" },
-    ],
-  },
-  // a blow to the body folds the fighter over it, both arms wrapping the belly
-  hitBody: {
-    limb: "body",
-    rate: 34,
-    keys: [
-      { at: ["s", 3], p: all({ spineX: 0.65, headX: 0.35, y: -0.12, z: -0.05 }, arm("L", -0.6, -0.5, -1.4), arm("R", -0.6, -0.5, -1.4), { kneeL: 0.85, kneeR: 0.7 }), ease: "out" },
-      { at: ["s", 14], p: { spineX: 0.55, y: -0.1 } },
-      { at: ["rec", 0.6], p: { spineX: 0.25, headX: 0.1, y: -0.06 }, ease: "io" },
-    ],
-  },
-  // a blow to a leg buckles it
-  hitLegL: {
-    limb: "legL",
-    rate: 34,
-    keys: [
-      { at: ["s", 3], p: all(leg("L", -0.1, 0.1, 1.35), { y: -0.16, spineZ: -0.22, spineX: 0.2 }, arm("L", -0.5, 0.6, -1.0), arm("R", -0.9, 0.3, -1.6)), ease: "out" },
-      { at: ["s", 12], p: { y: -0.14 } },
-      { at: ["rec", 0.55], p: { kneeL: 0.7, y: -0.08, spineZ: -0.08 } },
-    ],
-  },
-  hitLegR: {
-    limb: "legR",
-    rate: 34,
-    keys: [
-      { at: ["s", 3], p: all(leg("R", 0.2, 0.1, 1.35), { y: -0.16, spineZ: 0.22, spineX: 0.2 }, arm("R", -0.5, 0.6, -1.0), arm("L", -0.9, 0.3, -1.6)), ease: "out" },
-      { at: ["s", 12], p: { y: -0.14 } },
-      { at: ["rec", 0.55], p: { kneeR: 0.7, y: -0.08, spineZ: 0.08 } },
-    ],
-  },
-  // a blow to an arm spins the trunk round with that shoulder
-  hitArmL: {
-    limb: "armL",
-    rate: 34,
-    keys: [
-      { at: ["s", 3], p: all({ spineY: 0.45, hipY: 0.6, spineX: -0.2 }, arm("L", 0.2, 0.7, -0.6)), ease: "out" },
-      { at: ["rec", 0.5], p: { spineY: 0.05, hipY: 0.4, spineX: 0 } },
-    ],
-  },
-  hitArmR: {
-    limb: "armR",
-    rate: 34,
-    keys: [
-      { at: ["s", 3], p: all({ spineY: -0.75, hipY: 0.05, spineX: -0.2 }, arm("R", 0.3, 0.7, -0.6)), ease: "out" },
-      { at: ["rec", 0.5], p: { spineY: -0.3, hipY: 0.25, spineX: 0 } },
-    ],
-  },
   // a blow taken on the guard: the forearms absorb it and the body gives a little
   block: {
     limb: "body",
@@ -677,30 +707,6 @@ export const REACTIONS: Record<string, Clip> = {
     keys: [
       { at: ["s", 3], p: all({ spineX: -0.45, headX: -0.4, spineY: 0.45, hipY: 0.55, z: -0.05 }, arm("L", -0.6, 1.25, -0.3), arm("R", -0.6, 1.25, -0.3), leg("L", 0.3, 0.1, 0.4), leg("R", -0.3, -0.1, 0.5)), ease: "out" },
       { at: ["s", 9], p: { spineX: -0.25, spineY: 0.6, headX: -0.25, y: -0.08 } },
-    ],
-  },
-  // knocked down: the legs go, the body tips back and hits the floor, bounces once and lies there
-  down: {
-    limb: "body",
-    rate: 30,
-    hold: true,
-    keys: [
-      { at: ["s", 6], p: all({ rx: -0.75, y: -0.08, spineX: -0.3, headX: 0.25 }, arm("L", -2.2, 0.8, -0.4), arm("R", -2.2, 0.8, -0.4), leg("L", -0.7, 0.1, 0.9), leg("R", -0.4, 0.1, 0.6)), ease: "out" },
-      { at: ["s", 14], p: all({ rx: -Math.PI / 2, y: 0.17, z: -0.32, spineX: 0, headX: 0.35 }, arm("L", -0.5, 1.1, -0.3), arm("R", -0.5, 1.1, -0.3), leg("L", -0.35, 0.15, 0.4), leg("R", -0.2, 0.15, 0.2)), ease: "in" },
-      { at: ["s", 18], p: { rx: -1.38, y: 0.24, headX: 0.1 }, ease: "out" },
-      { at: ["s", 24], p: all({ rx: -Math.PI / 2, y: 0.18, z: -0.3, headX: 0.2 }, arm("L", -0.3, 1.0, -0.4), arm("R", -0.3, 1.0, -0.4), leg("L", 0, 0.15, 0.15), leg("R", 0, 0.15, 0.4)), ease: "in" },
-    ],
-  },
-  // the get-up: roll onto a hip, sit up on one hand, gather the feet under the body, stand into the guard
-  wakeup: {
-    limb: "body",
-    rate: 26,
-    keys: [
-      { at: ["s", 0], p: all({ rx: -Math.PI / 2, y: 0.18, z: -0.3, headX: 0.2 }, arm("L", -0.3, 1.0, -0.4), arm("R", -0.3, 1.0, -0.4), leg("L", 0, 0.15, 0.15), leg("R", 0, 0.15, 0.4)) },
-      { at: ["s", 12], p: all({ rx: -1.3, rz: 0.35, y: 0.12, z: -0.25, spineX: 0.25, headX: 0.35 }, leg("L", -0.9, 0.1, 1.4), leg("R", -0.5, 0.1, 0.9), arm("R", 0.4, 0.5, -0.2)), ease: "io" },
-      { at: ["s", 24], p: all({ rx: -0.85, rz: 0.15, y: -0.05, z: -0.18, spineX: 0.45, headX: 0.1 }, leg("L", -1.3, 0.1, 1.9), leg("R", -0.8, 0.1, 1.6), arm("R", 0.6, 0.4, -0.1), arm("L", -1.0, 0.2, -1.5)), ease: "io" },
-      { at: ["s", 36], p: all({ rx: -0.15, rz: 0, y: -0.38, z: -0.06, spineX: 0.45, headX: -0.05 }, leg("L", -1.05, 0.1, 1.7), leg("R", -0.25, 0.1, 1.8), arm("L", -1.2, -0.3, -1.8), arm("R", -1.2, -0.3, -1.9)), ease: "io" },
-      { at: ["s", 45], p: { rx: 0, y: -0.12, spineX: 0.18, kneeL: 0.75, kneeR: 0.6 }, ease: "io" },
     ],
   },
 };
@@ -744,7 +750,8 @@ export const HELD: Clip = {
     { at: ["s", 8], p: all({ spineX: 0.6, headX: 0.38, y: -0.08, hipY: 0.15, spineY: 0 }, arm("L", -1.15, -0.15, -1.0), arm("R", -1.15, -0.15, -1.0), leg("L", -0.2, 0.08, 0.75), leg("R", 0.25, -0.08, 0.65)), ease: "io" },
   ],
 };
-export const THROW_TIMING: Timing = { hit: 0, act: 4, end: 30 };
+// the thrower's throw motion runs 48 frames in Urban Reign (docs/calibration/urban-reign-reactions.json, grapple.throw)
+export const THROW_TIMING: Timing = { hit: 0, act: 4, end: 48 };
 /** The thrower's follow-through: a hip turned in and the body bent over the throw, then up again. */
 export const THROWER: Clip = {
   limb: "both",
@@ -760,6 +767,8 @@ export const THROWN: Clip = {
   limb: "body",
   rate: 40,
   hold: true,
+  plant: "none",
+  overlap: false,
   keys: [
     { at: ["s", 3], p: all({ rx: -0.45, y: 0.3, spineX: -0.35, headX: -0.3 }, arm("L", -2.3, 0.6, -0.4), arm("R", -2.3, 0.6, -0.4), leg("L", -0.6, 0.15, 0.7), leg("R", -0.3, 0.15, 0.5)), ease: "out" },
     { at: ["s", 10], p: all({ rx: -1.15, y: 0.95, rz: 0.25 }, leg("L", -1.4, 0.15, 0.4), leg("R", -1.1, 0.2, 0.3), arm("L", -2.7, 0.9, -0.3), arm("R", -2.6, 0.9, -0.3)), ease: "out" },
@@ -772,6 +781,8 @@ export const DOWN_LANDED: Clip = {
   limb: "body",
   rate: 30,
   hold: true,
+  plant: "none",
+  overlap: false,
   keys: [
     { at: ["s", 0], p: all({ rx: -Math.PI / 2, y: 0.17, z: -0.32, headX: 0.35 }, arm("L", -0.5, 1.1, -0.3), arm("R", -0.5, 1.1, -0.3), leg("L", -0.35, 0.15, 0.4), leg("R", -0.2, 0.15, 0.2)) },
     { at: ["s", 4], p: { rx: -1.36, y: 0.25, headX: 0.1 }, ease: "out" },
@@ -779,13 +790,199 @@ export const DOWN_LANDED: Clip = {
   ],
 };
 
-/** The clip of a hit reaction, by the part that took the blow. */
-export function hitClip(part: string): Clip {
-  if (part === "head") return REACTIONS.hitHead;
-  if (part === "legL") return REACTIONS.hitLegL;
-  if (part === "legR") return REACTIONS.hitLegR;
-  if (part === "armL") return REACTIONS.hitArmL;
-  if (part === "armR") return REACTIONS.hitArmR;
-  return REACTIONS.hitBody;
+
+
+// ------------------------------------------------------------ the hit reactions
+// Measured in Urban Reign's EE RAM (docs/calibration/urban-reign-reactions.json):
+// a light hit plays a 41-frame reaction, which one depends on the side the blow
+// comes from; heavier blows play 46-59 frames; a knockdown falls for about 27
+// frames, stays on the floor face up or face down, and gets up in 50. The sim
+// owns the lengths (the fighter's hitstun, DOWN); a reaction only fills them.
+//
+// A reaction is played on top of the pose the blow found the body in: the
+// clip is an offset from that pose, which itself eases back to the stance
+// over the reaction. So a second blow before the first has settled turns the
+// body further rather than starting it over, and the reaction ends in the
+// stance on the frame the sim lets the fighter go.
+
+/** Frames from the start of a knockdown to the body landing on the floor (measured: the fall action runs a median 27 frames). */
+export const FALL_LAND = 27;
+
+export type HitHeight = "head" | "body" | "legs";
+export type HitStrength = "light" | "heavy" | "knockdown" | "launch";
+/** The pose every reaction offset is added to: nothing moved. */
+export const ZERO: Pose = { y: 0, z: 0, rx: 0, ry: 0, rz: 0, spineX: 0, spineY: 0, spineZ: 0, headX: 0, headY: 0, headZ: 0, armL: [0, 0, 0], armR: [0, 0, 0], elbowL: 0, elbowR: 0, legL: [0, 0], legR: [0, 0], kneeL: 0, kneeR: 0, hipY: 0, tail: 0 };
+
+/**
+ * The offset of a reaction to a blow that lands on the fighter's right (the
+ * left is its mirror): the struck part is driven away from the blow and turned
+ * with it, peaking a few frames after contact, then easing off.
+ */
+function reaction(height: HitHeight, heavy: boolean): Clip {
+  const k = heavy ? 1.6 : 1;
+  const peak = heavy ? 5 : 3;
+  const out: Record<HitHeight, Partial<Pose>> = {
+    // the head snaps away from the fist, turning and tilting off it; the chest follows it round
+    head: all({ headY: -0.55 * k, headX: -0.35 * k, headZ: 0.22 * k, spineY: -0.22 * k, spineX: -0.16 * k, spineZ: 0.08 * k, z: -0.04 * k, y: -0.03 * k }, { armL: [0.35 * k, 0, 0.3 * k], armR: [0.25, 0, -0.2 * k], elbowL: 0.4 }),
+    // the trunk folds over the blow and turns away from it, the knees give, the arms come in
+    body: all({ spineX: 0.42 * k, headX: 0.22 * k, spineY: -0.2 * k, spineZ: 0.1 * k, y: -0.08 * k, z: -0.03 * k, kneeL: 0.3 * k, kneeR: 0.25 * k }, { armL: [0.25, 0, -0.35 * k], armR: [0.25, 0, 0.35 * k], elbowL: 0.3, elbowR: 0.3 }),
+    // the struck leg buckles under the body and the body drops toward it
+    legs: all({ kneeR: 0.75 * k, legR: [0.3 * k, 0], y: -0.1 * k, spineZ: 0.18 * k, spineX: 0.16 * k, spineY: -0.12 * k }, { armL: [0, 0, 0.35 * k], armR: [0.2, 0, 0.2] }),
+  };
+  // a heavy blow walks the fighter back a step
+  const step: Partial<Pose> = heavy ? { z: (out[height].z ?? 0) - 0.1, legR: [0.35, 0], kneeL: (out[height].kneeL ?? 0) + 0.2 } : {};
+  return {
+    limb: height === "head" ? "head" : height === "legs" ? "legR" : "body",
+    rate: 34,
+    plant: "both",
+    overlap: false,
+    keys: [
+      { at: ["s", peak], p: all(out[height], step), ease: "out" },
+      { at: ["s", peak + (heavy ? 12 : 8)], p: all(out[height], step, { headY: (out[height].headY ?? 0) * 0.7, spineY: (out[height].spineY ?? 0) * 0.8 }), ease: "io" },
+      { at: ["rec", 0.7], p: { headX: 0, headY: 0, headZ: 0, spineY: 0, spineZ: 0, spineX: (out[height].spineX ?? 0) * 0.2, armL: [0, 0, 0], armR: [0, 0, 0], elbowL: 0, elbowR: 0 }, ease: "io" },
+    ],
+  };
 }
 
+/** The mirror of a reaction offset: the same blow from the other side (the offsets have no stance to mirror about). */
+/** A pose with an offset (a reaction) added to every joint. */
+export function addPose(a: Pose, d: Pose): Pose {
+  const o = merge(a, {});
+  for (const key of Object.keys(a) as (keyof Pose)[]) {
+    const x = a[key];
+    const y = d[key];
+    if (Array.isArray(x)) (o as unknown as Record<string, number[]>)[key] = x.map((v, i) => v + (y as number[])[i]);
+    else (o as unknown as Record<string, number>)[key] = (x as number) + (y as number);
+  }
+  return o;
+}
+export function mirrorOffset(p: Pose): Pose {
+  return {
+    ...p,
+    ry: -p.ry,
+    rz: -p.rz,
+    spineY: -p.spineY,
+    spineZ: -p.spineZ,
+    headY: -p.headY,
+    headZ: -p.headZ,
+    hipY: -p.hipY,
+    armL: [p.armR[0], -p.armR[1], -p.armR[2]],
+    armR: [p.armL[0], -p.armL[1], -p.armL[2]],
+    elbowL: p.elbowR,
+    elbowR: p.elbowL,
+    legL: [p.legR[0], -p.legR[1]],
+    legR: [p.legL[0], -p.legL[1]],
+    kneeL: p.kneeR,
+    kneeR: p.kneeL,
+  };
+}
+
+const REACT = Object.fromEntries((["head", "body", "legs"] as HitHeight[]).flatMap((h) => [false, true].map((heavy) => [`${h}:${heavy}`, reaction(h, heavy)]))) as Record<string, Clip>;
+/** The reaction clips: 3 heights x light / heavy, each for a blow on the right (a blow on the left plays it mirrored). */
+export const REACTION_CLIPS: Readonly<Record<string, Clip>> = REACT;
+
+/** The reaction to a blow: the clip (an offset for a blow on the right) and whether to mirror it for one on the left. */
+export function reactionFor(height: HitHeight, side: number, strength: HitStrength): { clip: Clip; mirror: boolean } {
+  return { clip: REACT[`${height}:${strength !== "light"}`], mirror: side < 0 };
+}
+/** The height a blow on a body part reads at. */
+export const heightOf = (part: string): HitHeight => (part === "head" ? "head" : part === "legL" || part === "legR" ? "legs" : "body");
+
+/** Flat on the floor: face up (1) or face down (-1). */
+const lying = (face: 1 | -1): Partial<Pose> =>
+  all({ rx: (-face * Math.PI) / 2, y: 0.18, z: -face * 0.3, spineX: 0, headX: face > 0 ? 0.2 : -0.35, headY: 0 }, arm("L", face > 0 ? -0.3 : -2.6, 1.0, -0.4), arm("R", face > 0 ? -0.3 : -2.6, 1.0, -0.4), leg("L", 0, 0.15, face > 0 ? 0.15 : 0.3), leg("R", 0, 0.15, face > 0 ? 0.4 : 0.1));
+
+/** Knocked down onto the back: the legs go, the body tips back and lands on FALL_LAND, bounces once and lies there. */
+export const DOWN_BACK: Clip = {
+  limb: "body",
+  rate: 30,
+  hold: true,
+  plant: "both",
+  overlap: false,
+  keys: [
+    // the blow drives the chest back over the feet
+    { at: ["s", 5], p: all({ rx: -0.3, y: -0.04, spineX: -0.45, headX: -0.3 }, arm("L", -1.8, 0.9, -0.5), arm("R", -1.6, 0.9, -0.6), leg("R", 0.35, -0.06, 0.4)), ease: "out" },
+    // the legs give and the body goes back past its feet
+    { at: ["s", 13], p: all({ rx: -0.85, y: -0.2, spineX: -0.2, headX: 0.25 }, arm("L", -2.4, 1.0, -0.4), arm("R", -2.3, 1.0, -0.4), leg("L", -0.8, 0.1, 0.9), leg("R", -0.5, 0.1, 0.7)), ease: "io", plant: "none" },
+    { at: ["s", FALL_LAND - 4], p: all({ rx: -1.38, y: 0.1, z: -0.25, headX: 0.4 }, leg("L", -0.6, 0.15, 0.6), leg("R", -0.4, 0.15, 0.4)), ease: "in" },
+    { at: ["s", FALL_LAND], p: all(lying(1), { y: 0.17, z: -0.32, headX: 0.35 }, arm("L", -0.5, 1.1, -0.3), arm("R", -0.5, 1.1, -0.3), leg("L", -0.35, 0.15, 0.4), leg("R", -0.2, 0.15, 0.2)), ease: "in" },
+    { at: ["s", FALL_LAND + 4], p: { rx: -1.38, y: 0.24, headX: 0.1 }, ease: "out" },
+    { at: ["s", FALL_LAND + 10], p: lying(1), ease: "in" },
+  ],
+};
+/** Knocked down onto the front, by a blow from behind: pitched forward over the feet, the arms out to break the fall. */
+export const DOWN_FRONT: Clip = {
+  limb: "body",
+  rate: 30,
+  hold: true,
+  plant: "both",
+  overlap: false,
+  keys: [
+    { at: ["s", 5], p: all({ rx: 0.3, y: -0.04, spineX: 0.5, headX: -0.4 }, arm("L", -0.4, 0.6, -0.4), arm("R", -0.5, 0.6, -0.4), leg("L", 0.3, 0.06, 0.3)), ease: "out" },
+    { at: ["s", 13], p: all({ rx: 0.85, y: -0.18, spineX: 0.3, headX: -0.5 }, arm("L", -1.5, 0.5, -0.3), arm("R", -1.5, 0.5, -0.3), leg("L", 0.4, 0.1, 0.8), leg("R", 0.2, 0.1, 1.0)), ease: "io", plant: "none" },
+    { at: ["s", FALL_LAND - 4], p: all({ rx: 1.35, y: 0.1, z: 0.25, headX: -0.4 }, arm("L", -2.2, 0.8, -0.6), arm("R", -2.2, 0.8, -0.6)), ease: "in" },
+    { at: ["s", FALL_LAND], p: all(lying(-1), { y: 0.15 }), ease: "in" },
+    { at: ["s", FALL_LAND + 4], p: { rx: 1.4, y: 0.21 }, ease: "out" },
+    { at: ["s", FALL_LAND + 10], p: lying(-1), ease: "in" },
+  ],
+};
+
+/** The get-up from the back: roll onto a hip, sit up on one hand, gather the feet under the body, stand into the guard. */
+export const WAKE_BACK: Clip = {
+  limb: "body",
+  rate: 26,
+  plant: "none",
+  overlap: false,
+  keys: [
+    { at: ["s", 0], p: lying(1) },
+    { at: ["s", 12], p: all({ rx: -1.3, rz: 0.35, y: 0.12, z: -0.25, spineX: 0.25, headX: 0.35 }, leg("L", -0.9, 0.1, 1.4), leg("R", -0.5, 0.1, 0.9), arm("R", 0.4, 0.5, -0.2)), ease: "io" },
+    { at: ["s", 24], p: all({ rx: -0.85, rz: 0.15, y: -0.05, z: -0.18, spineX: 0.45, headX: 0.1 }, leg("L", -1.3, 0.1, 1.9), leg("R", -0.8, 0.1, 1.6), arm("R", 0.6, 0.4, -0.1), arm("L", -1.0, 0.2, -1.5)), ease: "io" },
+    { at: ["s", 36], p: all({ rx: -0.15, rz: 0, y: -0.38, z: -0.06, spineX: 0.45, headX: -0.05 }, leg("L", -1.05, 0.1, 1.7), leg("R", -0.25, 0.1, 1.8), arm("L", -1.2, -0.3, -1.8), arm("R", -1.2, -0.3, -1.9)), ease: "io", plant: "both" },
+    { at: ["s", 45], p: { rx: 0, y: -0.12, spineX: 0.18, kneeL: 0.75, kneeR: 0.6 }, ease: "io" },
+  ],
+};
+/** The get-up from the front: push up on both hands, draw a knee under the chest, rise off it into the guard. */
+export const WAKE_FRONT: Clip = {
+  limb: "body",
+  rate: 26,
+  plant: "none",
+  overlap: false,
+  keys: [
+    { at: ["s", 0], p: lying(-1) },
+    // the hands come under the shoulders and press the chest off the floor
+    { at: ["s", 10], p: all({ rx: 1.25, y: 0.22, z: 0.28, spineX: -0.35, headX: -0.4 }, arm("L", -1.4, 0.35, -0.2), arm("R", -1.4, 0.35, -0.2), leg("L", 0.1, 0.12, 0.5), leg("R", 0.05, 0.12, 0.3)), ease: "io" },
+    // up on the hands and one knee, the other foot drawn forward under the body
+    { at: ["s", 22], p: all({ rx: 0.85, y: -0.12, z: 0.2, spineX: 0.1, headX: -0.3 }, arm("L", -1.15, 0.2, -0.1), arm("R", -1.15, 0.2, -0.1), leg("L", -1.4, 0.1, 1.9), leg("R", 0.25, 0.1, 1.8)), ease: "io" },
+    // the hands leave the floor: a crouch over the front foot
+    { at: ["s", 34], p: all({ rx: 0.2, y: -0.36, z: 0.06, spineX: 0.55, headX: -0.15 }, leg("L", -1.05, 0.1, 1.7), leg("R", -0.2, 0.1, 1.8), arm("L", -1.2, -0.3, -1.8), arm("R", -1.2, -0.3, -1.9)), ease: "io", plant: "both" },
+    { at: ["s", 45], p: { rx: 0, y: -0.12, spineX: 0.18, kneeL: 0.75, kneeR: 0.6 }, ease: "io" },
+  ],
+};
+
+// ------------------------------------------------------------ the stances
+/**
+ * Each family's guard, laid over the bladed stance: what every move of the
+ * family recovers into. The boxer's fists are up at the brows, the Thai fighter
+ * stands tall behind a long lead arm, the brawler carries the hands low.
+ */
+export const STANCES: Record<Family, Partial<Pose>> = {
+  boxing: { armL: [-1.0, 0, -0.2], elbowL: -2.2, armR: [-0.85, 0, 0.32], elbowR: -2.35, spineX: 0.16, headX: 0.08, kneeL: 0.6, kneeR: 0.5, y: -0.06 },
+  karate: {},
+  muay: { armL: [-1.4, 0, 0.0], elbowL: -0.95, armR: [-0.95, 0, 0.25], elbowR: -2.2, spineX: 0.0, headX: -0.06, kneeL: 0.4, kneeR: 0.32, y: -0.02 },
+  kungfu: { armL: [-1.15, 0, 0.05], elbowL: -1.15, armR: [-0.7, 0, 0.0], elbowR: -1.9, spineX: 0.06, kneeL: 0.78, kneeR: 0.72, y: -0.1 },
+  brawler: { armL: [-0.5, 0, 0.3], elbowL: -1.5, armR: [-0.35, 0, -0.3], elbowR: -1.7, spineX: 0.16, headX: -0.14, kneeL: 0.45, kneeR: 0.35 },
+  power: { armL: [-0.65, 0, 0.45], elbowL: -1.5, armR: [-0.55, 0, -0.45], elbowR: -1.6, legL: [-0.4, 0.14], legR: [0.15, -0.14], spineX: 0.2, kneeL: 0.62, kneeR: 0.55, y: -0.08 },
+  grappler: { armL: [-1.05, 0, 0.35], elbowL: -1.05, armR: [-0.95, 0, -0.35], elbowR: -1.15, spineX: 0.36, headX: -0.2, kneeL: 0.85, kneeR: 0.75, y: -0.13 },
+  kicker: { armL: [-0.75, 0, 0.25], elbowL: -1.65, armR: [-0.4, 0, -0.3], elbowR: -1.95, spineX: 0.03, kneeL: 0.36, kneeR: 0.3, y: -0.02 },
+};
+/** How each family breathes and bounces in its stance: bounce rate (rad/s), bounce depth (m), sway of the hips, and how much the lead hand paws. */
+export const IDLE: Record<Family, { rate: number; bob: number; sway: number; paw: number }> = {
+  boxing: { rate: 4.6, bob: 0.035, sway: 0.05, paw: 0.08 },
+  karate: { rate: 4.2, bob: 0.03, sway: 0.02, paw: 0.06 },
+  muay: { rate: 2.4, bob: 0.02, sway: 0.1, paw: 0.1 },
+  kungfu: { rate: 3.2, bob: 0.015, sway: 0.04, paw: 0.05 },
+  brawler: { rate: 3.6, bob: 0.03, sway: 0.07, paw: 0.04 },
+  power: { rate: 2.0, bob: 0.02, sway: 0.03, paw: 0.02 },
+  grappler: { rate: 2.8, bob: 0.02, sway: 0.05, paw: 0.07 },
+  kicker: { rate: 5.0, bob: 0.045, sway: 0.03, paw: 0.05 },
+};

@@ -5,7 +5,7 @@
 import { describe, expect, it } from "vitest";
 import { applyPose, buildBody, targetPose, type Body, type Pose } from "../src/render/body";
 import { BTN, type PlayerInput } from "../src/sim/types";
-import { FAMILIES, FAMILY_OF, REACTIONS, clipFor, familyOf, loadFrame, sampleClip, stateTiming, type Clip, type Timing } from "../src/render/motion";
+import { DOWN_BACK, FALL_LAND, FAMILIES, FAMILY_OF, WAKE_BACK, clipFor, familyOf, loadFrame, sampleClip, stateTiming, type Clip, type Timing } from "../src/render/motion";
 import { DOWN } from "../src/sim/moves";
 import { STYLES } from "../src/sim/styles";
 import { World } from "../src/sim/world";
@@ -40,8 +40,8 @@ function limbGap(limb: Clip["limb"], a: Pose, b: Pose): number {
 function drive(b: Body, f: Fighter, w: World, from: number, to: number): void {
   for (let t = from; t <= to; t++) {
     f.t = t;
-    const { p, rate, snap } = targetPose(f, w, t / 60, b.hurt);
-    applyPose(b, p, rate, snap, 1 / 60, 0);
+    const { p, rate, snap, drive } = targetPose(f, w, t / 60, b.hurt);
+    applyPose(b, p, rate, snap, 1 / 60, 0, drive);
   }
 }
 function settled(style: number): { w: World; f: Fighter; b: Body } {
@@ -141,17 +141,17 @@ describe("the move set", () => {
     const { w, f, b } = settled(0);
     b.hurt = { part: "head", age: 0 };
     Object.assign(f, { state: "hitstun", dur: 41 });
-    drive(b, f, w, 0, 4);
-    expect(b.cur.headX).toBeLessThan(-0.4);
-    // the knockdown
+    drive(b, f, w, 0, 5);
+    expect(b.cur.headX).toBeLessThan(-0.3);
+    // the knockdown lands on the frame Urban Reign's fall does
     const T = stateTiming(DOWN.dur);
     const base = targetPose(settled(0).f, w, 0, b.hurt).p;
-    const down = (t: number) => sampleClip(REACTIONS.down, t, T, base);
-    expect(down(14).rx).toBeCloseTo(-Math.PI / 2, 5); // on the floor
-    expect(down(18).rx).toBeGreaterThan(-1.45); // bounced up off it
-    expect(down(18).y).toBeGreaterThan(down(14).y);
+    const down = (t: number) => sampleClip(DOWN_BACK, t, T, base);
+    expect(down(FALL_LAND).rx).toBeCloseTo(-Math.PI / 2, 5); // on the floor
+    expect(down(FALL_LAND + 4).rx).toBeGreaterThan(-1.45); // bounced up off it
+    expect(down(FALL_LAND + 4).y).toBeGreaterThan(down(FALL_LAND).y);
     expect(down(DOWN.dur).rx).toBeCloseTo(-Math.PI / 2, 5); // and lies there
-    const up = (t: number) => sampleClip(REACTIONS.wakeup, t, stateTiming(DOWN.wake), base);
+    const up = (t: number) => sampleClip(WAKE_BACK, t, stateTiming(DOWN.wake), base);
     expect(up(0).rx).toBeCloseTo(-Math.PI / 2, 5);
     expect(up(36).y).toBeLessThan(-0.3); // crouched, feet under the body
     expect(up(DOWN.wake).rx).toBe(0); // and standing
