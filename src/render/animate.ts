@@ -15,6 +15,7 @@ import * as THREE from "three";
 import type { Fighter, PartId } from "../sim/types";
 import type { World } from "../sim/world";
 import { LEG, applyPose, copyPose, impulse, targetPose, type Body, type Foot, type Target } from "./body";
+import { ragdoll } from "./ragdoll";
 import { clipFor, heightOf, mix, reactionFor, type HitStrength, type Plant } from "./motion";
 
 /** Which side of the victim a blow comes from (1: its right, the +x side; -1: its left), and whether it comes from behind. */
@@ -43,6 +44,7 @@ export function onHit(v: Body, d: Fighter, a: Fighter | undefined, part: PartId,
   const strength = strengthOf(dmg, stop);
   v.cue.react = { ...reactionFor(heightOf(part), side, strength), from: copyPose(v.cur) };
   v.cue.face = behind ? -1 : 1;
+  v.cue.side = side;
   v.hurt = { part, age: 0 };
   // a burn from the arena only makes the body flinch
   impulse(v, part, a ? (strength === "heavy" ? 1 : 0.55) : 0.15, side);
@@ -64,6 +66,7 @@ export function animate(v: Body, f: Fighter, w: World, time: number, dt: number,
   // (a knee or a throw jumps onto its landing pose, so the freeze holds the blow, not the wind-up)
   applyPose(v, tp.p, f.stop > 0 ? 0 : tp.rate, (tp.snap && f.stop === 0) || tp.impact, dt, jitter, tp.drive);
   footwork(v, tp.plant, dt, f.stop > 0);
+  ragdoll(v, f, tp, dt, v.cue.from, v.cue.side, v.cue.face);
   return tp;
 }
 

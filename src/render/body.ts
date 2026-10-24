@@ -11,6 +11,7 @@
 // its own bone and its own piece of skin, so a limb that falls off simply hides
 // on the body and appears as a pickup on the floor.
 import * as THREE from "three";
+import type { Rag } from "./ragdoll";
 import { LIMBS, type Fighter, type PartId } from "../sim/types";
 import { CHARGE, DOWN, HOP_AIR, HOP_CYCLE } from "../sim/moves";
 import { STYLES } from "../sim/styles";
@@ -254,6 +255,8 @@ export interface Body {
   feet: { L: Foot; R: Foot };
   /** the walk cycle: its phase (one per stride of both feet), where the root was last frame, its speed (m/s) */
   gait: { phase: number; prev: THREE.Vector3 | null; speed: number; on: boolean };
+  /** the trunk on the ragdoll through a fall (ragdoll.ts), or null */
+  rag: Rag | null;
   skeleton: THREE.Skeleton;
   skins: Record<"torso" | "armL" | "armR" | "legL" | "legR", THREE.SkinnedMesh>;
   mats: THREE.MeshStandardMaterial[];
@@ -521,6 +524,7 @@ export function buildBody(f: Fighter): Body {
     ankles,
     feet: { L: newFoot(), R: newFoot() },
     gait: { phase: 0, prev: null, speed: 0, on: false },
+    rag: null,
     skeleton,
     skins,
     mats: [skin, accent, torsoSkin, armSkinL, armSkinR, headSkin, jawSkin],
@@ -541,6 +545,8 @@ export interface Cue {
   react: { clip: Clip; mirror: boolean; from: Pose } | null;
   /** which way up a knockdown lands: 1 on the back, -1 on the front (a blow from behind) */
   face: 1 | -1;
+  /** which side the last blow came from (1: the right) */
+  side: 1 | -1;
   /** the state and move playing, the frame it started on, the last frame seen, and the pose the body was in when it started (blended out of) */
   key: string;
   start: number;
@@ -549,7 +555,7 @@ export interface Cue {
   age: number;
   blend: Pose | null;
 }
-export const noCue = (): Cue => ({ last: null, from: null, throwAge: 99, react: null, face: 1, key: "", start: 0, at: 0, age: 0, blend: null });
+export const noCue = (): Cue => ({ last: null, from: null, throwAge: 99, react: null, face: 1, side: 1, key: "", start: 0, at: 0, age: 0, blend: null });
 
 /** What targetPose decided, besides the pose: which feet carry the weight, and what is playing (for the debug overlay and the strips). */
 export interface Target {

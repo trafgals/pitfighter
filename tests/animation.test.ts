@@ -6,6 +6,7 @@
 import { describe, expect, it } from "vitest";
 import * as THREE from "three";
 import { buildBody, stance, targetPose, type Body } from "../src/render/body";
+import { RAGDOLL } from "../src/render/ragdoll";
 import { BLEND, animate, ankleOf, hitSide, onHit, strideOf } from "../src/render/animate";
 import { DOWN_BACK, DOWN_FRONT, FALL_LAND, REACTION_CLIPS, THROW_TIMING, WAKE_BACK, WAKE_FRONT, clipFor, familyOf, stateTiming, type Clip } from "../src/render/motion";
 import { DOWN, MOVES } from "../src/sim/moves";
@@ -300,6 +301,48 @@ describe("knockdowns and get-ups", () => {
     Object.assign(f, { state: "down", dur: DOWN.dur });
     play(b, f, w, time, 0, FALL_LAND);
     expect(b.cur.rx).toBeGreaterThan(1);
+  });
+});
+
+describe("the ragdoll", () => {
+  /** The pelvis and head in the root's frame, every frame of a fall, with or without the ragdoll. */
+  function fall(face: 1 | -1, state: "down" | "thrown", on: boolean, frames: number) {
+    RAGDOLL.on = on;
+    try {
+      const { w, f, b, time } = standing(0);
+      b.cue.face = face;
+      Object.assign(f, { state, dur: state === "down" ? DOWN.dur : 44, stop: 0 });
+      const out: { hips: THREE.Vector3; head: THREE.Vector3 }[] = [];
+      play(b, f, w, time, 0, frames, () => {
+        const at = (o: THREE.Object3D) => b.root.worldToLocal(o.getWorldPosition(new THREE.Vector3()));
+        out.push({ hips: at(b.hips), head: at(b.head) });
+      });
+      return out;
+    } finally {
+      RAGDOLL.on = true;
+    }
+  }
+
+  for (const face of [1, -1] as const)
+    it(`a knockdown ${face > 0 ? "face up" : "face down"} is thrown ${face > 0 ? "back" : "forward"} by the blow, stays above the floor, and is on its clip on the landing frame`, () => {
+      const rag = fall(face, "down", true, FALL_LAND);
+      const clip = fall(face, "down", false, FALL_LAND);
+      // carried along by the blow early in the fall
+      const push = Math.max(...[4, 6, 8, 10].map((t) => (clip[t].hips.z - rag[t].hips.z) * face));
+      expect(push, "pushed the way the blow went").toBeGreaterThan(0.03);
+      for (const p of rag) {
+        expect(p.hips.y).toBeGreaterThan(0.05);
+        expect(p.head.y).toBeGreaterThan(0.05);
+      }
+      expect(rag[FALL_LAND].hips.distanceTo(clip[FALL_LAND].hips), "on the clip on landing").toBeLessThan(1e-3);
+      expect(rag[FALL_LAND].hips.y, "on the floor").toBeLessThan(0.35);
+    });
+
+  it("a thrown body tumbles on the ragdoll and lands where its clip does", () => {
+    const rag = fall(1, "thrown", true, 44);
+    const clip = fall(1, "thrown", false, 44);
+    expect(Math.max(...rag.map((p, t) => p.head.distanceTo(clip[t].head)))).toBeGreaterThan(0.02);
+    expect(rag[44].hips.distanceTo(clip[44].hips)).toBeLessThan(1e-3);
   });
 });
 
