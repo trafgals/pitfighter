@@ -10,7 +10,7 @@ The fighters' motion is our own: every pose is keyframed in `src/render/`. Only 
 2. **`blendIn()`**: a new state or move eases out of the pose the body was in over `BLEND` = 3 frames. It is always on its clip by the contact frame, so a cancel never blurs a hit.
 3. **`applyPose()`** drives the joints toward the target on damped springs (`JOINT_SPRINGS`). The striking limb is driven kinematically from the fire phase through the active frames, and a punch takes the chest with it.
 4. **`footwork()`** puts the legs on two-bone IK: planted feet, recovery steps, hip drop and the walk cycle.
-5. **`ragdoll()`** (`ragdoll.ts`) carries the trunk through knockdowns, throws and falls.
+5. **`ragdoll()`** (`ragdoll.ts`) carries the whole skeleton through knockdowns, throws and falls.
 
 ## Clips
 
@@ -55,11 +55,21 @@ A clip is a list of keys anchored to the move's **phases**, not to absolute fram
 
 ## Ragdoll
 
-During a knockdown fall, a throw and a fall off a ledge, the trunk is three verlet points: pelvis, chest and head.
+During a knockdown fall, a throw and a fall off a ledge, the skeleton's 11 bones are 15 verlet points: the pelvis (both hip joints and a point in front), the chest (both shoulders and the neck), the head, and the elbows, hands, knees and ankles.
 
-- The blow throws them back and up, gravity pulls them down, and the floor stops them.
-- A motor pulls them toward the clip. It starts weak and is full on the landing frame, so the body is on the floor exactly when the sim says.
-- The clip's body is moved and turned to follow the ragdoll's trunk.
+- **Bones** keep their length. The pelvis and the chest keep their shape.
+- **Joint limits:**
+  - The spine is a ball joint over the hips: the chest turns on the pelvis at most `SPINE_MAX` (0.9 rad) from how it sat when the fall began.
+  - The neck, shoulders and hips stay inside a cone (`CONES`).
+  - The elbows and knees are hinges about the bone's own axis (`HINGES`). They bend one way only, at most 2.6 rad.
+- The blow throws the points back and up, the upper body harder so the body tips over. Gravity pulls them down, and the floor stops them without a bounce.
+- A motor pulls every point toward the clip. It starts weak, so the arms and legs flail on their own, and it is full on the landing frame. Every bone is then exactly on its clip, so the body is on the floor when the sim says and the get-up starts from its own first pose.
+- The bones are then turned to lie along the points: the body on the pelvis, the spine on the chest, then the head and each bone of the limbs, parents first.
+- Tested, for both knockdowns and the throw:
+  - lengths within 2 mm and every joint within its limits on every frame;
+  - nothing goes through the floor;
+  - the hands and feet move off the clip, against the pelvis;
+  - every bone is within 1 mm of the clip on landing.
 
 ## Seeing it
 

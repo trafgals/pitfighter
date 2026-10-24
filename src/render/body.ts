@@ -255,7 +255,7 @@ export interface Body {
   feet: { L: Foot; R: Foot };
   /** the walk cycle: its phase (one per stride of both feet), where the root was last frame, its speed (m/s) */
   gait: { phase: number; prev: THREE.Vector3 | null; speed: number; on: boolean };
-  /** the trunk on the ragdoll through a fall (ragdoll.ts), or null */
+  /** the skeleton on the ragdoll through a fall (ragdoll.ts), or null */
   rag: Rag | null;
   skeleton: THREE.Skeleton;
   skins: Record<"torso" | "armL" | "armR" | "legL" | "legR", THREE.SkinnedMesh>;

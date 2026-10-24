@@ -6,7 +6,7 @@
 import { describe, expect, it } from "vitest";
 import * as THREE from "three";
 import { buildBody, stance, targetPose, type Body } from "../src/render/body";
-import { RAGDOLL } from "../src/render/ragdoll";
+import { CONES, HINGES, RAGDOLL, SPINE_MAX, bendOf, coneAngle, spineBend, type Rag } from "../src/render/ragdoll";
 import { BLEND, animate, ankleOf, hitSide, onHit, strideOf } from "../src/render/animate";
 import { DOWN_BACK, DOWN_FRONT, FALL_LAND, REACTION_CLIPS, THROW_TIMING, WAKE_BACK, WAKE_FRONT, clipFor, familyOf, stateTiming, type Clip } from "../src/render/motion";
 import { DOWN, MOVES } from "../src/sim/moves";
@@ -344,6 +344,72 @@ describe("the ragdoll", () => {
     expect(Math.max(...rag.map((p, t) => p.head.distanceTo(clip[t].head)))).toBeGreaterThan(0.02);
     expect(rag[44].hips.distanceTo(clip[44].hips)).toBeLessThan(1e-3);
   });
+
+  /** Every bone's world position and the ragdoll's points, every frame of a fall. */
+  function chain(face: 1 | -1, state: "down" | "thrown", on: boolean, frames: number) {
+    RAGDOLL.on = on;
+    try {
+      const { w, f, b, time } = standing(0);
+      b.cue.face = face;
+      b.cue.side = 1;
+      Object.assign(f, { state, dur: state === "down" ? DOWN.dur : 44, stop: 0 });
+      const out: { bones: THREE.Vector3[]; hands: THREE.Vector3[]; rag: Rag | null }[] = [];
+      play(b, f, w, time, 0, frames, () => {
+        b.root.updateMatrixWorld(true);
+        const at = (o: THREE.Object3D) => b.root.worldToLocal(o.getWorldPosition(new THREE.Vector3()));
+        const bones = b.skeleton.bones.map(at);
+        // the hands and feet, in the pelvis's frame: what the limbs do on their own
+        const tips = [fistOf(b, "L"), fistOf(b, "R"), ankleOf(b, "L"), ankleOf(b, "R")].map((p) => b.hips.worldToLocal(p));
+        const rag = b.rag && { ...b.rag, x: b.rag.x.map((p) => p.clone()), axes: b.rag.axes.map((a) => a.clone()) };
+        out.push({ bones, hands: tips, rag });
+      });
+      return out;
+    } finally {
+      RAGDOLL.on = true;
+    }
+  }
+
+  const falls = [
+    { name: "a knockdown face up", face: 1, state: "down", land: FALL_LAND },
+    { name: "a knockdown face down", face: -1, state: "down", land: FALL_LAND },
+    { name: "a throw", face: 1, state: "thrown", land: 44 },
+  ] as const;
+
+  for (const fall of falls) {
+    it(`${fall.name}: every bone keeps its length and every joint stays within its limits`, () => {
+      const run = chain(fall.face, fall.state, true, fall.land);
+      const first = run[0].rag!;
+      let worst = { cone: 0, hinge: 0 };
+      for (const { rag } of run.slice(0, fall.land)) {
+        expect(rag).not.toBeNull();
+        const x = rag!.x;
+        // the head, the limbs and the pelvis and chest are rigid (within a millimetre)
+        for (const [i, [a, c]] of [[0, 1], [0, 2], [3, 4], [5, 6], [3, 7], [7, 8], [11, 12]].entries())
+          expect(Math.abs(x[a].distanceTo(x[c]) - first.x[a].distanceTo(first.x[c])), `stick ${i}`).toBeLessThan(2e-3);
+        // the chest bends and twists on the pelvis only within its range
+        expect(spineBend(rag!)).toBeLessThan(SPINE_MAX + 0.01);
+        for (const c of CONES) worst.cone = Math.max(worst.cone, coneAngle(x, c) - c.max);
+        HINGES.forEach((h, i) => {
+          const bend = bendOf(x, h, rag!.axes[i]);
+          worst.hinge = Math.max(worst.hinge, h.lo - bend, bend - h.hi);
+        });
+        // nothing goes through the floor
+        for (const p of x) expect(p.y).toBeGreaterThan(0.03);
+      }
+      expect(worst.cone, "outside a cone (rad)").toBeLessThan(0.03);
+      expect(worst.hinge, "an elbow or knee bent the wrong way or too far (rad)").toBeLessThan(0.03);
+    });
+
+    it(`${fall.name}: the arms and legs flail on their own, and on the landing frame every bone is on its clip`, () => {
+      const rag = chain(fall.face, fall.state, true, fall.land);
+      const clip = chain(fall.face, fall.state, false, fall.land);
+      // the hands and feet move against the pelvis, not just with the trunk
+      const flail = Math.max(...rag.map((r, t) => Math.max(...r.hands.map((p, i) => p.distanceTo(clip[t].hands[i])))));
+      expect(flail, "the limbs move off the clip (m)").toBeGreaterThan(0.05);
+      const land = rag[fall.land].bones.map((p, i) => p.distanceTo(clip[fall.land].bones[i]));
+      expect(Math.max(...land), "every bone on its clip on landing (m)").toBeLessThan(1e-3);
+    });
+  }
 });
 
 describe("timed to Urban Reign", () => {
