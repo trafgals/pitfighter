@@ -479,7 +479,7 @@ const sweep = (s: Side): Clip => ({
   keys: [
     { at: ["up", 0.6], p: all(leg(other(s), -1.0, 0, 1.75), leg(s, -0.3, 0.6, 0.6), { y: -0.42, spineX: 0.35, ry: -0.5 * sgn(s) }, arm("L", -0.6, 0.6, -0.4), arm("R", -0.6, 0.6, -0.4)), ease: "out", load: true, plant: "none" },
     { at: ["hit", -LEAD], p: all(leg(s, -0.3, 1.4, 0.08), { ry: 1.1 * sgn(s) }), ease: "in" },
-    { at: ["act", 0], p: { ry: 2.6 * sgn(s) } },
+    { at: ["act", 0], p: { ry: 2.6 * sgn(s) }, ease: "out" },
     { at: ["rec", 0.35], p: { ry: 4.3 * sgn(s) }, ease: "out" },
     { at: ["rec", 0.7], p: { ry: 6.28 * sgn(s), y: -0.25 }, reset: true, plant: "both" },
   ],

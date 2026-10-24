@@ -392,6 +392,45 @@ async function main() {
   check(/●/.test(dbg) && /plant/.test(dbg), `?debug=motion: shows the planted feet ("${lines[0].trim()}")`);
   await page.screenshot({ path: path.join(OUT, "8_debug_motion.png") });
   check(errors.length === 0, `?debug=motion: no page errors${errors.length ? ": " + errors.slice(0, 3).join(" | ") : ""}`);
+
+  // frame time: 8 fighters' animation (springs, IK, ragdoll: the scene's sync) must fit easily in a 60 fps frame.
+  // Headless Chrome draws on the CPU (SwiftShader), so the whole frame is reported, but only the animation is held to a budget.
+  await withTimeout(page.goto(`${SITE}/?auto=1&fighters=8&seed=7`, { waitUntil: "load" }), 20_000, "load frame-time match");
+  await withTimeout(page.waitForFunction(() => window.__game.mode === "match", { timeout: 15_000 }), 16_000, "frame-time match starts");
+  const ft = await withTimeout(
+    page.evaluate(
+      () =>
+        new Promise((done) => {
+          const sc = window.__game.scene;
+          const sync = sc.sync.bind(sc);
+          const anim = [];
+          const frame = [];
+          sc.sync = (...a) => {
+            const t0 = performance.now();
+            sync(...a);
+            anim.push(performance.now() - t0);
+          };
+          let last = performance.now();
+          const tick = (now) => {
+            frame.push(now - last);
+            last = now;
+            if (frame.length < 120) requestAnimationFrame(tick);
+            else {
+              sc.sync = sync;
+              const med = (xs) => xs.slice().sort((a, b) => a - b)[xs.length >> 1];
+              const p95 = (xs) => xs.slice().sort((a, b) => a - b)[Math.floor(xs.length * 0.95)];
+              done({ anim: med(anim), anim95: p95(anim), frame: med(frame), n: anim.length, fighters: window.__game.world.fighters.length });
+            }
+          };
+          requestAnimationFrame(tick);
+        }),
+    ),
+    60_000,
+    "measure frame time",
+  );
+  console.log(`      frame time: ${JSON.stringify(ft)}`);
+  check(ft.fighters === 8 && ft.n > 30, `frame time: measured ${ft.n} frames of an 8-fighter match`);
+  check(ft.anim < 4 && ft.anim95 < 8, `frame time: animating 8 fighters takes ${ft.anim.toFixed(2)} ms a frame (95th percentile ${ft.anim95.toFixed(2)} ms), under a quarter of a 60 fps frame (whole frame ${ft.frame.toFixed(1)} ms on the software renderer)`);
 }
 
 main()

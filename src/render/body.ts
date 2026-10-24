@@ -885,9 +885,11 @@ export const JOINT_SPRINGS: Partial<Record<(typeof KEYS)[number] | "armL" | "arm
 const DRIVEN: Record<Limb, number[]> = (() => {
   const n = KEYS.length;
   const k = (key: (typeof KEYS)[number]) => KEYS.indexOf(key);
-  const armL = [n, n + 1, n + 2, k("elbowL")];
-  const armR = [n + 3, n + 4, n + 5, k("elbowR")];
-  return { armL, armR, legL: [n + 6, n + 7, k("kneeL")], legR: [n + 8, n + 9, k("kneeR")], both: [...armL, ...armR], head: [], body: [] };
+  // a punch is thrown with the chest: it rides along with the arm, so the fist is where the clip puts it
+  const chest = [k("spineX"), k("spineY"), k("spineZ")];
+  const armL = [...chest, n, n + 1, n + 2, k("elbowL")];
+  const armR = [...chest, n + 3, n + 4, n + 5, k("elbowR")];
+  return { armL, armR, legL: [n + 6, n + 7, k("kneeL")], legR: [n + 8, n + 9, k("kneeR")], both: [...new Set([...armL, ...armR])], head: [], body: [] };
 })();
 const SPRING = [...KEYS.map((k) => JOINT_SPRINGS[k]), ...(["armL", "armL", "armL", "armR", "armR", "armR", "legL", "legL", "legR", "legR"] as const).map((k) => JOINT_SPRINGS[k])].map((j) => j ?? { k: 1, damp: DAMPING });
 

@@ -14,7 +14,7 @@
 // tools/strip.mjs drives it headless and saves the pictures to test-output/strips/.
 import * as THREE from "three";
 import { World } from "./sim/world";
-import { DOWN, MOVES } from "./sim/moves";
+import { DOWN, GRAB, HOLD, MOVES, REVERSAL } from "./sim/moves";
 import { STYLES } from "./sim/styles";
 import type { Fighter, PartId } from "./sim/types";
 import { buildBody, type Body, type Target } from "./render/body";
@@ -51,7 +51,7 @@ function rows(): Row[] {
   const set = params.get("set") ?? "moves";
   if (set === "moves") {
     const moves = ["jab1", "jab2", "jab3", "punchFin", "kick1", "kick2", "sweep", STYLES[sStyle].special, "headbutt"];
-    return moves.map((move) => {
+    const strikes: Row[] = moves.map((move) => {
       const w = new World({ seed: 1, styles: [sStyle, 0], humans: [true, true] });
       const m = w.eff(w.fighters[0], move);
       return {
@@ -63,6 +63,25 @@ function rows(): Row[] {
         start: (f) => Object.assign(f, { state: "attack", move, chargeHeld: false, charge: 0 }),
       };
     });
+    const grab = GRAB.startup + GRAB.active + GRAB.whiff;
+    return [
+      ...strikes,
+      { name: "grapple", style: sStyle, frames: grab, hit: GRAB.startup, act: GRAB.startup + GRAB.active, start: (f) => Object.assign(f, { state: "attack", move: "grab", chargeHeld: false, charge: 0 }) },
+      {
+        // the clinch, a knee every HOLD.kneeCool frames
+        name: "clinch, knees",
+        style: sStyle,
+        frames: HOLD.kneeCool * 3,
+        start: (f) => Object.assign(f, { state: "holding", dur: HOLD.dur, holdStrikes: 0, holdCool: 0 }),
+        each: (f, _b, _w, t) => {
+          if (t % HOLD.kneeCool === 0) Object.assign(f, { holdStrikes: t / HOLD.kneeCool + 1, holdCool: HOLD.kneeCool });
+          else f.holdCool = Math.max(0, f.holdCool - 1);
+        },
+      },
+      { name: "deflect", style: sStyle, frames: REVERSAL.dur, hit: REVERSAL.first, act: REVERSAL.window, start: (f) => Object.assign(f, { state: "reversal", dur: REVERSAL.dur, revHeight: "high" }) },
+      { name: "deflect low", style: sStyle, frames: REVERSAL.dur, hit: REVERSAL.first, act: REVERSAL.window, start: (f) => Object.assign(f, { state: "reversal", dur: REVERSAL.dur, revHeight: "low" }) },
+      { name: "blocked", style: sStyle, frames: MOVES.jab1.blockstun, start: (f) => Object.assign(f, { state: "blockstun", dur: MOVES.jab1.blockstun }) },
+    ];
   }
   if (set === "reactions") {
     const out: Row[] = [];
@@ -218,7 +237,7 @@ async function draw(): Promise<HTMLCanvasElement> {
       renderer.render(scene, camera);
       const x = LEFT + col * CW;
       g.drawImage(renderer.domElement, x, y0);
-      const T = tp.T ?? (row.hit !== undefined ? { hit: row.hit, act: row.act ?? row.hit, end: row.frames } : undefined);
+      const T = row.hit !== undefined ? { hit: row.hit, act: row.act ?? row.hit, end: row.frames } : tp.phase ? tp.T : undefined;
       const active = T && t >= T.hit && t < T.act;
       if (T && t === T.hit) {
         g.strokeStyle = "#ff3030";
