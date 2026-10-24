@@ -249,6 +249,8 @@ export interface Body {
   head: THREE.Bone;
   tail: THREE.Group;
   limbs: Record<PartId, THREE.Object3D>; // arm / leg bones (plus head, torso) for visibility
+  /** the raw end left at a shoulder or a hip when the limb is torn off, shown only then */
+  stumps: Record<"armL" | "armR" | "legL" | "legR", THREE.Mesh>;
   joints: { elbowL: THREE.Bone; elbowR: THREE.Bone; kneeL: THREE.Bone; kneeR: THREE.Bone };
   ankles: { L: THREE.Group; R: THREE.Group };
   /** where each foot is on the floor (world space) while it carries weight, and how far the leg IK has it (animate.ts) */
@@ -514,6 +516,26 @@ export function buildBody(f: Fighter): Body {
   hips.add(tail);
 
   const limbs = { armL, armR, legL, legR, head, torso: spine } as Record<PartId, THREE.Object3D>;
+  // where a limb is torn off: wet red meat round a white knob of bone, on the shoulder or hip it came from
+  const meat = new THREE.MeshStandardMaterial({ color: 0x7a0606, roughness: 0.3, emissive: 0x200000 });
+  const boneMat = new THREE.MeshStandardMaterial({ color: 0xe8dcc0, roughness: 0.6 });
+  const stump = (parent: THREE.Object3D, x: number, y: number, r: number) => {
+    const m = new THREE.Mesh(new THREE.SphereGeometry(r, 14, 10), meat);
+    m.scale.set(1, 0.8, 1);
+    m.position.set(x, y, 0);
+    const knob = new THREE.Mesh(new THREE.SphereGeometry(r * 0.38, 8, 6), boneMat);
+    knob.position.y = -r * 0.72;
+    m.add(knob);
+    m.visible = false;
+    parent.add(m);
+    return m;
+  };
+  const stumps = {
+    armL: stump(spine, -SHOULDER_X, SHOULDER_Y - 0.03, 0.075),
+    armR: stump(spine, SHOULDER_X, SHOULDER_Y - 0.03, 0.075),
+    legL: stump(hips, -0.11, -0.1, 0.085),
+    legR: stump(hips, 0.11, -0.1, 0.085),
+  };
   return {
     root,
     body,
@@ -522,6 +544,7 @@ export function buildBody(f: Fighter): Body {
     head,
     tail,
     limbs,
+    stumps,
     joints: { elbowL, elbowR, kneeL, kneeR },
     ankles,
     feet: { L: newFoot(), R: newFoot() },
@@ -970,6 +993,7 @@ export function syncLimbs(b: Body, f: Fighter): void {
     const on = f.parts[p].attached;
     b.limbs[p].visible = on; // the hand or foot riding on the bone
     b.skins[p as keyof Body["skins"]].visible = on; // and the limb's skin
+    if (p in b.stumps) b.stumps[p as keyof Body["stumps"]].visible = !on;
   }
 }
 

@@ -220,6 +220,11 @@ async function main() {
   check(!!feel.heavy, `a heavy hit landed (${JSON.stringify(feel.heavy)})`);
   await new Promise((r) => setTimeout(r, 60));
   await page.screenshot({ path: path.join(OUT, "4_heavy_hit.png") });
+  // the blood those hits drew: drops thrown, and splats where they landed
+  await new Promise((r) => setTimeout(r, 1200));
+  const gore = await page.evaluate(() => ({ ...window.__game.scene.fx.stats }));
+  check(gore.drops > 50 && gore.splats > 20, `hits draw blood that splats on the floor (${gore.drops} drops, ${gore.splats} splats)`);
+  await page.screenshot({ path: path.join(OUT, "4b_blood.png") });
   const sp = await withTimeout(
     page.evaluate(() => {
       const g = window.__game;
@@ -395,7 +400,7 @@ async function main() {
   }
 
   // ?debug=motion: a line per fighter and foot markers that follow the plants
-  await withTimeout(page.goto(`${SITE}/?auto=1&fighters=8&seed=3&debug=motion`, { waitUntil: "load" }), 20_000, "load debug=motion");
+  await withTimeout(page.goto(`${SITE}/?auto=1&fighters=8&seed=3&debug=motion&gore=0`, { waitUntil: "load" }), 20_000, "load debug=motion");
   await withTimeout(page.waitForFunction(() => (document.getElementById("motion-debug")?.textContent ?? "").split("\n").length === 8, { timeout: 15_000 }), 16_000, "motion overlay");
   await withTimeout(page.evaluate(() => window.__game.step(240)), 15_000, "debug=motion 240 frames");
   await frames();
@@ -404,6 +409,8 @@ async function main() {
   check(lines.length === 8 && lines.every((l, i) => l.startsWith(`P${i + 1} `)), `?debug=motion: one line per fighter (${lines.length})`);
   check(/●/.test(dbg) && /plant/.test(dbg), `?debug=motion: shows the planted feet ("${lines[0].trim()}")`);
   await page.screenshot({ path: path.join(OUT, "8_debug_motion.png") });
+  const clean = await page.evaluate(() => ({ ...window.__game.scene.fx.stats }));
+  check(clean.drops === 0 && clean.splats === 0, `?gore=0: no blood (${clean.drops} drops, ${clean.splats} splats)`);
   check(errors.length === 0, `?debug=motion: no page errors${errors.length ? ": " + errors.slice(0, 3).join(" | ") : ""}`);
 
   // frame time: 8 fighters' animation (springs, IK, ragdoll: the scene's sync) must fit easily in a 60 fps frame.

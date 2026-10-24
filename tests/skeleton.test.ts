@@ -58,6 +58,15 @@ describe("the skeleton", () => {
     expect(b.skins.armL.visible).toBe(false);
     expect(b.limbs.armL.visible).toBe(false);
     expect(b.skins.armR.visible).toBe(true);
+    // and leaves a stump at the shoulder, still on the body
+    expect(b.stumps.armL.visible).toBe(true);
+    expect(b.stumps.armR.visible || b.stumps.legL.visible || b.stumps.legR.visible).toBe(false);
+    let shown = true;
+    for (let o: THREE.Object3D | null = b.stumps.armL; o; o = o.parent) shown &&= o.visible;
+    expect(shown, "the stump is not hidden with the arm").toBe(true);
+    f.parts.armL.attached = true;
+    syncLimbs(b, f);
+    expect(b.stumps.armL.visible).toBe(false);
   });
 
   it("the joints follow their targets on springs: a little overshoot, then they settle", () => {

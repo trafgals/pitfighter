@@ -39,7 +39,15 @@ interface FighterView extends Body {
   aura: THREE.Mesh;
   marker: THREE.Mesh | null; // a human's lock-on chevron, floating over their target
   fell: boolean; // went over the edge: stays out of sight until it respawns
+  /** torn-off limbs' stumps still pumping blood, and for how long (s) */
+  spurts: { part: "armL" | "armR" | "legL" | "legR"; t: number }[];
+  /** seconds until the pool spreads under a knocked-out body, or -1 */
+  pool: number;
 }
+
+/** How long (s) a stump pumps blood after the limb comes off, and its heartbeat (beats/s). */
+const SPURT = 2.6;
+const PULSE = 1.7;
 
 /** The tag over a fighter's head: "P2·cpu" small, a human's "P1" twice the size with an arrow down to the head. */
 function labelSprite(text: string, color: number, human: boolean): THREE.Sprite {
@@ -89,6 +97,8 @@ export class Scene {
   private punchAt = new THREE.Vector3();
   private hype = 0; // how loud the crowd is, 0..1
   private motion: MotionDebug | null = null; // ?debug=motion
+  /** blood, splats and pumping stumps (?gore=0 turns them off; a torn-off limb still leaves its stump) */
+  gore = true;
   /** pixels at the bottom of the canvas the HUD covers: the camera frames the fight above them */
   private inset = 0;
   /** the countdown before a round: the humans' beacons are up */
@@ -229,7 +239,7 @@ export class Scene {
       this.scene.add(marker);
     }
     this.scene.add(b.root);
-    return { ...b, ring, fury, label, beacon, stars, aura, marker, fell: false };
+    return { ...b, ring, fury, label, beacon, stars, aura, marker, fell: false, spurts: [], pool: -1 };
   }
 
   attach(world: World): void {
@@ -243,6 +253,7 @@ export class Scene {
     this.fighters = world.fighters.map((f) => this.buildFighter(f));
     this.pickups.clear();
     this.hazards = [];
+    this.fx.clear();
     this.world = world;
     this.camTarget.set(0, 0, 0);
   }
@@ -269,6 +280,12 @@ export class Scene {
             p.add(toV((dx / dd) * 0.3, (dy / dd) * 0.3));
           }
           this.fx.burst(p, { count: Math.round(8 + dmg * 2.5), speed: 3 + dmg * 0.4, color: heavy ? 0xffe0a0 : 0xffa040, life: 0.3, gravity: 6 });
+          if (this.gore && dmg >= 3) {
+            // blood sprays out of the far side of the blow, the head bleeding most
+            const away = a ? toV(d.x - a.x, d.y - a.y).normalize() : new THREE.Vector3();
+            const k = (q.part === "head" ? 1.6 : 1) * dmg;
+            this.fx.bleed(p, away.setY(0.7), { count: Math.round(3 + k * 1.3), speed: 1.6 + dmg * 0.22, spread: 1.4, size: 0.5 + Math.min(1, dmg / 14) });
+          }
           this.fx.ring(p, heavy ? 0xfff0c0 : 0xff9a40, heavy ? 1.1 : 0.6, heavy ? 0.25 : 0.16);
           if (!a) this.fx.burst(at(d, 0.4), { count: 10, speed: 2.5, color: 0xff5010, life: 0.5, up: 2 }); // burnt by the arena
           const v = this.fighters[d.id];
@@ -326,7 +343,16 @@ export class Scene {
         case "detach": {
           const f = fs[q.a];
           if (!f) break;
-          this.fx.burst(at(f, q.part?.startsWith("arm") ? 1.3 : 0.6), { count: 26, speed: 3.5, color: 0xc01000, life: 0.6, gravity: 9, up: 1.5 });
+          const v = this.fighters[f.id];
+          const part = q.part as FighterView["spurts"][number]["part"] | undefined;
+          if (this.gore && v && part && part in v.stumps) {
+            // the limb tears away in a gush, and the stump keeps pumping
+            v.root.updateMatrixWorld(true);
+            const from = v.stumps[part].getWorldPosition(new THREE.Vector3());
+            this.fx.bleed(from, stumpDir(v, part), { count: 40, speed: 3.2, spread: 2, size: 1.4 });
+            this.fx.splat(from.x, from.z, 0.55);
+            v.spurts.push({ part, t: 0 });
+          } else this.fx.burst(at(f, q.part?.startsWith("arm") ? 1.3 : 0.6), { count: 26, speed: 3.5, color: 0xc01000, life: 0.6, gravity: 9, up: 1.5 });
           this.shake = Math.min(1, this.shake + 0.3);
           break;
         }
@@ -334,6 +360,11 @@ export class Scene {
           const f = fs[q.a];
           if (!f) break;
           this.fx.burst(at(f, 1.1), { count: 70, speed: 7, color: 0xff4010, life: 0.8, gravity: 5, up: 1 });
+          if (this.gore && this.fighters[f.id]) {
+            this.fx.bleed(at(f, 1.3), new THREE.Vector3(0, 1, 0), { count: 30, speed: 2.5, spread: 2.2, size: 1 });
+            // once the body is down, a pool spreads under it
+            this.fighters[f.id].pool = 0.9;
+          }
           this.fx.ring(at(f, 1.1), 0xff6020, 2.4, 0.4);
           this.fx.ring(at(f, 0.05), 0xff3000, 3.5, 0.5, true);
           this.shake = 1;
@@ -439,6 +470,26 @@ export class Scene {
     }
   }
 
+  /** The stumps pump blood in heartbeats, weaker each beat; a knocked-out body bleeds a pool under it. */
+  private bleedOut(v: FighterView, f: Fighter, dt: number): void {
+    if (v.spurts.length) v.root.updateMatrixWorld(true);
+    for (const sp of v.spurts) {
+      const beat = Math.floor(sp.t * PULSE);
+      sp.t += dt;
+      if (Math.floor(sp.t * PULSE) === beat || sp.t > SPURT || !v.root.visible) continue;
+      const k = 1 - sp.t / SPURT;
+      this.fx.bleed(v.stumps[sp.part].getWorldPosition(new THREE.Vector3()), stumpDir(v, sp.part), { count: Math.round(4 + 10 * k), speed: 0.8 + 2.6 * k, spread: 0.45, size: 0.8 });
+    }
+    v.spurts = v.spurts.filter((sp) => sp.t <= SPURT && !f.parts[sp.part].attached);
+    if (v.pool >= 0) {
+      v.pool -= dt;
+      if (v.pool < 0 && v.root.visible) {
+        const at = v.hips.getWorldPosition(new THREE.Vector3());
+        this.fx.splat(at.x, at.z, 1.1 + Math.random() * 0.4);
+      }
+    }
+  }
+
   private punchIn(p: THREE.Vector3, k: number): void {
     if (k >= this.punch) this.punchAt.copy(p);
     this.punch = Math.max(this.punch, k);
@@ -481,6 +532,7 @@ export class Scene {
         v.root.position.y -= 0.5 * 0.012 * f.t * f.t;
       }
       syncLimbs(v, f);
+      if (this.gore) this.bleedOut(v, f, dt);
       v.flash = Math.max(0, v.flash - dt * 9);
       // the victim of a hit shudders while the hitstop holds it
       const jitter = f.stop > 0 && v.hurt.age < 0.3 ? 0.07 : 0;
@@ -625,6 +677,13 @@ export class Scene {
     holder.add(tag);
     return holder;
   }
+}
+
+/** Which way a stump points, in the world: out of the shoulder and down, or straight down out of the hip. */
+function stumpDir(v: Body, part: "armL" | "armR" | "legL" | "legR"): THREE.Vector3 {
+  const side = part.endsWith("L") ? -1 : 1;
+  const leg = part.startsWith("leg");
+  return new THREE.Vector3(side * (leg ? 0.3 : 1), leg ? -1 : 0.2, 0).transformDirection((leg ? v.hips : v.spine).matrixWorld);
 }
 
 const HAZARD_COLOR: Record<HazardKind, number> = { geyser: 0xffa000, beam: 0xffd040, boulder: 0xff6040, arrows: 0xff3030 };
