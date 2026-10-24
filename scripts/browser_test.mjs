@@ -380,6 +380,18 @@ async function main() {
     await page.screenshot({ path: path.join(OUT, `7_${run.id}_fight.png`) });
     check(errors.length === 0, `${run.id}: no page errors${errors.length ? ": " + errors.slice(0, 3).join(" | ") : ""}`);
   }
+
+  // ?debug=motion: a line per fighter and foot markers that follow the plants
+  await withTimeout(page.goto(`${SITE}/?auto=1&fighters=8&seed=3&debug=motion`, { waitUntil: "load" }), 20_000, "load debug=motion");
+  await withTimeout(page.waitForFunction(() => (document.getElementById("motion-debug")?.textContent ?? "").split("\n").length === 8, { timeout: 15_000 }), 16_000, "motion overlay");
+  await withTimeout(page.evaluate(() => window.__game.step(240)), 15_000, "debug=motion 240 frames");
+  await frames();
+  const dbg = await page.evaluate(() => document.getElementById("motion-debug").textContent);
+  const lines = dbg.split("\n");
+  check(lines.length === 8 && lines.every((l, i) => l.startsWith(`P${i + 1} `)), `?debug=motion: one line per fighter (${lines.length})`);
+  check(/●/.test(dbg) && /plant/.test(dbg), `?debug=motion: shows the planted feet ("${lines[0].trim()}")`);
+  await page.screenshot({ path: path.join(OUT, "8_debug_motion.png") });
+  check(errors.length === 0, `?debug=motion: no page errors${errors.length ? ": " + errors.slice(0, 3).join(" | ") : ""}`);
 }
 
 main()

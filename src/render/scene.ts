@@ -19,6 +19,7 @@ import { PLAYER_COLORS, buildBody, limbGeometry, syncLimbs, type Body, type Targ
 import { animate, onHit } from "./animate";
 import type { Cue } from "./cues";
 import { Fx } from "./fx";
+import { MotionDebug } from "./motiondebug";
 import { canvasTexture, makeStageView, toV, yaw, type StageView } from "./stageviews";
 
 export { PLAYER_COLORS };
@@ -73,6 +74,7 @@ export class Scene {
   private punch = 0; // camera punch-in toward `punchAt`, 0..1
   private punchAt = new THREE.Vector3();
   private hype = 0; // how loud the crowd is, 0..1
+  private motion: MotionDebug | null = null; // ?debug=motion
 
   constructor(
     readonly canvas: HTMLCanvasElement,
@@ -390,9 +392,16 @@ export class Scene {
   }
 
   // ---------------------------------------------------------------- per frame
+  /** ?debug=motion: show what the animation of every fighter is doing in `el`, and mark the planted feet. */
+  debugMotion(el: HTMLElement): void {
+    this.motion = new MotionDebug(el);
+    this.scene.add(this.motion.group);
+  }
+
   render(time: number, dt: number): void {
     const w = this.world;
     if (w) this.sync(w, time, dt);
+    if (w && this.motion) this.motion.flush(w.s.fighters.length);
     this.hype *= Math.exp(-dt * 0.6);
     this.view.update(w, time, dt, this.hype);
     this.fx.update(dt, this.camera);
@@ -423,6 +432,7 @@ export class Scene {
       // the victim of a hit shudders while the hitstop holds it
       const jitter = f.stop > 0 && v.hurt.age < 0.3 ? 0.07 : 0;
       v.last = animate(v, f, w, time, dt, jitter);
+      this.motion?.track(i, v, f, v.last, dt);
 
       const aura = v.aura.material as THREE.MeshBasicMaterial;
       aura.opacity = 0;

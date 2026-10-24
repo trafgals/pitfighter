@@ -15,6 +15,13 @@ const canvas = document.querySelector<HTMLCanvasElement>("#view")!;
 const input = new Input();
 // ?lofi=1: no bloom and no shadows, for slow machines
 const scene = new Scene(canvas, params.get("lofi") === "1");
+// ?debug=motion: the animation's state, per fighter, over the game
+if (params.get("debug") === "motion") {
+  const el = document.createElement("pre");
+  el.id = "motion-debug";
+  document.body.append(el);
+  scene.debugMotion(el);
+}
 const sfx = new Sfx();
 const cues = new CueTracker();
 const hud = new Hud(document.querySelector<HTMLElement>("#hud")!);

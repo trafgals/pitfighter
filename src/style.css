@@ -352,3 +352,20 @@ body.playing #hud {
 #over .small {
   opacity: 0.7;
 }
+
+/* ------------------------------------------------------------ ?debug=motion */
+#motion-debug {
+  position: fixed;
+  left: 8px;
+  bottom: 8px;
+  margin: 0;
+  padding: 6px 8px;
+  font: 11px/1.35 ui-monospace, Consolas, monospace;
+  color: #d8ffd8;
+  background: rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+  z-index: 50;
+  white-space: pre;
+  max-width: calc(100vw - 16px);
+  overflow: hidden;
+}
