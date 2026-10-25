@@ -1,0 +1,94 @@
+{
+  "model": "stable_audio_3_small_sfx.safetensors",
+  "text_encoder": "t5gemma_b_b_ul2.safetensors",
+  "defaults": {
+    "steps": 8,
+    "cfg": 1,
+    "sampler": "lcm",
+    "scheduler": "simple",
+    "negative": "",
+    "seconds": 1.0
+  },
+  "cues": [
+    {
+      "id": "hit-fist-skin",
+      "file": "hit-fist-skin.mp3",
+      "seed": 4101,
+      "category": "impact",
+      "note": "a bare knuckle landing on flesh",
+      "prompt": "A bare-knuckle punch lands hard on flesh: a dull fleshy thud with a short wet slap on top of it. Close microphone, dry room, one single impact."
+    },
+    {
+      "id": "hit-claw-skin",
+      "file": "hit-claw-skin.mp3",
+      "seed": 4102,
+      "category": "impact",
+      "note": "a claw raking across flesh",
+      "prompt": "A sharp claw rakes across flesh: a short wet tearing scrape with a faint squelch at the end. Close microphone, dry room, one single impact."
+    },
+    {
+      "id": "hit-hoof-skin",
+      "file": "hit-hoof-skin.mp3",
+      "seed": 4103,
+      "category": "impact",
+      "note": "a hoof stamping onto a body",
+      "prompt": "A heavy hoof stamps onto a body: a deep low thud with a hard knock underneath it. Close microphone, dry room, one single impact."
+    },
+    {
+      "id": "hit-club-skin",
+      "file": "hit-club-skin.mp3",
+      "seed": 4104,
+      "category": "impact",
+      "note": "a wooden club swinging into a body",
+      "prompt": "A heavy wooden club swings into a body: a dull woody crack followed by a fleshy thump. Close microphone, dry room, one single impact."
+    },
+    {
+      "id": "hit-spike-skin",
+      "file": "hit-spike-skin.mp3",
+      "seed": 4105,
+      "category": "impact",
+      "note": "a metal spike driving into flesh",
+      "prompt": "A metal spike drives into flesh: a sharp metallic scrape and a sudden wet puncture. Close microphone, dry room, one single impact."
+    },
+    {
+      "id": "hit-fist-armour",
+      "file": "hit-fist-armour.mp3",
+      "seed": 4106,
+      "category": "impact",
+      "note": "the same fist against a hard surface, to check the material axis",
+      "prompt": "A bare-knuckle fist slams into a sheet of metal armour: a hard metallic clang with a dull thud underneath it. Close microphone, dry room, one single impact."
+    },
+    {
+      "id": "hit-club-armour",
+      "file": "hit-club-armour.mp3",
+      "seed": 4107,
+      "category": "impact",
+      "note": "the same club against a hard surface",
+      "prompt": "A wooden club slams into a sheet of metal armour: a hard metallic clang with a hollow woody knock underneath it. Close microphone, dry room, one single impact."
+    },
+    {
+      "id": "swing-heavy",
+      "file": "swing-heavy.mp3",
+      "seed": 4201,
+      "category": "swing",
+      "note": "the wind of a big limb coming through the air",
+      "prompt": "A heavy arm swings through the air: a broad low whoosh that swells and cuts off sharply. Close microphone, dry room, one single movement."
+    },
+    {
+      "id": "swing-light",
+      "file": "swing-light.mp3",
+      "seed": 4202,
+      "category": "swing",
+      "note": "the wind of a fast, light limb",
+      "prompt": "A fast light fist cuts through the air: a thin sharp whoosh with a little whistle. Close microphone, dry room, one single movement."
+    },
+    {
+      "id": "grunt-heavy",
+      "file": "grunt-heavy.mp3",
+      "seed": 4301,
+      "category": "voice",
+      "note": "an experiment: can the same model carry a fighter's voice?",
+      "prompt": "A very large heavy fighter grunts with effort while striking: a low rough wordless exhale, chesty and strained. Close microphone, dry room, one single vocalisation."
+    }
+  ]
+}
