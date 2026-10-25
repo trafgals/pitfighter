@@ -84,6 +84,13 @@ band - on the red devil hide that came out as a bright vermilion cross, on
 basalt as a near-black one. At 0.6 it continues the material, and the band
 matches the rest of the tile in colour and in texture.
 
+But 0.6 continues the material too well on a satin or a drape, whose folds
+are large compared with the tile: the band comes out flat and the cross reads
+as a cross. So the band is also inpainted at `denoise 0.75`, which paints the
+fold back in, and the two are measured against each other and the better one
+is kept. On a material where the model would rather paint something else,
+0.75 is the worse of the two and 0.6 stays.
+
 ### How a tile is measured
 
 Every tile is measured twice, because the two failure modes are independent:
@@ -105,6 +112,14 @@ border, and the roll makes that continuous by construction, so a high wrap
 ratio usually means a strong feature - a fold, a crack - that continues into
 the next tile rather than a seam. The cross is the real seam, because that is
 where the render's opposite borders meet.
+
+And the measurement is made on the file that ships, not on the image that goes
+into it. The tile is measured after the downscale to 512x512 and after the
+WebP encode: the downscale takes the high frequency out of the material,
+which lowers the difference between neighbouring pixels inside the tile, and
+the encoder rings on a hard edge. Which of the three candidates - the rolled
+tile, the band healed at 0.6, the band healed at 0.75 - is the best one
+changes with the size, so it has to be measured at the size that ships.
 
 ### Height maps
 
@@ -173,17 +188,17 @@ where ComfyUI is installed and which models are on disk.
 One thing in this set is not finished. It is listed here rather than hidden,
 and it is the next thing to work on.
 
-**Nine of the 48 material tiles still score a cross seam above 2.5.** The worst
-is `fighters/eight-limbed-ash/cloth.webp` at 5.70, then
-`fighters/brother-blaze/cloth.webp` at 4.61 and
-`stages/hindenburg-blimp/planks.webp` at 4.14. These are all large satin or
-drape folds, whose scale is close to the size of the 512x512 tile, and
-`fighters/hellkick-hana/skin.webp`, whose kintsugi crackle lines up with the
-tile's edge. The colour drift of the healed band is at most 1.0 of 255, so the
-inpaint is blending the right material - the folds are simply too big for
-the tile. The seam is visible if you look for it on a flat floor; it does not
-read at fighting distance.
+**Four of the 48 material tiles still score a cross seam above 2.5.** The worst
+is `fighters/brother-blaze/cloth.webp` at 4.52, then
+`fighters/knuckles-inferno/cloth.webp` at 3.15 and
+`fighters/eight-limbed-ash/cloth.webp` at 3.13. They are all satin or drape
+folds, whose scale is close to the size of the 512x512 tile. The colour drift
+of the healed band is at most 1.0 of 255, so the inpaint is blending the right
+material - the folds are simply too big for the tile. The seam is visible if
+you look for it on a flat floor; it does not read at fighting distance.
 
-The faces are all correct now: brow to chin, symmetric, with no hair and no
-neck, and no horn in the frame - a few of them still show the tip of a horn
-in the very corner, where the horn leaves the skull.
+The faces are all brow to chin, symmetric, with no hair and no neck. A few of
+them still show the base of a horn in the top corner, where the horn leaves
+the skull: the model draws a devil's face with horns whatever the prompt
+says, and on a fighter whose horns are thick enough to be fused to the skull
+in the silhouette, no crop can take them out.

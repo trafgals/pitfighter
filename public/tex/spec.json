@@ -59,7 +59,7 @@
       "skin_colour": "sooty tan brown",
       "cloth_idea": "faded grey denim with frayed edges and worn seams",
       "cloth_colour": "faded grey blue",
-      "face_idea": "stubble shadow, scarred lip",
+      "face_idea": "stubble shadow, scarred lip, bald smooth rounded skull, no horns, no ears, head cropped from the brow to the chin",
       "face_colour": "sooty tan brown"
     },
     {
@@ -87,7 +87,7 @@
       "skin_colour": "deep violet purple",
       "cloth_idea": "quilted gold satin with stitched panels",
       "cloth_colour": "antique gold",
-      "face_idea": "grinning, face paint stripes",
+      "face_idea": "grinning, face paint stripes, bald smooth rounded skull, no horns, no ears, head cropped from the brow to the chin",
       "face_colour": "deep violet purple"
     },
     {
@@ -129,7 +129,7 @@
       "skin_colour": "deep blood red",
       "cloth_idea": "matte black leather strapping, creased",
       "cloth_colour": "black",
-      "face_idea": "snarling, bared teeth",
+      "face_idea": "snarling, bared teeth, bald smooth rounded skull, no horns, no ears, head cropped from the brow to the chin",
       "face_colour": "deep blood red"
     },
     {
@@ -143,7 +143,7 @@
       "skin_colour": "bright pinkish red",
       "cloth_idea": "dark maroon satin with thin straps",
       "cloth_colour": "dark maroon",
-      "face_idea": "big eyes, impish grin",
+      "face_idea": "big eyes, impish grin, bald smooth rounded skull, no horns, no ears, head cropped from the brow to the chin",
       "face_colour": "bright pinkish red"
     },
     {
@@ -213,7 +213,7 @@
       "skin_colour": "warm amber tan",
       "cloth_idea": "dark brown cotton cord and canvas",
       "cloth_colour": "dark brown",
-      "face_idea": "joyful, wide smile",
+      "face_idea": "joyful, wide smile, bald smooth rounded skull, no horns, no ears, head cropped from the brow to the chin",
       "face_colour": "warm amber tan"
     },
     {
@@ -241,7 +241,7 @@
       "skin_colour": "slate grey",
       "cloth_idea": "gold lacquered plate, riveted and chipped",
       "cloth_colour": "antique gold",
-      "face_idea": "stern, a scar across one eye",
+      "face_idea": "stern, a scar across one eye, bald smooth rounded skull, no horns, no ears, head cropped from the brow to the chin",
       "face_colour": "slate grey"
     },
     {
@@ -283,7 +283,7 @@
       "skin_colour": "golden tan",
       "cloth_idea": "black cotton jersey, soft and stretchy",
       "cloth_colour": "black",
-      "face_idea": "open-mouthed battle yell",
+      "face_idea": "battle yell, open mouth, teeth bared, bald smooth rounded skull, no horns, no ears, head cropped from the brow to the chin",
       "face_colour": "golden tan"
     },
     {
@@ -297,7 +297,7 @@
       "skin_colour": "pale bone ash",
       "cloth_idea": "midnight blue heavy cotton twill",
       "cloth_colour": "midnight blue",
-      "face_idea": "composed, heavy-lidded",
+      "face_idea": "composed, heavy-lidded eyes, bald smooth rounded skull, no horns, no ears, head cropped from the brow to the chin",
       "face_colour": "pale bone ash"
     },
     {
@@ -388,9 +388,14 @@
     "ashen-judoka__skin": 9704,
     "hindenburg-blimp__planks": 9553,
     "hellfire-flick__cloth": 8431,
-    "eight-limbed-ash__face": 19788,
+    "eight-limbed-ash__face": 21788,
     "crimson-crane__face": 5336,
     "the-old-devil__face": 6295,
-    "hellfire-flick__face": 11432
+    "hellfire-flick__face": 14432,
+    "big-lou-cipher__face": 5651,
+    "rage-reaper__face": 6062,
+    "quickfire-imp__face": 7199,
+    "ronin-of-gehenna__face": 9158,
+    "brother-blaze__face": 7569
   }
 }

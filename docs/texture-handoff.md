@@ -212,4 +212,13 @@ public/tex/contact/*.png     2x2 tiling previews plus the face
 - `cloth_h.webp` is beyond the tree above, but `src/render/textures.ts` bakes
   a bump map for the cloth as well as for the skin, so the file is there to
   be used or ignored.
-- The renderer change is deliberately not in this branch.
+- 152 files, 11.7 MB in total, against the 25 MB budget. Every 512 square
+  file is under 120 KB and every 1024 square file under 400 KB.
+- Four of the 48 material tiles still score a cross seam above 2.5, the worst
+  at 4.52. They are the satin and drape folds, whose scale is close to the
+  512 square tile. The healed band's colour drift is at most 1.0 of 255, so
+  the inpaint is blending the right material; the folds are simply too big
+  for the tile. `public/tex/README.md` says the same.
+- The faces are all brow to chin and symmetric, with no hair and no neck. A
+  few still show the base of a horn in the top corner, where the model fused
+  the horn to the skull and no crop can take it out.- The renderer change is deliberately not in this branch.

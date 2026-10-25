@@ -316,7 +316,7 @@
       "title": "Positive prompt"
     },
     "inputs": {
-      "text": "front orthographic view of a devil's face, stubble shadow, scarred lip, sooty tan brown skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "text": "front orthographic view of a devil's face, stubble shadow, scarred lip, bald smooth rounded skull, no horns, no ears, head cropped from the brow to the chin, sooty tan brown skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
       "clip": [
         "431",
         0
@@ -370,7 +370,7 @@
         "430",
         0
       ],
-      "seed": 4377,
+      "seed": 6377,
       "steps": 4,
       "cfg": 1.0,
       "sampler_name": "euler",
@@ -596,7 +596,7 @@
       "title": "Positive prompt"
     },
     "inputs": {
-      "text": "front orthographic view of a devil's face, grinning, face paint stripes, deep violet purple skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "text": "front orthographic view of a devil's face, grinning, face paint stripes, bald smooth rounded skull, no horns, no ears, head cropped from the brow to the chin, deep violet purple skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
       "clip": [
         "751",
         0
@@ -650,7 +650,7 @@
         "750",
         0
       ],
-      "seed": 4651,
+      "seed": 5651,
       "steps": 4,
       "cfg": 1.0,
       "sampler_name": "euler",
@@ -790,7 +790,7 @@
         "910",
         0
       ],
-      "seed": 19788,
+      "seed": 21788,
       "steps": 4,
       "cfg": 1.0,
       "sampler_name": "euler",
@@ -1016,7 +1016,7 @@
       "title": "Positive prompt"
     },
     "inputs": {
-      "text": "front orthographic view of a devil's face, snarling, bared teeth, deep blood red skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "text": "front orthographic view of a devil's face, snarling, bared teeth, bald smooth rounded skull, no horns, no ears, head cropped from the brow to the chin, deep blood red skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
       "clip": [
         "1231",
         0
@@ -1070,7 +1070,7 @@
         "1230",
         0
       ],
-      "seed": 5062,
+      "seed": 6062,
       "steps": 4,
       "cfg": 1.0,
       "sampler_name": "euler",
@@ -1156,7 +1156,7 @@
       "title": "Positive prompt"
     },
     "inputs": {
-      "text": "front orthographic view of a devil's face, big eyes, impish grin, bright pinkish red skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "text": "front orthographic view of a devil's face, big eyes, impish grin, bald smooth rounded skull, no horns, no ears, head cropped from the brow to the chin, bright pinkish red skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
       "clip": [
         "1391",
         0
@@ -1210,7 +1210,7 @@
         "1390",
         0
       ],
-      "seed": 5199,
+      "seed": 7199,
       "steps": 4,
       "cfg": 1.0,
       "sampler_name": "euler",
@@ -1350,7 +1350,7 @@
         "1550",
         0
       ],
-      "seed": 5336,
+      "seed": 6336,
       "steps": 4,
       "cfg": 1.0,
       "sampler_name": "euler",
@@ -1856,7 +1856,7 @@
       "title": "Positive prompt"
     },
     "inputs": {
-      "text": "front orthographic view of a devil's face, joyful, wide smile, warm amber tan skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "text": "front orthographic view of a devil's face, joyful, wide smile, bald smooth rounded skull, no horns, no ears, head cropped from the brow to the chin, warm amber tan skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
       "clip": [
         "2191",
         0
@@ -1910,7 +1910,7 @@
         "2190",
         0
       ],
-      "seed": 5884,
+      "seed": 8884,
       "steps": 4,
       "cfg": 1.0,
       "sampler_name": "euler",
@@ -2136,7 +2136,7 @@
       "title": "Positive prompt"
     },
     "inputs": {
-      "text": "front orthographic view of a devil's face, stern, a scar across one eye, slate grey skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "text": "front orthographic view of a devil's face, stern, a scar across one eye, bald smooth rounded skull, no horns, no ears, head cropped from the brow to the chin, slate grey skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
       "clip": [
         "2511",
         0
@@ -2190,7 +2190,7 @@
         "2510",
         0
       ],
-      "seed": 6158,
+      "seed": 9158,
       "steps": 4,
       "cfg": 1.0,
       "sampler_name": "euler",
@@ -2330,7 +2330,7 @@
         "2670",
         0
       ],
-      "seed": 6295,
+      "seed": 8295,
       "steps": 4,
       "cfg": 1.0,
       "sampler_name": "euler",
@@ -2470,7 +2470,7 @@
         "2830",
         0
       ],
-      "seed": 11432,
+      "seed": 14432,
       "steps": 4,
       "cfg": 1.0,
       "sampler_name": "euler",
@@ -2556,7 +2556,7 @@
       "title": "Positive prompt"
     },
     "inputs": {
-      "text": "front orthographic view of a devil's face, open-mouthed battle yell, golden tan skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "text": "front orthographic view of a devil's face, battle yell, open mouth, teeth bared, bald smooth rounded skull, no horns, no ears, head cropped from the brow to the chin, golden tan skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
       "clip": [
         "2991",
         0
@@ -2610,7 +2610,7 @@
         "2990",
         0
       ],
-      "seed": 6569,
+      "seed": 7569,
       "steps": 4,
       "cfg": 1.0,
       "sampler_name": "euler",
@@ -2696,7 +2696,7 @@
       "title": "Positive prompt"
     },
     "inputs": {
-      "text": "front orthographic view of a devil's face, composed, heavy-lidded, pale bone ash skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "text": "front orthographic view of a devil's face, composed, heavy-lidded eyes, bald smooth rounded skull, no horns, no ears, head cropped from the brow to the chin, pale bone ash skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
       "clip": [
         "3151",
         0
@@ -2750,7 +2750,7 @@
         "3150",
         0
       ],
-      "seed": 6706,
+      "seed": 7706,
       "steps": 4,
       "cfg": 1.0,
       "sampler_name": "euler",
