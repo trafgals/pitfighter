@@ -11,10 +11,13 @@
 // texture seeds and ideas come from public/tex/spec.json. See
 // docs/characters.md.
 //
-//   npx vite-node tools/character-json/derive.ts
+// It refuses to overwrite the file it wrote, because the JSON is now the
+// source of truth and a stray run must not replace it with a stale copy.
 //
-// It writes src/data/characters.json and prints what it wrote.
-import { writeFileSync } from "node:fs";
+//   npx vite-node tools/character-json/derive.ts --force
+//
+// Only ever run it deliberately, and only to rebuild the file from scratch.
+import { existsSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { STYLES } from "../../src/sim/styles";
 import { KITS } from "../../src/render/kit";
@@ -86,6 +89,11 @@ const characters = STYLES.map((st, i) => {
 
 const out = { schema: "pitfighter-characters/1", specials, characters };
 const path = resolve(__dirname, "../../src/data/characters.json");
+if (existsSync(path) && !process.argv.includes("--force")) {
+  console.error(`${path} already exists, and it is now the source of truth.`);
+  console.error("Refusing to overwrite it. Pass --force if you mean to rebuild it from scratch.");
+  process.exit(1);
+}
 writeFileSync(path, JSON.stringify(out, null, 2) + "\n", "utf8");
 
 console.log(`wrote ${path}`);

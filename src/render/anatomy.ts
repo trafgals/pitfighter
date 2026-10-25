@@ -13,12 +13,13 @@ export type { Look };
 
 /** The look of a style: read from the character design, so it is the same every
  *  match and travels with the fighter instead of with its position in the
- *  roster. The second argument is no longer read and is kept only so that
- *  existing callers do not have to change. */
+ *  roster. A copy, so a caller cannot change the design by accident. The
+ *  second argument is no longer read and is kept only so that existing
+ *  callers do not have to change. */
 export function lookOf(style: number, _st?: { style: string; punch: number; torso: number }): Look {
   const c = CHARACTERS[style];
   if (!c) throw new Error(`no character for style ${style}`);
-  return c.look;
+  return { ...c.look };
 }
 
 const clamp01 = (x: number) => (x < 0 ? 0 : x > 1 ? 1 : x);

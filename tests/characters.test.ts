@@ -180,6 +180,28 @@ describe("the character design", () => {
     }
   });
 
+  it("keeps the texture pipeline's seed overrides pointing at real things", () => {
+    // the overrides are the pipeline's own bookkeeping - they name the seed a
+    // surface was re-rendered with - so there is nothing in characters.json to
+    // compare them against. What can still go wrong is a typo: an override
+    // for a fighter or a stage that does not exist, or for a surface that
+    // fighter does not have.
+    const fighterIds = new Set(CHARACTERS.map((c) => c.id));
+    const stageIds = new Set(texSpec.stages.map((s) => s.stage));
+    const stageSurfaces = new Map(texSpec.stages.map((s) => [s.stage, s.surface]));
+    for (const [key, seed] of Object.entries(texSpec.seed_overrides)) {
+      const [who, surface] = key.split("__");
+      expect(seed, key).toBeGreaterThan(0);
+      expect(Number.isInteger(seed), key).toBe(true);
+      if (fighterIds.has(who)) {
+        expect(["skin", "cloth", "face"], key).toContain(surface);
+      } else {
+        expect(stageIds.has(who), key).toBe(true);
+        expect(stageSurfaces.get(who), key).toBe(surface);
+      }
+    }
+  });
+
   it("has a fighter's textures and a contact sheet on disk", () => {
     for (const c of CHARACTERS) {
       const files = Object.keys(TEX_FILES).filter((p) => p.includes(`/fighters/${c.id}/`));
@@ -216,5 +238,22 @@ describe("the character design", () => {
     expect(lookOf(10, STYLES[10])).toEqual(before);
     expect(lookOf(10, { style: "nonsense", punch: 99, torso: 99 })).toEqual(before);
     expect(lookOf(10).def).toBe(SNAPSHOT[10].look[0]);
+  });
+
+  it("hands out a copy of the face, so a caller cannot change the design", () => {
+    const look = lookOf(3);
+    look.def = 99;
+    look.scar = 3;
+    const s = SNAPSHOT[3];
+    expect(lookOf(3)).toEqual({
+      def: s.look[0],
+      scar: s.look[1],
+      paint: s.look[2],
+      wrinkles: s.look[3],
+      stubble: s.look[4],
+      veins: s.look[5],
+    });
+    expect(CHARACTERS[3].look.def).toBe(s.look[0]);
+    expect(CHARACTERS[3].look.scar).toBe(s.look[1]);
   });
 });

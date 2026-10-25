@@ -38,8 +38,18 @@ Three rules:
    chosen; it is now written down like everything else.
 3. **The texture half has two homes.** The design says what a fighter's hide
    looks like; `public/tex/spec.json` is the texture pipeline's own record of
-   what was rendered from it, with the per-surface seeds. A test checks that
-   the two agree, so change both or neither.
+   what was rendered from it, with the base seed and any per-surface seed
+   overrides. A test compares the two fighter by fighter - the slug, the name,
+   the colours, the surface ideas and the base seed - so change both or
+   neither.
+
+   The `seed_overrides` block is the pipeline's own bookkeeping: it records
+   the seed a surface was re-rendered with, after the first render tiled
+   badly. `characters.json` has no field for it and no test compares one
+   override against another, so it is not part of the design: changing one
+   changes how that surface is rendered, not what the fighter is. A test does
+   check that every override still names a real fighter or stage and a real
+   surface, so a typo cannot hide there.
 
 ## The shape
 
@@ -85,14 +95,15 @@ The file was generated once, from the tables it replaced, by
 `tools/character-json/derive.ts`:
 
 ```
-npx vite-node tools/character-json/derive.ts
+npx vite-node tools/character-json/derive.ts --force
 ```
 
 That script is kept because it is the record of the migration: the `look`
 numbers are the hash of each fighter's old index in the roster, and the
-texture seeds and ideas come from `public/tex/spec.json`. It now reads from
-the JSON it wrote, so running it again reproduces the file rather than
-recovering anything.
+texture seeds and ideas come from `public/tex/spec.json`. **It refuses to
+overwrite the file it wrote** — the JSON is the source of truth now, and a
+stray run must not replace it with a stale copy. `--force` is the only way
+through, and it is only for rebuilding the file from scratch.
 
 `tools/character-json/snapshot.ts` prints the snapshot that
 `tests/characters.test.ts` checks the design against. After a deliberate

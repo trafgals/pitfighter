@@ -10,9 +10,10 @@
 import charactersJson from "./characters.json";
 import type { Character, Family, Kit, Special, SpecialId, Style } from "./types";
 
-// The JSON is checked against these types in tests/characters.test.ts, which
-// fails the build if a field is missing, misspelled or out of range. This is
-// where that promise is made; TypeScript cannot check a JSON import.
+// The compiler cannot check a JSON import, so the schema is enforced by
+// tests/characters.test.ts instead: it fails when a field is missing, when a
+// part is not one the renderer knows, or when a number is out of range. That
+// is a test-suite guarantee, not a build one — run `npm test` to get it.
 const raw = charactersJson as unknown as {
   characters: Character[];
   specials: Record<SpecialId, Special>;
