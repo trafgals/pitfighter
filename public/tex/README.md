@@ -92,17 +92,23 @@ is kept. On a material where the model would rather paint something else,
 0.75 is the worse of the two and 0.6 stays.
 
 That is still not enough on a satin or a drape. Their folds are two hundred
-pixels across where the band is thirty, and a band that narrow cannot repaint
-a fold - it can only blur the edge of one, and the step is still there at the
-bottom of the blur. So a tile that is still rough after the narrow heal gets
-a third heal: the same band at `denoise 0.9`, over a few seeds, and the best
-of those is measured against the first two. Four of the 48 tiles needed it,
-and they are exactly the satin and drape folds. The stage can widen the band
-as well, to 80 and then 160 pixels either side of the middle, for a tile that
-0.9 does not fix - none of the four needed it, but the band is there, and the
-blend that lays the healed band back over the rolled original is widened to
-match the band, because a blend narrower than the band lets the edge of the
-band through as a step of its own.
+pixels across where the band is thirty-two pixels across, and a band that
+narrow cannot repaint a fold - it can only blur the edge of one, and the step
+is still there at the bottom of the blur. So a tile that is still rough after
+the narrow heal gets a third heal: the same 32 pixel band at `denoise 0.9`,
+over a few seeds, and the best of those is measured against the first two.
+Four of the 48 tiles needed it, and they are exactly the satin and drape
+folds. The stage can widen the band as well, to 80 and then 160 pixels either
+side of the middle, for a tile that 0.9 does not fix - none of the four needed
+it, but the band is there.
+
+The band is 16 pixels either side of the middle and the blend that lays the
+healed band back over the rolled original ramps out to 28 pixels either side,
+so the blend is 56 pixels across and the band is 32: the blend is wider than
+the band, because a blend narrower than the band lets the edge of the band
+through as a step of its own. Both numbers are measured from the middle, and
+the mask that carries the band is in the ComfyUI input folder, so the widths
+can be checked rather than taken on trust.
 
 The manifest records which of the four candidates each file is and, for the
 repaired ones, the band width, the inpaint strength and the seed, so the file

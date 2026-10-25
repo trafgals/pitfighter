@@ -252,7 +252,7 @@
       "seed": 4787,
       "steps": 4,
       "workflow": "workflows/cloth.json",
-      "post": "roll-half, seam-inpaint denoise 0.9 (workflows/seam.json), band half 16px, seed 92001, over the rolled tile, blend 28px, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.9 (workflows/seam.json), band half 16px (32px across), seed 92001, over the rolled tile, blend half 28px (56px across, wider than the band), lanczos, webp q85"
     },
     {
       "file": "fighters/eight-limbed-ash/cloth_h.webp",
@@ -296,7 +296,7 @@
       "seed": 7924,
       "steps": 4,
       "workflow": "workflows/cloth.json",
-      "post": "roll-half, seam-inpaint denoise 0.9 (workflows/seam.json), band half 16px, seed 92003, over the rolled tile, blend 28px, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.9 (workflows/seam.json), band half 16px (32px across), seed 92003, over the rolled tile, blend half 28px (56px across, wider than the band), lanczos, webp q85"
     },
     {
       "file": "fighters/knuckles-inferno/cloth_h.webp",
@@ -384,7 +384,7 @@
       "seed": 10198,
       "steps": 4,
       "workflow": "workflows/cloth.json",
-      "post": "roll-half, seam-inpaint denoise 0.9 (workflows/seam.json), band half 16px, seed 92001, over the rolled tile, blend 28px, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.9 (workflows/seam.json), band half 16px (32px across), seed 92001, over the rolled tile, blend half 28px (56px across, wider than the band), lanczos, webp q85"
     },
     {
       "file": "fighters/quickfire-imp/cloth_h.webp",
@@ -824,7 +824,7 @@
       "seed": 6568,
       "steps": 4,
       "workflow": "workflows/cloth.json",
-      "post": "roll-half, seam-inpaint denoise 0.9 (workflows/seam.json), band half 16px, seed 92002, over the rolled tile, blend 28px, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.9 (workflows/seam.json), band half 16px (32px across), seed 92002, over the rolled tile, blend half 28px (56px across, wider than the band), lanczos, webp q85"
     },
     {
       "file": "fighters/brother-blaze/cloth_h.webp",

@@ -220,9 +220,10 @@ public/tex/contact/*.png     2x2 tiling previews plus the face
   because the tile is rolled, so the cross down the middle is the only
   boundary that can be a fault. The four that were over it - the satin and
   drape folds, whose scale is close to the 512 square tile - were repaired
-  with a third heal, the same band at a stronger inpaint, because a band that
-  narrow cannot repaint a fold whose scale is close to the size of the tile:
-  it can only blur the edge of one. The worst of them,
+  with a third heal: the same 32 pixel band, at a stronger inpaint. A band
+  that narrow cannot repaint a fold whose scale is close to the size of the
+  tile - it can only blur the edge of one - so what repairs the fold is the
+  strength of the inpaint, not the width of the band. The worst of them,
   `fighters/brother-blaze/cloth.webp`, came down from 4.52 to 0.63. The worst
   tile in the set is now `fighters/fresh-soul-kevin/skin.webp` at 2.46, a
   smooth pale skin where the cross is a soft change of shading rather than a
