@@ -199,17 +199,17 @@ async function main() {
   // the check the same on a fast GPU and on a software renderer, where a whole
   // frame can take a quarter of a second.
   const x0 = await page.evaluate(() => window.__game.world.fighters[0].x);
-  const f0 = await page.evaluate(() => window.__game.world.s.frame);
+  const moveFrame0 = await page.evaluate(() => window.__game.world.s.frame);
   await page.keyboard.down("KeyD");
   await withTimeout(
-    page.waitForFunction((f) => window.__game.world.s.frame - f >= 30, { timeout: 60_000 }, f0),
+    page.waitForFunction((f) => window.__game.world.s.frame - f >= 30, { timeout: 60_000 }, moveFrame0),
     65_000,
     "hold D for 30 frames",
   );
   await page.keyboard.up("KeyD");
   const x1 = await page.evaluate(() => window.__game.world.fighters[0].x);
-  const f1 = await page.evaluate(() => window.__game.world.s.frame);
-  check(x1 - x0 > 0.3, `keyboard moves P1 (dx = ${(x1 - x0).toFixed(2)} m over ${f1 - f0} frames)`);
+  const moveFrame1 = await page.evaluate(() => window.__game.world.s.frame);
+  check(x1 - x0 > 0.3, `keyboard moves P1 (dx = ${(x1 - x0).toFixed(2)} m over ${moveFrame1 - moveFrame0} frames)`);
   await page.keyboard.down("KeyJ");
   const st = await page.waitForFunction(() => window.__game.world.fighters[0].state === "attack" && window.__game.world.fighters[0].move, { timeout: 2000 }).then(
     (h) => h.jsonValue(),
