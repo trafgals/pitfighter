@@ -94,6 +94,11 @@ export class Bot {
       // keep the string going
       if (this.plan === "string" && this.rng.chance(0.3)) press(BTN.HIGH);
       if (this.plan === "low" && this.rng.chance(0.3)) press(BTN.LOW);
+      // a landed kick flows into the punch string now and then
+      if (this.plan === "low" && me.moveLanded && this.rng.chance(0.08)) {
+        this.plan = "string";
+        press(BTN.HIGH);
+      }
       return out;
     }
     if (!actionable(me)) return out;

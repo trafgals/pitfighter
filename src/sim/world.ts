@@ -20,6 +20,7 @@ import {
   AIR,
   BUFFER,
   CRUNCH,
+  FLOW,
   COMBO_FLOOR,
   COMBO_SCALE,
   CROWD,
@@ -164,6 +165,8 @@ export class World {
         juggle: 0,
         bounced: false,
         grown: 1, // the first set of limbs is roll 0
+        chainTo: null,
+        flows: 0,
         carryZ: 0,
         stickX: 0,
         stickY: 0,
@@ -339,7 +342,11 @@ export class World {
       f.move = null;
       f.chain = false;
     }
-    if (st === "idle" || st === "walk") f.combo = 0;
+    if (st === "idle" || st === "walk") {
+      f.combo = 0;
+      f.flows = 0;
+    }
+    f.chainTo = null;
     if (st !== "walk") f.running = false;
   }
 
@@ -370,7 +377,8 @@ export class World {
 
   /** The limb that throws a strike (the other one if it is gone), or null for the body's own moves. */
   strikerOf(f: Fighter, id: string): PartId | null {
-    const want = striker(id, MOVES[id].kind);
+    // the finisher comes from the hand the last jab did not
+    const want = id === "punchFin" ? (STYLES[f.style].string % 2 === 1 ? "armL" : "armR") : striker(id, MOVES[id].kind);
     if (!want) return null;
     if (f.parts[want].attached) return want;
     const other = ({ armL: "armR", armR: "armL", legL: "legR", legR: "legL" } as const)[want as "armL"];
@@ -706,7 +714,8 @@ export class World {
     }
     // charge: the opener waits on its last startup frame while its button is held
     if (f.chargeHeld) {
-      const held = (inp.buttons & (m.height === "high" ? BTN.HIGH : BTN.LOW)) !== 0;
+      // the low string is Circle with the stick back for a player, LOW for a CPU
+      const held = (inp.buttons & (m.height === "high" ? BTN.HIGH : BTN.HIGH | BTN.LOW)) !== 0;
       if (held && f.t === m.startup - 1 && f.charge < CHARGE.max) {
         f.charge++;
         f.t--; // updateFighter advances it again
@@ -720,17 +729,36 @@ export class World {
     }
     const next = this.nextOf(f, f.move);
     if (!next) return;
-    const btn = m.height === "high" ? BTN.HIGH : BTN.LOW;
     // presses during this move (not the one that started it) queue the follow-up
-    if (f.t > 0 && this.buffered(f, btn, this.s.frame - f.t + 1)) {
-      this.consume(f, btn);
+    const since = this.s.frame - f.t + 1;
+    const circle = f.t > 0 && this.buffered(f, BTN.HIGH, since);
+    const low = f.t > 0 && this.buffered(f, BTN.LOW, since);
+    if (circle || low) {
+      const st = this.stick(inp);
+      const back = st.mag > 0 && st.dx * Math.cos(f.facing) + st.dy * Math.sin(f.facing) < -0.5;
+      const kicking = m.kind === "kick";
+      // a press for the other string (plain Circle out of a kick, back + Circle out of a punch) flows into it,
+      // while the combo has crossings left and the body has the limbs for it; otherwise the string goes on
+      const other = kicking ? circle && !back : low || (circle && back);
+      const can = f.flows < FLOW.max && (kicking ? arms(f) > 0 : legs(f) === 2);
+      this.consume(f, BTN.HIGH);
+      this.consume(f, BTN.LOW);
+      f.chainTo = other && can ? (kicking ? STRING_STARTS.high : STRING_STARTS.low) : next;
       f.chain = true;
     }
-    if (f.chain && f.moveLanded && f.t >= m.startup + m.active) {
-      if (m.kind === "kick" && legs(f) < 2) return;
-      if (m.kind === "punch" && arms(f) === 0) return;
-      this.startMove(f, next);
-    }
+    if (!f.chain || !f.chainTo || !f.moveLanded) return;
+    const to = f.chainTo;
+    // the same limb twice running (the other one is gone) has to come back before it goes again
+    const from = this.strikerOf(f, f.move);
+    const same = from !== null && from === this.strikerOf(f, to);
+    if (f.t < m.startup + m.active + (same ? FLOW.same : 0)) return;
+    if (MOVES[to].kind === "kick" && legs(f) < 2) return;
+    if (MOVES[to].kind === "punch" && arms(f) === 0) return;
+    if (to !== next) f.flows++;
+    const flows = f.flows;
+    this.startMove(f, to);
+    f.flows = flows;
+    f.chargeHeld = false; // a follow-up never charges, even one that opens the other string
   }
 
   private updateHolding(f: Fighter, inp: PlayerInput): void {
@@ -1455,6 +1483,7 @@ export class World {
       mix(f.z);
       mix(f.vz);
       mix(f.juggle);
+      mix(f.flows);
       mix(f.partner);
       mix(f.out ? 1 : 0);
       for (const p of PARTS) mix(f.parts[p].hp + (f.parts[p].attached ? 1000 : 0) + f.parts[p].trait.mass);

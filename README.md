@@ -39,7 +39,7 @@ The combat is modelled on the feel of Namco's *Urban Reign*:
 - soft lock-on, and R1 to lock on and strafe;
 - multi-target hits, kinetic pushback when you land a reversal, and dogpile protection.
 
-Pitfighter changes six things (`src/sim/moves.ts`, `tests/tweaks.test.ts`, `tests/juggle.test.ts`):
+Pitfighter changes seven things (`src/sim/moves.ts`, `tests/tweaks.test.ts`, `tests/juggle.test.ts`):
 
 - **Charged openers.** Hold ○ to charge the first strike of a string. It
   waits on its last startup frame while you hold, for up to 1 s, and fires on
@@ -53,6 +53,12 @@ Pitfighter changes six things (`src/sim/moves.ts`, `tests/tweaks.test.ts`, `test
   away from the attacker as a blow lands flies them further off, more for every
   hit so far, so a long juggle gets easier to escape. A body flown above 1.9 m
   is out of reach. It bounces once off the floor and then lies there.
+- **Flow combos.** A string trades limbs (right, left, right), and each
+  strike comes out of the last one's follow-through. With one arm left, the
+  same arm has to come back before it goes again, which costs 4 frames.
+  Mid-string, a landed punch flows into the kick string (back + ○) and a
+  landed kick into the punch string (○), up to twice in a combo
+  (`tests/flow.test.ts`).
 - **Air grabs.** Triangle on a juggled body within 1.45 m, and no higher
   than an outstretched arm, catches it out of the air with the style's own air
   grab (`src/sim/airgrabs.ts`): a suplex, a powerbomb, a slingshot, an axe-kick

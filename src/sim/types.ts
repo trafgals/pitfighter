@@ -102,6 +102,8 @@ export interface Fighter {
   juggle: number; // hits taken in the air since the launch: the more, the harder the victim can steer
   bounced: boolean; // this juggle has bounced off the floor once already
   grown: number; // limbs grown so far (each new one rolls its own traits)
+  chainTo: string | null; // the follow-up queued in a string (its next strike, or one that flows into the other string)
+  flows: number; // crossings between the punch and kick strings in this combo
   carryZ: number; // an air grab: the height the victim was caught at
   stickX: number; // the stick as last read (steering in the air)
   stickY: number;
