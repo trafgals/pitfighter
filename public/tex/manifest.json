@@ -989,7 +989,7 @@
       "seed": 7327,
       "steps": 4,
       "workflow": "workflows/stage.json",
-      "post": "roll-half, seam-inpaint (workflows/seam.json), blend, lanczos, webp q80"
+      "post": "roll-half, seam-inpaint (workflows/seam.json), blend, lanczos, webp q85"
     },
     {
       "file": "stages/construction-site/concrete_h.webp",
@@ -1011,7 +1011,7 @@
       "seed": 7440,
       "steps": 4,
       "workflow": "workflows/stage.json",
-      "post": "roll-half, seam-inpaint (workflows/seam.json), blend, lanczos, webp q70"
+      "post": "roll-half, seam-inpaint (workflows/seam.json), blend, lanczos, webp q75"
     },
     {
       "file": "stages/collapsing-tower/roof_h.webp",
@@ -1094,9 +1094,9 @@
       "file": "fighters/gutter-gus/face.webp",
       "model": "flux1-schnell-fp8",
       "licence": "Apache-2.0",
-      "prompt": "front orthographic view of a devil's face, stubble shadow, scarred lip, sooty tan brown skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "prompt": "front orthographic view of a devil's face, stubble shadow, scarred lip, bald smooth rounded skull, no horns, no ears, head cropped from the brow to the chin, sooty tan brown skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
       "negative": "text, watermark, logo, signature, frame, border, perspective, depth of field, shadows, vignette, hands, multiple faces, two faces, profile view, three-quarter view, hair, horns, neck, shoulders, clothing, helmet, scenery, background objects, gradient background, asymmetrical, blurry, low quality",
-      "seed": 4377,
+      "seed": 6377,
       "steps": 4,
       "workflow": "workflows/face.json",
       "post": "background flood-fill matte, mirror blend, erode-crop, lanczos 1024->512, webp q80 rgba"
@@ -1116,9 +1116,9 @@
       "file": "fighters/big-lou-cipher/face.webp",
       "model": "flux1-schnell-fp8",
       "licence": "Apache-2.0",
-      "prompt": "front orthographic view of a devil's face, grinning, face paint stripes, deep violet purple skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "prompt": "front orthographic view of a devil's face, grinning, face paint stripes, bald smooth rounded skull, no horns, no ears, head cropped from the brow to the chin, deep violet purple skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
       "negative": "text, watermark, logo, signature, frame, border, perspective, depth of field, shadows, vignette, hands, multiple faces, two faces, profile view, three-quarter view, hair, horns, neck, shoulders, clothing, helmet, scenery, background objects, gradient background, asymmetrical, blurry, low quality",
-      "seed": 4651,
+      "seed": 5651,
       "steps": 4,
       "workflow": "workflows/face.json",
       "post": "background flood-fill matte, mirror blend, erode-crop, lanczos 1024->512, webp q80 rgba"
@@ -1129,7 +1129,7 @@
       "licence": "Apache-2.0",
       "prompt": "front orthographic view of a devil's face, fierce glare, sweat-slick brow, heavy dark eyebrows, bald smooth crown, burnt orange skin with pale ash dust skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
       "negative": "text, watermark, logo, signature, frame, border, perspective, depth of field, shadows, vignette, hands, multiple faces, two faces, profile view, three-quarter view, hair, horns, neck, shoulders, clothing, helmet, scenery, background objects, gradient background, asymmetrical, blurry, low quality",
-      "seed": 19788,
+      "seed": 21788,
       "steps": 4,
       "workflow": "workflows/face.json",
       "post": "background flood-fill matte, mirror blend, erode-crop, lanczos 1024->512, webp q80 rgba"
@@ -1149,9 +1149,9 @@
       "file": "fighters/rage-reaper/face.webp",
       "model": "flux1-schnell-fp8",
       "licence": "Apache-2.0",
-      "prompt": "front orthographic view of a devil's face, snarling, bared teeth, deep blood red skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "prompt": "front orthographic view of a devil's face, snarling, bared teeth, bald smooth rounded skull, no horns, no ears, head cropped from the brow to the chin, deep blood red skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
       "negative": "text, watermark, logo, signature, frame, border, perspective, depth of field, shadows, vignette, hands, multiple faces, two faces, profile view, three-quarter view, hair, horns, neck, shoulders, clothing, helmet, scenery, background objects, gradient background, asymmetrical, blurry, low quality",
-      "seed": 5062,
+      "seed": 6062,
       "steps": 4,
       "workflow": "workflows/face.json",
       "post": "background flood-fill matte, mirror blend, erode-crop, lanczos 1024->512, webp q80 rgba"
@@ -1160,9 +1160,9 @@
       "file": "fighters/quickfire-imp/face.webp",
       "model": "flux1-schnell-fp8",
       "licence": "Apache-2.0",
-      "prompt": "front orthographic view of a devil's face, big eyes, impish grin, bright pinkish red skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "prompt": "front orthographic view of a devil's face, big eyes, impish grin, bald smooth rounded skull, no horns, no ears, head cropped from the brow to the chin, bright pinkish red skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
       "negative": "text, watermark, logo, signature, frame, border, perspective, depth of field, shadows, vignette, hands, multiple faces, two faces, profile view, three-quarter view, hair, horns, neck, shoulders, clothing, helmet, scenery, background objects, gradient background, asymmetrical, blurry, low quality",
-      "seed": 5199,
+      "seed": 7199,
       "steps": 4,
       "workflow": "workflows/face.json",
       "post": "background flood-fill matte, mirror blend, erode-crop, lanczos 1024->512, webp q80 rgba"
@@ -1173,7 +1173,7 @@
       "licence": "Apache-2.0",
       "prompt": "front orthographic view of a devil's face, long thin moustache marks, bald smooth crown, sharp cheekbones, deep crimson red skin skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
       "negative": "text, watermark, logo, signature, frame, border, perspective, depth of field, shadows, vignette, hands, multiple faces, two faces, profile view, three-quarter view, hair, horns, neck, shoulders, clothing, helmet, scenery, background objects, gradient background, asymmetrical, blurry, low quality",
-      "seed": 5336,
+      "seed": 6336,
       "steps": 4,
       "workflow": "workflows/face.json",
       "post": "background flood-fill matte, mirror blend, erode-crop, lanczos 1024->512, webp q80 rgba"
@@ -1215,9 +1215,9 @@
       "file": "fighters/cinder-ginga/face.webp",
       "model": "flux1-schnell-fp8",
       "licence": "Apache-2.0",
-      "prompt": "front orthographic view of a devil's face, joyful, wide smile, warm amber tan skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "prompt": "front orthographic view of a devil's face, joyful, wide smile, bald smooth rounded skull, no horns, no ears, head cropped from the brow to the chin, warm amber tan skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
       "negative": "text, watermark, logo, signature, frame, border, perspective, depth of field, shadows, vignette, hands, multiple faces, two faces, profile view, three-quarter view, hair, horns, neck, shoulders, clothing, helmet, scenery, background objects, gradient background, asymmetrical, blurry, low quality",
-      "seed": 5884,
+      "seed": 8884,
       "steps": 4,
       "workflow": "workflows/face.json",
       "post": "background flood-fill matte, mirror blend, erode-crop, lanczos 1024->512, webp q80 rgba"
@@ -1237,9 +1237,9 @@
       "file": "fighters/ronin-of-gehenna/face.webp",
       "model": "flux1-schnell-fp8",
       "licence": "Apache-2.0",
-      "prompt": "front orthographic view of a devil's face, stern, a scar across one eye, slate grey skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "prompt": "front orthographic view of a devil's face, stern, a scar across one eye, bald smooth rounded skull, no horns, no ears, head cropped from the brow to the chin, slate grey skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
       "negative": "text, watermark, logo, signature, frame, border, perspective, depth of field, shadows, vignette, hands, multiple faces, two faces, profile view, three-quarter view, hair, horns, neck, shoulders, clothing, helmet, scenery, background objects, gradient background, asymmetrical, blurry, low quality",
-      "seed": 6158,
+      "seed": 9158,
       "steps": 4,
       "workflow": "workflows/face.json",
       "post": "background flood-fill matte, mirror blend, erode-crop, lanczos 1024->512, webp q80 rgba"
@@ -1250,7 +1250,7 @@
       "licence": "Apache-2.0",
       "prompt": "front orthographic view of a devil's face, wise squint, deep wrinkles, liver spots, bald smooth crown, dark dried red leathery skin skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
       "negative": "text, watermark, logo, signature, frame, border, perspective, depth of field, shadows, vignette, hands, multiple faces, two faces, profile view, three-quarter view, hair, horns, neck, shoulders, clothing, helmet, scenery, background objects, gradient background, asymmetrical, blurry, low quality",
-      "seed": 6295,
+      "seed": 8295,
       "steps": 4,
       "workflow": "workflows/face.json",
       "post": "background flood-fill matte, mirror blend, erode-crop, lanczos 1024->512, webp q80 rgba"
@@ -1261,7 +1261,7 @@
       "licence": "Apache-2.0",
       "prompt": "front orthographic view of a devil's face, cocky half-smile, one brow raised, bald smooth crown, scorched cheek, charcoal grey-black skin with orange embers in the cracks skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
       "negative": "text, watermark, logo, signature, frame, border, perspective, depth of field, shadows, vignette, hands, multiple faces, two faces, profile view, three-quarter view, hair, horns, neck, shoulders, clothing, helmet, scenery, background objects, gradient background, asymmetrical, blurry, low quality",
-      "seed": 11432,
+      "seed": 14432,
       "steps": 4,
       "workflow": "workflows/face.json",
       "post": "background flood-fill matte, mirror blend, erode-crop, lanczos 1024->512, webp q80 rgba"
@@ -1270,9 +1270,9 @@
       "file": "fighters/brother-blaze/face.webp",
       "model": "flux1-schnell-fp8",
       "licence": "Apache-2.0",
-      "prompt": "front orthographic view of a devil's face, open-mouthed battle yell, golden tan skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "prompt": "front orthographic view of a devil's face, battle yell, open mouth, teeth bared, bald smooth rounded skull, no horns, no ears, head cropped from the brow to the chin, golden tan skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
       "negative": "text, watermark, logo, signature, frame, border, perspective, depth of field, shadows, vignette, hands, multiple faces, two faces, profile view, three-quarter view, hair, horns, neck, shoulders, clothing, helmet, scenery, background objects, gradient background, asymmetrical, blurry, low quality",
-      "seed": 6569,
+      "seed": 7569,
       "steps": 4,
       "workflow": "workflows/face.json",
       "post": "background flood-fill matte, mirror blend, erode-crop, lanczos 1024->512, webp q80 rgba"
@@ -1281,9 +1281,9 @@
       "file": "fighters/ashen-judoka/face.webp",
       "model": "flux1-schnell-fp8",
       "licence": "Apache-2.0",
-      "prompt": "front orthographic view of a devil's face, composed, heavy-lidded, pale bone ash skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "prompt": "front orthographic view of a devil's face, composed, heavy-lidded eyes, bald smooth rounded skull, no horns, no ears, head cropped from the brow to the chin, pale bone ash skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
       "negative": "text, watermark, logo, signature, frame, border, perspective, depth of field, shadows, vignette, hands, multiple faces, two faces, profile view, three-quarter view, hair, horns, neck, shoulders, clothing, helmet, scenery, background objects, gradient background, asymmetrical, blurry, low quality",
-      "seed": 6706,
+      "seed": 7706,
       "steps": 4,
       "workflow": "workflows/face.json",
       "post": "background flood-fill matte, mirror blend, erode-crop, lanczos 1024->512, webp q80 rgba"
