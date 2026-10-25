@@ -19,6 +19,7 @@ import {
 import {
   AIR,
   BUFFER,
+  CRUNCH,
   COMBO_FLOOR,
   COMBO_SCALE,
   CROWD,
@@ -909,6 +910,7 @@ export class World {
     if (fresh) {
       if (d.state === "dizzy") d.parts.head.hp = DIZZY.headReset;
       this.setState(d, "air");
+      d.moveHits = [a.id];
       d.juggle = 1;
       d.bounced = false;
       d.vz = Math.max(d.vz, AIR.launch);
@@ -1137,15 +1139,23 @@ export class World {
     this.ev({ kind: "grab", a: f.id, b: best.id, stop });
   }
 
+  /** A thrown body, or a juggled one flying fast enough, is a missile: it knocks down whoever it hits. */
   private resolveThrown(f: Fighter): void {
-    if (f.state !== "thrown") return;
+    const speed = Math.hypot(f.slideX, f.slideY);
+    const missile = f.state === "air" && speed >= CRUNCH.knock;
+    if (f.state !== "thrown" && !missile) return;
+    const by = f.state === "thrown" ? f.partner : f.lastHitBy;
     for (const o of this.s.fighters) {
-      if (o.id === f.id || f.moveHits.includes(o.id) || !this.hittable(o, "high") || o.state === "down") continue;
-      if (dist(f, o) > 0.8) continue;
+      if (o.id === f.id || f.moveHits.includes(o.id) || !this.hittable(o, "high") || o.state === "down" || o.state === "air") continue;
+      if (dist(f, o) > 0.8 || f.z > 1.6) continue; // over their head
       f.moveHits.push(o.id);
       const dmg = THROW.splash;
-      this.ev({ kind: "hit", a: f.partner, b: o.id, part: "torso", dmg });
-      this.damage(o, "torso", dmg, f.partner);
+      this.ev({ kind: "hit", a: by, b: o.id, part: "torso", dmg });
+      if (missile) {
+        this.ev({ kind: "crunch", a: f.id, b: o.id, dmg });
+        this.damage(f, this.pickPart(f, "high"), dmg, by);
+      }
+      this.damage(o, "torso", dmg, by);
       if (o.state !== "ko") {
         const k = Math.hypot(f.slideX, f.slideY) || 1;
         this.knockDown(o, f.slideX / k, f.slideY / k, 1.2);
@@ -1195,7 +1205,40 @@ export class World {
         }
       }
     }
-    for (const f of fs) if (f.state !== "falling") this.arena.bound(this, f);
+    for (const f of fs) {
+      if (f.state === "falling") continue;
+      const x = f.x;
+      const y = f.y;
+      const vx = f.slideX;
+      const vy = f.slideY;
+      this.arena.bound(this, f);
+      this.crunch(f, f.x - x, f.y - y, vx, vy);
+    }
+  }
+
+  /**
+   * A body flying into a wall or a prop: the arena pushed it back by (cx, cy)
+   * while it was sliding at (vx, vy). Fast enough, it crunches: a limb takes
+   * the blow (the torso its share), and it rebounds off the surface.
+   */
+  private crunch(f: Fighter, cx: number, cy: number, vx: number, vy: number): void {
+    const c = Math.hypot(cx, cy);
+    if (c < 1e-5 || !alive(f)) return;
+    if (f.state !== "air" && f.state !== "thrown" && f.state !== "down") return;
+    const nx = cx / c;
+    const ny = cy / c;
+    const into = -(vx * nx + vy * ny); // speed into the surface
+    if (into < CRUNCH.speed) return;
+    const dmg = Math.round(CRUNCH.dmg * into);
+    const by = f.state === "thrown" ? f.partner : f.lastHitBy;
+    const part = this.pickPart(f, f.z > 0.5 || f.state === "thrown" ? "high" : "low");
+    // bounce off: the part of the move into the surface comes back, softened
+    f.slideX = (vx + 2 * into * nx) * CRUNCH.rebound;
+    f.slideY = (vy + 2 * into * ny) * CRUNCH.rebound;
+    this.ev({ kind: "crunch", a: f.id, b: by, part, dmg });
+    this.damage(f, part, dmg, by);
+    if (!alive(f)) return;
+    this.freeze(f, undefined, hitstopFor(dmg, true));
   }
 
   /** Height under the floaty gravity: one bounce off the floor, then down. */

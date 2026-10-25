@@ -39,7 +39,7 @@ The combat is modelled on the feel of Namco's *Urban Reign*:
 - soft lock-on, and R1 to lock on and strafe;
 - multi-target hits, kinetic pushback when you land a reversal, and dogpile protection.
 
-Pitfighter changes three things (`src/sim/moves.ts`, `tests/tweaks.test.ts`, `tests/juggle.test.ts`):
+Pitfighter changes four things (`src/sim/moves.ts`, `tests/tweaks.test.ts`, `tests/juggle.test.ts`):
 
 - **Charged openers.** Hold ○ to charge the first strike of a string. It
   waits on its last startup frame while you hold, for up to 1 s, and fires on
@@ -53,6 +53,10 @@ Pitfighter changes three things (`src/sim/moves.ts`, `tests/tweaks.test.ts`, `te
   away from the attacker as a blow lands flies them further off, more for every
   hit so far, so a long juggle gets easier to escape. A body flown above 1.9 m
   is out of reach. It bounces once off the floor and then lies there.
+- **Crunch.** A body flying fast into a wall, a prop or the toilet is hurt by
+  it, limb first, and bounces back off. A juggled body flying fast is a human
+  missile: it knocks down whoever it hits, and both of them are hurt. The sim
+  decides all of it (`tests/crunch.test.ts`); the ragdoll only follows.
 - **Whiffed reversals.** A reversal that counters nothing takes 3x as long to
   recover from (63 frames after its window instead of 21), so spamming
   reversal gets punished. A reversal that lands ends at once, as before.

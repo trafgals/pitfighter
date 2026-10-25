@@ -350,6 +350,18 @@ export class Scene {
           this.hype = Math.min(1, this.hype + 0.15);
           break;
         }
+        case "crunch": {
+          // a flying body into a wall, a prop or a fighter: debris, and the camera takes the blow with it
+          const f = fs[q.a];
+          if (!f) break;
+          const dmg = q.dmg ?? 6;
+          this.fx.burst(at(f, Math.max(0.5, f.z + 0.6)), { count: 18, speed: 2.4, color: 0x8a8070, life: 0.6, gravity: 3, up: 0.8, dust: true });
+          this.fx.ring(at(f, Math.max(0.5, f.z + 0.6)), 0xffffff, 0.9, 0.18);
+          this.impact.hit(toV(-f.slideX, -f.slideY).normalize(), dmg, dmg >= 8);
+          this.shake = Math.min(1, this.shake + 0.35);
+          this.hype = Math.min(1, this.hype + 0.2);
+          break;
+        }
         case "bounce":
         case "land": {
           const f = fs[q.a];

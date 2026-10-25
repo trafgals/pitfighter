@@ -148,6 +148,10 @@ export class Sfx {
       this.noiseHit(t, o, "bandpass", 400, 2400, 1.1, 0.3, 0.35);
       this.tone(t, o, "sine", 140, 420, 0.3, 0.3);
     },
+    crunch: (t, o) => {
+      this.noiseHit(t, o, "lowpass", 1400, 160, 1.3, 0.6, 0.28);
+      this.tone(t, o, "square", 95, 40, 0.35, 0.14);
+    },
     bounce: (t, o) => {
       this.tone(t, o, "sine", 110, 50, 0.6, 0.16);
       this.noiseHit(t, o, "lowpass", 500, 120, 0.6, 0.4, 0.16);
@@ -337,7 +341,7 @@ export class Sfx {
       if (q.kind === "crash") k = Math.min(1, ((q as { dmg?: number }).dmg ?? 4) / 12);
       voice(t, pan, k);
       this.played[key] = (this.played[key] ?? 0) + 1;
-      if (["ko", "reversal", "crowd", "special", "win", "fall", "wreck", "impact"].includes(q.kind)) this.hype = Math.min(1, this.hype + 0.5);
+      if (["ko", "reversal", "crowd", "special", "win", "fall", "wreck", "impact", "crunch"].includes(q.kind)) this.hype = Math.min(1, this.hype + 0.5);
       if (q.kind === "hit") this.hype = Math.min(1, this.hype + 0.04 * k);
     }
     if (this.crowd) {

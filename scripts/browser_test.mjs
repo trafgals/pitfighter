@@ -208,7 +208,15 @@ async function main() {
   // let real time run, then fast-forward the sim to see a lot of fighting
   await new Promise((r) => setTimeout(r, 2000));
   await page.screenshot({ path: path.join(OUT, "2_match_start.png") });
-  const f1 = await withTimeout(page.evaluate(() => window.__game.step(3600)), 30_000, "fast-forward 3600 frames");
+  const f1 = await withTimeout(page.evaluate(() => {
+      // the throne could end the match early: hold every sitter just short of it until the checks are done
+      const g = window.__game;
+      for (let i = 0; i < 3600 && g.mode === "match"; i++) {
+        g.step(1);
+        g.world.fighters.forEach((f) => (f.toilet = Math.min(f.toilet, 600)));
+      }
+      return g.world.s.frame;
+    }), 30_000, "fast-forward 3600 frames");
   const stats = await page.evaluate(() => {
     const w = window.__game.world;
     return {
@@ -237,6 +245,7 @@ async function main() {
       let heavy = null;
       for (let i = 0; i < 1800 && g.mode === "match"; i++) {
         g.step(1);
+        g.world.fighters.forEach((f) => (f.toilet = Math.min(f.toilet, 600))); // keep the match going: no throne win while we look
         const w = g.world;
         if (w.fighters.some((f) => f.stop > 0)) frozen++;
         specials += w.s.events.filter((e) => e.kind === "special").length;
@@ -286,6 +295,7 @@ async function main() {
       let n = 0;
       for (let i = 0; i < 5400 && g.mode === "match" && n === 0; i++) {
         g.step(1);
+        g.world.fighters.forEach((f) => (f.toilet = Math.min(f.toilet, 600))); // keep the match going: no throne win while we look
         n += g.world.s.events.filter((e) => e.kind === "special").length;
       }
       return { n, played: g.sfx.played.special ?? 0, frame: g.world.s.frame };
@@ -328,6 +338,7 @@ async function main() {
       let who = -1;
       for (let i = 0; i < 5400 && g.mode === "match" && who < 0; i++) {
         g.step(1);
+        g.world.fighters.forEach((f) => (f.toilet = Math.min(f.toilet, 600))); // keep the match going: no throne win while we look
         const e = g.world.s.events.find((q) => q.kind === "launch");
         if (e) who = e.b;
       }
