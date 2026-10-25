@@ -142,7 +142,7 @@ On the character select:
 
 - join with the high-strike button;
 - pick a fighter with the stick, confirm with high strike, back out with grab;
-- set the number of fighters with `-` / `+` (or L1 / R1 on a pad);
+- a match has 4 fighters by default: the first four humans to join each take a CPU's place, and every human after that adds a fighter (up to 8); set the number with `-` / `+` (or L1 / R1 on a pad);
 - pick the kind of match by clicking the arrows or a name on the banner, with `[` / `]` or `H` / `O`, or with L2 / R2 on a pad; a CPU brawl on its next arena plays behind the menu;
 - or click a fighter to join on it with the keyboard, and click FIGHT! to start;
 - turn the blood on or off with `G` (the game remembers your choice);

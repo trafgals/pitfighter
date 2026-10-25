@@ -2,7 +2,8 @@
 // moves a cursor over the 21 styles, confirms with high strike or Start, backs
 // out with grab. Start on a device that is in and ready starts the match once
 // everyone who joined is ready. Empty slots are filled with CPU fighters up to
-// the chosen fighter count.
+// the chosen fighter count: 4 by default, so the first four humans each take a
+// CPU's place and every human after that adds a fighter (up to 8).
 //
 // The kind of match (king of the hill, last one standing, KO race) is picked
 // with the arrows or pills on the banner (mouse), [ / ] or H / O (keyboard), or
@@ -10,6 +11,8 @@
 // brawl on the next one behind the menu. A fighter card clicked joins the keyboard player on it, and FIGHT!
 // readies everyone and starts.
 import { BTN } from "./sim/types";
+
+export const DEFAULT_FIGHTERS = 4;
 import { STYLES } from "./sim/styles";
 import { CONTROLS_HELP, type DeviceId, type DeviceRead, type Input } from "./input";
 import { PLAYER_COLORS } from "./render/scene";
@@ -34,7 +37,7 @@ export interface SelectResult {
 
 export class Select {
   slots: Slot[] = [];
-  fighters = 8;
+  fighters = DEFAULT_FIGHTERS;
   /** blood on or off (main.ts keeps it; the menu shows it) */
   gore = true;
   /** the kind of match, and the arena the next one is played on */
@@ -106,11 +109,7 @@ export class Select {
       // that device (and readies it, a second time) instead of filling the pit with CPUs
       if (edge("start") && slot?.ready) start = true;
       if (!slot) {
-        if ((bedge(BTN.HIGH) || edge("start")) && this.slots.length < 8) {
-          this.slots.push({ device: dev, style: (this.slots.length * 3) % STYLES.length, ready: false });
-          this.fighters = Math.max(this.fighters, this.slots.length);
-          changed = true;
-        }
+        if ((bedge(BTN.HIGH) || edge("start")) && this.join(dev, (this.slots.length * 3) % STYLES.length)) changed = true;
         continue;
       }
       if (bedge(BTN.TARGET)) this.setCount(this.fighters - 1);
@@ -171,11 +170,16 @@ export class Select {
     if (s) {
       s.style = style;
       s.ready = false;
-    } else if (this.slots.length < 8) {
-      this.slots.push({ device: "kb1", style, ready: false });
-      this.fighters = Math.max(this.fighters, this.slots.length);
-    }
+    } else this.join("kb1", style);
     this.render();
+  }
+
+  /** A new human joins: up to the fighter count they take a CPU's place, past it they add a fighter. */
+  join(device: string, style: number): boolean {
+    if (this.slots.length >= 8) return false;
+    this.slots.push({ device, style, ready: false });
+    this.fighters = Math.max(this.fighters, this.slots.length);
+    return true;
   }
 
   /** FIGHT!: everyone who joined is ready, and the match starts (all CPUs if nobody joined). */

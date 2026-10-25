@@ -9,7 +9,7 @@ import { STAGES, type StageId } from "./sim/stages";
 import { STYLES } from "./sim/styles";
 import { CueTracker } from "./render/cues";
 import { Sfx } from "./render/sfx";
-import { Select, type SelectResult } from "./select";
+import { DEFAULT_FIGHTERS, Select, type SelectResult } from "./select";
 
 const params = new URLSearchParams(location.search);
 const canvas = document.querySelector<HTMLCanvasElement>("#view")!;
@@ -210,7 +210,7 @@ function frame(now: number): void {
 requestAnimationFrame(frame);
 
 if (params.get("auto")) {
-  select.setCount(Number(params.get("fighters") ?? 8));
+  select.setCount(Number(params.get("fighters") ?? DEFAULT_FIGHTERS));
   // ?stage=<id>: start on that stage
   const st = params.get("stage");
   if (st && STAGES.some((x) => x.id === st)) select.setStage(st as StageId);

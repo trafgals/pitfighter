@@ -124,6 +124,19 @@ async function main() {
   check(b3.type === "kos" && b3.pick === "construction-site" && b3.world === "construction-site", `clicking a match type picks it (${JSON.stringify(b3)})`);
   await page.click('.stage[data-type="king"]');
   await page.screenshot({ path: path.join(OUT, "1b_select_live.png") });
+  // 4 fighters by default: the first four humans each replace a CPU, the fifth and later add a fighter
+  const grow = await page.evaluate(() => {
+    const sel = window.__game.select;
+    const seen = [sel.fighters];
+    for (let i = 0; i < 6; i++) {
+      sel.join(`probe${i}`, i);
+      seen.push(sel.fighters);
+    }
+    sel.slots = [];
+    sel.setCount(4);
+    return seen;
+  });
+  check(JSON.stringify(grow) === JSON.stringify([4, 4, 4, 4, 4, 5, 6]), `4 fighters by default; humans 1-4 replace CPUs, each one after adds a fighter (${JSON.stringify(grow)})`);
 
   // P1 joins on the keyboard, moves the cursor two styles right, confirms, starts
   // the game reads the keyboard once per animation frame, and a slow software
@@ -141,6 +154,10 @@ async function main() {
   await press("KeyD");
   const chosen = await page.evaluate(() => window.__game.select.slots.map((s) => [s.device, s.style, s.ready]));
   check(JSON.stringify(chosen) === JSON.stringify([["kb1", 2, false]]), `kb1 joined and picked style 2 (${JSON.stringify(chosen)})`);
+  const joinedCount = await page.evaluate(() => window.__game.select.fighters);
+  check(joinedCount === 4, `one human in a 4-fighter pit: they took a CPU's place (${joinedCount} fighters)`);
+  // the brawl checks below want a full pit
+  await page.evaluate(() => window.__game.select.setCount(8));
   await press("KeyJ");
   await press("BracketRight");
   const stageNext = await page.evaluate(() => window.__game.select.stage);
@@ -359,7 +376,7 @@ async function main() {
   await padPress(9);
   await page.waitForFunction(() => window.__game.mode === "match", { timeout: 10_000 });
   const padMatch = await page.evaluate(() => window.__game.world.fighters.map((f) => f.human));
-  check(padMatch.length === 8 && padMatch[0] && padMatch.slice(1).every((h) => !h), `a third Start starts the match with the pad as P1 and 7 CPUs (${JSON.stringify(padMatch)})`);
+  check(padMatch.length === 4 && padMatch[0] && padMatch.slice(1).every((h) => !h), `a third Start starts the match with the pad as P1 and 3 CPUs (${JSON.stringify(padMatch)})`);
 
   // every other stage: start an 8-CPU match with ?stage=, play it, look at it
   const litCanvas = () =>
