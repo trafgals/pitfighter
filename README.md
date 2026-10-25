@@ -180,6 +180,7 @@ dodges, Cross runs.
 | taunt (a whole one fills fury) | L2 | H | Num1 |
 | special (costs fury) | ○ + △ together, or R2 | J + K, or Y | Num6 + Num8, or Num3 |
 | mute | | M | |
+| move list (holds the fight) | Select | Tab | Num. |
 
 On the character select:
 
@@ -189,12 +190,22 @@ On the character select:
 - pick the kind of match by clicking the arrows or a name on the banner, with `[` / `]` or `H` / `Y`, or with L2 / R2 on a pad; a CPU brawl on its next arena plays behind the menu;
 - or click a fighter to join on it with the keyboard, and click FIGHT! to start;
 - turn the blood on or off with `G` (the game remembers your choice);
+- switch practice on or off with `P` (R3 on a pad, or the PRACTICE button). In practice the CPUs are dummies that stand there and take it. Nobody wins, the KO'd come back on every arena, and fury never runs out. A body nobody has hurt for 1.5 seconds is whole again, torn-off limbs included (`tests/practice.test.ts`);
 - start with Enter or Start.
 
 Each match opens with a 3, 2, 1 countdown. While it runs, every human's
 fighter stands in a column of their colour under a bouncing tag.
 
 Up to 8 gamepads work, and CPU fighters fill any empty slots.
+
+In a fight, the move list (Tab, Num. or Select) holds the fight and shows one card per human fighter. Each card lists:
+
+- the fighter's limbs' rolls;
+- the startup, total frames, damage and reach that those limbs give each strike of the punch and kick strings;
+- the dash strike and the special;
+- the style's air grab.
+
+The list is read off the sim, so it changes when you lose a limb or put on someone else's (`src/movelist.ts`, `tests/movelist.test.ts`).
 
 ## Running it
 

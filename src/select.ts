@@ -19,7 +19,7 @@ import { PLAYER_COLORS } from "./render/scene";
 import { DEFAULT_STAGE, MATCH_TYPES, arenasOf, matchTypeById, stageById, typeOf, type MatchTypeId, type StageId } from "./sim/stages";
 
 const COLS = 7;
-const RELEASED: DeviceRead = { x: 0, y: 0, buttons: 0, start: false, left: false, right: false, up: false, down: false };
+const RELEASED: DeviceRead = { x: 0, y: 0, buttons: 0, start: false, moves: false, left: false, right: false, up: false, down: false };
 const hex = (c: number) => "#" + c.toString(16).padStart(6, "0");
 
 export interface Slot {
@@ -33,6 +33,7 @@ export interface SelectResult {
   humans: boolean[];
   devices: (DeviceId | null)[];
   stage: StageId;
+  practice: boolean;
 }
 
 export class Select {
@@ -40,6 +41,8 @@ export class Select {
   fighters = DEFAULT_FIGHTERS;
   /** blood on or off (main.ts keeps it; the menu shows it) */
   gore = true;
+  /** a practice match: the CPUs stand still as dummies, nobody wins, everyone heals (P / R3) */
+  practice = false;
   /** the kind of match, and the arena the next one is played on */
   type: MatchTypeId = typeOf(DEFAULT_STAGE).id;
   stage: StageId = DEFAULT_STAGE;
@@ -69,9 +72,9 @@ export class Select {
       ).join("")}</div>
       <div class="info"></div>
       <div class="slots"></div>
-      <div class="bar"><div class="count"></div><button class="fight">FIGHT!</button></div>
+      <div class="bar"><div class="count"></div><button class="practice">PRACTICE: OFF</button><button class="fight">FIGHT!</button></div>
       <div class="help">${CONTROLS_HELP.map((l) => `<div>${l}</div>`).join("")}
-        <div>Join: J / Num4 / □ / Start · Move: stick · Confirm: J / □ / Start · Back: L / ○ · Fighters: - / + (L1 / R1) · Stage: [ / ] (L2 / R2) · Blood: G · Start: Enter / Start</div></div>`;
+        <div>Join: J / Num4 / □ / Start · Move: stick · Confirm: J / □ / Start · Back: L / ○ · Fighters: - / + (L1 / R1) · Stage: [ / ] (L2 / R2) · Practice: P (R3) · Blood: G · Start: Enter / Start · In a fight, the move list: Tab / Num. / Select</div></div>`;
     root.querySelector(".prev")!.addEventListener("click", () => this.cycleType(-1));
     root.querySelector(".next")!.addEventListener("click", () => this.cycleType(1));
     root.querySelectorAll<HTMLElement>(".stage").forEach((b) => b.addEventListener("click", () => this.setType(b.dataset.type as MatchTypeId)));
@@ -80,6 +83,7 @@ export class Select {
       b.addEventListener("mouseenter", () => this.describe(Number(b.dataset.i)));
     });
     root.querySelector(".fight")!.addEventListener("click", () => this.fight());
+    root.querySelector(".practice")!.addEventListener("click", () => this.setPractice(!this.practice));
     // buttons are for the mouse: keys and pads drive the menu through poll(), and a focused button must not eat Enter or Space
     root.querySelectorAll("button").forEach((b) => b.addEventListener("keydown", (e) => e.preventDefault()));
     this.render();
@@ -105,6 +109,7 @@ export class Select {
       // anyone can flip through the match types, joined or not
       if (bedge(BTN.TAUNT)) this.cycleType(-1);
       if (bedge(BTN.SPECIAL)) this.cycleType(1);
+      if (bedge(BTN.TARGET)) this.setPractice(!this.practice);
       // Start never starts the match from a device that is not in it: it joins
       // that device (and readies it, a second time) instead of filling the pit with CPUs
       if (edge("start") && slot?.ready) start = true;
@@ -127,6 +132,11 @@ export class Select {
     }
     if (changed) this.render();
     if (start && this.slots.every((s) => s.ready)) this.start();
+  }
+
+  setPractice(on: boolean): void {
+    this.practice = on;
+    this.render();
   }
 
   setGore(on: boolean): void {
@@ -214,7 +224,7 @@ export class Select {
     const arenas = arenasOf(matchTypeById(this.type));
     this.stage = arenas[(arenas.indexOf(stage) + 1) % arenas.length];
     this.render();
-    this.onStart({ styles, humans, devices, stage });
+    this.onStart({ styles, humans, devices, stage, practice: this.practice });
   }
 
   private render(): void {
@@ -245,5 +255,8 @@ export class Select {
       return `<div class="slot off"><b>P${p + 1}</b> -</div>`;
     }).join("");
     el.querySelector(".count")!.textContent = `${this.fighters} fighters · blood ${this.gore ? "ON" : "OFF"} (G) · Enter / Start when everyone is ready`;
+    const pr = el.querySelector<HTMLElement>(".practice")!;
+    pr.textContent = `PRACTICE: ${this.practice ? "ON" : "OFF"}`;
+    pr.classList.toggle("on", this.practice);
   }
 }

@@ -138,6 +138,7 @@ export interface Fighter {
   vehicle: number; // the vehicle this fighter drives, -1 on foot
   out: boolean; // eliminated (stages without respawns)
   lastHitBy: number; // who hit this fighter last (-1: nobody or the arena), credited with a fall
+  hurtAt: number; // the frame this fighter last took damage (practice makes them whole after a quiet spell)
 }
 
 export interface Pickup {

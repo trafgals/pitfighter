@@ -5,6 +5,7 @@ import { BTN, type PlayerInput } from "./sim/types";
 
 export interface DeviceRead extends PlayerInput {
   start: boolean;
+  moves: boolean; // the move list: Tab, Num. or a pad's Select
   left: boolean;
   right: boolean;
   up: boolean;
@@ -13,13 +14,14 @@ export interface DeviceRead extends PlayerInput {
 
 export type DeviceId = string; // "kb1" | "kb2" | "pad0".."pad7"
 
-const KEYMAPS: Record<string, { up: string; down: string; left: string; right: string; btn: Record<string, number>; start: string }> = {
+const KEYMAPS: Record<string, { up: string; down: string; left: string; right: string; btn: Record<string, number>; start: string; moves: string }> = {
   kb1: {
     up: "KeyW",
     down: "KeyS",
     left: "KeyA",
     right: "KeyD",
     start: "Enter",
+    moves: "Tab",
     btn: { KeyJ: BTN.HIGH, KeyK: BTN.GRAB, KeyL: BTN.REV, ShiftLeft: BTN.DASH, KeyQ: BTN.LOCK, KeyU: BTN.TARGET, KeyO: BTN.USE, KeyH: BTN.TAUNT, KeyY: BTN.SPECIAL },
   },
   kb2: {
@@ -28,6 +30,7 @@ const KEYMAPS: Record<string, { up: string; down: string; left: string; right: s
     left: "ArrowLeft",
     right: "ArrowRight",
     start: "NumpadEnter",
+    moves: "NumpadDecimal",
     // the numpad's 8 / 4 / 6 / 2 sit where a pad's Triangle / Square / Circle / Cross do
     btn: { Numpad6: BTN.HIGH, Numpad8: BTN.GRAB, Numpad4: BTN.REV, Numpad2: BTN.DASH, Numpad9: BTN.LOCK, Numpad0: BTN.TARGET, Numpad7: BTN.USE, Numpad1: BTN.TAUNT, Numpad3: BTN.SPECIAL },
   },
@@ -58,7 +61,7 @@ export class Input {
     target.addEventListener("keydown", (e) => {
       this.keys.add(e.code);
       this.tapped.add(e.code);
-      if (e.code.startsWith("Arrow") || e.code === "Space") e.preventDefault();
+      if (e.code.startsWith("Arrow") || e.code === "Space" || e.code === "Tab") e.preventDefault();
     });
     target.addEventListener("keyup", (e) => this.keys.delete(e.code));
     target.addEventListener("blur", () => this.keys.clear());
@@ -85,7 +88,7 @@ export class Input {
   }
 
   read(dev: DeviceId): DeviceRead {
-    const r: DeviceRead = { x: 0, y: 0, buttons: 0, start: false, left: false, right: false, up: false, down: false };
+    const r: DeviceRead = { x: 0, y: 0, buttons: 0, start: false, moves: false, left: false, right: false, up: false, down: false };
     const km = KEYMAPS[dev];
     if (km) {
       const k = this.view;
@@ -97,6 +100,7 @@ export class Input {
       r.y = (r.up ? 1 : 0) - (r.down ? 1 : 0);
       for (const [code, b] of Object.entries(km.btn)) if (k.has(code)) r.buttons |= b;
       r.start = k.has(km.start) || (dev === "kb1" && k.has("Space"));
+      r.moves = k.has(km.moves);
       return r;
     }
     const pad = navigator.getGamepads?.()[Number(dev.slice(3))];
@@ -117,6 +121,7 @@ export class Input {
     r.down = y < -0.5;
     for (const [i, bit] of PAD_BTN) if (b(i)) r.buttons |= bit;
     r.start = b(9);
+    r.moves = b(8);
     return r;
   }
 }
