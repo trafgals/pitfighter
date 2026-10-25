@@ -10,6 +10,7 @@ import { STYLES } from "./sim/styles";
 import { CueTracker } from "./render/cues";
 import { Sfx } from "./render/sfx";
 import { DEFAULT_FIGHTERS, Select, type SelectResult } from "./select";
+import { MoveList } from "./render/movelist";
 
 const params = new URLSearchParams(location.search);
 const canvas = document.querySelector<HTMLCanvasElement>("#view")!;
@@ -39,6 +40,8 @@ const sfx = new Sfx();
 const cues = new CueTracker();
 const hud = new Hud(document.querySelector<HTMLElement>("#hud")!);
 const overEl = document.querySelector<HTMLElement>("#over")!;
+const moves = new MoveList(document.querySelector<HTMLElement>("#moves")!);
+let lastMoves = false;
 
 type Mode = "select" | "countdown" | "match" | "over";
 let mode: Mode = "select";
@@ -71,6 +74,7 @@ window.addEventListener("keydown", (e) => {
   if (e.code === "Equal" || e.code === "NumpadAdd") select.setCount(select.fighters + 1);
   if (e.code === "BracketLeft") select.cycleType(-1);
   if (e.code === "BracketRight") select.cycleType(1);
+  if (e.code === "KeyP") select.setPractice(!select.practice);
   if (e.code === "KeyG") {
     scene.gore = !scene.gore;
     select.setGore(scene.gore);
@@ -100,8 +104,9 @@ function attract(): void {
 }
 
 function startMatch(r: SelectResult, seed = Number(params.get("seed") ?? Date.now() >>> 0)): void {
-  world = new World({ seed, styles: r.styles, humans: r.humans, stage: r.stage });
-  bots = r.humans.map((h, i) => (h ? null : new Bot(i, seed, 0.55 + 0.1 * ((i * 7) % 4))));
+  world = new World({ seed, styles: r.styles, humans: r.humans, stage: r.stage, practice: r.practice });
+  // in practice the CPUs are dummies: they stand there and take it
+  bots = r.humans.map((h, i) => (h || r.practice ? null : new Bot(i, seed, 0.55 + 0.1 * ((i * 7) % 4))));
   devices = r.devices;
   scene.attach(world);
   hud.attach(world);
@@ -112,7 +117,8 @@ function startMatch(r: SelectResult, seed = Number(params.get("seed") ?? Date.no
   overEl.classList.remove("show");
   document.body.classList.add("playing");
   acc = 0;
-  opener = OPENERS[r.stage];
+  opener = r.practice ? "PRACTICE! TAB FOR THE MOVE LIST" : OPENERS[r.stage];
+  moves.hide();
   scene.setInset(hud.inset);
   if (COUNTDOWN) {
     mode = "countdown";
@@ -151,6 +157,7 @@ function stepOnce(): void {
     if (w.s.winner >= 0) attract();
     return;
   }
+  if (moves.open) moves.show(w); // a limb torn off while it is open changes the list
   sfx.cue(c, w);
   hud.update(w);
   if (w.s.winner >= 0 && mode === "match") {
@@ -188,7 +195,17 @@ function frame(now: number): void {
     const n = 3 - Math.floor(countT / BEAT);
     if (n >= 1) hud.countdown(String(n));
     else go();
-  } else if (mode === "match") run(dt);
+  } else if (mode === "match") {
+    // the move list holds the fight while it is open
+    const press = input.devices().some((d) => input.read(d).moves);
+    if (press && !lastMoves && world) {
+      if (moves.open) moves.hide();
+      else moves.show(world);
+      acc = 0;
+    }
+    lastMoves = press;
+    if (!moves.open) run(dt);
+  }
   else if (mode === "over") {
     overT += real;
     const anyStart = input.devices().some((d) => input.read(d).start);
@@ -211,6 +228,7 @@ requestAnimationFrame(frame);
 
 if (params.get("auto")) {
   select.setCount(Number(params.get("fighters") ?? DEFAULT_FIGHTERS));
+  select.setPractice(params.get("practice") === "1");
   // ?stage=<id>: start on that stage
   const st = params.get("stage");
   if (st && STAGES.some((x) => x.id === st)) select.setStage(st as StageId);
@@ -232,6 +250,7 @@ window.__game = {
   },
   select,
   input,
+  moves,
   scene,
   sfx,
   /** advance the simulation synchronously (tests) */

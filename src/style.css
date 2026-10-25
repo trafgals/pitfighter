@@ -536,6 +536,80 @@ body.playing #hud {
   opacity: 0.7;
 }
 
+/* ------------------------------------------------------------ move list */
+#moves {
+  position: fixed;
+  inset: 0;
+  display: none;
+  overflow: auto;
+  padding: 16px;
+  background: rgba(10, 0, 0, 0.88);
+  text-align: center;
+}
+#moves.show {
+  display: block;
+}
+#moves h2 {
+  margin: 8px 0 0;
+  color: var(--gold);
+}
+#moves .small {
+  opacity: 0.7;
+}
+#moves .sheets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+#moves .sheet {
+  border: 2px solid;
+  border-radius: 8px;
+  padding: 8px 12px;
+  text-align: left;
+  max-width: 100%;
+  background: rgba(40, 0, 0, 0.6);
+}
+#moves h3 {
+  margin: 0 0 4px;
+}
+#moves .limbs {
+  margin: 0 0 6px;
+  padding-left: 16px;
+  font-size: 13px;
+}
+#moves .limbs .gone {
+  opacity: 0.45;
+}
+#moves table {
+  border-collapse: collapse;
+  font-size: 13px;
+}
+#moves th,
+#moves td {
+  padding: 1px 6px;
+}
+#moves tr.sec th {
+  text-align: left;
+  color: var(--gold);
+  padding-top: 6px;
+}
+#moves tr.note td {
+  opacity: 0.6;
+  font-style: italic;
+  padding-top: 0;
+}
+#moves .airgrab,
+#moves .flow {
+  margin: 6px 0 0;
+  font-size: 13px;
+  max-width: 560px;
+}
+#select .bar .practice.on {
+  background: var(--gold);
+  color: #200;
+}
+
 /* ------------------------------------------------------------ ?debug=motion */
 #motion-debug {
   position: fixed;

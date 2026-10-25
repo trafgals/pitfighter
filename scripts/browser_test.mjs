@@ -570,6 +570,38 @@ async function main() {
   check(clean.drops === 0 && clean.splats === 0, `?gore=0: no blood (${clean.drops} drops, ${clean.splats} splats)`);
   check(errors.length === 0, `?debug=motion: no page errors${errors.length ? ": " + errors.slice(0, 3).join(" | ") : ""}`);
 
+  // practice: the CPU is a dummy, nobody wins, and Tab opens the move list, which holds the fight
+  await withTimeout(page.goto(`${SITE}/?auto=1&fighters=2&seed=5&practice=1`, { waitUntil: "load" }), 20_000, "load practice");
+  await withTimeout(page.waitForFunction(() => window.__game.mode === "match", { timeout: 15_000 }), 16_000, "practice match starts");
+  const pr0 = await page.evaluate(() => {
+    const w = window.__game.world;
+    return { practice: w.practice, x: w.fighters[1].x, y: w.fighters[1].y };
+  });
+  await withTimeout(page.evaluate(() => window.__game.step(240)), 15_000, "practice 240 frames");
+  const pr1 = await page.evaluate(() => {
+    const w = window.__game.world;
+    return { x: w.fighters[1].x, y: w.fighters[1].y, state: w.fighters[1].state, fury: w.fighters[0].fury };
+  });
+  check(pr0.practice && Math.hypot(pr1.x - pr0.x, pr1.y - pr0.y) < 0.05 && pr1.fury === 100, `practice: the CPU stands still as a dummy and fury stays full (${JSON.stringify({ ...pr0, ...pr1 })})`);
+  await page.keyboard.press("Tab");
+  await frames();
+  const ml = await page.evaluate(() => ({
+    open: document.querySelector("#moves").classList.contains("show"),
+    text: document.querySelector("#moves").textContent,
+    sheets: document.querySelectorAll("#moves .sheet").length,
+    frame: window.__game.world.s.frame,
+  }));
+  await new Promise((r) => setTimeout(r, 400));
+  const held = await page.evaluate(() => window.__game.world.s.frame);
+  check(ml.open && ml.sheets === 2 && /Air grab: [A-Z]/.test(ml.text) && /Launcher/.test(ml.text) && /Sweep/.test(ml.text), `Tab opens the move list: a sheet per fighter when nobody is human, strings and the air grab (${ml.sheets} sheets)`);
+  check(held === ml.frame, `the move list holds the fight (frame ${ml.frame} -> ${held})`);
+  await page.keyboard.press("Tab");
+  await new Promise((r) => setTimeout(r, 400));
+  const gone = await page.evaluate(() => ({ open: document.querySelector("#moves").classList.contains("show"), frame: window.__game.world.s.frame }));
+  check(!gone.open && gone.frame > held, `Tab again closes it and the fight goes on (frame ${held} -> ${gone.frame})`);
+  await page.screenshot({ path: path.join(OUT, "9_practice.png") });
+  check(errors.length === 0, `practice: no page errors${errors.length ? ": " + errors.slice(0, 3).join(" | ") : ""}`);
+
   // frame time: 8 fighters' animation (springs, IK, ragdoll: the scene's sync) must fit easily in a 60 fps frame.
   // Headless Chrome draws on the CPU (SwiftShader), so the whole frame is reported, but only the animation is held to a budget.
   await withTimeout(page.goto(`${SITE}/?auto=1&fighters=8&seed=7`, { waitUntil: "load" }), 20_000, "load frame-time match");

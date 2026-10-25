@@ -20,6 +20,8 @@ import {
   AIR,
   BUFFER,
   CRUNCH,
+  FLOW,
+  PRACTICE,
   COMBO_FLOOR,
   COMBO_SCALE,
   CROWD,
@@ -67,6 +69,7 @@ export interface MatchConfig {
   stage?: StageId; // default: Hell Toilet
   hitstop?: boolean; // default true; the calibration tests switch it off to compare raw timings
   limbs?: boolean; // default true: every limb rolls its own traits; off, every limb is the plain one the frame data is written for
+  practice?: boolean; // no winner, everyone comes back, fury stays full and a quiet body heals (PRACTICE)
 }
 
 export const BASE_HP: Record<PartId, number> = { head: 40, torso: 100, armL: 30, armR: 30, legL: 35, legR: 35 };
@@ -126,6 +129,7 @@ export class World {
   rng: Rng;
   readonly hitstop: boolean;
   readonly limbs: boolean;
+  readonly practice: boolean;
   private readonly seed: number;
   readonly arena: Arena;
   /** fighters frozen by hitstop on the current step: they neither act nor slide nor hit */
@@ -139,6 +143,7 @@ export class World {
     this.rng = new Rng(cfg.seed);
     this.hitstop = cfg.hitstop ?? true;
     this.limbs = cfg.limbs ?? true;
+    this.practice = cfg.practice ?? false;
     this.seed = cfg.seed;
     const sp = this.arena.spawns(n);
     this.s = {
@@ -164,6 +169,8 @@ export class World {
         juggle: 0,
         bounced: false,
         grown: 1, // the first set of limbs is roll 0
+        chainTo: null,
+        flows: 0,
         carryZ: 0,
         stickX: 0,
         stickY: 0,
@@ -198,6 +205,7 @@ export class World {
         vehicle: -1,
         out: false,
         lastHitBy: -1,
+        hurtAt: 0,
       })),
       pickups: [],
       nextPickupId: 1,
@@ -238,7 +246,8 @@ export class World {
     this.physics();
     this.updatePickups();
     this.arena.update(this);
-    if (!this.arena.respawn && s.winner < 0) {
+    if (this.practice) this.refill();
+    if (!this.arena.respawn && !this.practice && s.winner < 0) {
       // the last one standing wins
       const left = fs.filter((f) => !f.out);
       if (left.length <= 1) this.win(left.length ? left[0].id : [...fs].sort((a, b) => b.kos - a.kos || a.id - b.id)[0].id);
@@ -246,7 +255,7 @@ export class World {
   }
 
   win(id: number): void {
-    if (this.s.winner >= 0) return;
+    if (this.s.winner >= 0 || this.practice) return;
     this.s.winner = id;
     this.ev({ kind: "win", a: id });
   }
@@ -339,7 +348,11 @@ export class World {
       f.move = null;
       f.chain = false;
     }
-    if (st === "idle" || st === "walk") f.combo = 0;
+    if (st === "idle" || st === "walk") {
+      f.combo = 0;
+      f.flows = 0;
+    }
+    f.chainTo = null;
     if (st !== "walk") f.running = false;
   }
 
@@ -370,7 +383,8 @@ export class World {
 
   /** The limb that throws a strike (the other one if it is gone), or null for the body's own moves. */
   strikerOf(f: Fighter, id: string): PartId | null {
-    const want = striker(id, MOVES[id].kind);
+    // the finisher comes from the hand the last jab did not
+    const want = id === "punchFin" ? (STYLES[f.style].string % 2 === 1 ? "armL" : "armR") : striker(id, MOVES[id].kind);
     if (!want) return null;
     if (f.parts[want].attached) return want;
     const other = ({ armL: "armR", armR: "armL", legL: "legR", legR: "legL" } as const)[want as "armL"];
@@ -553,7 +567,7 @@ export class World {
         this.setState(f, "idle");
         break;
       case "ko":
-        if (this.arena.respawn) this.respawn(f);
+        if (this.arena.respawn || this.practice) this.respawn(f);
         else f.dur = 0; // out for good
         break;
       case "falling":
@@ -706,7 +720,8 @@ export class World {
     }
     // charge: the opener waits on its last startup frame while its button is held
     if (f.chargeHeld) {
-      const held = (inp.buttons & (m.height === "high" ? BTN.HIGH : BTN.LOW)) !== 0;
+      // the low string is Circle with the stick back for a player, LOW for a CPU
+      const held = (inp.buttons & (m.height === "high" ? BTN.HIGH : BTN.HIGH | BTN.LOW)) !== 0;
       if (held && f.t === m.startup - 1 && f.charge < CHARGE.max) {
         f.charge++;
         f.t--; // updateFighter advances it again
@@ -720,17 +735,36 @@ export class World {
     }
     const next = this.nextOf(f, f.move);
     if (!next) return;
-    const btn = m.height === "high" ? BTN.HIGH : BTN.LOW;
     // presses during this move (not the one that started it) queue the follow-up
-    if (f.t > 0 && this.buffered(f, btn, this.s.frame - f.t + 1)) {
-      this.consume(f, btn);
+    const since = this.s.frame - f.t + 1;
+    const circle = f.t > 0 && this.buffered(f, BTN.HIGH, since);
+    const low = f.t > 0 && this.buffered(f, BTN.LOW, since);
+    if (circle || low) {
+      const st = this.stick(inp);
+      const back = st.mag > 0 && st.dx * Math.cos(f.facing) + st.dy * Math.sin(f.facing) < -0.5;
+      const kicking = m.kind === "kick";
+      // a press for the other string (plain Circle out of a kick, back + Circle out of a punch) flows into it,
+      // while the combo has crossings left and the body has the limbs for it; otherwise the string goes on
+      const other = kicking ? circle && !back : low || (circle && back);
+      const can = f.flows < FLOW.max && (kicking ? arms(f) > 0 : legs(f) === 2);
+      this.consume(f, BTN.HIGH);
+      this.consume(f, BTN.LOW);
+      f.chainTo = other && can ? (kicking ? STRING_STARTS.high : STRING_STARTS.low) : next;
       f.chain = true;
     }
-    if (f.chain && f.moveLanded && f.t >= m.startup + m.active) {
-      if (m.kind === "kick" && legs(f) < 2) return;
-      if (m.kind === "punch" && arms(f) === 0) return;
-      this.startMove(f, next);
-    }
+    if (!f.chain || !f.chainTo || !f.moveLanded) return;
+    const to = f.chainTo;
+    // the same limb twice running (the other one is gone) has to come back before it goes again
+    const from = this.strikerOf(f, f.move);
+    const same = from !== null && from === this.strikerOf(f, to);
+    if (f.t < m.startup + m.active + (same ? FLOW.same : 0)) return;
+    if (MOVES[to].kind === "kick" && legs(f) < 2) return;
+    if (MOVES[to].kind === "punch" && arms(f) === 0) return;
+    if (to !== next) f.flows++;
+    const flows = f.flows;
+    this.startMove(f, to);
+    f.flows = flows;
+    f.chargeHeld = false; // a follow-up never charges, even one that opens the other string
   }
 
   private updateHolding(f: Fighter, inp: PlayerInput): void {
@@ -1054,6 +1088,7 @@ export class World {
   damage(d: Fighter, part: PartId, dmg: number, by: number): void {
     if (!alive(d)) return;
     if (by >= 0) d.lastHitBy = by;
+    d.hurtAt = this.s.frame;
     const p = d.parts[part];
     p.hp -= dmg;
     if (part !== "torso") d.parts.torso.hp -= dmg * LIMB_TORSO_SHARE;
@@ -1128,12 +1163,26 @@ export class World {
     d.fury = 0;
     this.setState(d, "ko", KO_FRAMES);
     d.deaths++;
-    if (!this.arena.respawn) d.out = true;
+    if (!this.arena.respawn && !this.practice) d.out = true;
     const killer = this.s.fighters[by];
     if (killer && killer.id !== d.id) killer.kos++;
     // the body comes apart (one that fell is gone already)
     if (!fell) for (const p of LIMBS) if (d.parts[p].attached) this.detach(d, p, by);
     this.ev({ kind: "ko", a: d.id, b: by, what: fell ? "fall" : undefined });
+  }
+
+  /** Practice: fury stays full, and a body nobody has hurt for a while is whole again (its torn-off limbs grow back). */
+  private refill(): void {
+    for (const f of this.s.fighters) {
+      if (!alive(f)) continue;
+      f.fury = FURY.max;
+      if (this.s.frame - f.hurtAt < PRACTICE.refill) continue;
+      for (const p of PARTS) {
+        const part = f.parts[p];
+        if (part.attached) part.hp = part.max;
+        else if (part.regrow > 1) part.regrow = 1;
+      }
+    }
   }
 
   private respawn(f: Fighter): void {
@@ -1455,6 +1504,8 @@ export class World {
       mix(f.z);
       mix(f.vz);
       mix(f.juggle);
+      mix(f.flows);
+      mix(f.hurtAt);
       mix(f.partner);
       mix(f.out ? 1 : 0);
       for (const p of PARTS) mix(f.parts[p].hp + (f.parts[p].attached ? 1000 : 0) + f.parts[p].trait.mass);

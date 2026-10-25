@@ -39,7 +39,7 @@ The combat is modelled on the feel of Namco's *Urban Reign*:
 - soft lock-on, and R1 to lock on and strafe;
 - multi-target hits, kinetic pushback when you land a reversal, and dogpile protection.
 
-Pitfighter changes six things (`src/sim/moves.ts`, `tests/tweaks.test.ts`, `tests/juggle.test.ts`):
+Pitfighter changes seven things (`src/sim/moves.ts`, `tests/tweaks.test.ts`, `tests/juggle.test.ts`):
 
 - **Charged openers.** Hold ○ to charge the first strike of a string. It
   waits on its last startup frame while you hold, for up to 1 s, and fires on
@@ -53,6 +53,12 @@ Pitfighter changes six things (`src/sim/moves.ts`, `tests/tweaks.test.ts`, `test
   away from the attacker as a blow lands flies them further off, more for every
   hit so far, so a long juggle gets easier to escape. A body flown above 1.9 m
   is out of reach. It bounces once off the floor and then lies there.
+- **Flow combos.** A string trades limbs (right, left, right), and each
+  strike comes out of the last one's follow-through. With one arm left, the
+  same arm has to come back before it goes again, which costs 4 frames.
+  Mid-string, a landed punch flows into the kick string (back + ○) and a
+  landed kick into the punch string (○), up to twice in a combo
+  (`tests/flow.test.ts`).
 - **Air grabs.** Triangle on a juggled body within 1.45 m, and no higher
   than an outstretched arm, catches it out of the air with the style's own air
   grab (`src/sim/airgrabs.ts`): a suplex, a powerbomb, a slingshot, an axe-kick
@@ -174,6 +180,7 @@ dodges, Cross runs.
 | taunt (a whole one fills fury) | L2 | H | Num1 |
 | special (costs fury) | ○ + △ together, or R2 | J + K, or Y | Num6 + Num8, or Num3 |
 | mute | | M | |
+| move list (holds the fight) | Select | Tab | Num. |
 
 On the character select:
 
@@ -183,12 +190,22 @@ On the character select:
 - pick the kind of match by clicking the arrows or a name on the banner, with `[` / `]` or `H` / `Y`, or with L2 / R2 on a pad; a CPU brawl on its next arena plays behind the menu;
 - or click a fighter to join on it with the keyboard, and click FIGHT! to start;
 - turn the blood on or off with `G` (the game remembers your choice);
+- switch practice on or off with `P` (R3 on a pad, or the PRACTICE button). In practice the CPUs are dummies that stand there and take it. Nobody wins, the KO'd come back on every arena, and fury never runs out. A body nobody has hurt for 1.5 seconds is whole again, torn-off limbs included (`tests/practice.test.ts`);
 - start with Enter or Start.
 
 Each match opens with a 3, 2, 1 countdown. While it runs, every human's
 fighter stands in a column of their colour under a bouncing tag.
 
 Up to 8 gamepads work, and CPU fighters fill any empty slots.
+
+In a fight, the move list (Tab, Num. or Select) holds the fight and shows one card per human fighter. Each card lists:
+
+- the fighter's limbs' rolls;
+- the startup, total frames, damage and reach that those limbs give each strike of the punch and kick strings;
+- the dash strike and the special;
+- the style's air grab.
+
+The list is read off the sim, so it changes when you lose a limb or put on someone else's (`src/movelist.ts`, `tests/movelist.test.ts`).
 
 ## Running it
 

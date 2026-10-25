@@ -98,6 +98,13 @@ export function hitstopFor(dmg: number, knockdown: boolean): number {
 }
 
 export const STRING_STARTS = { high: "jab1", low: "kick1" } as const;
+// Combos from the flow of the body: a strike that lands leaves the body set up
+// for the next. A string trades limbs, and the other side's strike comes out
+// of the last one's follow-through at once; the same limb twice running has
+// to come back first (`same` frames more). Mid-string, a landed punch flows
+// into the kick string (Circle with the stick back) and a landed kick into
+// the punch string (plain Circle), up to `max` crossings in a combo.
+export const FLOW = { max: 2, same: 4 };
 
 export const GRAB = { startup: 1, active: 3, whiff: 41, reach: 1.05, arc: 0.6 };
 export const HOLD = { dur: 100, escape: 12, knee: 6, kneeCool: 18, kneeMax: 3 };
@@ -123,6 +130,9 @@ export const DIZZY = { dur: 90, headReset: 20 };
 export const KO_FRAMES = 180;
 export const FALL_FRAMES = 50; // over the edge to gone
 export const RESPAWN_INVULN = 90;
+// Practice: nobody wins, the KO'd come back on any arena, fury never runs out,
+// and a body left alone for `refill` frames is whole again.
+export const PRACTICE = { refill: 90 };
 export const REATTACH = { dur: 30, range: 1.1, hpFrac: 0.5 };
 export const REGROW_FRAMES = 720;
 export const SIT_FRAMES = 20;
