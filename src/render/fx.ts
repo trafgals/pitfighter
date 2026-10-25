@@ -24,6 +24,12 @@ export interface BleedOpts {
   size?: number;
 }
 
+/** A spray of sparks: like blood, but they glow, burn out after `life` and leave nothing. */
+interface SprayOpts extends BleedOpts {
+  life?: number;
+  gravity?: number;
+}
+
 /** How long (s) a splat stays on the floor, and how long of that it takes to soak away at the end. */
 export const SPLAT_LIFE = 45;
 const SPLAT_FADE = 6;
@@ -87,7 +93,7 @@ class Particles {
   }
 
   /** Throw `count` particles along dir, scattered; they last until they land (or three seconds run out). */
-  spray(at: THREE.Vector3, dir: THREE.Vector3, o: BleedOpts, color: number, rnd: () => number): void {
+  spray(at: THREE.Vector3, dir: THREE.Vector3, o: SprayOpts, color: number, rnd: () => number): void {
     const c = new THREE.Color(color);
     for (let k = 0; k < o.count; k++) {
       const i = this.next;
@@ -101,9 +107,9 @@ class Particles {
       this.vel.set([dir.x * sp + r * Math.cos(th) * sc, dir.y * sp + u * sc, dir.z * sp + r * Math.sin(th) * sc], i * 3);
       const v = 0.6 + rnd() * 0.4;
       this.base.set([c.r * v, c.g * v, c.b * v], i * 3);
-      this.max[i] = 3;
-      this.life[i] = 3;
-      this.grav[i] = 9.8;
+      this.max[i] = (o.life ?? 3) * (o.life ? 0.6 + rnd() * 0.4 : 1);
+      this.life[i] = this.max[i];
+      this.grav[i] = o.gravity ?? 9.8;
       this.mark[i] = (o.size ?? 1) * (0.5 + rnd());
     }
   }
@@ -319,6 +325,13 @@ export class Fx {
     const d = dir.lengthSq() > 1e-8 ? dir.clone().normalize() : new THREE.Vector3(0, 1, 0);
     this.blood.spray(at, d, o, 0x8a0404, this.rnd);
     this.stats.drops += o.count;
+  }
+
+  /** Sparks thrown out the far side of a blow, along `dir`: the hit's force made visible. */
+  streak(at: THREE.Vector3, dir: THREE.Vector3, o: { count: number; speed: number; color: number }): void {
+    const d = dir.lengthSq() > 1e-8 ? dir.clone().normalize() : new THREE.Vector3(0, 1, 0);
+    this.sparks.spray(at, d, { count: o.count, speed: o.speed, spread: o.speed * 0.3, life: 0.22, gravity: 4 }, o.color, this.rnd);
+    this.stats.bursts++;
   }
 
   /** A splat right on the floor (a pool under a body), `size` metres across. */

@@ -226,6 +226,7 @@ async function main() {
         specials,
         heavy,
         fx: { ...g.scene.fx.stats },
+        flash: g.scene.impact.flash,
         bloom: g.scene.bloomOn,
         audio: g.sfx.ctx ? g.sfx.ctx.state : "none",
         played: { ...g.sfx.played },
@@ -244,6 +245,7 @@ async function main() {
   check((feel.played.hit ?? 0) > 0 && (feel.played.swing ?? 0) > 0, `hits and swings made sounds (${feel.played.hit ?? 0} hits, ${feel.played.swing ?? 0} swings)`);
   check(feel.fury === 8, `HUD shows 8 fury bars (${feel.fury})`);
   check(!!feel.heavy, `a heavy hit landed (${JSON.stringify(feel.heavy)})`);
+  check(feel.flash > 0.3, `the heavy hit flashed the picture white-hot (${feel.flash.toFixed(2)})`);
   await new Promise((r) => setTimeout(r, 60));
   await page.screenshot({ path: path.join(OUT, "4_heavy_hit.png") });
   // the blood those hits drew: drops thrown, and splats where they landed
@@ -292,6 +294,31 @@ async function main() {
   });
   check(px.lit > 200 && px.colours > 40, `canvas renders the arena (${px.lit} lit px, ${px.colours} colours)`);
   await page.screenshot({ path: path.join(OUT, "3_match_fight.png") });
+
+  // the end of the match: the winning KO slows time nearly to a stop, and the camera closes in on the body
+  const end = await withTimeout(
+    page.evaluate(() => {
+      const g = window.__game;
+      let ko = false;
+      for (let i = 0; i < 40000 && g.mode === "match"; i++) {
+        g.step(1);
+        ko = g.world.s.events.some((e) => e.kind === "ko");
+      }
+      return { mode: g.mode, ko, slow: g.scene.timeScale, finale: !!g.scene.impact.finale, frame: g.world.s.frame };
+    }),
+    60_000,
+    "play the match out",
+  );
+  console.log("      match end:", JSON.stringify(end));
+  check(end.mode === "over" && end.finale, `the match ended on a closing shot (${end.mode}, finale ${end.finale})`);
+  if (end.ko) check(end.slow < 0.3, `the winning KO slowed time to ${end.slow.toFixed(2)}`);
+  await new Promise((r) => setTimeout(r, 450));
+  const still = await page.evaluate(() => window.__game.scene.timeScale);
+  if (end.ko) check(still < 1, `the slow motion holds a moment in real time (${still.toFixed(2)})`);
+  await page.screenshot({ path: path.join(OUT, "6_finale.png") });
+  await new Promise((r) => setTimeout(r, 2500));
+  const back = await page.evaluate(() => window.__game.scene.timeScale);
+  check(back === 1, `then time runs at full speed again (${back})`);
 
   check(errors.length === 0, `no page errors${errors.length ? ": " + errors.slice(0, 3).join(" | ") : ""}`);
 
