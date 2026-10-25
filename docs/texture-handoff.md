@@ -212,13 +212,20 @@ public/tex/contact/*.png     2x2 tiling previews plus the face
 - `cloth_h.webp` is beyond the tree above, but `src/render/textures.ts` bakes
   a bump map for the cloth as well as for the skin, so the file is there to
   be used or ignored.
-- 152 files, 11.7 MB in total, against the 25 MB budget. Every 512 square
+- 152 files, 11.6 MB in total, against the 25 MB budget. Every 512 square
   file is under 120 KB and every 1024 square file under 400 KB.
-- Four of the 48 material tiles still score a cross seam above 2.5, the worst
-  at 4.52. They are the satin and drape folds, whose scale is close to the
-  512 square tile. The healed band's colour drift is at most 1.0 of 255, so
-  the inpaint is blending the right material; the folds are simply too big
-  for the tile. `public/tex/README.md` says the same.
-- The faces are all brow to chin and symmetric, with no hair and no neck. A
-  few still show the base of a horn in the top corner, where the model fused
-  the horn to the skull and no crop can take it out.- The renderer change is deliberately not in this branch.
+- Every material tile now measures a cross seam below 2.5. The four that were
+  over it - the satin and drape folds, whose scale is close to the 512 square
+  tile - were repaired with a second heal, on a much wider band and with a
+  stronger inpaint, because a band that narrow cannot repaint a fold whose
+  scale is close to the size of the tile: it can only blur the edge of one.
+  The worst of them, `fighters/brother-blaze/cloth.webp`, came down from 4.52
+  to 0.63, and the worst tile in the set is now
+  `fighters/fresh-soul-kevin/skin.webp` at 2.46.
+- The faces are all brow to chin, symmetric, with no hair, no horns, no ears
+  and no neck. The frame is anchored on the brow line, measured on the run of
+  the silhouette that holds the symmetry axis: a horn stands off that axis, so
+  the run is the face itself. The background flood also has to be tight, or it
+  walks through the dark horn above the face and into the shadow it throws
+  across the cheek, and the face comes out with a hole in it.
+- The renderer change is deliberately not in this branch.

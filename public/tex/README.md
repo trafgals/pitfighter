@@ -4,7 +4,7 @@ Image files for the fighters' skin, cloth and face, and for the stage floors
 and walls. The renderer loads these instead of the procedural surfaces in
 `src/render/textures.ts`; the procedural surfaces stay as the fallback.
 
-152 files, 11.7 MB in total, against a 25 MB budget.
+152 files, 11.6 MB in total, against a 25 MB budget.
 
 ## What is here
 
@@ -91,6 +91,17 @@ fold back in, and the two are measured against each other and the better one
 is kept. On a material where the model would rather paint something else,
 0.75 is the worse of the two and 0.6 stays.
 
+That is still not enough on a satin or a drape. Their folds are two hundred
+pixels across where the band is thirty, and a band that narrow cannot repaint
+a fold - it can only blur the edge of one, and the step is still there at the
+bottom of the blur. So a tile that is still rough after the narrow heal gets
+a second heal with a much wider band, up to 320 pixels across the tile, and a
+stronger inpaint, over a few seeds; the best of those is measured against the
+first two. Four of the 48 tiles needed it, and they are exactly the satin and
+drape folds. The wide band is blended back over the rolled original the same
+way the narrow one is, so the tile's borders stay pixel-exact, and the
+colour-drift gate still applies to it.
+
 ### How a tile is measured
 
 Every tile is measured twice, because the two failure modes are independent:
@@ -117,9 +128,10 @@ And the measurement is made on the file that ships, not on the image that goes
 into it. The tile is measured after the downscale to 512x512 and after the
 WebP encode: the downscale takes the high frequency out of the material,
 which lowers the difference between neighbouring pixels inside the tile, and
-the encoder rings on a hard edge. Which of the three candidates - the rolled
-tile, the band healed at 0.6, the band healed at 0.75 - is the best one
-changes with the size, so it has to be measured at the size that ships.
+the encoder rings on a hard edge. Which of the four candidates - the rolled
+tile, the band healed at 0.6, the band healed at 0.75, the band healed by the
+repair - is the best one changes with the size, so it has to be measured at
+the size that ships.
 
 ### Height maps
 
@@ -133,12 +145,14 @@ a flat-lit material still gives a usable bump map.
 The face is rendered front-on on a black background. The mask is cut by
 flooding the background from the edge of the frame, so dark features inside
 the face - eyes, mouth, nostrils - stay opaque and only the background
-goes. That flood can also leak into the creases of the face, so the small
-holes it leaves are filled - but only the small ones, because the hole
-between a pair of horns is not small and the sky has to stay sky. The
-silhouette is then mirrored about the head's *own* axis, because the skull
-it is projected onto is symmetric, and a head the model placed off centre
-must not end up off centre on the other side.
+goes. The flood has to be tight: the renders sit on a black background, and a
+loose flood walks through the dark horn above the face and into the shadow
+that horn throws across the cheek, and the face comes out with a hole in it.
+The small holes the flood leaves inside the face are filled, but only the
+small ones, because the hole between a pair of horns is not small and the sky
+has to stay sky. The silhouette is then mirrored about the head's *own* axis,
+because the skull it is projected onto is symmetric, and a head the model
+placed off centre must not end up off centre on the other side.
 
 The crop is the awkward part. The model draws horns and ears, and the game
 draws those as separate meshes, but the head is not the face: the blob that
@@ -146,17 +160,28 @@ comes out of the flood fill includes the horns, the ears, and for one
 fighter a painted mask. So the frame is not sized from the blob but from an
 eroded copy of it - the erosion is as deep as it can be while the mass that
 is left still looks like a head, so a big horn goes and a small head
-survives - and the frame is anchored on the top of that mass, which keeps
-the horns above it and out of the picture. A head with tusks has a mass that
-is not on the axis, and a frame built on that lands on the tusk, so a mass
-that is off the axis is rejected.
+survives - and the frame is anchored on the **brow line** rather than on the
+top of that mass.
+
+The brow line is measured on the run of the silhouette that holds the
+symmetry axis. A horn stands off to the side and the sky between a pair of
+horns is a gap, so the run on the axis is the face itself, and the row where
+that run first reaches its widest is the brow. Anchoring the frame there
+keeps the forehead - and the horn bases standing on it - out of the picture,
+which is what "brow to chin" asks for. A head with tusks has a mass that is
+not on the axis, and a frame built on that lands on the tusk, so a mass that
+is off the axis is rejected.
 
 Because that is a set of rules and not a measurement, several frames are
 tried and the one that measures best as a face is kept: a face fills the
 frame, sits in the middle of it and has structure in it, where a crop that
-landed on a cheek or on a horn fills the frame too but is flat. The matte is
-then resized to 512x512 with the alpha premultiplied first, so the soft edge
-of the mask does not pick up a halo.
+landed on a cheek or on a horn fills the frame too but is flat. A horn is
+dark and hard, so a crop that holds one of them has *more* structure in it
+and scores better on every other count; the one thing that tells the two
+apart is that a horn arrives in the top corner as a shape of its own, so the
+rows at the top of the frame come in more than one piece where a face comes
+in one. The matte is then resized to 512x512 with the alpha premultiplied
+first, so the soft edge of the mask does not pick up a halo.
 
 ## Regenerating
 
@@ -185,20 +210,25 @@ where ComfyUI is installed and which models are on disk.
 
 ## Known limitations
 
-One thing in this set is not finished. It is listed here rather than hidden,
-and it is the next thing to work on.
+Nothing in this set is known to be unfinished. The two things that were open
+when the first version of the set was delivered are closed.
 
-**Four of the 48 material tiles still score a cross seam above 2.5.** The worst
-is `fighters/brother-blaze/cloth.webp` at 4.52, then
-`fighters/knuckles-inferno/cloth.webp` at 3.15 and
-`fighters/eight-limbed-ash/cloth.webp` at 3.13. They are all satin or drape
-folds, whose scale is close to the size of the 512x512 tile. The colour drift
-of the healed band is at most 1.0 of 255, so the inpaint is blending the right
-material - the folds are simply too big for the tile. The seam is visible if
-you look for it on a flat floor; it does not read at fighting distance.
+**Every material tile measures a cross seam below 2.5.** The four that were
+over it - the satin and drape folds, whose scale is close to the size of the
+512x512 tile - were repaired with a wider heal band. The worst of them,
+`fighters/brother-blaze/cloth.webp`, came down from 4.52 to 0.63; the worst
+tile in the set is now `fighters/fresh-soul-kevin/skin.webp` at 2.46.
 
-The faces are all brow to chin, symmetric, with no hair and no neck. A few of
-them still show the base of a horn in the top corner, where the horn leaves
-the skull: the model draws a devil's face with horns whatever the prompt
-says, and on a fighter whose horns are thick enough to be fused to the skull
-in the silhouette, no crop can take them out.
+**No face shows a horn, an ear or hair.** The frames are anchored on the
+brow line, measured on the run of the silhouette that holds the symmetry
+axis - a horn stands off that axis, so the run is the face itself - and the
+top of the frame is the brow, so the horn bases that stand on the forehead
+stay out of the picture.
+
+Two things are worth knowing rather than fixing. The face crop has to be
+picked by measurement rather than by rule, because the model draws horns and
+ears on every devil and the ones fused to the skull cannot be cropped away;
+the only thing that tells a crop of the face from a crop of a horn is that a
+horn arrives in the top corner as a shape of its own. And the tile that
+measures worst is still a satin: 2.46 is a fold that carries on across the
+middle of the tile rather than a step.
