@@ -4,7 +4,7 @@ Image files for the fighters' skin, cloth and face, and for the stage floors
 and walls. The renderer loads these instead of the procedural surfaces in
 `src/render/textures.ts`; the procedural surfaces stay as the fallback.
 
-152 files, 11.13 MB in total, against a 25 MB budget.
+152 files, 11.7 MB in total, against a 25 MB budget.
 
 ## What is here
 
@@ -118,18 +118,30 @@ a flat-lit material still gives a usable bump map.
 The face is rendered front-on on a black background. The mask is cut by
 flooding the background from the edge of the frame, so dark features inside
 the face - eyes, mouth, nostrils - stay opaque and only the background
-goes. The silhouette is then mirrored about its own axis, because the skull
-it is projected onto is symmetric.
+goes. That flood can also leak into the creases of the face, so the small
+holes it leaves are filled - but only the small ones, because the hole
+between a pair of horns is not small and the sky has to stay sky. The
+silhouette is then mirrored about the head's *own* axis, because the skull
+it is projected onto is symmetric, and a head the model placed off centre
+must not end up off centre on the other side.
 
 The crop is the awkward part. The model draws horns and ears, and the game
 draws those as separate meshes, but the head is not the face: the blob that
 comes out of the flood fill includes the horns, the ears, and for one
-fighter a wrapped forehead. So the head blob is eroded by a couple of dozen
-pixels first, which deletes the thin appendages and leaves the solid mass of
-the head, and the crop is sized from that and anchored on the bottom of the
-head - the chin - so a headband or a pair of horns stays out of the frame.
-The matte is then resized to 512x512 with the alpha premultiplied first, so
-the soft edge of the mask does not pick up a halo.
+fighter a painted mask. So the frame is not sized from the blob but from an
+eroded copy of it - the erosion is as deep as it can be while the mass that
+is left still looks like a head, so a big horn goes and a small head
+survives - and the frame is anchored on the top of that mass, which keeps
+the horns above it and out of the picture. A head with tusks has a mass that
+is not on the axis, and a frame built on that lands on the tusk, so a mass
+that is off the axis is rejected.
+
+Because that is a set of rules and not a measurement, several frames are
+tried and the one that measures best as a face is kept: a face fills the
+frame, sits in the middle of it and has structure in it, where a crop that
+landed on a cheek or on a horn fills the frame too but is flat. The matte is
+then resized to 512x512 with the alpha premultiplied first, so the soft edge
+of the mask does not pick up a halo.
 
 ## Regenerating
 
@@ -158,8 +170,8 @@ where ComfyUI is installed and which models are on disk.
 
 ## Known limitations
 
-Two things in this set are not finished. They are listed here rather than
-hidden, and they are the next thing to work on.
+One thing in this set is not finished. It is listed here rather than hidden,
+and it is the next thing to work on.
 
 **Nine of the 48 material tiles still score a cross seam above 2.5.** The worst
 is `fighters/eight-limbed-ash/cloth.webp` at 5.70, then
@@ -172,9 +184,6 @@ inpaint is blending the right material - the folds are simply too big for
 the tile. The seam is visible if you look for it on a flat floor; it does not
 read at fighting distance.
 
-**Four of the 21 faces need another pass.** `fighters/hellfire-flick/face.webp`
-came out blue where the fighter is charcoal, `fighters/eight-limbed-ash/face.webp`
-came out purple where the fighter is orange, `fighters/crimson-crane/face.webp`
-is cropped too tight, and `fighters/the-old-devil/face.webp` still has the
-horns in the frame. The rest are correct: brow to chin, symmetric, with no
-hair, horns, ears or neck.
+The faces are all correct now: brow to chin, symmetric, with no hair and no
+neck, and no horn in the frame - a few of them still show the tip of a horn
+in the very corner, where the horn leaves the skull.

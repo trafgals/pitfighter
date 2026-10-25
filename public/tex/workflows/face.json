@@ -736,7 +736,7 @@
       "title": "Positive prompt"
     },
     "inputs": {
-      "text": "front orthographic view of a devil's face, fierce glare, sweat-slick brow, heavy dark eyebrows, scarred cheek, burnt orange skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "text": "front orthographic view of a devil's face, fierce glare, sweat-slick brow, heavy dark eyebrows, bald smooth crown, burnt orange skin with pale ash dust skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
       "clip": [
         "911",
         0
@@ -790,7 +790,7 @@
         "910",
         0
       ],
-      "seed": 4788,
+      "seed": 19788,
       "steps": 4,
       "cfg": 1.0,
       "sampler_name": "euler",
@@ -1296,7 +1296,7 @@
       "title": "Positive prompt"
     },
     "inputs": {
-      "text": "front orthographic view of a devil's face, long thin moustache marks, deep crimson red skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "text": "front orthographic view of a devil's face, long thin moustache marks, bald smooth crown, sharp cheekbones, deep crimson red skin skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
       "clip": [
         "1551",
         0
@@ -2276,7 +2276,7 @@
       "title": "Positive prompt"
     },
     "inputs": {
-      "text": "front orthographic view of a devil's face, long white brows, wise squint, dark dried red skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "text": "front orthographic view of a devil's face, wise squint, deep wrinkles, liver spots, bald smooth crown, dark dried red leathery skin skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
       "clip": [
         "2671",
         0
@@ -2416,7 +2416,7 @@
       "title": "Positive prompt"
     },
     "inputs": {
-      "text": "front orthographic view of a devil's face, cocky half-smile, one brow raised, charcoal black grey skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "text": "front orthographic view of a devil's face, cocky half-smile, one brow raised, bald smooth crown, scorched cheek, charcoal grey-black skin with orange embers in the cracks skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
       "clip": [
         "2831",
         0
@@ -2470,7 +2470,7 @@
         "2830",
         0
       ],
-      "seed": 6432,
+      "seed": 11432,
       "steps": 4,
       "cfg": 1.0,
       "sampler_name": "euler",

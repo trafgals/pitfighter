@@ -101,8 +101,8 @@
       "skin_colour": "burnt orange",
       "cloth_idea": "matte black wrapped cloth, folded overlapping bands",
       "cloth_colour": "charcoal black",
-      "face_idea": "fierce glare, sweat-slick brow, heavy dark eyebrows, scarred cheek",
-      "face_colour": "burnt orange"
+      "face_idea": "fierce glare, sweat-slick brow, heavy dark eyebrows, bald smooth crown",
+      "face_colour": "burnt orange skin with pale ash dust"
     },
     {
       "slug": "knuckles-inferno",
@@ -157,8 +157,8 @@
       "skin_colour": "deep crimson red",
       "cloth_idea": "pale gold silk brocade, woven pattern",
       "cloth_colour": "pale yellow gold",
-      "face_idea": "long thin moustache marks",
-      "face_colour": "deep crimson red"
+      "face_idea": "long thin moustache marks, bald smooth crown, sharp cheekbones",
+      "face_colour": "deep crimson red skin"
     },
     {
       "slug": "hellmountain",
@@ -255,8 +255,8 @@
       "skin_colour": "dark dried red",
       "cloth_idea": "pale silver white silk weave, soft drape",
       "cloth_colour": "pale silver white",
-      "face_idea": "long white brows, wise squint",
-      "face_colour": "dark dried red"
+      "face_idea": "wise squint, deep wrinkles, liver spots, bald smooth crown",
+      "face_colour": "dark dried red leathery skin"
     },
     {
       "slug": "hellfire-flick",
@@ -269,8 +269,8 @@
       "skin_colour": "charcoal black grey",
       "cloth_idea": "heat scorched orange leather, blistered and blackened at the edges",
       "cloth_colour": "burnt orange",
-      "face_idea": "cocky half-smile, one brow raised",
-      "face_colour": "charcoal black grey"
+      "face_idea": "cocky half-smile, one brow raised, bald smooth crown, scorched cheek",
+      "face_colour": "charcoal grey-black skin with orange embers in the cracks"
     },
     {
       "slug": "brother-blaze",
@@ -387,6 +387,10 @@
     "brother-blaze__skin": 7567,
     "ashen-judoka__skin": 9704,
     "hindenburg-blimp__planks": 9553,
-    "hellfire-flick__cloth": 8431
+    "hellfire-flick__cloth": 8431,
+    "eight-limbed-ash__face": 19788,
+    "crimson-crane__face": 5336,
+    "the-old-devil__face": 6295,
+    "hellfire-flick__face": 11432
   }
 }
