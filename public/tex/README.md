@@ -4,7 +4,7 @@ Image files for the fighters' skin, cloth and face, and for the stage floors
 and walls. The renderer loads these instead of the procedural surfaces in
 `src/render/textures.ts`; the procedural surfaces stay as the fallback.
 
-152 files, 11.6 MB in total, against a 25 MB budget.
+152 files, 12,119,024 bytes - 11.56 MiB - in total, against a 25 MB budget.
 
 ## What is here
 
@@ -95,12 +95,18 @@ That is still not enough on a satin or a drape. Their folds are two hundred
 pixels across where the band is thirty, and a band that narrow cannot repaint
 a fold - it can only blur the edge of one, and the step is still there at the
 bottom of the blur. So a tile that is still rough after the narrow heal gets
-a second heal with a much wider band, up to 320 pixels across the tile, and a
-stronger inpaint, over a few seeds; the best of those is measured against the
-first two. Four of the 48 tiles needed it, and they are exactly the satin and
-drape folds. The wide band is blended back over the rolled original the same
-way the narrow one is, so the tile's borders stay pixel-exact, and the
-colour-drift gate still applies to it.
+a third heal: the same band at `denoise 0.9`, over a few seeds, and the best
+of those is measured against the first two. Four of the 48 tiles needed it,
+and they are exactly the satin and drape folds. The stage can widen the band
+as well, to 80 and then 160 pixels either side of the middle, for a tile that
+0.9 does not fix - none of the four needed it, but the band is there, and the
+blend that lays the healed band back over the rolled original is widened to
+match the band, because a blend narrower than the band lets the edge of the
+band through as a step of its own.
+
+The manifest records which of the four candidates each file is and, for the
+repaired ones, the band width, the inpaint strength and the seed, so the file
+can be reproduced from the manifest alone.
 
 ### How a tile is measured
 
@@ -204,7 +210,9 @@ where ComfyUI is installed and which models are on disk.
 - `skin.webp` and `cloth.webp` are colour only; `*_h.webp` are the matching
   bump maps and are greyscale (white is raised).
 - `face.webp` is RGBA and is meant to be projected onto the front of the
-  skull. It is cropped to brow-to-chin and has no hair, horns, ears or neck.
+  skull. It is cropped to brow-to-chin, with no hair and no neck. A few of
+  them still carry a small piece of horn or an ear at the edge of the frame -
+  see Known limitations for which, and how big.
 - `stages/hell-toilet/basalt_glow.webp` is the emissive map: white only in the
   cracks that the lava runs through.
 
@@ -213,22 +221,39 @@ where ComfyUI is installed and which models are on disk.
 Nothing in this set is known to be unfinished. The two things that were open
 when the first version of the set was delivered are closed.
 
-**Every material tile measures a cross seam below 2.5.** The four that were
-over it - the satin and drape folds, whose scale is close to the size of the
-512x512 tile - were repaired with a wider heal band. The worst of them,
-`fighters/brother-blaze/cloth.webp`, came down from 4.52 to 0.63; the worst
-tile in the set is now `fighters/fresh-soul-kevin/skin.webp` at 2.46.
+**Every material tile's cross seam measures below 2.5.** The cross is the
+seam the gate measures: the tile has four boundaries, the wrap on each axis
+and the cross down the middle, and the wrap is continuous by construction
+because the tile is rolled, so the cross is the only one that can be a
+fault. The four that were over it - the satin and drape folds, whose scale
+is close to the size of the 512x512 tile - were repaired with a third heal
+at a stronger inpaint. The worst of them,
+`fighters/brother-blaze/cloth.webp`, came down from 4.52 to 0.63. The worst
+tile in the set is now `fighters/fresh-soul-kevin/skin.webp` at 2.46, which
+is a smooth pale skin: the cross there is a soft change of shading across
+the middle of the tile rather than a step, and the ratio is high because the
+material itself is smooth enough that the step is large next to it.
 
-**No face shows a horn, an ear or hair.** The frames are anchored on the
-brow line, measured on the run of the silhouette that holds the symmetry
-axis - a horn stands off that axis, so the run is the face itself - and the
-top of the frame is the brow, so the horn bases that stand on the forehead
-stay out of the picture.
+**The faces are brow to chin.** The frames are anchored on the brow line,
+measured on the run of the silhouette that holds the symmetry axis - a horn
+stands off that axis, so the run is the face itself - and the top of the
+frame is the brow, so the horn bases that stood on the forehead stay out of
+the picture.
+
+That is not the same as saying that no face carries a horn or an ear. The
+crop cannot promise it, and it does not: a horn that rises from below the
+brow, or an ear at the temple, is inside the frame, and where the model
+fused a horn to the skull in the silhouette there is nothing to crop it
+away with. Measured on the delivered files, 18 of the 21 masks are a single
+connected piece. `gutter-gus` carries one piece of 494 pixels, `rage-reaper`
+one of 351, and `sergeant-sulphur` thirteen - its jaw plate, and the horn
+and ear bits around the head. Those are the only horn and ear fragments left
+in the set, and they are small.
 
 Two things are worth knowing rather than fixing. The face crop has to be
 picked by measurement rather than by rule, because the model draws horns and
-ears on every devil and the ones fused to the skull cannot be cropped away;
-the only thing that tells a crop of the face from a crop of a horn is that a
-horn arrives in the top corner as a shape of its own. And the tile that
-measures worst is still a satin: 2.46 is a fold that carries on across the
-middle of the tile rather than a step.
+ears on every devil; the only thing that tells a crop of the face from a
+crop of a horn is that a horn arrives in the top corner as a shape of its
+own. And the background flood has to be tight: a loose one walks through the
+dark horn above a face and into the shadow the horn throws across the cheek,
+and the face comes out with a hole in it.

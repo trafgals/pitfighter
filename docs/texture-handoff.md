@@ -212,20 +212,32 @@ public/tex/contact/*.png     2x2 tiling previews plus the face
 - `cloth_h.webp` is beyond the tree above, but `src/render/textures.ts` bakes
   a bump map for the cloth as well as for the skin, so the file is there to
   be used or ignored.
-- 152 files, 11.6 MB in total, against the 25 MB budget. Every 512 square
-  file is under 120 KB and every 1024 square file under 400 KB.
-- Every material tile now measures a cross seam below 2.5. The four that were
-  over it - the satin and drape folds, whose scale is close to the 512 square
-  tile - were repaired with a second heal, on a much wider band and with a
-  stronger inpaint, because a band that narrow cannot repaint a fold whose
-  scale is close to the size of the tile: it can only blur the edge of one.
-  The worst of them, `fighters/brother-blaze/cloth.webp`, came down from 4.52
-  to 0.63, and the worst tile in the set is now
-  `fighters/fresh-soul-kevin/skin.webp` at 2.46.
-- The faces are all brow to chin, symmetric, with no hair, no horns, no ears
-  and no neck. The frame is anchored on the brow line, measured on the run of
-  the silhouette that holds the symmetry axis: a horn stands off that axis, so
-  the run is the face itself. The background flood also has to be tight, or it
-  walks through the dark horn above the face and into the shadow it throws
-  across the cheek, and the face comes out with a hole in it.
+- 152 files, 12,119,024 bytes - 11.56 MiB - in total, against the 25 MB
+  budget. Every 512 square file is under 120 KB and every 1024 square file
+  under 400 KB.
+- Every material tile's cross seam measures below 2.5. The cross is the seam
+  the gate measures: the wrap on each axis is continuous by construction
+  because the tile is rolled, so the cross down the middle is the only
+  boundary that can be a fault. The four that were over it - the satin and
+  drape folds, whose scale is close to the 512 square tile - were repaired
+  with a third heal, the same band at a stronger inpaint, because a band that
+  narrow cannot repaint a fold whose scale is close to the size of the tile:
+  it can only blur the edge of one. The worst of them,
+  `fighters/brother-blaze/cloth.webp`, came down from 4.52 to 0.63. The worst
+  tile in the set is now `fighters/fresh-soul-kevin/skin.webp` at 2.46, a
+  smooth pale skin where the cross is a soft change of shading rather than a
+  step.
+- The faces are all brow to chin, symmetric, with no hair and no neck. The
+  frame is anchored on the brow line, measured on the run of the silhouette
+  that holds the symmetry axis: a horn stands off that axis, so the run is
+  the face itself. That is not the same as saying no face carries a horn or
+  an ear: a horn that rises from below the brow, or an ear at the temple, is
+  inside the frame, and a horn fused to the skull cannot be cropped away at
+  all. Measured on the delivered files, 18 of the 21 masks are a single
+  connected piece; `gutter-gus` carries one piece of 494 pixels,
+  `rage-reaper` one of 351, and `sergeant-sulphur` thirteen - its jaw plate
+  and the horn and ear bits around the head.
+- The background flood also has to be tight, or it walks through the dark
+  horn above a face and into the shadow it throws across the cheek, and the
+  face comes out with a hole in it.
 - The renderer change is deliberately not in this branch.

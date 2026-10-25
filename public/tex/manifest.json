@@ -10,7 +10,7 @@
       "seed": 4101,
       "steps": 4,
       "workflow": "workflows/skin.json",
-      "post": "healed band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.6 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
     },
     {
       "file": "fighters/dale-damnation/skin_h.webp",
@@ -32,7 +32,7 @@
       "seed": 7102,
       "steps": 4,
       "workflow": "workflows/cloth.json",
-      "post": "healed band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.6 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
     },
     {
       "file": "fighters/dale-damnation/cloth_h.webp",
@@ -54,7 +54,7 @@
       "seed": 6238,
       "steps": 4,
       "workflow": "workflows/skin.json",
-      "post": "healed_alt band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.75 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
     },
     {
       "file": "fighters/brimstone-bruno/skin_h.webp",
@@ -76,7 +76,7 @@
       "seed": 4239,
       "steps": 4,
       "workflow": "workflows/cloth.json",
-      "post": "healed band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.6 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
     },
     {
       "file": "fighters/brimstone-bruno/cloth_h.webp",
@@ -98,7 +98,7 @@
       "seed": 4375,
       "steps": 4,
       "workflow": "workflows/skin.json",
-      "post": "healed band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.6 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
     },
     {
       "file": "fighters/gutter-gus/skin_h.webp",
@@ -120,7 +120,7 @@
       "seed": 7376,
       "steps": 4,
       "workflow": "workflows/cloth.json",
-      "post": "healed_alt band over the rolled tile, blend, lanczos, webp q70"
+      "post": "roll-half, seam-inpaint denoise 0.75 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q70"
     },
     {
       "file": "fighters/gutter-gus/cloth_h.webp",
@@ -142,7 +142,7 @@
       "seed": 7512,
       "steps": 4,
       "workflow": "workflows/skin.json",
-      "post": "healed_alt band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.75 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
     },
     {
       "file": "fighters/sensei-smoulder/skin_h.webp",
@@ -164,7 +164,7 @@
       "seed": 4513,
       "steps": 4,
       "workflow": "workflows/cloth.json",
-      "post": "healed_alt band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.75 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
     },
     {
       "file": "fighters/sensei-smoulder/cloth_h.webp",
@@ -186,7 +186,7 @@
       "seed": 4649,
       "steps": 4,
       "workflow": "workflows/skin.json",
-      "post": "healed band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.6 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
     },
     {
       "file": "fighters/big-lou-cipher/skin_h.webp",
@@ -208,7 +208,7 @@
       "seed": 7650,
       "steps": 4,
       "workflow": "workflows/cloth.json",
-      "post": "healed band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.6 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
     },
     {
       "file": "fighters/big-lou-cipher/cloth_h.webp",
@@ -230,7 +230,7 @@
       "seed": 4786,
       "steps": 4,
       "workflow": "workflows/skin.json",
-      "post": "healed band over the rolled tile, blend, lanczos, webp q80"
+      "post": "roll-half, seam-inpaint denoise 0.6 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q80"
     },
     {
       "file": "fighters/eight-limbed-ash/skin_h.webp",
@@ -252,7 +252,7 @@
       "seed": 4787,
       "steps": 4,
       "workflow": "workflows/cloth.json",
-      "post": "healed_repair band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.9 (workflows/seam.json), band half 16px, seed 92001, over the rolled tile, blend 28px, lanczos, webp q85"
     },
     {
       "file": "fighters/eight-limbed-ash/cloth_h.webp",
@@ -274,7 +274,7 @@
       "seed": 5923,
       "steps": 4,
       "workflow": "workflows/skin.json",
-      "post": "healed_alt band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.75 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
     },
     {
       "file": "fighters/knuckles-inferno/skin_h.webp",
@@ -296,7 +296,7 @@
       "seed": 7924,
       "steps": 4,
       "workflow": "workflows/cloth.json",
-      "post": "healed_repair band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.9 (workflows/seam.json), band half 16px, seed 92003, over the rolled tile, blend 28px, lanczos, webp q85"
     },
     {
       "file": "fighters/knuckles-inferno/cloth_h.webp",
@@ -318,7 +318,7 @@
       "seed": 8060,
       "steps": 4,
       "workflow": "workflows/skin.json",
-      "post": "healed band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.6 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
     },
     {
       "file": "fighters/rage-reaper/skin_h.webp",
@@ -340,7 +340,7 @@
       "seed": 5061,
       "steps": 4,
       "workflow": "workflows/cloth.json",
-      "post": "healed band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.6 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
     },
     {
       "file": "fighters/rage-reaper/cloth_h.webp",
@@ -362,7 +362,7 @@
       "seed": 8197,
       "steps": 4,
       "workflow": "workflows/skin.json",
-      "post": "healed_alt band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.75 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
     },
     {
       "file": "fighters/quickfire-imp/skin_h.webp",
@@ -384,7 +384,7 @@
       "seed": 10198,
       "steps": 4,
       "workflow": "workflows/cloth.json",
-      "post": "healed_repair band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.9 (workflows/seam.json), band half 16px, seed 92001, over the rolled tile, blend 28px, lanczos, webp q85"
     },
     {
       "file": "fighters/quickfire-imp/cloth_h.webp",
@@ -406,7 +406,7 @@
       "seed": 8334,
       "steps": 4,
       "workflow": "workflows/skin.json",
-      "post": "healed_alt band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.75 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
     },
     {
       "file": "fighters/crimson-crane/skin_h.webp",
@@ -428,7 +428,7 @@
       "seed": 5335,
       "steps": 4,
       "workflow": "workflows/cloth.json",
-      "post": "healed band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.6 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
     },
     {
       "file": "fighters/crimson-crane/cloth_h.webp",
@@ -450,7 +450,7 @@
       "seed": 5471,
       "steps": 4,
       "workflow": "workflows/skin.json",
-      "post": "healed_alt band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.75 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
     },
     {
       "file": "fighters/hellmountain/skin_h.webp",
@@ -472,7 +472,7 @@
       "seed": 7472,
       "steps": 4,
       "workflow": "workflows/cloth.json",
-      "post": "healed band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.6 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
     },
     {
       "file": "fighters/hellmountain/cloth_h.webp",
@@ -494,7 +494,7 @@
       "seed": 5608,
       "steps": 4,
       "workflow": "workflows/skin.json",
-      "post": "healed band over the rolled tile, blend, lanczos, webp q80"
+      "post": "roll-half, seam-inpaint denoise 0.6 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q80"
     },
     {
       "file": "fighters/choke-chimera/skin_h.webp",
@@ -516,7 +516,7 @@
       "seed": 5609,
       "steps": 4,
       "workflow": "workflows/cloth.json",
-      "post": "healed_alt band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.75 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
     },
     {
       "file": "fighters/choke-chimera/cloth_h.webp",
@@ -538,7 +538,7 @@
       "seed": 5745,
       "steps": 4,
       "workflow": "workflows/skin.json",
-      "post": "healed band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.6 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
     },
     {
       "file": "fighters/sergeant-sulphur/skin_h.webp",
@@ -560,7 +560,7 @@
       "seed": 5746,
       "steps": 4,
       "workflow": "workflows/cloth.json",
-      "post": "healed_alt band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.75 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
     },
     {
       "file": "fighters/sergeant-sulphur/cloth_h.webp",
@@ -582,7 +582,7 @@
       "seed": 8882,
       "steps": 4,
       "workflow": "workflows/skin.json",
-      "post": "healed band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.6 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
     },
     {
       "file": "fighters/cinder-ginga/skin_h.webp",
@@ -604,7 +604,7 @@
       "seed": 11883,
       "steps": 4,
       "workflow": "workflows/cloth.json",
-      "post": "healed_alt band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.75 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
     },
     {
       "file": "fighters/cinder-ginga/cloth_h.webp",
@@ -626,7 +626,7 @@
       "seed": 8019,
       "steps": 4,
       "workflow": "workflows/skin.json",
-      "post": "healed band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.6 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
     },
     {
       "file": "fighters/hellkick-hana/skin_h.webp",
@@ -648,7 +648,7 @@
       "seed": 8020,
       "steps": 4,
       "workflow": "workflows/cloth.json",
-      "post": "healed_alt band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.75 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
     },
     {
       "file": "fighters/hellkick-hana/cloth_h.webp",
@@ -670,7 +670,7 @@
       "seed": 6156,
       "steps": 4,
       "workflow": "workflows/skin.json",
-      "post": "healed band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.6 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
     },
     {
       "file": "fighters/ronin-of-gehenna/skin_h.webp",
@@ -692,7 +692,7 @@
       "seed": 7157,
       "steps": 4,
       "workflow": "workflows/cloth.json",
-      "post": "healed band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.6 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
     },
     {
       "file": "fighters/ronin-of-gehenna/cloth_h.webp",
@@ -714,7 +714,7 @@
       "seed": 7293,
       "steps": 4,
       "workflow": "workflows/skin.json",
-      "post": "healed band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.6 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
     },
     {
       "file": "fighters/the-old-devil/skin_h.webp",
@@ -736,7 +736,7 @@
       "seed": 6294,
       "steps": 4,
       "workflow": "workflows/cloth.json",
-      "post": "healed_alt band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.75 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
     },
     {
       "file": "fighters/the-old-devil/cloth_h.webp",
@@ -758,7 +758,7 @@
       "seed": 6430,
       "steps": 4,
       "workflow": "workflows/skin.json",
-      "post": "healed band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.6 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
     },
     {
       "file": "fighters/hellfire-flick/skin_h.webp",
@@ -780,7 +780,7 @@
       "seed": 8431,
       "steps": 4,
       "workflow": "workflows/cloth.json",
-      "post": "healed_alt band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.75 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
     },
     {
       "file": "fighters/hellfire-flick/cloth_h.webp",
@@ -802,7 +802,7 @@
       "seed": 7567,
       "steps": 4,
       "workflow": "workflows/skin.json",
-      "post": "roll-half, blend, lanczos, webp q85"
+      "post": "roll-half, lanczos, webp q85"
     },
     {
       "file": "fighters/brother-blaze/skin_h.webp",
@@ -824,7 +824,7 @@
       "seed": 6568,
       "steps": 4,
       "workflow": "workflows/cloth.json",
-      "post": "healed_repair band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.9 (workflows/seam.json), band half 16px, seed 92002, over the rolled tile, blend 28px, lanczos, webp q85"
     },
     {
       "file": "fighters/brother-blaze/cloth_h.webp",
@@ -846,7 +846,7 @@
       "seed": 9704,
       "steps": 4,
       "workflow": "workflows/skin.json",
-      "post": "healed band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.6 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
     },
     {
       "file": "fighters/ashen-judoka/skin_h.webp",
@@ -868,7 +868,7 @@
       "seed": 6705,
       "steps": 4,
       "workflow": "workflows/cloth.json",
-      "post": "healed_alt band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.75 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
     },
     {
       "file": "fighters/ashen-judoka/cloth_h.webp",
@@ -890,7 +890,7 @@
       "seed": 6841,
       "steps": 4,
       "workflow": "workflows/skin.json",
-      "post": "roll-half, blend, lanczos, webp q85"
+      "post": "roll-half, lanczos, webp q85"
     },
     {
       "file": "fighters/fresh-soul-kevin/skin_h.webp",
@@ -912,7 +912,7 @@
       "seed": 6842,
       "steps": 4,
       "workflow": "workflows/cloth.json",
-      "post": "healed_alt band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.75 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
     },
     {
       "file": "fighters/fresh-soul-kevin/cloth_h.webp",
@@ -934,7 +934,7 @@
       "seed": 7101,
       "steps": 4,
       "workflow": "workflows/stage.json",
-      "post": "healed band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.6 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
     },
     {
       "file": "stages/hell-toilet/basalt_h.webp",
@@ -967,7 +967,7 @@
       "seed": 7214,
       "steps": 4,
       "workflow": "workflows/stage.json",
-      "post": "healed band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.6 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
     },
     {
       "file": "stages/construction-site/dirt_h.webp",
@@ -989,7 +989,7 @@
       "seed": 7327,
       "steps": 4,
       "workflow": "workflows/stage.json",
-      "post": "healed band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.6 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
     },
     {
       "file": "stages/construction-site/concrete_h.webp",
@@ -1011,7 +1011,7 @@
       "seed": 7440,
       "steps": 4,
       "workflow": "workflows/stage.json",
-      "post": "healed band over the rolled tile, blend, lanczos, webp q75"
+      "post": "roll-half, seam-inpaint denoise 0.6 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q75"
     },
     {
       "file": "stages/collapsing-tower/roof_h.webp",
@@ -1033,7 +1033,7 @@
       "seed": 7553,
       "steps": 4,
       "workflow": "workflows/stage.json",
-      "post": "healed band over the rolled tile, blend, lanczos, webp q85"
+      "post": "roll-half, seam-inpaint denoise 0.6 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
     },
     {
       "file": "stages/hindenburg-blimp/planks_h.webp",
@@ -1055,7 +1055,7 @@
       "seed": 7666,
       "steps": 4,
       "workflow": "workflows/stage.json",
-      "post": "healed band over the rolled tile, blend, lanczos, webp q80"
+      "post": "roll-half, seam-inpaint denoise 0.6 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q80"
     },
     {
       "file": "stages/castle-under-siege/stone_h.webp",
