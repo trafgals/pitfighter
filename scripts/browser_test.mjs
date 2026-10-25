@@ -349,15 +349,42 @@ async function main() {
     "wait for a launch",
   );
   if (launch.who >= 0) {
-    await new Promise((r) => setTimeout(r, 80));
-    const up = await page.evaluate((who) => {
-      const g = window.__game;
-      const f = g.world.fighters[who];
-      return { state: f.state, z: f.z, y: g.scene.fighters[who].root.position.y };
-    }, launch.who);
+    // read it straight after a drawn frame, so the body and the sim are on the same step
+    const up = await page.evaluate(
+      (who) =>
+        new Promise((done) =>
+          requestAnimationFrame(() =>
+            requestAnimationFrame(() => {
+              const g = window.__game;
+              const f = g.world.fighters[who];
+              done({ state: f.state, z: f.z, y: g.scene.fighters[who].root.position.y });
+            }),
+          ),
+        ),
+      launch.who,
+    );
     check(up.state !== "air" || (up.z > 0.3 && Math.abs(up.y - up.z) < 0.05), `a launched fighter is drawn up in the air (${JSON.stringify(up)})`);
     if (up.state === "air") await page.screenshot({ path: path.join(OUT, "6_juggle.png") });
   }
+  // and the CPUs cash juggles out with their style's air grab, named on the banner
+  const ag = await withTimeout(
+    page.evaluate(() => {
+      const g = window.__game;
+      let e = null;
+      for (let i = 0; i < 5400 && g.mode === "match" && !e; i++) {
+        g.step(1);
+        g.world.fighters.forEach((f) => (f.toilet = Math.min(f.toilet, 600))); // keep the match going: no throne win while we look
+        e = g.world.s.events.find((q) => q.kind === "airgrab") ?? null;
+      }
+      return { what: e?.what ?? null, played: g.sfx.played.airgrab ?? 0, frame: g.world.s.frame };
+    }),
+    40_000,
+    "wait for an air grab",
+  );
+  await new Promise((r) => setTimeout(r, 120));
+  const agBanner = await page.evaluate(() => document.querySelector(".banner")?.textContent ?? "");
+  if (ag.what) await page.screenshot({ path: path.join(OUT, "7_airgrab.png") });
+  check(!!ag.what && agBanner.includes(ag.what), `a CPU cashed a juggle out with an air grab, named on the banner (${ag.what} at frame ${ag.frame}; banner "${agBanner}")`);
   check(launch.who >= 0 && launch.played > 0, `the CPUs' strings launched someone, with sound (fighter ${launch.who} at frame ${launch.frame})`);
 
   // the end of the match: the winning KO slows time nearly to a stop, and the camera closes in on the body

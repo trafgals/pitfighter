@@ -39,7 +39,7 @@ The combat is modelled on the feel of Namco's *Urban Reign*:
 - soft lock-on, and R1 to lock on and strafe;
 - multi-target hits, kinetic pushback when you land a reversal, and dogpile protection.
 
-Pitfighter changes four things (`src/sim/moves.ts`, `tests/tweaks.test.ts`, `tests/juggle.test.ts`):
+Pitfighter changes five things (`src/sim/moves.ts`, `tests/tweaks.test.ts`, `tests/juggle.test.ts`):
 
 - **Charged openers.** Hold ○ to charge the first strike of a string. It
   waits on its last startup frame while you hold, for up to 1 s, and fires on
@@ -53,6 +53,15 @@ Pitfighter changes four things (`src/sim/moves.ts`, `tests/tweaks.test.ts`, `tes
   away from the attacker as a blow lands flies them further off, more for every
   hit so far, so a long juggle gets easier to escape. A body flown above 1.9 m
   is out of reach. It bounces once off the floor and then lies there.
+- **Air grabs.** Triangle on a juggled body within 1.45 m, and no higher
+  than an outstretched arm, catches it out of the air with the style's own air
+  grab (`src/sim/airgrabs.ts`): a suplex, a powerbomb, a slingshot, an axe-kick
+  spike, and so on. The grab belongs to the torso, so it stays the fighter's
+  whatever limbs they wear, but the arms set its strength (70% with one arm,
+  half with none). Each ends its own way: down, bounced back up into a fresh
+  juggle, flung across the floor, or with an arm torn at. Out of reach, it
+  whiffs like any grapple, so the longer a juggle runs and the further it
+  drifts, the riskier the cash-out.
 - **Crunch.** A body flying fast into a wall, a prop or the toilet is hurt by
   it, limb first, and bounces back off. A juggled body flying fast is a human
   missile: it knocks down whoever it hits, and both of them are hurt. The sim

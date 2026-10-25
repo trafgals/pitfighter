@@ -14,6 +14,7 @@ import { FURY, MOVES } from "./moves";
 import { STYLES } from "./styles";
 import { Rng } from "./rng";
 import { HAZARDS } from "./arena";
+import { AIR_GRAB } from "./airgrabs";
 import { actionable, alive, arms, dist, legs, type World } from "./world";
 
 /** how many fighters may close in on one target at once */
@@ -98,6 +99,16 @@ export class Bot {
     if (!actionable(me)) return out;
 
     const enemies = s.fighters.filter((o) => o.id !== me.id && alive(o));
+
+    // 0. a juggled foe in reach: cash it out with the air grab, or keep it up with a jab
+    for (const e of enemies) {
+      if (e.state !== "air" || e.z > AIR_GRAB.height || dist(e, me) > AIR_GRAB.reach) continue;
+      out.x = (e.x - me.x) * 0.3; // turn to it
+      out.y = (e.y - me.y) * 0.3;
+      if (arms(me) > 0 && (e.juggle >= 3 || this.rng.chance(this.skill * 0.25))) press(BTN.GRAB);
+      else if (this.rng.chance(0.5)) press(BTN.HIGH);
+      if (out.buttons) return out;
+    }
 
     // 1. reactive defence against a strike in its startup: deflect it (Square), or evade it (Square + a direction)
     for (const e of enemies) {

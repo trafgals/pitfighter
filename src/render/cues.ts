@@ -39,7 +39,7 @@ export class CueTracker {
       this.moves[f.id] = f.state === "attack" ? f.move : null;
       this.starts[f.id] = start;
       // a knockdown hits the floor partway into "down"; a thrown body hits it as "down" starts
-      if (f.state === "down" && this.states[f.id] !== "down") this.thrown[f.id] = this.states[f.id] === "thrown" || this.states[f.id] === "air";
+      if (f.state === "down" && this.states[f.id] !== "down") this.thrown[f.id] = ["thrown", "air", "airslammed"].includes(this.states[f.id] ?? "");
       if (f.state === "down" && f.stop === 0 && f.t === (this.thrown[f.id] ? 0 : LAND_AT)) out.push({ kind: "land", a: f.id });
       this.states[f.id] = f.state;
     }

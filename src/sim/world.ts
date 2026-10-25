@@ -51,6 +51,7 @@ import {
   THROW,
   type Move,
 } from "./moves";
+import { AIR_GRAB, AIR_GRABS, type AirGrab } from "./airgrabs";
 import { STYLES } from "./styles";
 import { Rng } from "./rng";
 import { DEFAULT_STAGE, type StageId } from "./stages";
@@ -156,6 +157,7 @@ export class World {
         vz: 0,
         juggle: 0,
         bounced: false,
+        carryZ: 0,
         stickX: 0,
         stickY: 0,
         state: "idle",
@@ -249,6 +251,7 @@ export class World {
     else if (f.state === "thrown" && f.partner >= 0) f.lastHitBy = f.partner;
     if (f.state === "holding" || f.state === "held") this.release(f);
     if (f.state === "reattach") this.dropReattach(f);
+    if (f.state === "airslam" || f.state === "airslammed") f.partner = -1;
     this.setState(f, "falling", FALL_FRAMES);
     f.stop = 0;
     this.ev({ kind: "fall", a: f.id, b: f.lastHitBy });
@@ -406,6 +409,25 @@ export class World {
       case "evade":
         if (f.t < EVADE.move) this.travel(f, f.dirX * EVADE.speed, f.dirY * EVADE.speed);
         break;
+      case "airslammed": {
+        // carried along the grab's arc: up off the catch, then down on the slam
+        const a = s.fighters[f.partner];
+        if (!a || a.state !== "airslam" || a.partner !== f.id) {
+          // the grab broke: they drop out of it
+          f.partner = -1;
+          this.setState(f, "air");
+          f.vz = 0;
+          break;
+        }
+        const g = World.airGrab(a);
+        const u = Math.min(1, (f.t + 1) / g.slam);
+        f.x = a.x + Math.cos(a.facing) * 0.7;
+        f.y = a.y + Math.sin(a.facing) * 0.7;
+        f.z = Math.max(0, f.carryZ * (1 - u) + g.lift * Math.sin(Math.PI * u));
+        f.slideX = f.slideY = 0;
+        f.vz = 0;
+        break;
+      }
       case "air": {
         // Soul Calibur's air control: the stick drifts the body, harder for every hit taken up here
         const st = this.stick(inp);
@@ -493,6 +515,13 @@ export class World {
         break;
       case "taunt":
         this.addFury(f, TAUNT.fury);
+        this.setState(f, "idle");
+        break;
+      case "airslammed":
+        this.slam(f);
+        break;
+      case "airslam":
+        f.partner = -1;
         this.setState(f, "idle");
         break;
       case "ko":
@@ -839,7 +868,7 @@ export class World {
     if (!alive(d) || d.state === "thrown" || d.state === "driving" || d.invuln > 0) return false;
     if (d.state === "down") return height === "low"; // only low strikes reach a downed body
     if (d.state === "air") return d.z < (height === "low" ? AIR.low : AIR.high); // a body flown too high is out of reach
-    if (d.state === "wakeup") return false;
+    if (d.state === "wakeup" || d.state === "airslam" || d.state === "airslammed") return false;
     return true;
   }
 
@@ -1113,8 +1142,11 @@ export class World {
     let best: Fighter | null = null;
     let bd = 1e9;
     for (const d of this.s.fighters) {
-      if (d.id === f.id || !this.inCone(f, d, reach, GRAB.arc)) continue;
-      if (d.invuln > 0 || ["ko", "falling", "driving", "down", "wakeup", "thrown", "held", "holding", "air"].includes(d.state)) continue;
+      if (d.id === f.id) continue;
+      if (d.invuln > 0 || ["ko", "falling", "driving", "down", "wakeup", "thrown", "held", "holding", "airslam", "airslammed"].includes(d.state)) continue;
+      // up in a juggle: the air grab reaches further, but only up to an outstretched arm
+      if (d.state === "air" && (d.z > AIR_GRAB.height || !this.inCone(f, d, AIR_GRAB.reach * limbMod(f, ARMS, "grabReach"), GRAB.arc))) continue;
+      if (d.state !== "air" && !this.inCone(f, d, reach, GRAB.arc)) continue;
       const dd = dist(f, d);
       if (dd < bd) {
         bd = dd;
@@ -1124,6 +1156,10 @@ export class World {
     if (!best) return;
     if (best.state === "reversal" && this.inReversalWindow(best) && this.facingDot(best, f) > 0) {
       this.reverse(best, f);
+      return;
+    }
+    if (best.state === "air") {
+      this.catchAir(f, best);
       return;
     }
     if (best.state === "reattach") this.dropReattach(best);
@@ -1140,6 +1176,73 @@ export class World {
   }
 
   /** A thrown body, or a juggled one flying fast enough, is a missile: it knocks down whoever it hits. */
+  /** The fighter's air grab: the torso's own, whatever limbs it wears. */
+  static airGrab(f: Fighter): AirGrab {
+    return AIR_GRABS[STYLES[f.style].style] ?? AIR_GRABS["All-Round"];
+  }
+
+  /** Triangle on a juggled body in reach: the style's air grab, which ends the juggle. */
+  private catchAir(f: Fighter, d: Fighter): void {
+    const g = World.airGrab(f);
+    f.facing = Math.atan2(d.y - f.y, d.x - f.x);
+    this.setState(f, "airslam", g.dur);
+    this.setState(d, "airslammed", g.slam);
+    f.partner = d.id;
+    d.partner = f.id;
+    d.carryZ = d.z;
+    d.vz = 0;
+    d.slideX = d.slideY = 0;
+    const stop = this.freeze(f, d, HITSTOP.grab);
+    this.arena.onHit(this, d);
+    this.ev({ kind: "airgrab", a: f.id, b: d.id, what: g.name, stop });
+  }
+
+  /**
+   * The slam of an air grab: the damage lands, scaled by the arms that did it
+   * (their style's grapple strength; one arm does 70%, none half), then the
+   * grab's own ending.
+   */
+  private slam(d: Fighter): void {
+    const a = this.s.fighters[d.partner];
+    d.partner = -1;
+    d.z = 0;
+    d.juggle = 0;
+    if (!a) return this.setState(d, "down", DOWN.dur);
+    const g = World.airGrab(a);
+    const n = arms(a);
+    const dmg = g.dmg * limbMod(a, ARMS, "grab") * (n === 2 ? 1 : n === 1 ? 0.7 : 0.5) * this.comboScale(d);
+    d.combo++;
+    const hit: GameEvent = { f: this.s.frame, kind: "hit", a: a.id, b: d.id, part: "torso", dmg };
+    this.s.events.push(hit);
+    this.addFury(a, FURY.hit);
+    this.damage(d, "torso", dmg, a.id);
+    if (g.end === "limb") {
+      const arm = ARMS.find((p) => d.parts[p].attached);
+      if (arm && alive(d)) this.damage(d, arm, dmg, a.id);
+    }
+    hit.stop = this.freeze(a, d, alive(d) && d.state !== "ko" ? hitstopFor(dmg, true) : HITSTOP.ko);
+    if (!alive(d)) return;
+    const dx = Math.cos(a.facing);
+    const dy = Math.sin(a.facing);
+    if (g.end === "bounce") {
+      // back up off the floor: a fresh juggle to carry on
+      this.setState(d, "air");
+      d.moveHits = [a.id];
+      d.juggle = 1;
+      d.bounced = true;
+      d.vz = AIR.launch * 0.8;
+      this.ev({ kind: "bounce", a: d.id });
+    } else if (g.end === "throw") {
+      this.setState(d, "thrown", THROW.dur);
+      d.partner = a.id;
+      d.moveHits = [a.id];
+      d.slideX = (dx * (g.dist ?? THROW.dist)) / THROW.dur;
+      d.slideY = (dy * (g.dist ?? THROW.dist)) / THROW.dur;
+    } else {
+      this.setState(d, "down", DOWN.dur);
+    }
+  }
+
   private resolveThrown(f: Fighter): void {
     const speed = Math.hypot(f.slideX, f.slideY);
     const missile = f.state === "air" && speed >= CRUNCH.knock;
@@ -1170,7 +1273,7 @@ export class World {
       if (f.state === "seated" || f.state === "driving" || this.frozen[f.id]) continue;
       f.x += f.slideX;
       f.y += f.slideY;
-      if (f.state === "air" || f.z > 0) this.fly(f);
+      if (f.state === "air" || (f.z > 0 && f.state !== "airslammed")) this.fly(f);
       const decay = f.state === "thrown" ? 1 : f.state === "air" ? AIR.drag : 0.85;
       f.slideX *= decay;
       f.slideY *= decay;
@@ -1183,7 +1286,7 @@ export class World {
         const a = fs[i];
         const b = fs[j];
         if (!alive(a) || !alive(b) || a.state === "thrown" || b.state === "thrown" || a.state === "driving" || b.state === "driving") continue;
-        if (a.partner === b.id && (a.state === "holding" || a.state === "held")) continue;
+        if (a.partner === b.id && (a.state === "holding" || a.state === "held" || a.state === "airslam" || a.state === "airslammed")) continue;
         if (Math.abs(a.z - b.z) > 1) continue; // one flies over the other
         const dx = b.x - a.x;
         const dy = b.y - a.y;
@@ -1321,6 +1424,7 @@ export class World {
       mix(f.z);
       mix(f.vz);
       mix(f.juggle);
+      mix(f.partner);
       mix(f.out ? 1 : 0);
       for (const p of PARTS) mix(f.parts[p].hp + (f.parts[p].attached ? 1000 : 0));
     }

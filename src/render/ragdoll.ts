@@ -130,7 +130,7 @@ export interface Settle {
 /** The frames a fall is on the ragdoll, and the frame it lands: null when the body is on its clip alone. */
 export function ragWindow(f: Fighter, tp: Target, from: Fighter["state"] | null): { land: number; floor: boolean } | null {
   // a knockdown lands partway in; off the back of a throw the body is already down
-  if (f.state === "down") return { land: from === "thrown" || from === "air" ? 0 : FALL_LAND, floor: true };
+  if (f.state === "down") return { land: from === "thrown" || from === "air" || from === "airslammed" ? 0 : FALL_LAND, floor: true };
   if (f.state === "thrown" && tp.T) return { land: tp.T.end, floor: true };
   if (f.state === "falling") return { land: Infinity, floor: false };
   return null;
@@ -242,7 +242,7 @@ export function ragdoll(b: Body, f: Fighter, tp: Target, dt: number, from: Fight
   const target = ragPoints(b);
   const sc = b.body.scale.x;
   // a throw and the knockdown it ends in are one fall
-  const key = f.state === "down" && (from === "thrown" || from === "air") ? "thrown" : f.state;
+  const key = f.state === "down" && (from === "thrown" || from === "air" || from === "airslammed") ? "thrown" : f.state;
   if (!b.rag || b.rag.key !== key) {
     // it starts where the body is, with the blow's push: the higher the point, the harder, so the body tips over
     const kick = f.state === "down" ? KICK.clone().set(KICK.x - 0.6 * side, KICK.y, KICK.z * face) : new THREE.Vector3();

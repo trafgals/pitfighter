@@ -98,6 +98,7 @@ export interface Fighter {
   vz: number; // m/frame, up +
   juggle: number; // hits taken in the air since the launch: the more, the harder the victim can steer
   bounced: boolean; // this juggle has bounced off the floor once already
+  carryZ: number; // an air grab: the height the victim was caught at
   stickX: number; // the stick as last read (steering in the air)
   stickY: number;
   state: FighterState;

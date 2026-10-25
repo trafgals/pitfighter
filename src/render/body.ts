@@ -605,7 +605,7 @@ export interface Cue {
   blend: Pose | null;
 }
 /** Came down out of the air already lying flat: a throw or a juggle. */
-export const flung = (from: Fighter["state"] | null): boolean => from === "thrown" || from === "air";
+export const flung = (from: Fighter["state"] | null): boolean => from === "thrown" || from === "air" || from === "airslammed";
 export const noCue = (): Cue => ({ last: null, from: null, throwAge: 99, react: null, face: 1, lie: 0, side: 1, key: "", start: 0, at: 0, age: 0, blend: null });
 
 /** What targetPose decided, besides the pose: which feet carry the weight, and what is playing (for the debug overlay and the strips). */
@@ -847,9 +847,16 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
       play(THROWN, t, stateTiming(f.dur || 24));
       break;
     case "air":
-      // up in a juggle: laid out in the throw's flight, held there until the floor
+    case "airslammed":
+      // up in a juggle (or carried in an air grab): laid out in the throw's flight, held there until the floor
       play(THROWN, Math.min(t, 12), stateTiming(24));
-      label = "juggled";
+      label = f.state === "air" ? "juggled" : "air grabbed";
+      break;
+    case "airslam":
+      // the air grab: the thrower's turn, stretched over the grab
+      play(THROWER, t, stateTiming(f.dur || 40));
+      impact = f.stop > 0;
+      label = "air grab";
       break;
     case "down":
     case "ko":
@@ -949,7 +956,7 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
     p.kneeL = p.kneeR = 0.4;
   }
   if (nLegs < 2) plant = "none"; // a hop or a drag: no foot stays put
-  if (nLegs === 0 && !["down", "ko", "thrown", "air", "held", "wakeup", "driving", "falling"].includes(f.state)) {
+  if (nLegs === 0 && !["down", "ko", "thrown", "air", "airslammed", "held", "wakeup", "driving", "falling"].includes(f.state)) {
     // upright on the stumps, springing off the floor: high in the air, squashed low on landing
     const ph = f.hopPhase % HOP_CYCLE;
     const air = ph < HOP_AIR ? Math.sin((ph / HOP_AIR) * Math.PI) : 0;

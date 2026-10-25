@@ -350,6 +350,13 @@ export class Scene {
           this.hype = Math.min(1, this.hype + 0.15);
           break;
         }
+        case "airgrab": {
+          const d = fs[q.b ?? -1];
+          if (d) this.fx.ring(at(d, d.z + 0.8), 0xffd060, 0.8, 0.2);
+          this.shake = Math.min(1, this.shake + 0.2);
+          this.hype = Math.min(1, this.hype + 0.3);
+          break;
+        }
         case "crunch": {
           // a flying body into a wall, a prop or a fighter: debris, and the camera takes the blow with it
           const f = fs[q.a];
