@@ -69,8 +69,8 @@ window.addEventListener("keydown", (e) => {
   if (mode !== "select") return;
   if (e.code === "Minus" || e.code === "NumpadSubtract") select.setCount(select.fighters - 1);
   if (e.code === "Equal" || e.code === "NumpadAdd") select.setCount(select.fighters + 1);
-  if (e.code === "BracketLeft") select.cycleStage(-1);
-  if (e.code === "BracketRight") select.cycleStage(1);
+  if (e.code === "BracketLeft") select.cycleType(-1);
+  if (e.code === "BracketRight") select.cycleType(1);
   if (e.code === "KeyG") {
     scene.gore = !scene.gore;
     select.setGore(scene.gore);
@@ -176,19 +176,21 @@ function run(dt: number): void {
 
 let last = performance.now();
 function frame(now: number): void {
-  const dt = Math.min(0.1, (now - last) / 1000);
+  const real = Math.min(0.1, (now - last) / 1000);
   last = now;
+  // a KO slows the fight: the sim is stepped less often, and the animation runs at the same pace
+  const dt = mode === "countdown" ? real : real * scene.timeScale;
   if (mode === "select") {
     select.poll();
     if (mode === "select") run(dt);
   } else if (mode === "countdown") {
-    countT += dt;
+    countT += real;
     const n = 3 - Math.floor(countT / BEAT);
     if (n >= 1) hud.countdown(String(n));
     else go();
   } else if (mode === "match") run(dt);
   else if (mode === "over") {
-    overT += dt;
+    overT += real;
     const anyStart = input.devices().some((d) => input.read(d).start);
     if (overT > 1.5 && anyStart && !lastStart) {
       mode = "select";
@@ -201,7 +203,7 @@ function frame(now: number): void {
     }
     lastStart = anyStart;
   }
-  scene.render(now / 1000, dt);
+  scene.render(now / 1000, dt, real);
   input.endFrame();
   requestAnimationFrame(frame);
 }

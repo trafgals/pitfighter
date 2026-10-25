@@ -78,17 +78,15 @@ async function main() {
   check(cards === 21, `select shows one fighter per Urban Reign style (${cards})`);
   const title = await page.evaluate(() => ({ doc: document.title, h1: document.querySelector("#select h1")?.textContent }));
   check(title.doc === "Pitfighter" && title.h1 === "PITFIGHTER", `the game is called Pitfighter (${JSON.stringify(title)})`);
-  const stages = await page.$$eval(".stage", (els) => els.map((e) => ({ id: e.dataset.stage, on: e.classList.contains("on"), soon: e.classList.contains("soon") })));
+  const types = await page.$$eval(".stage", (els) => els.map((e) => ({ id: e.dataset.type, on: e.classList.contains("on") })));
   check(
-    JSON.stringify(stages) ===
+    JSON.stringify(types) ===
       JSON.stringify([
-        { id: "hell-toilet", on: true, soon: false },
-        { id: "construction-site", on: false, soon: false },
-        { id: "collapsing-tower", on: false, soon: false },
-        { id: "hindenburg-blimp", on: false, soon: false },
-        { id: "castle-under-siege", on: false, soon: false },
+        { id: "king", on: true },
+        { id: "last", on: false },
+        { id: "kos", on: false },
       ]),
-    `stage list: all five stages playable, Hell Toilet selected (${JSON.stringify(stages)})`,
+    `match types: king of the hill, last one standing, KO race; king of the hill selected (${JSON.stringify(types)})`,
   );
   await page.screenshot({ path: path.join(OUT, "1_select.png") });
   // the menu's count line is shown, and G turns the blood off and on
@@ -103,19 +101,28 @@ async function main() {
   const on = await line();
   check(before.opacity === "1" && /blood ON/.test(before.text) && before.gore, `the menu shows the fighter count and blood ON (${JSON.stringify(before)})`);
   check(/blood OFF/.test(off.text) && !off.gore && /blood ON/.test(on.text) && on.gore, `G turns the blood off and on again (${off.text} / ${on.text})`);
-  // stages are picked by clicking, and the CPU brawl behind the menu moves to the chosen stage
-  const behind = () => page.evaluate(() => ({ pick: window.__game.select.stage, world: window.__game.world?.s.stage, frame: window.__game.world?.s.frame, name: document.querySelector(".stname").textContent }));
+  // match types are picked by clicking, and the CPU brawl behind the menu moves to the type's next arena
+  const behind = () =>
+    page.evaluate(() => ({
+      type: window.__game.select.type,
+      pick: window.__game.select.stage,
+      world: window.__game.world?.s.stage,
+      frame: window.__game.world?.s.frame,
+      name: document.querySelector(".stname").textContent,
+      arenas: document.querySelector(".starenas").textContent,
+    }));
   const b0 = await behind();
   await new Promise((r) => setTimeout(r, 400));
   const b1 = await behind();
-  check(b0.world === "hell-toilet" && b1.frame > b0.frame, `a CPU brawl plays on the chosen stage behind the menu (${JSON.stringify(b0)} -> frame ${b1.frame})`);
+  check(b0.world === "hell-toilet" && b1.frame > b0.frame, `a CPU brawl plays on the next arena behind the menu (${JSON.stringify(b0)} -> frame ${b1.frame})`);
+  check(b0.type === "king" && b0.name === "King of the Hill" && /Hell Toilet/.test(b0.arenas) && /Castle Under Siege/.test(b0.arenas), `the menu picks a match type, not a stage, and lists its arenas (${JSON.stringify(b0)})`);
   await page.click(".stagepick .next");
   const b2 = await behind();
-  check(b2.pick === "construction-site" && b2.world === "construction-site" && b2.name === "Construction Site", `the stage banner's arrow picks the next stage, and the pit behind follows (${JSON.stringify(b2)})`);
-  await page.click('.stage[data-stage="castle-under-siege"]');
+  check(b2.type === "last" && b2.pick === "collapsing-tower" && b2.world === "collapsing-tower" && b2.name === "Last One Standing", `the banner's arrow picks the next match type, and the pit behind follows to its arena (${JSON.stringify(b2)})`);
+  await page.click('.stage[data-type="kos"]');
   const b3 = await behind();
-  check(b3.pick === "castle-under-siege" && b3.world === "castle-under-siege", `clicking a stage picks it (${JSON.stringify(b3)})`);
-  await page.click('.stage[data-stage="hell-toilet"]');
+  check(b3.type === "kos" && b3.pick === "construction-site" && b3.world === "construction-site", `clicking a match type picks it (${JSON.stringify(b3)})`);
+  await page.click('.stage[data-type="king"]');
   await page.screenshot({ path: path.join(OUT, "1b_select_live.png") });
 
   // P1 joins on the keyboard, moves the cursor two styles right, confirms, starts
@@ -137,7 +144,7 @@ async function main() {
   await press("KeyJ");
   await press("BracketRight");
   const stageNext = await page.evaluate(() => window.__game.select.stage);
-  check(stageNext === "construction-site", `] picks the next stage (${stageNext})`);
+  check(stageNext === "collapsing-tower", `] picks the next match type, on its first arena (${stageNext})`);
   await press("BracketLeft");
   const stageAfter = await page.evaluate(() => window.__game.select.stage);
   check(stageAfter === "hell-toilet", `[ goes back to Hell Toilet (${stageAfter})`);
@@ -159,6 +166,8 @@ async function main() {
   const setup = await page.evaluate(() => window.__game.world.fighters.map((f) => ({ style: f.style, human: f.human, x: f.spawnX, y: f.spawnY })));
   check(setup.length === 8, `match starts with 8 fighters (${setup.length})`);
   const worldStage = await page.evaluate(() => window.__game.world.s.stage);
+  const upNext = await page.evaluate(() => window.__game.select.stage);
+  check(upNext === "castle-under-siege", `the next King of the Hill match is on the other arena (${upNext})`);
   check(worldStage === "hell-toilet", `the match is played on Hell Toilet (${worldStage})`);
   check(setup[0].human && setup[0].style === 2 && setup.slice(1).every((f) => !f.human), "P1 is the human with the chosen style, 7 CPUs fill the rest");
   const radii = setup.map((f) => Math.hypot(f.x, f.y).toFixed(2));
@@ -226,6 +235,7 @@ async function main() {
         specials,
         heavy,
         fx: { ...g.scene.fx.stats },
+        flash: g.scene.impact.flash,
         bloom: g.scene.bloomOn,
         audio: g.sfx.ctx ? g.sfx.ctx.state : "none",
         played: { ...g.sfx.played },
@@ -244,6 +254,7 @@ async function main() {
   check((feel.played.hit ?? 0) > 0 && (feel.played.swing ?? 0) > 0, `hits and swings made sounds (${feel.played.hit ?? 0} hits, ${feel.played.swing ?? 0} swings)`);
   check(feel.fury === 8, `HUD shows 8 fury bars (${feel.fury})`);
   check(!!feel.heavy, `a heavy hit landed (${JSON.stringify(feel.heavy)})`);
+  check(feel.flash > 0.3, `the heavy hit flashed the picture white-hot (${feel.flash.toFixed(2)})`);
   await new Promise((r) => setTimeout(r, 60));
   await page.screenshot({ path: path.join(OUT, "4_heavy_hit.png") });
   // the blood those hits drew: drops thrown, and splats where they landed
@@ -292,6 +303,31 @@ async function main() {
   });
   check(px.lit > 200 && px.colours > 40, `canvas renders the arena (${px.lit} lit px, ${px.colours} colours)`);
   await page.screenshot({ path: path.join(OUT, "3_match_fight.png") });
+
+  // the end of the match: the winning KO slows time nearly to a stop, and the camera closes in on the body
+  const end = await withTimeout(
+    page.evaluate(() => {
+      const g = window.__game;
+      let ko = false;
+      for (let i = 0; i < 40000 && g.mode === "match"; i++) {
+        g.step(1);
+        ko = g.world.s.events.some((e) => e.kind === "ko");
+      }
+      return { mode: g.mode, ko, slow: g.scene.timeScale, finale: !!g.scene.impact.finale, frame: g.world.s.frame };
+    }),
+    60_000,
+    "play the match out",
+  );
+  console.log("      match end:", JSON.stringify(end));
+  check(end.mode === "over" && end.finale, `the match ended on a closing shot (${end.mode}, finale ${end.finale})`);
+  if (end.ko) check(end.slow < 0.3, `the winning KO slowed time to ${end.slow.toFixed(2)}`);
+  await new Promise((r) => setTimeout(r, 450));
+  const still = await page.evaluate(() => window.__game.scene.timeScale);
+  if (end.ko) check(still < 1, `the slow motion holds a moment in real time (${still.toFixed(2)})`);
+  await page.screenshot({ path: path.join(OUT, "6_finale.png") });
+  await new Promise((r) => setTimeout(r, 2500));
+  const back = await page.evaluate(() => window.__game.scene.timeScale);
+  check(back === 1, `then time runs at full speed again (${back})`);
 
   check(errors.length === 0, `no page errors${errors.length ? ": " + errors.slice(0, 3).join(" | ") : ""}`);
 

@@ -315,6 +315,14 @@ body.playing #hud {
   font-size: 13px;
   opacity: 0.9;
 }
+.starenas {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--gold);
+}
+.starenas b {
+  color: #fff;
+}
 .stages {
   display: flex;
   flex-wrap: wrap;

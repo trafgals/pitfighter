@@ -18,6 +18,7 @@ import { STYLES } from "../sim/styles";
 import { legs, type World } from "../sim/world";
 import { painted, surface, type Surface } from "./textures";
 import { armRecipe, faceRecipe, jawRecipe, lookOf, torsoRecipe } from "./anatomy";
+import { KITS, buildGear, buildHorns, buildTail } from "./kit";
 import {
   CLINCH,
   DOWN_BACK,
@@ -266,6 +267,8 @@ export interface Body {
   skeleton: THREE.Skeleton;
   skins: Record<"torso" | "armL" | "armR" | "legL" | "legR", THREE.SkinnedMesh>;
   mats: THREE.MeshStandardMaterial[];
+  /** each limb's own materials, coloured as the style the limb came from (a transplant keeps its first owner's colours) */
+  limbLook: Record<"armL" | "armR" | "legL" | "legR", { style: number; skin: THREE.MeshStandardMaterial[]; accent: THREE.MeshStandardMaterial[] }>;
   cur: Pose;
   vel: number[]; // the joint springs' velocities, in the order of flat()
   /** the body part the last hit landed on, and how fresh that is (seconds) */
@@ -296,7 +299,9 @@ export function buildBody(f: Fighter): Body {
   // the trunk, the arms and the head have their own skin, with the style's anatomy painted on it
   const look = lookOf(f.style, st);
   const painting = (s: Surface) => new THREE.MeshStandardMaterial({ color: st.color, roughness: 0.6, emissive: 0x000000, ...s, bumpScale: 2.5 });
-  const big = st.torso > 1.1 ? 1.15 : st.torso < 0.9 ? 0.88 : 1;
+  // the style's silhouette: its size, horns, tail and gear (kit.ts)
+  const kit = KITS[st.style];
+  const big = kit.size;
   const root = new THREE.Group();
   const body = new THREE.Group();
   body.scale.setScalar(big);
@@ -462,10 +467,6 @@ export function buildBody(f: Fighter): Body {
   jaw.position.set(0, 0.07, 0.04);
   head.add(jaw);
   for (const s of [-1, 1]) {
-    const horn = mesh(new THREE.ConeGeometry(0.04, 0.22, 14), accent);
-    horn.position.set(0.1 * s, 0.3, 0);
-    horn.rotation.z = -0.5 * s;
-    head.add(horn);
     const eye = new THREE.Mesh(new THREE.SphereGeometry(0.028, 8, 6), eyeMat);
     eye.position.set(0.055 * s, 0.17, 0.135);
     head.add(eye);
@@ -482,50 +483,49 @@ export function buildBody(f: Fighter): Body {
   }
 
   // the deltoids cap the shoulders; the elbows and knees keep their volume when they bend
+  const hands = { L: accent.clone(), R: accent.clone() };
   for (const [side, sh, el] of [
     [-1, armL, elbowL],
     [1, armR, elbowR],
   ] as const) {
+    const hand = side < 0 ? hands.L : hands.R;
     const delt = mesh(new THREE.SphereGeometry(0.088, 16, 12), skin);
     delt.scale.set(1.08, 0.95, 1);
     sh.add(delt);
     el.add(mesh(new THREE.SphereGeometry(0.05, 12, 10), skin));
     // a wrapped fist: a squared-off knuckle ball with a thumb
-    const fist = mesh(new THREE.SphereGeometry(0.066, 16, 12), accent);
+    const fist = mesh(new THREE.SphereGeometry(0.066, 16, 12), hand);
     fist.scale.set(0.9, 0.95, 1.15);
     fist.position.y = -FORE - 0.03;
-    const thumb = mesh(new THREE.CapsuleGeometry(0.018, 0.03, 4, 8), accent);
+    const thumb = mesh(new THREE.CapsuleGeometry(0.018, 0.03, 4, 8), hand);
     thumb.position.set(-side * 0.045, -FORE - 0.02, 0.03);
     thumb.rotation.z = side * 0.6;
     el.add(fist, thumb);
   }
   // the feet hang on ankles at the end of the shins, so a planted foot can lie flat on the floor
   const ankles = { L: new THREE.Group(), R: new THREE.Group() };
-  for (const [kn, an] of [
-    [kneeL, ankles.L],
-    [kneeR, ankles.R],
+  const boots = { L: { skin: skin.clone(), accent: accent.clone() }, R: { skin: skin.clone(), accent: accent.clone() } };
+  for (const [kn, an, boot] of [
+    [kneeL, ankles.L, boots.L],
+    [kneeR, ankles.R, boots.R],
   ] as const) {
-    kn.add(mesh(new THREE.SphereGeometry(0.06, 12, 10), accent));
+    kn.add(mesh(new THREE.SphereGeometry(0.06, 12, 10), boot.accent));
     an.position.y = -SHIN;
     kn.add(an);
     // a rounded boot with a toe cap
-    const foot = mesh(new THREE.SphereGeometry(0.075, 16, 12), skin);
+    const foot = mesh(new THREE.SphereGeometry(0.075, 16, 12), boot.skin);
     foot.scale.set(0.8, 0.5, 1.7);
     foot.position.set(0, -0.03, 0.05);
-    const sole = mesh(new THREE.BoxGeometry(0.12, 0.02, 0.25), accent);
+    const sole = mesh(new THREE.BoxGeometry(0.12, 0.02, 0.25), boot.accent);
     sole.position.set(0, -0.065, 0.05);
     an.add(foot, sole);
   }
 
-  // the devil's tail
-  const tail = new THREE.Group();
-  tail.position.set(0, 0.02, -0.13);
-  const curve = new THREE.CatmullRomCurve3([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, -0.18, -0.15), new THREE.Vector3(0, -0.2, -0.38), new THREE.Vector3(0, 0.02, -0.5)]);
-  tail.add(mesh(new THREE.TubeGeometry(curve, 24, 0.022, 10), accent));
-  const tip = mesh(new THREE.ConeGeometry(0.05, 0.1, 4), accent); // the spade stays four-sided
-  tip.position.set(0, 0.07, -0.5);
-  tail.add(tip);
+  // the horns, the devil's tail, and the style's gear
+  head.add(buildHorns(kit.horns, accent));
+  const tail = buildTail(kit.tail, accent);
   hips.add(tail);
+  buildGear(kit.gear, { head, spine, armL, armR, elbowL, elbowR, fore: FORE }, { accent, accentColour: st.accent });
 
   const limbs = { armL, armR, legL, legR, head, torso: spine } as Record<PartId, THREE.Object3D>;
   // where a limb is torn off: wet red meat round a white knob of bone, on the shoulder or hip it came from
@@ -542,6 +542,8 @@ export function buildBody(f: Fighter): Body {
     parent.add(m);
     return m;
   };
+  const legClothL = skins.legL.material as THREE.MeshStandardMaterial;
+  const legClothR = skins.legR.material as THREE.MeshStandardMaterial;
   const stumps = {
     armL: stump(spine, -SHOULDER_X, SHOULDER_Y - 0.03, 0.075),
     armR: stump(spine, SHOULDER_X, SHOULDER_Y - 0.03, 0.075),
@@ -566,7 +568,13 @@ export function buildBody(f: Fighter): Body {
     settle: null,
     skeleton,
     skins,
-    mats: [skin, accent, torsoSkin, armSkinL, armSkinR, headSkin, jawSkin, skins.legL.material as THREE.MeshStandardMaterial, skins.legR.material as THREE.MeshStandardMaterial],
+    mats: [skin, accent, torsoSkin, armSkinL, armSkinR, headSkin, jawSkin, legClothL, legClothR, hands.L, hands.R, boots.L.skin, boots.L.accent, boots.R.skin, boots.R.accent],
+    limbLook: {
+      armL: { style: f.style, skin: [armSkinL], accent: [hands.L] },
+      armR: { style: f.style, skin: [armSkinR], accent: [hands.R] },
+      legL: { style: f.style, skin: [boots.L.skin], accent: [legClothL, boots.L.accent] },
+      legR: { style: f.style, skin: [boots.R.skin], accent: [legClothR, boots.R.accent] },
+    },
     cur: stance(),
     vel: new Array(N_DOF).fill(0),
     hurt: { part: "torso", age: 99 },
@@ -876,7 +884,7 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
     p.spineY += a * 0.3;
   }
 
-  // one leg: hop; no legs: drag the torso along the floor
+  // one leg: hop; no legs: bounce along on the torso
   if (nLegs === 1 && (f.state === "walk" || f.state === "idle" || f.state === "guard")) {
     const ph = f.hopPhase % HOP_CYCLE;
     p.y += ph < HOP_AIR ? Math.sin((ph / HOP_AIR) * Math.PI) * 0.22 : 0;
@@ -886,8 +894,13 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
   }
   if (nLegs < 2) plant = "none"; // a hop or a drag: no foot stays put
   if (nLegs === 0 && !["down", "ko", "thrown", "held", "wakeup", "driving", "falling"].includes(f.state)) {
-    p.y += -0.78;
-    p.spineX += 0.6;
+    // upright on the stumps, springing off the floor: high in the air, squashed low on landing
+    const ph = f.hopPhase % HOP_CYCLE;
+    const air = ph < HOP_AIR ? Math.sin((ph / HOP_AIR) * Math.PI) : 0;
+    const squash = ph >= HOP_AIR ? Math.sin(((ph - HOP_AIR) / (HOP_CYCLE - HOP_AIR)) * Math.PI) : 0;
+    p.y += -0.74 + air * 0.38 - squash * 0.05;
+    p.spineX += 0.1 + squash * 0.25 - air * 0.08;
+    p.headX -= squash * 0.15;
   }
   return { p, rate, snap, impact, plant, drive, label, phase, T: timing };
 }
@@ -1082,6 +1095,14 @@ export function syncLimbs(b: Body, f: Fighter): void {
     b.limbs[p].visible = on; // the hand or foot riding on the bone
     b.skins[p as keyof Body["skins"]].visible = on; // and the limb's skin
     if (p in b.stumps) b.stumps[p as keyof Body["stumps"]].visible = !on;
+    // a limb taken from someone else wears their colours
+    const look = b.limbLook[p as keyof Body["limbLook"]];
+    const style = f.parts[p].style ?? f.style;
+    if (look && on && look.style !== style) {
+      look.style = style;
+      for (const m of look.skin) m.color.set(STYLES[style].color);
+      for (const m of look.accent) m.color.set(STYLES[style].accent);
+    }
   }
 }
 

@@ -4,15 +4,16 @@
 // everyone who joined is ready. Empty slots are filled with CPU fighters up to
 // the chosen fighter count.
 //
-// The stage is picked with the arrows or pips on the stage banner (mouse), [ / ]
-// or H / O (keyboard), or L2 / R2 (pad); main.ts plays a CPU brawl on it behind
-// the menu. A fighter card clicked joins the keyboard player on it, and FIGHT!
+// The kind of match (king of the hill, last one standing, KO race) is picked
+// with the arrows or pills on the banner (mouse), [ / ] or H / O (keyboard), or
+// L2 / R2 (pad); its arenas take turns, one match each, and main.ts plays a CPU
+// brawl on the next one behind the menu. A fighter card clicked joins the keyboard player on it, and FIGHT!
 // readies everyone and starts.
 import { BTN } from "./sim/types";
 import { STYLES } from "./sim/styles";
 import { CONTROLS_HELP, type DeviceId, type DeviceRead, type Input } from "./input";
 import { PLAYER_COLORS } from "./render/scene";
-import { DEFAULT_STAGE, PLAYABLE_STAGES, STAGES, stageById, type StageId } from "./sim/stages";
+import { DEFAULT_STAGE, MATCH_TYPES, arenasOf, matchTypeById, stageById, typeOf, type MatchTypeId, type StageId } from "./sim/stages";
 
 const COLS = 7;
 const RELEASED: DeviceRead = { x: 0, y: 0, buttons: 0, start: false, left: false, right: false, up: false, down: false };
@@ -36,8 +37,10 @@ export class Select {
   fighters = 8;
   /** blood on or off (main.ts keeps it; the menu shows it) */
   gore = true;
+  /** the kind of match, and the arena the next one is played on */
+  type: MatchTypeId = typeOf(DEFAULT_STAGE).id;
   stage: StageId = DEFAULT_STAGE;
-  /** told when the stage changes (main.ts shows it behind the menu) */
+  /** told when the arena changes (main.ts shows it behind the menu) */
   onStage: ((id: StageId) => void) | null = null;
   private prev = new Map<DeviceId, DeviceRead>();
   private el: HTMLElement;
@@ -51,14 +54,12 @@ export class Select {
     root.innerHTML = `
       <header><h1>PITFIGHTER</h1><p class="sub">Up to eight devils. One pit. No rules.</p></header>
       <section class="stagepick">
-        <button class="arrow prev" aria-label="Previous stage">&#9664;</button>
-        <div class="stagecard"><div class="kicker"></div><h2 class="stname"></h2><p class="stblurb"></p></div>
-        <button class="arrow next" aria-label="Next stage">&#9654;</button>
+        <button class="arrow prev" aria-label="Previous match type">&#9664;</button>
+        <div class="stagecard"><div class="kicker"></div><h2 class="stname"></h2><p class="stblurb"></p><p class="starenas"></p></div>
+        <button class="arrow next" aria-label="Next match type">&#9654;</button>
       </section>
-      <div class="stages">${STAGES.map(
-        (st) => `<button class="stage${st.playable ? "" : " soon"}" data-stage="${st.id}"${st.playable ? "" : " disabled"}>${st.name}</button>`,
-      ).join("")}</div>
-      <div class="stagehint">Change stage: click &#9664; &#9654; · [ / ] or H / O · L2 / R2</div>
+      <div class="stages">${MATCH_TYPES.map((t) => `<button class="stage" data-type="${t.id}">${t.name}</button>`).join("")}</div>
+      <div class="stagehint">Change match type: click &#9664; &#9654; · [ / ] or H / O · L2 / R2</div>
       <div class="grid">${STYLES.map(
         (s, i) => `<button class="sc" data-i="${i}" style="--body:${hex(s.color)};--acc:${hex(s.accent)}"><div class="sw"></div>
           <div class="sn">${s.name}</div><div class="ss">${s.style}</div><div class="cur"></div></button>`,
@@ -68,9 +69,9 @@ export class Select {
       <div class="bar"><div class="count"></div><button class="fight">FIGHT!</button></div>
       <div class="help">${CONTROLS_HELP.map((l) => `<div>${l}</div>`).join("")}
         <div>Join: J / Num4 / □ / Start · Move: stick · Confirm: J / □ / Start · Back: L / ○ · Fighters: - / + (L1 / R1) · Stage: [ / ] (L2 / R2) · Blood: G · Start: Enter / Start</div></div>`;
-    root.querySelector(".prev")!.addEventListener("click", () => this.cycleStage(-1));
-    root.querySelector(".next")!.addEventListener("click", () => this.cycleStage(1));
-    root.querySelectorAll<HTMLElement>(".stage").forEach((b) => b.addEventListener("click", () => this.setStage(b.dataset.stage as StageId)));
+    root.querySelector(".prev")!.addEventListener("click", () => this.cycleType(-1));
+    root.querySelector(".next")!.addEventListener("click", () => this.cycleType(1));
+    root.querySelectorAll<HTMLElement>(".stage").forEach((b) => b.addEventListener("click", () => this.setType(b.dataset.type as MatchTypeId)));
     root.querySelectorAll<HTMLElement>(".sc").forEach((b) => {
       b.addEventListener("click", () => this.pick(Number(b.dataset.i)));
       b.addEventListener("mouseenter", () => this.describe(Number(b.dataset.i)));
@@ -98,9 +99,9 @@ export class Select {
       const edge = (k: keyof DeviceRead) => !!now[k] && !was[k];
       const bedge = (b: number) => (now.buttons & b) !== 0 && (was.buttons & b) === 0;
       const slot = this.slots.find((s) => s.device === dev);
-      // anyone can flip through the stages, joined or not
-      if (bedge(BTN.SPECIAL)) this.cycleStage(-1);
-      if (bedge(BTN.USE)) this.cycleStage(1);
+      // anyone can flip through the match types, joined or not
+      if (bedge(BTN.SPECIAL)) this.cycleType(-1);
+      if (bedge(BTN.USE)) this.cycleType(1);
       // Start never starts the match from a device that is not in it: it joins
       // that device (and readies it, a second time) instead of filling the pit with CPUs
       if (edge("start") && slot?.ready) start = true;
@@ -139,16 +140,26 @@ export class Select {
     this.render();
   }
 
-  /** Step through the playable stages; a stage that is not playable cannot be picked. */
-  cycleStage(dir: number): void {
-    const n = PLAYABLE_STAGES.length;
-    const i = PLAYABLE_STAGES.findIndex((s) => s.id === this.stage);
-    this.setStage(PLAYABLE_STAGES[(i + dir + n) % n].id);
+  /** Step through the match types that have an arena to play on. */
+  cycleType(dir: number): void {
+    const types = MATCH_TYPES.filter((t) => arenasOf(t).length);
+    const n = types.length;
+    const i = types.findIndex((t) => t.id === this.type);
+    this.setType(types[(i + dir + n) % n].id);
   }
 
+  /** Pick a kind of match: its first arena is up next. */
+  setType(id: MatchTypeId): void {
+    const arenas = arenasOf(matchTypeById(id));
+    if (!arenas.length) throw new Error(`match type ${id} has no arena yet`);
+    this.setStage(arenas.includes(this.stage) ? this.stage : arenas[0]);
+  }
+
+  /** Play the next match on this arena, and its kind of match: ?stage=, and the tests. */
   setStage(id: StageId): void {
     if (!stageById(id).playable) throw new Error(`stage ${id} is not playable yet`);
     const changed = id !== this.stage;
+    this.type = typeOf(id).id;
     this.stage = id;
     this.render();
     if (changed) this.onStage?.(id);
@@ -194,17 +205,24 @@ export class Select {
       humans.push(false);
       devices.push(null);
     }
-    this.onStart({ styles, humans, devices, stage: this.stage });
+    const stage = this.stage;
+    // the kind's arenas take turns: the next match is on the next one
+    const arenas = arenasOf(matchTypeById(this.type));
+    this.stage = arenas[(arenas.indexOf(stage) + 1) % arenas.length];
+    this.render();
+    this.onStart({ styles, humans, devices, stage });
   }
 
   private render(): void {
     const el = this.el;
-    el.querySelectorAll<HTMLElement>(".stage").forEach((c) => c.classList.toggle("on", c.dataset.stage === this.stage));
-    const stage = stageById(this.stage);
-    const k = PLAYABLE_STAGES.findIndex((x) => x.id === this.stage);
-    el.querySelector(".kicker")!.textContent = `STAGE ${k + 1} / ${PLAYABLE_STAGES.length}`;
-    el.querySelector(".stname")!.textContent = stage.name;
-    el.querySelector(".stblurb")!.textContent = stage.blurb;
+    el.querySelectorAll<HTMLElement>(".stage").forEach((c) => c.classList.toggle("on", c.dataset.type === this.type));
+    const type = matchTypeById(this.type);
+    el.querySelector(".kicker")!.textContent = `MATCH TYPE ${MATCH_TYPES.indexOf(type) + 1} / ${MATCH_TYPES.length}`;
+    el.querySelector(".stname")!.textContent = type.name;
+    el.querySelector(".stblurb")!.textContent = type.blurb;
+    const arenas = arenasOf(type);
+    el.querySelector(".starenas")!.innerHTML =
+      (arenas.length > 1 ? "Arenas, in turn: " : "Arena: ") + arenas.map((id) => (id === this.stage ? `<b>${stageById(id).name}</b>` : stageById(id).name)).join(" · ");
     el.querySelectorAll<HTMLElement>(".sc").forEach((c) => {
       const i = Number(c.dataset.i);
       const here = this.slots.map((s, p) => ({ s, p })).filter(({ s }) => s.style === i);

@@ -73,9 +73,21 @@ describe("procedural textures", () => {
     }
   });
 
-  it("ships no texture images: every surface is code", () => {
+  it("ships no texture image without its provenance: only the generated set in public/tex, each in its manifest", () => {
     const exts = /\.(png|jpe?g|webp|avif|ktx2|basis)$/i;
     const walk = (d: string): string[] => (fs.existsSync(d) ? fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(path.join(d, e.name)) : [path.join(d, e.name)])) : []);
-    expect([...walk("src"), ...walk("public")].filter((f) => exts.test(f))).toEqual([]);
+    const rel = (f: string) => path.relative("public/tex", f).split(path.sep).join("/");
+    const images = [...walk("src"), ...walk("public")].filter((f) => exts.test(f));
+    // nothing outside the generated set (docs/texture-handoff.md): the procedural surfaces stay code
+    expect(images.filter((f) => rel(f).startsWith(".."))).toEqual([]);
+    // every texture the game can load says what made it, from what, under which licence
+    const manifest = JSON.parse(fs.readFileSync("public/tex/manifest.json", "utf8")) as { files: { file: string; model: string; licence: string; seed: number }[] };
+    const entry = new Map(manifest.files.map((e) => [e.file, e]));
+    for (const f of images.map(rel).filter((f) => !f.startsWith("contact/"))) {
+      const e = entry.get(f);
+      expect(e, f).toBeDefined();
+      expect(["Apache-2.0", "CC0-1.0"], f).toContain(e!.licence);
+      expect(e!.model, f).not.toMatch(/dev/i);
+    }
   });
 });

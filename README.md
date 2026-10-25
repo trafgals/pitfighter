@@ -1,3 +1,7 @@
+# [▶ PLAY NOW](https://trafgals.github.io/pitfighter/)
+
+**https://trafgals.github.io/pitfighter/**
+
 # Pitfighter
 
 An 8-player local brawler for the browser. Up to eight fighters, one pit; the
@@ -13,7 +17,11 @@ stage decides the arena and how a match is won.
 | **Hindenburg Blimp** | On top of the burning airship: the fire creeps forward from the tail and gusts of wind push everyone toward the edge. Knock someone over the edge and they are gone. After 30 seconds it hits the ground: the impact throws everyone flat, the wreck is walled in by twisted frame, and the fire burns everyone a little more every second until nobody is left. | Last one standing. Nobody comes back. |
 | **Castle Under Siege** | The wall walk of a besieged castle. The parapet stops you, except at the two breaches the siege has knocked in it, which are a long way down. Catapult stones knock you down, arrow volleys sting. | Raise your banner at the flagpole: the fighter nearest the pole raises theirs, 10 seconds alone wins, and it rises at half speed while someone else is in the circle. KO'd fighters come back. |
 
-Every stage is picked on the select screen with `[` / `]`, or started
+The menu picks the kind of match, not the stage: **King of the Hill** (Hell
+Toilet, Castle Under Siege), **Last One Standing** (Collapsing Tower,
+Hindenburg Blimp) or **KO Race** (Construction Site). A kind's arenas take
+turns, one match each; `MATCH_TYPES` in `src/sim/stages.ts` lists them, and a
+new arena joins its kind there. A stage can still be started
 directly with `?auto=1&stage=<id>` (`hell-toilet`, `construction-site`,
 `collapsing-tower`, `hindenburg-blimp`, `castle-under-siege`). The list of
 stages is `src/sim/stages.ts`, their rules are `src/sim/arena.ts` (one
@@ -46,12 +54,14 @@ All characters, names and art are original.
 ## Bodies come apart
 
 Every arm and leg has its own HP. A limb at 0 HP falls off and lands on the
-floor. Walk over to it and press *pick up* to reattach it at half HP. Anyone
-else who touches it punts it away. A limb that lands in the hellfire burns,
-and grows back 12 s later.
+floor. Walk over to it and press *grab* (or *pick up*) to reattach it at half
+HP. Grab someone else's limb and it goes on you instead, keeping its first
+owner's colours and fighting like them: a boxer's arm punches like a boxer.
+Its owner grows a new one 12 s later. *Pick up* on someone else's limb punts
+it away. A limb that lands in the hellfire burns, and grows back 12 s later.
 
 - One leg: you hop. You're slower, can't guard and can't low kick.
-- No legs: you crawl.
+- No legs: you bounce along on your torso.
 - One arm: slower, weaker punches and weaker throws.
 - No arms: Square becomes a headbutt, and you can't grab or high-reverse.
 - Head at 0 HP: you're dizzy. Torso at 0 HP: you're torn apart and respawn at your spot on the edge.
@@ -105,7 +115,12 @@ Each style also has a special, paid for with fury:
 - **Feedback:** sparks, dust and flash rings on impacts, a hit flash on the
   victim, camera shake with a punch-in on heavy hits, bloom, and synthesised
   sound (Web Audio, no sample files): impacts, swings, a lava rumble, and a
-  crowd that swells on big moments.
+  crowd that swells on big moments. Each blow lurches the camera along its
+  line; a heavy one tilts it and flashes the picture white. A KO slows time,
+  and the blow that wins the match nearly stops it while the camera closes in.
+- **Silhouettes:** every fighter has its own size, horns, tail and gear (a
+  straw hat, a stetson, boxing gloves, a beard, spiked pauldrons, a work
+  lanyard), so they read apart from across the pit before any colour.
 
 ## Controls
 
@@ -114,7 +129,7 @@ Each style also has a special, paid for with fury:
 | move | stick / d-pad | WASD | arrows |
 | high strike (string) | □ | J | Num4 |
 | low strike (string) | ✕ | K | Num5 |
-| grab, then □ knee / ○ throw toward the stick | ○ | L | Num6 |
+| grab, then □ knee / ○ throw toward the stick; over a limb, put it on | ○ | L | Num6 |
 | high reversal | △ | I | Num8 |
 | low reversal | R1 + △ | Shift + I | Num0 + Num8 |
 | guard | R1 | Shift | Num0 |
@@ -128,7 +143,7 @@ On the character select:
 - join with the high-strike button;
 - pick a fighter with the stick, confirm with high strike, back out with grab;
 - set the number of fighters with `-` / `+` (or L1 / R1 on a pad);
-- pick the stage by clicking the arrows or a stage name on the banner, with `[` / `]` or `H` / `O`, or with L2 / R2 on a pad; a CPU brawl on that stage plays behind the menu;
+- pick the kind of match by clicking the arrows or a name on the banner, with `[` / `]` or `H` / `O`, or with L2 / R2 on a pad; a CPU brawl on its next arena plays behind the menu;
 - or click a fighter to join on it with the keyboard, and click FIGHT! to start;
 - turn the blood on or off with `G` (the game remembers your choice);
 - start with Enter or Start.
@@ -165,7 +180,7 @@ This runs the Vitest unit tests for the simulation:
 - the Urban Reign calibration (`tests/calibration.test.ts`) and the decoded Urban Reign movesets (`tests/urban-reign-movesets.test.ts`);
 - reversals and pushback;
 - grapples and the crowd rule;
-- limbs, hopping and crawling;
+- limbs, hopping and bouncing;
 - spawns for 2–8 players;
 - toilet rules;
 - stages (`tests/stages.test.ts`): each stage's rules, and a deterministic 8-bot match on every stage that ends with a winner;
@@ -181,7 +196,7 @@ npm run test:browser
 
 This runs headless Chrome against the Vite dev server:
 
-- checks the Pitfighter title and the stage list (all five playable, Hell Toilet selected, `[` / `]` cycle them);
+- checks the Pitfighter title and the match types (King of the Hill first, with its arenas; `[` / `]` and clicks cycle them);
 - joins on the keyboard, picks a fighter and starts an 8-fighter match on Hell Toilet;
 - checks that the keyboard controls P1;
 - plays more than 3600 frames;

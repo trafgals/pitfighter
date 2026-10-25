@@ -3,7 +3,9 @@
 // stage's arena in stageviews.ts; this file places the fighters, limbs and
 // hazards each frame, runs the camera, and turns each step's cues
 // into impact effects: hit sparks, flash rings, dust, white hit flashes, a
-// shaking and punching-in camera, and hitstop jitter on the victim.
+// shaking and punching-in camera, and hitstop jitter on the victim; impact.ts
+// adds the lurch and roll along each blow, the white-hot flash, and the slow
+// motion and closing shot of a KO.
 import * as THREE from "three";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
@@ -19,6 +21,7 @@ import { PLAYER_COLORS, buildBody, limbGeometry, paintWounds, syncLimbs, type Bo
 import { animate, onHit } from "./animate";
 import type { Cue } from "./cues";
 import { Fx } from "./fx";
+import { Impact } from "./impact";
 import { MotionDebug } from "./motiondebug";
 import { canvasTexture, makeStageView, toV, yaw, type StageView } from "./stageviews";
 
@@ -96,6 +99,7 @@ export class Scene {
   private punch = 0; // camera punch-in toward `punchAt`, 0..1
   private punchAt = new THREE.Vector3();
   private hype = 0; // how loud the crowd is, 0..1
+  readonly impact = new Impact();
   private motion: MotionDebug | null = null; // ?debug=motion
   /** blood, splats and pumping stumps (?gore=0 turns them off; a torn-off limb still leaves its stump) */
   gore = true;
@@ -254,6 +258,7 @@ export class Scene {
     this.pickups.clear();
     this.hazards = [];
     this.fx.clear();
+    this.impact.reset();
     this.world = world;
     this.camTarget.set(0, 0, 0);
   }
@@ -280,6 +285,12 @@ export class Scene {
             p.add(toV((dx / dd) * 0.3, (dy / dd) * 0.3));
           }
           this.fx.burst(p, { count: Math.round(8 + dmg * 2.5), speed: 3 + dmg * 0.4, color: heavy ? 0xffe0a0 : 0xffa040, life: 0.3, gravity: 6 });
+          if (a) {
+            // the force of it carries on through: sparks out the far side, and the camera lurches with it
+            const line = toV(d.x - a.x, d.y - a.y);
+            this.fx.streak(p, line.clone().normalize().setY(0.25), { count: Math.round(4 + dmg * 1.5), speed: 5 + dmg * 0.6, color: heavy ? 0xfff4d0 : 0xffc070 });
+            this.impact.hit(line, dmg, heavy);
+          }
           if (this.gore && dmg >= 3) {
             // blood sprays out of the far side of the blow, the head bleeding most
             const away = a ? toV(d.x - a.x, d.y - a.y).normalize() : new THREE.Vector3();
@@ -370,6 +381,8 @@ export class Scene {
           this.shake = 1;
           this.punchIn(at(f, 1), 1);
           this.hype = 1;
+          // time slows on a KO; on the one that wins the match it nearly stops, and the camera stays on the body
+          this.impact.ko(at(f, 0.6), w.s.winner >= 0);
           break;
         }
         case "special": {
@@ -435,8 +448,14 @@ export class Scene {
           if (p) this.fx.burst(toV(p.x, p.y, 0.1), { count: 16, speed: 1.5, color: 0xff6010, life: 0.7, gravity: -2 });
           break;
         }
+        case "win": {
+          // a match won without a KO (the throne): the closing shot is on the winner
+          const f = fs[q.a];
+          if (f && !this.impact.finale) this.impact.finale = at(f, 0.9);
+          this.hype = 1;
+          break;
+        }
         case "crowd":
-        case "win":
           this.hype = 1;
           break;
         default:
@@ -502,7 +521,16 @@ export class Scene {
     this.scene.add(this.motion.group);
   }
 
-  render(time: number, dt: number): void {
+  /** How fast the fight runs now (slow motion on a KO): main.ts steps the sim and passes dt at this pace. */
+  get timeScale(): number {
+    return this.impact.timeScale;
+  }
+
+  /** Draw a frame; `dt` is game time (slowed in slow motion), `real` the wall-clock time since the last. */
+  render(time: number, dt: number, real = dt): void {
+    this.impact.update(real);
+    this.renderer.toneMappingExposure = 1 + 0.6 * this.impact.flash;
+    if (this.bloom) this.bloom.strength = 0.55 + 0.8 * this.impact.flash;
     const w = this.world;
     if (w) this.sync(w, time, dt);
     if (w && this.motion) this.motion.flush(w.s.fighters.length);
@@ -639,15 +667,31 @@ export class Scene {
     this.camDist += (Math.min(26 * cover, (9 + spread * 1.5) * cover) - this.camDist) * k;
     this.punch *= Math.exp(-dt * 4);
     const pk = this.punch * this.punch;
-    const tx = this.camTarget.x + (this.punchAt.x - this.camTarget.x) * pk * 0.35;
-    const tz = this.camTarget.z + (this.punchAt.z - this.camTarget.z) * pk * 0.35;
-    const dist = this.camDist * (1 - pk * 0.12);
+    let tx = this.camTarget.x + (this.punchAt.x - this.camTarget.x) * pk * 0.35;
+    let tz = this.camTarget.z + (this.punchAt.z - this.camTarget.z) * pk * 0.35;
+    let dist = this.camDist * (1 - pk * 0.12);
+    const im = this.impact;
+    let tilt = im.roll;
+    let side = 0;
+    if (im.finale) {
+      // the closing shot: in on the fallen (or the winner), low, tilted, drifting round
+      const t = Math.min(1, im.finaleT / 0.9);
+      const e = t * t * (3 - 2 * t);
+      tx += (im.finale.x - tx) * e;
+      tz += (im.finale.z - tz) * e;
+      dist += (Math.max(6, dist * 0.45) - dist) * e;
+      tilt += 0.07 * e;
+      side = Math.sin(im.finaleT * 0.35) * dist * 0.35 * e;
+    }
+    tx += im.kick.x;
+    tz += im.kick.z;
     const sh = this.shake * this.shake * 0.5;
     this.shake = Math.max(0, this.shake - dt * 2.2);
     const jx = (Math.random() - 0.5) * sh;
     const jy = (Math.random() - 0.5) * sh;
-    this.camera.position.set(tx + jx, dist * 0.78 + jy, tz + dist * 0.72);
-    this.camera.lookAt(tx + jx * 0.5, 0.8 + jy * 0.5, tz);
+    this.camera.position.set(tx + jx + side, dist * 0.78 + jy + im.kick.y, tz + dist * 0.72);
+    this.camera.lookAt(tx + jx * 0.5 - im.kick.x * 0.4, 0.8 + jy * 0.5, tz - im.kick.z * 0.4);
+    if (tilt) this.camera.rotateZ(tilt);
     const fov = 42 - pk * 3;
     if (Math.abs(this.camera.fov - fov) > 0.01) {
       this.camera.fov = fov;

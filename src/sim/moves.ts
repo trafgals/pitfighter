@@ -124,7 +124,8 @@ export const REGROW_FRAMES = 720;
 export const SIT_FRAMES = 20;
 export const GEYSER = { warn: 60, erupt: 20, radius: 1.3, dmg: 10, minGap: 240, maxGap: 420 };
 export const LAVA = { tick: 10, dmg: 2 };
-export const SPEED = { walk: 0.05, guard: 0.02, hop: 0.045, crawl: 0.0133 };
+export const SPEED = { walk: 0.05, guard: 0.02, hop: 0.045, bounce: 0.03 };
+// one leg: hop, moving only in the air; no legs: bounce along on the torso, the same way but slower
 export const HOP_CYCLE = 24;
 export const HOP_AIR = 14;
 export const BUFFER = 8; // input buffer for presses, frames

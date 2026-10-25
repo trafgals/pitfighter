@@ -53,3 +53,50 @@ export function stageById(id: StageId): Stage {
 }
 
 export const PLAYABLE_STAGES: readonly Stage[] = STAGES.filter((s) => s.playable);
+
+/**
+ * What the menu picks: the kind of match. Each kind is played on its arenas in
+ * turn, and more arenas of a kind can join it later.
+ */
+export type MatchTypeId = "king" | "last" | "kos";
+
+export interface MatchType {
+  id: MatchTypeId;
+  name: string;
+  blurb: string;
+  stages: readonly StageId[];
+}
+
+export const MATCH_TYPES: readonly MatchType[] = [
+  {
+    id: "king",
+    name: "King of the Hill",
+    blurb: "Take the one spot that matters and hold it: the last toilet in hell, the castle's flagpole. Any hit knocks you off it.",
+    stages: ["hell-toilet", "castle-under-siege"],
+  },
+  {
+    id: "last",
+    name: "Last One Standing",
+    blurb: "Knock them off the edge. Nobody comes back, and the arena is falling apart under all of you.",
+    stages: ["collapsing-tower", "hindenburg-blimp"],
+  },
+  { id: "kos", name: "KO Race", blurb: "First to 4 KOs. The knocked-out come back, so keep knocking them out.", stages: ["construction-site"] },
+];
+
+export function matchTypeById(id: MatchTypeId): MatchType {
+  const t = MATCH_TYPES.find((x) => x.id === id);
+  if (!t) throw new Error(`unknown match type ${id}`);
+  return t;
+}
+
+/** The kind of match a stage plays. */
+export function typeOf(stage: StageId): MatchType {
+  const t = MATCH_TYPES.find((x) => x.stages.includes(stage));
+  if (!t) throw new Error(`stage ${stage} has no match type`);
+  return t;
+}
+
+/** A match type's arenas that can be played now. */
+export function arenasOf(t: MatchType): StageId[] {
+  return t.stages.filter((id) => stageById(id).playable);
+}
