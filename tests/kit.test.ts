@@ -39,13 +39,13 @@ describe("silhouettes", () => {
     expect(new Set(keys).size).toBe(STYLES.length);
   });
 
-  it("the giants stand well over the imp", () => {
-    const imp = height(styleIx("Speed"));
-    const mountain = height(styleIx("Mighty"));
-    const dale = height(styleIx("All-Round"));
-    expect(mountain).toBeGreaterThan(imp * 1.35);
-    expect(dale).toBeGreaterThan(imp);
-    expect(dale).toBeLessThan(mountain);
+  it("the ironmaster stands well over the professor", () => {
+    const professor = height(styleIx("Kung Fu"));
+    const ironmaster = height(styleIx("Mighty"));
+    const constable = height(styleIx("All-Round"));
+    expect(ironmaster).toBeGreaterThan(professor * 1.35);
+    expect(constable).toBeGreaterThan(professor);
+    expect(constable).toBeLessThan(ironmaster);
   });
 
   it("each body wears its kit's horns, tail and gear", () => {
@@ -56,14 +56,14 @@ describe("silhouettes", () => {
       expect(b.tail.name).toBe(`tail:${k.tail}`);
       expect(b.body.scale.x).toBeCloseTo(k.size);
       for (const g of k.gear) {
-        const pieces = g === "gloves" || g === "pauldrons" ? [`${g.replace(/s$/, "")}L`, `${g.replace(/s$/, "")}R`] : [g];
+        const pieces = g === "gloves" || g === "pauldrons" || g === "pistons" ? [`${g.replace(/s$/, "")}L`, `${g.replace(/s$/, "")}R`] : [g];
         for (const p of pieces) expect(named(b.root, p), `${s.style} ${p}`).toBeDefined();
       }
     }
   });
 
   it("the hats and horns ride on the head, so every blow to it carries them", () => {
-    for (const label of ["Samurai Sword", "Gun", "Military", "Master"]) {
+    for (const label of ["All-Round", "Mighty", "Street", "Karate", "Judo Based", "Samurai Sword", "Amateur"]) {
       const b = buildBody(fighterOf(styleIx(label)));
       const k = KITS[label];
       expect(named(b.root, k.gear[0])!.parent, label).toBe(b.head);
@@ -71,10 +71,10 @@ describe("silhouettes", () => {
     }
   });
 
-  it("gloves ride on the forearms, out where the fists are", () => {
+  it("the pistons ride on the forearms, out where the fists are", () => {
     const b = buildBody(fighterOf(styleIx("Boxing")));
-    expect(named(b.root, "gloveL")!.parent).toBe(b.joints.elbowL);
-    expect(named(b.root, "gloveR")!.parent).toBe(b.joints.elbowR);
+    expect(named(b.root, "pistonL")!.parent).toBe(b.joints.elbowL);
+    expect(named(b.root, "pistonR")!.parent).toBe(b.joints.elbowR);
   });
 
   it("a horn tapers from its root to a point", () => {

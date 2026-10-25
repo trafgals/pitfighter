@@ -46,14 +46,13 @@ import {
   HITSTOP,
   hitstopFor,
   SPECIAL_CHORD,
-  SPECIAL_NAMES,
   SPEED,
   STRING_STARTS,
   TAUNT,
   THROW,
   type Move,
 } from "./moves";
-import { AIR_GRAB, AIR_GRABS, type AirGrab } from "./airgrabs";
+import { AIR_GRAB, type AirGrab } from "./airgrabs";
 import { PLAIN, rollLimb, shape, striker, type LimbTrait } from "./limbs";
 import { STYLES } from "./styles";
 import { Rng } from "./rng";
@@ -311,9 +310,9 @@ export class World {
     return true;
   }
 
-  /** The name of a special, for banners. */
-  static specialName(id: string): string {
-    return SPECIAL_NAMES[id as keyof typeof SPECIAL_NAMES] ?? id;
+  /** What a fighter calls its special, for banners: its own name, not the shape's. */
+  static specialName(f: Fighter): string {
+    return STYLES[f.style].specialName;
   }
 
   // ---------------------------------------------------------------- input
@@ -1259,7 +1258,7 @@ export class World {
   /** A thrown body, or a juggled one flying fast enough, is a missile: it knocks down whoever it hits. */
   /** The fighter's air grab: the torso's own, whatever limbs it wears. */
   static airGrab(f: Fighter): AirGrab {
-    return AIR_GRABS[STYLES[f.style].style] ?? AIR_GRABS["All-Round"];
+    return STYLES[f.style].airGrab;
   }
 
   /** Triangle on a juggled body in reach: the style's air grab, which ends the juggle. */

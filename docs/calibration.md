@@ -126,6 +126,19 @@ the first (field [3] looks like the limb), the branch fields other than the
 target, input and window, and which character uses which moveset (index 0 is
 Brad; the index is not the character index of the name table).
 
+### The moves, grouped
+
+`tools/ur-calibration/clusters.cjs` groups every decoded strike (1909 of them,
+from 71 distinct movesets) into 29 clusters by the limb that carries it, its
+place in a string and its timing, and the grapple-class actions into 6 bands by
+length:
+[calibration/urban-reign-move-clusters.md](calibration/urban-reign-move-clusters.md),
+with the data in `calibration/urban-reign-move-clusters.json`. The move
+vocabulary in `src/data/characters.json` is built on them: every archetype a
+fighter's moves are written against names the clusters it comes from, and
+`tests/roster.test.ts` holds each archetype inside them and each move inside
+its archetype ([docs/characters.md](characters.md)).
+
 ## Not calibrated
 
 - **Damage, reach and knockback** stay this game's own. Urban Reign scales

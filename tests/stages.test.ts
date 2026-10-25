@@ -41,7 +41,7 @@ describe("stages", () => {
   for (const st of STAGES) {
     it(`${st.name}: an 8-bot match is deterministic and ends with a winner`, () => {
       const play = () => {
-        const w = new World({ seed: 2, styles: [0, 3, 4, 15, 17, 1, 6, 9], humans: Array(8).fill(false), stage: st.id });
+        const w = new World({ seed: 2, styles: [0, 3, 4, 10, 11, 1, 6, 9], humans: Array(8).fill(false), stage: st.id });
         const bots = w.fighters.map((f) => new Bot(f.id, 2));
         const hashes: number[] = [];
         for (let i = 0; i < 60 * 360 && w.s.winner < 0; i++) {

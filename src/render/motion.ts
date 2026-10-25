@@ -564,7 +564,7 @@ function flurry(): Clip {
 }
 
 export const SPECIALS: Record<string, Clip> = {
-  // HELLSPIN: a crouch, then a whole turn on the active frames with the leg swung out like a roundhouse
+  // the spin (THE WHIRLIGIG): a crouch, then a whole turn on the active frames with the leg swung out like a roundhouse
   spSpin: {
     limb: "legR",
     rate: STRIKE_RATE,

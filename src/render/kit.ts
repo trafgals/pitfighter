@@ -1,6 +1,6 @@
 // What makes each fighter read as itself from across the pit, before any
-// colour: its size, the shape of its horns, its tail, and a piece or two of
-// gear (a hat, a beard, gloves, spikes). All of it rides on the bones, so the
+// colour: its size, its horns and tail if it has them, and a piece or two of
+// gear (a hat, whiskers, a monocle, pistons). All of it rides on the bones, so the
 // skeleton, the animation and the sim never see it. One kit per fighting style.
 //
 // The kits themselves are part of the character design and live in
@@ -64,6 +64,7 @@ function hornPath(h: Horns, s: number, k: number): { pts: THREE.Vector3[]; r: nu
 export function buildHorns(h: Horns, mat: THREE.Material): THREE.Group {
   const g = new THREE.Group();
   g.name = `horns:${h}`;
+  if (h === "none") return g;
   const add = (geo: THREE.BufferGeometry) => {
     const m = new THREE.Mesh(geo, mat);
     m.castShadow = true;
@@ -91,6 +92,7 @@ export function buildTail(t: Tail, mat: THREE.Material): THREE.Group {
   const g = new THREE.Group();
   g.name = `tail:${t}`;
   g.position.set(0, 0.02, -0.13);
+  if (t === "none") return g;
   const pts =
     t === "stub"
       ? [V(0, 0, 0), V(0, -0.07, -0.08), V(0, -0.05, -0.17)]
@@ -285,6 +287,119 @@ export function buildGear(gear: Gear[], b: GearBones, mats: { accent: THREE.Mate
         put(b.spine, "title", plate);
         break;
       }
+      case "custodian": {
+        // the constable's tall domed helmet, a silver star on the front
+        const navy = std(0x1a2038, 0.55);
+        const dome = at(new THREE.Mesh(new THREE.SphereGeometry(0.165, 20, 12, 0, Math.PI * 2, 0, Math.PI / 2), navy), 0, 0.23, 0);
+        dome.scale.set(1, 1.7, 1.1);
+        const brim = at(new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.012, 24), navy), 0, 0.23, 0);
+        brim.scale.set(1, 1, 1.15);
+        const star = at(new THREE.Mesh(new THREE.CircleGeometry(0.035, 8), std(0xd8dce4, 0.3, 0.8)), 0, 0.34, 0.16, -0.35);
+        const knob = at(new THREE.Mesh(new THREE.SphereGeometry(0.022, 10, 8), std(0xd8dce4, 0.3, 0.8)), 0, 0.51, 0);
+        put(b.head, "custodian", dome, brim, star, knob);
+        break;
+      }
+      case "whiskers":
+        // mutton chops down both cheeks
+        put(
+          b.head,
+          "whiskers",
+          ...[-1, 1].map((s) => at(new THREE.Mesh(taper([V(0.13 * s, 0.2, 0.05), V(0.14 * s, 0.12, 0.08), V(0.11 * s, 0.04, 0.11)], 0.035, 0.5), std(0x6a5a48, 0.95)), 0, 0, 0)),
+        );
+        break;
+      case "pistons":
+        // a hydraulic ram along each forearm, a pressure gauge at the wrist
+        for (const [el, s] of [
+          [b.elbowL, -1],
+          [b.elbowR, 1],
+        ] as const) {
+          const steel = std(0x2a3a5a, 0.3, 0.8);
+          const sleeve = at(new THREE.Mesh(new THREE.CylinderGeometry(0.058, 0.064, b.fore * 0.8, 14), steel), 0, -b.fore * 0.5, 0);
+          const ram = at(new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, b.fore * 0.7, 10), std(0xc8ccd4, 0.2, 0.9)), 0.05 * s, -b.fore * 0.5, -0.05);
+          const gauge = at(new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.016, 14), std(0xc09040, 0.3, 0.8)), 0, -b.fore * 0.75, 0.065, Math.PI / 2);
+          const hose = at(new THREE.Mesh(new THREE.TorusGeometry(0.06, 0.01, 6, 14, Math.PI), std(0xa01818, 0.6)), 0.02 * s, -b.fore * 0.3, -0.06, 0, Math.PI / 2, 0);
+          put(el, `piston${s < 0 ? "L" : "R"}`, sleeve, ram, gauge, hose);
+        }
+        break;
+      case "flatcap": {
+        const tweed = std(0x4a3c2c, 0.95);
+        const cap = at(new THREE.Mesh(new THREE.CylinderGeometry(0.168, 0.172, 0.05, 20), tweed), 0, 0.29, 0.01, 0.12);
+        const peak = at(new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.012, 0.09), tweed), 0, 0.27, 0.17, 0.2);
+        put(b.head, "flatcap", cap, peak);
+        break;
+      }
+      case "nursecap": {
+        // a starched white cap with a red cross
+        const cap = at(new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.08, 0.1), std(0xf2f0ea, 0.6)), 0, 0.32, 0.02, -0.3);
+        const red = std(0xb01818, 0.5);
+        const bar = at(new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.014, 0.004), red), 0, 0.33, 0.075, -0.3);
+        const post = at(new THREE.Mesh(new THREE.BoxGeometry(0.014, 0.05, 0.004), red), 0, 0.33, 0.075, -0.3);
+        put(b.head, "nursecap", cap, bar, post);
+        break;
+      }
+      case "tophat": {
+        // a silk top hat in the fighter's trim colour, a black band
+        const silk = std(mats.accentColour, 0.35, 0.1);
+        const brim = at(new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.012, 24), silk), 0, 0.29, 0);
+        brim.scale.set(1, 1, 0.9);
+        const crown = at(new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.14, 0.26, 20), silk), 0, 0.42, 0);
+        const band = at(new THREE.Mesh(new THREE.CylinderGeometry(0.143, 0.143, 0.035, 20), dark), 0, 0.32, 0);
+        put(b.head, "tophat", brim, crown, band);
+        break;
+      }
+      case "monocle": {
+        const gold = std(0xd8b030, 0.25, 0.9);
+        const ring = at(new THREE.Mesh(new THREE.TorusGeometry(0.032, 0.005, 6, 18), gold), 0.06, 0.19, 0.155);
+        const cord = at(new THREE.Mesh(taper([V(0.09, 0.17, 0.15), V(0.12, 0.08, 0.13), V(0.1, -0.04, 0.14)], 0.003, 1), dark), 0, 0, 0);
+        put(b.head, "monocle", ring, cord);
+        break;
+      }
+      case "stovepipe": {
+        // taller than a top hat, soot black, a brass band, and the chimney rising through the crown
+        const soot = std(0x1a1714, 0.8);
+        const brim = at(new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.014, 24), soot), 0, 0.29, 0);
+        const crown = at(new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.145, 0.4, 20), soot), 0, 0.49, 0);
+        const band = at(new THREE.Mesh(new THREE.CylinderGeometry(0.148, 0.148, 0.03, 20), std(0xc09040, 0.3, 0.8)), 0, 0.33, 0);
+        const flue = at(new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.1, 12, 1, true), std(0x2a2420, 0.6, 0.5)), 0, 0.73, 0);
+        put(b.head, "stovepipe", brim, crown, band, flue);
+        break;
+      }
+      case "bowler": {
+        const felt = std(0x1a1a1a, 0.7);
+        const dome = at(new THREE.Mesh(new THREE.SphereGeometry(0.16, 20, 12, 0, Math.PI * 2, 0, Math.PI / 2), felt), 0, 0.27, 0);
+        dome.scale.set(1, 0.85, 1.05);
+        const brim = at(new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.012, 24), felt), 0, 0.27, 0);
+        brim.scale.set(1, 1, 1.1);
+        put(b.head, "bowler", dome, brim);
+        break;
+      }
+      case "goggles": {
+        // brass goggles pushed up on the brow, green glass
+        const brass = std(0xc09040, 0.3, 0.8);
+        const strap = at(new THREE.Mesh(new THREE.TorusGeometry(0.158, 0.014, 8, 28), std(0x3a2a1a, 0.8)), 0, 0.25, 0, Math.PI / 2 - 0.15);
+        const lenses = [-1, 1].flatMap((s) => [
+          at(new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.04, 14), brass), 0.06 * s, 0.25, 0.13, Math.PI / 2 - 0.3),
+          at(new THREE.Mesh(new THREE.CircleGeometry(0.033, 14), std(0x60a080, 0.1, 0.2)), 0.06 * s, 0.256, 0.151, -0.3),
+        ]);
+        put(b.head, "goggles", strap, ...lenses);
+        break;
+      }
+      case "weepers":
+        // the mourner's black crape ribbons, hanging from the back of the hat to the waist
+        put(
+          b.head,
+          "weepers",
+          ...[-1, 1].map((s) => at(new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.7, 0.006), std(0x0c0c0c, 0.9)), 0.04 * s, -0.03, -0.18, 0.12)),
+        );
+        break;
+      case "moustache":
+        // a great waxed handlebar
+        put(
+          b.head,
+          "moustache",
+          ...[-1, 1].map((s) => at(new THREE.Mesh(taper([V(0.01 * s, 0.115, 0.158), V(0.07 * s, 0.105, 0.148), V(0.12 * s, 0.14, 0.115)], 0.02, 0.2), std(0x2a1a10, 0.6)), 0, 0, 0)),
+        );
+        break;
     }
   }
   return out;

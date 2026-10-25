@@ -118,19 +118,19 @@ The test fails if contact is off the hit frame, if the speed peak is more than a
 | All-Round | karate | kick1 | 18 | 48 | 18 | 0 | 18 | 0 |
 | All-Round | karate | kick2 | 20 | 51 | 20 | 0 | 20 | 0 |
 | All-Round | karate | sweep | 26 | 60 | 26 | 0 | 27 | +1 |
-| Power | power | jab1 | 16 | 47 | 16 | 0 | 15 | -1 |
-| Power | power | jab2 | 13 | 40 | 13 | 0 | 12 | -1 |
-| Power | power | jab3 | 15 | 42 | 15 | 0 | 15 | 0 |
-| Power | power | kick1 | 22 | 52 | 22 | 0 | 21 | -1 |
-| Power | power | kick2 | 24 | 55 | 24 | 0 | 24 | 0 |
-| Power | power | sweep | 30 | 64 | 30 | 0 | 30 | 0 |
-| Street | brawler | jab1 | 12 | 43 | 12 | 0 | 11 | -1 |
-| Street | brawler | jab2 | 9 | 36 | 9 | 0 | 8 | -1 |
-| Street | brawler | jab3 | 11 | 38 | 11 | 0 | 10 | -1 |
-| Street | brawler | punchFin | 17 | 47 | 17 | 0 | 16 | -1 |
-| Street | brawler | kick1 | 18 | 48 | 18 | 0 | 17 | -1 |
-| Street | brawler | kick2 | 20 | 51 | 20 | 0 | 20 | 0 |
-| Street | brawler | sweep | 26 | 60 | 26 | 0 | 26 | 0 |
+| Mighty | power | jab1 | 18 | 49 | 18 | 0 | 17 | -1 |
+| Mighty | power | jab2 | 15 | 42 | 15 | 0 | 14 | -1 |
+| Mighty | power | jab3 | 17 | 44 | 17 | 0 | 17 | 0 |
+| Mighty | power | kick1 | 24 | 54 | 24 | 0 | 23 | -1 |
+| Mighty | power | kick2 | 26 | 57 | 26 | 0 | 26 | 0 |
+| Mighty | power | sweep | 32 | 66 | 32 | 0 | 32 | 0 |
+| Street | brawler | jab1 | 10 | 41 | 10 | 0 | 9 | -1 |
+| Street | brawler | jab2 | 7 | 34 | 7 | 0 | 6 | -1 |
+| Street | brawler | jab3 | 9 | 36 | 9 | 0 | 8 | -1 |
+| Street | brawler | punchFin | 15 | 45 | 15 | 0 | 14 | -1 |
+| Street | brawler | kick1 | 16 | 46 | 16 | 0 | 15 | -1 |
+| Street | brawler | kick2 | 18 | 49 | 18 | 0 | 18 | 0 |
+| Street | brawler | sweep | 24 | 58 | 24 | 0 | 24 | 0 |
 | Karate | karate | jab1 | 10 | 41 | 10 | 0 | 9 | -1 |
 | Karate | karate | jab2 | 7 | 34 | 7 | 0 | 6 | -1 |
 | Karate | karate | jab3 | 9 | 36 | 9 | 0 | 9 | 0 |
@@ -139,12 +139,12 @@ The test fails if contact is off the hit frame, if the speed peak is more than a
 | Karate | karate | kick2 | 18 | 49 | 18 | 0 | 18 | 0 |
 | Karate | karate | sweep | 24 | 58 | 24 | 0 | 25 | +1 |
 | Karate | karate | spSpin | 8 | 44 | 8 | 0 | 8 | 0 |
-| Wrestling | power | jab1 | 12 | 43 | 12 | 0 | 11 | -1 |
-| Wrestling | power | jab2 | 9 | 36 | 9 | 0 | 8 | -1 |
-| Wrestling | power | jab3 | 11 | 38 | 11 | 0 | 11 | 0 |
-| Wrestling | power | kick1 | 18 | 48 | 18 | 0 | 17 | -1 |
-| Wrestling | power | kick2 | 20 | 51 | 20 | 0 | 20 | 0 |
-| Wrestling | power | sweep | 26 | 60 | 26 | 0 | 26 | 0 |
+| Wrestling | power | jab1 | 13 | 44 | 13 | 0 | 12 | -1 |
+| Wrestling | power | jab2 | 10 | 37 | 10 | 0 | 9 | -1 |
+| Wrestling | power | jab3 | 12 | 39 | 12 | 0 | 12 | 0 |
+| Wrestling | power | kick1 | 19 | 49 | 19 | 0 | 18 | -1 |
+| Wrestling | power | kick2 | 21 | 52 | 21 | 0 | 21 | 0 |
+| Wrestling | power | sweep | 27 | 61 | 27 | 0 | 27 | 0 |
 | Muay Thai | muay | jab1 | 12 | 43 | 12 | 0 | 11 | -1 |
 | Muay Thai | muay | jab2 | 9 | 36 | 9 | 0 | 8 | -1 |
 | Muay Thai | muay | jab3 | 11 | 38 | 11 | 0 | 10 | -1 |
@@ -159,54 +159,13 @@ The test fails if contact is off the hit frame, if the speed peak is more than a
 | Boxing | boxing | kick1 | 16 | 46 | 16 | 0 | 15 | -1 |
 | Boxing | boxing | kick2 | 18 | 49 | 18 | 0 | 18 | 0 |
 | Boxing | boxing | sweep | 24 | 58 | 24 | 0 | 24 | 0 |
-| Rush | brawler | jab1 | 10 | 41 | 10 | 0 | 9 | -1 |
-| Rush | brawler | jab2 | 7 | 34 | 7 | 0 | 6 | -1 |
-| Rush | brawler | jab3 | 9 | 36 | 9 | 0 | 8 | -1 |
-| Rush | brawler | punchFin | 15 | 45 | 15 | 0 | 14 | -1 |
-| Rush | brawler | kick1 | 16 | 46 | 16 | 0 | 15 | -1 |
-| Rush | brawler | kick2 | 18 | 49 | 18 | 0 | 18 | 0 |
-| Rush | brawler | sweep | 24 | 58 | 24 | 0 | 24 | 0 |
-| Speed | kungfu | jab1 | 8 | 39 | 8 | 0 | 7 | -1 |
-| Speed | kungfu | jab2 | 5 | 32 | 5 | 0 | 4 | -1 |
-| Speed | kungfu | jab3 | 7 | 34 | 7 | 0 | 7 | 0 |
-| Speed | kungfu | kick1 | 14 | 44 | 14 | 0 | 14 | 0 |
-| Speed | kungfu | kick2 | 16 | 47 | 16 | 0 | 16 | 0 |
-| Speed | kungfu | sweep | 22 | 56 | 22 | 0 | 23 | +1 |
-| Speed | kungfu | spSpin | 6 | 42 | 6 | 0 | 6 | 0 |
-| Kung Fu | kungfu | jab1 | 10 | 41 | 10 | 0 | 9 | -1 |
-| Kung Fu | kungfu | jab2 | 7 | 34 | 7 | 0 | 6 | -1 |
-| Kung Fu | kungfu | jab3 | 9 | 36 | 9 | 0 | 9 | 0 |
-| Kung Fu | kungfu | kick1 | 16 | 46 | 16 | 0 | 16 | 0 |
-| Kung Fu | kungfu | kick2 | 18 | 49 | 18 | 0 | 18 | 0 |
-| Kung Fu | kungfu | sweep | 24 | 58 | 24 | 0 | 25 | +1 |
-| Kung Fu | kungfu | spSpin | 8 | 44 | 8 | 0 | 8 | 0 |
-| Mighty | power | jab1 | 18 | 49 | 18 | 0 | 17 | -1 |
-| Mighty | power | jab2 | 15 | 42 | 15 | 0 | 14 | -1 |
-| Mighty | power | jab3 | 17 | 44 | 17 | 0 | 17 | 0 |
-| Mighty | power | kick1 | 24 | 54 | 24 | 0 | 23 | -1 |
-| Mighty | power | kick2 | 26 | 57 | 26 | 0 | 26 | 0 |
-| Mighty | power | sweep | 32 | 66 | 32 | 0 | 32 | 0 |
-| Submission | grappler | jab1 | 12 | 43 | 12 | 0 | 11 | -1 |
-| Submission | grappler | jab2 | 9 | 36 | 9 | 0 | 8 | -1 |
-| Submission | grappler | jab3 | 11 | 38 | 11 | 0 | 11 | 0 |
-| Submission | grappler | kick1 | 18 | 48 | 18 | 0 | 18 | 0 |
-| Submission | grappler | kick2 | 20 | 51 | 20 | 0 | 20 | 0 |
-| Submission | grappler | sweep | 26 | 60 | 26 | 0 | 26 | 0 |
-| Military | karate | jab1 | 12 | 43 | 12 | 0 | 11 | -1 |
-| Military | karate | jab2 | 9 | 36 | 9 | 0 | 8 | -1 |
-| Military | karate | jab3 | 11 | 38 | 11 | 0 | 11 | 0 |
-| Military | karate | punchFin | 17 | 47 | 17 | 0 | 16 | -1 |
-| Military | karate | kick1 | 18 | 48 | 18 | 0 | 18 | 0 |
-| Military | karate | kick2 | 20 | 51 | 20 | 0 | 20 | 0 |
-| Military | karate | sweep | 26 | 60 | 26 | 0 | 27 | +1 |
-| Capoeira | kicker | jab1 | 12 | 43 | 12 | 0 | 11 | -1 |
-| Capoeira | kicker | jab2 | 9 | 36 | 9 | 0 | 8 | -1 |
-| Capoeira | kicker | jab3 | 11 | 38 | 11 | 0 | 11 | 0 |
-| Capoeira | kicker | punchFin | 17 | 47 | 17 | 0 | 16 | -1 |
-| Capoeira | kicker | kick1 | 18 | 48 | 18 | 0 | 18 | 0 |
-| Capoeira | kicker | kick2 | 20 | 51 | 20 | 0 | 20 | 0 |
-| Capoeira | kicker | sweep | 26 | 60 | 26 | 0 | 25 | -1 |
-| Capoeira | kicker | spSpin | 10 | 46 | 10 | 0 | 10 | 0 |
+| Kung Fu | kungfu | jab1 | 8 | 39 | 8 | 0 | 7 | -1 |
+| Kung Fu | kungfu | jab2 | 5 | 32 | 5 | 0 | 4 | -1 |
+| Kung Fu | kungfu | jab3 | 7 | 34 | 7 | 0 | 7 | 0 |
+| Kung Fu | kungfu | kick1 | 14 | 44 | 14 | 0 | 14 | 0 |
+| Kung Fu | kungfu | kick2 | 16 | 47 | 16 | 0 | 16 | 0 |
+| Kung Fu | kungfu | sweep | 22 | 56 | 22 | 0 | 23 | +1 |
+| Kung Fu | kungfu | spSpin | 6 | 42 | 6 | 0 | 6 | 0 |
 | Tae Kwon Do | kicker | jab1 | 10 | 41 | 10 | 0 | 9 | -1 |
 | Tae Kwon Do | kicker | jab2 | 7 | 34 | 7 | 0 | 6 | -1 |
 | Tae Kwon Do | kicker | jab3 | 9 | 36 | 9 | 0 | 9 | 0 |
@@ -214,7 +173,13 @@ The test fails if contact is off the hit frame, if the speed peak is more than a
 | Tae Kwon Do | kicker | kick1 | 16 | 46 | 16 | 0 | 16 | 0 |
 | Tae Kwon Do | kicker | kick2 | 18 | 49 | 18 | 0 | 18 | 0 |
 | Tae Kwon Do | kicker | sweep | 24 | 58 | 24 | 0 | 23 | -1 |
-| Tae Kwon Do | kicker | spSpin | 8 | 44 | 8 | 0 | 8 | 0 |
+| Tae Kwon Do | kicker | spFire | 14 | 50 | 14 | 0 | 13 | -1 |
+| Judo Based | grappler | jab1 | 12 | 43 | 12 | 0 | 11 | -1 |
+| Judo Based | grappler | jab2 | 9 | 36 | 9 | 0 | 8 | -1 |
+| Judo Based | grappler | jab3 | 11 | 38 | 11 | 0 | 11 | 0 |
+| Judo Based | grappler | kick1 | 18 | 48 | 18 | 0 | 18 | 0 |
+| Judo Based | grappler | kick2 | 20 | 51 | 20 | 0 | 20 | 0 |
+| Judo Based | grappler | sweep | 26 | 60 | 26 | 0 | 26 | 0 |
 | Samurai Sword | brawler | jab1 | 14 | 45 | 14 | 0 | 13 | -1 |
 | Samurai Sword | brawler | jab2 | 11 | 38 | 11 | 0 | 10 | -1 |
 | Samurai Sword | brawler | jab3 | 13 | 40 | 13 | 0 | 12 | -1 |
@@ -223,34 +188,6 @@ The test fails if contact is off the hit frame, if the speed peak is more than a
 | Samurai Sword | brawler | kick2 | 22 | 53 | 22 | 0 | 22 | 0 |
 | Samurai Sword | brawler | sweep | 28 | 62 | 28 | 0 | 28 | 0 |
 | Samurai Sword | brawler | spBlade | 16 | 49 | 16 | 0 | 15 | -1 |
-| Master | kungfu | jab1 | 10 | 41 | 10 | 0 | 9 | -1 |
-| Master | kungfu | jab2 | 7 | 34 | 7 | 0 | 6 | -1 |
-| Master | kungfu | jab3 | 9 | 36 | 9 | 0 | 9 | 0 |
-| Master | kungfu | kick1 | 16 | 46 | 16 | 0 | 16 | 0 |
-| Master | kungfu | kick2 | 18 | 49 | 18 | 0 | 18 | 0 |
-| Master | kungfu | sweep | 24 | 58 | 24 | 0 | 25 | +1 |
-| Master | kungfu | spBlade | 12 | 45 | 12 | 0 | 11 | -1 |
-| Gun | brawler | jab1 | 14 | 45 | 14 | 0 | 13 | -1 |
-| Gun | brawler | jab2 | 11 | 38 | 11 | 0 | 10 | -1 |
-| Gun | brawler | jab3 | 13 | 40 | 13 | 0 | 12 | -1 |
-| Gun | brawler | punchFin | 19 | 49 | 19 | 0 | 18 | -1 |
-| Gun | brawler | kick1 | 20 | 50 | 20 | 0 | 19 | -1 |
-| Gun | brawler | kick2 | 22 | 53 | 22 | 0 | 22 | 0 |
-| Gun | brawler | sweep | 28 | 62 | 28 | 0 | 28 | 0 |
-| Gun | brawler | spFire | 18 | 54 | 18 | 0 | 17 | -1 |
-| Martial Arts | karate | jab1 | 8 | 39 | 8 | 0 | 7 | -1 |
-| Martial Arts | karate | jab2 | 5 | 32 | 5 | 0 | 4 | -1 |
-| Martial Arts | karate | jab3 | 7 | 34 | 7 | 0 | 7 | 0 |
-| Martial Arts | karate | punchFin | 13 | 43 | 13 | 0 | 12 | -1 |
-| Martial Arts | karate | kick1 | 14 | 44 | 14 | 0 | 14 | 0 |
-| Martial Arts | karate | kick2 | 16 | 47 | 16 | 0 | 16 | 0 |
-| Martial Arts | karate | sweep | 22 | 56 | 22 | 0 | 23 | +1 |
-| Judo Based | grappler | jab1 | 12 | 43 | 12 | 0 | 11 | -1 |
-| Judo Based | grappler | jab2 | 9 | 36 | 9 | 0 | 8 | -1 |
-| Judo Based | grappler | jab3 | 11 | 38 | 11 | 0 | 11 | 0 |
-| Judo Based | grappler | kick1 | 18 | 48 | 18 | 0 | 18 | 0 |
-| Judo Based | grappler | kick2 | 20 | 51 | 20 | 0 | 20 | 0 |
-| Judo Based | grappler | sweep | 26 | 60 | 26 | 0 | 26 | 0 |
 | Amateur | boxing | jab1 | 14 | 45 | 14 | 0 | 13 | -1 |
 | Amateur | boxing | jab2 | 11 | 38 | 11 | 0 | 10 | -1 |
 | Amateur | boxing | jab3 | 13 | 40 | 13 | 0 | 12 | -1 |

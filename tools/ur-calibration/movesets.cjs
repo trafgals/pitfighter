@@ -28,6 +28,9 @@
 // Usage: node tools/ur-calibration/movesets.cjs [path/to/ps2web.data|core.elf] [out.json]
 // Without a path it takes the pristine engine data from urban-reign-pitfighter's
 // history (`git show 1303e9f:ps2web.data`, UR_PITFIGHTER points at the checkout).
+//
+// clusters.cjs reads the JSON this writes and groups its strikes into the move
+// archetypes the roster design is written against (src/data/characters.json).
 const fs = require("fs");
 const path = require("path");
 const { execFileSync } = require("child_process");

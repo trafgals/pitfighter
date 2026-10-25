@@ -81,14 +81,14 @@ describe("no two bodies play the same", () => {
     expect(rolled(78).fighters[1].parts.armR.trait).not.toEqual(a.parts.armR.trait);
   });
 
-  it("the style leans the roll: Power grows heavy arms, Speed fast ones", () => {
+  it("the style leans the roll: Mighty grows heavy arms, Kung Fu fast ones", () => {
     const avg = (style: number, k: "mass" | "swing") => {
       let sum = 0;
       for (let i = 0; i < 400; i++) sum += rollLimb(i, 0, "armR", 0, style)[k];
       return sum / 400;
     };
-    expect(avg(styleOf("Power"), "mass")).toBeGreaterThan(avg(styleOf("Speed"), "mass") + 0.1);
-    expect(avg(styleOf("Speed"), "swing")).toBeGreaterThan(avg(styleOf("Mighty"), "swing") + 0.1);
+    expect(avg(styleOf("Mighty"), "mass")).toBeGreaterThan(avg(styleOf("Kung Fu"), "mass") + 0.1);
+    expect(avg(styleOf("Kung Fu"), "swing")).toBeGreaterThan(avg(styleOf("Mighty"), "swing") + 0.1);
   });
 });
 

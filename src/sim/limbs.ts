@@ -4,8 +4,8 @@
 // them, so a body put together from torn-off parts fights like nothing else,
 // and no two limbs (even two grown on the same style) are quite alike.
 //
-// The style still leans the roll: a Power arm is heavy, a Speed arm fast, a
-// Kung Fu leg long. And every generated strike stays inside Urban Reign's own
+// The style still leans the roll: a Mighty arm is heavy, a Kung Fu arm fast, a
+// Tae Kwon Do leg long. And every generated strike stays inside Urban Reign's own
 // timing (`UR_STRIKE`, from the decoded movesets: first hits on frames 9..38,
 // whole actions 36..90 frames long), so the feel stays the game's.
 import type { Move } from "./moves";

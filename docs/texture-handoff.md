@@ -3,7 +3,7 @@
 You are generating texture images for PITFIGHTER, a browser brawler built with
 Three.js (repo: `C:\code\trafgals\pitfighter`). Every surface in the game is
 currently made from noise in code (`src/render/textures.ts` and
-`src/render/anatomy.ts`). As a result, all 21 fighters look like the same devil
+`src/render/anatomy.ts`). As a result, all 12 fighters look like the same body
 in a different colour. Your job is to make **image files** for those surfaces on
 the user's local GPU. Another agent will wire them into the renderer, so **do
 not change anything under `src/`**.
@@ -102,6 +102,8 @@ public/tex/
   fighters/<slug>/skin_h.webp    512×512   seamless height, greyscale (white = raised)
   fighters/<slug>/cloth.webp     512×512   seamless colour
   fighters/<slug>/face.webp      512×512   RGBA, transparent outside the mask
+  fighters/<slug>/limb.webp      512×512   seamless colour: the limbs' craft
+  fighters/<slug>/limb_h.webp    512×512   seamless height, greyscale (white = raised)
   stages/<stage>/<surface>.webp  1024×1024 seamless colour
   stages/<stage>/<surface>_h.webp 1024×1024 seamless height
   stages/hell-toilet/basalt_glow.webp  1024×1024 greyscale: white where the lava cracks glow
@@ -113,55 +115,82 @@ public/tex/
   Keep each 512² file under ~120 KB and each 1024² file under ~400 KB.
 - **Generate large, then downscale:** render at the model's native size (1024²)
   and downscale with a good filter (Lanczos). Don't generate at 512 directly.
-- **`<slug>`** is the fighter's name in kebab-case, for example `dale-damnation`.
+- **`<slug>`** is the fighter's `id` in `src/data/characters.json`, for example `sir-peregrine`.
 - **`manifest.json`** has one entry per file:
   ```json
-  { "file": "fighters/dale-damnation/skin.webp", "model": "flux1-schnell-fp8", "licence": "Apache-2.0",
+  { "file": "fighters/sir-peregrine/skin.webp", "model": "flux1-schnell-fp8", "licence": "Apache-2.0",
     "prompt": "...", "negative": "...", "seed": 1234, "steps": 4, "workflow": "workflows/skin.json",
     "post": "seam-inpaint, lanczos 1024->512, webp q85" }
   ```
 
 ## Fighters
 
-Each fighter is a devil from hell's fighting pit. Their gameplay style is in
-brackets. Make them **clearly different from each other at a glance**, by both
-hue and surface character, not just tint. Hex values are the current body and
-accent colours; keep the skin near the body colour and the cloth near the accent.
+The fighters are the ladies and gentlemen of Old Sorrow, a rain-soaked
+steampunk city, who fight to the death in their best clothes
+([docs/characters.md](characters.md)). Their gameplay style is in brackets.
+Make them **clearly different from each other at a glance**, by both hue and
+surface character, not just tint. Hex values are the body and accent colours;
+keep the skin near the body colour and the cloth near the accent.
 
-| slug | name (style) | body / accent | skin idea | face idea |
-|---|---|---|---|---|
-| dale-damnation | Dale Damnation (All-Round) | #b33a3a / #2b1a1a | plain red devil hide, light pores, faint veins | ordinary, mildly smug |
-| brimstone-bruno | Brimstone Bruno (Power) | #7a2e1e / #111111 | thick cracked hide like cooled lava crust, glowing seams very faint | heavy brow, broken nose |
-| gutter-gus | Gutter Gus (Street) | #8a5a3a / #3a3a3a | grimy tanned leather with soot, old scrapes | stubble shadow, scarred lip |
-| sensei-smoulder | Sensei Smoulder (Karate) | #d9d0c0 / #1a1a1a | pale ash-white skin with fine charcoal scorch marks | calm, narrow eyes, grey eyebrows |
-| big-lou-cipher | Big Lou Cipher (Wrestling) | #6b2a6b / #f0c000 | purple, oily, stretched skin with gold-foil tattoo flecks | grinning, face paint stripes |
-| eight-limbed-ash | Eight-Limbed Ash (Muay Thai) | #c06020 / #202020 | orange hide dusted with ash, knotted scar tissue | wrapped-forehead look, fierce |
-| knuckles-inferno | Knuckles Inferno (Boxing) | #2a4aa0 / #d0d0d0 | cobalt-blue smooth skin, bruising mottles | swollen eye, flattened nose |
-| rage-reaper | Rage Reaper (Rush) | #a01010 / #000000 | deep red, raw, ridged like exposed muscle | snarling, bared teeth |
-| quickfire-imp | Quickfire Imp (Speed) | #e05050 / #400000 | bright pinkish-red, fine scales like a lizard | big eyes, impish grin |
-| crimson-crane | Crimson Crane (Kung Fu) | #c03030 / #f0d060 | red skin with gold painted scrollwork fading into it | long thin moustache marks |
-| hellmountain | Hellmountain (Mighty) | #4a3a30 / #902010 | rock: basalt plates and moss-dark crevices, like a cliff face | stony, deep-set eyes |
-| choke-chimera | Choke Chimera (Submission) | #3a6a3a / #101010 | green reptilian scales mixed with patches of fur | slit pupils, wide jaw |
-| sergeant-sulphur | Sergeant Sulphur (Military) | #4a5a2a / #202010 | olive skin, yellow sulphur crust in the creases | square jaw, permanent scowl |
-| cinder-ginga | Cinder Ginga (Capoeira) | #d08040 / #2a1a0a | warm amber skin with glowing ember speckles | joyful, wide smile |
-| hellkick-hana | Hellkick Hana (Tae Kwon Do) | #f0f0f0 / #a00000 | porcelain-white skin with thin red crack lines like kintsugi | sharp, focused, red eyeliner marks |
-| ronin-of-gehenna | Ronin of Gehenna (Samurai Sword) | #303040 / #c0a030 | slate-grey skin like lacquered armour plates, chipped | stern, a scar across one eye |
-| the-old-devil | The Old Devil (Master) | #902020 / #e0e0e0 | wrinkled dark-red skin, liver spots, very old | long white brows, wise squint |
-| hellfire-flick | Hellfire Flick (Gun) | #404040 / #ff6000 | charcoal skin with orange glowing burn veins | cocky half-smile, one brow raised |
-| brother-blaze | Brother Blaze (Martial Arts) | #e0a040 / #202020 | golden-tan skin, sweat sheen, small burn spots | open-mouthed battle yell |
-| ashen-judoka | Ashen Judoka (Judo Based) | #e8e0d0 / #101040 | pale ashen skin with soft grey smudges | composed, heavy-lidded |
-| fresh-soul-kevin | Fresh Soul Kevin (Amateur) | #9a9a9a / #3a6aa0 | grey, slightly translucent ghostly skin, faint office-pallor blotches | nervous, wide-eyed, eyebags |
+Every fighter's limbs are made in a craft of their own (clockwork brass, kiln
+porcelain, ship's oak, aether glass...), and the **limb** surface is that
+craft, painted. It is the one surface that is not skin or cloth, so let it be
+the loudest thing about the fighter. The crafts are described in full in
+`crafts` in `src/data/characters.json`.
 
-Cloth: plain fabrics keyed to the accent colour, varied in weave and wear: satin
-trunks, worn denim, gi canvas, leather, quilted silk, camouflage canvas and so
-on. Pick one that suits each fighter.
+| slug | name (style) | body / accent | skin idea | limb idea | face idea |
+|---|---|---|---|---|---|
+| constable-winch | Constable Obadiah Winch (All-Round) | #c69472 / #1c2340 | weathered ruddy skin with broken veins over the cheeks, rain-wet | polished brass casing with engraved scrollwork, rivets and small glass windows over a watch movement | a broad ruddy face, grey mutton-chop whiskers, a cab-wheel scar across the right cheek, steady pale eyes |
+| hezekiah-smelt | Mr. Hezekiah Smelt (Mighty) | #d8b8a0 / #26201c | thin pale elderly skin, pink at the cheeks, fine wrinkles, soot in the creases | rough black sand-cast iron with mould seams, big rivets and glowing orange grated vents | a small pleasant old man's face, white side whiskers, half-moon spectacles, framed by iron |
+| nell-sluice | Nell Sluice (Street) | #a87656 / #4a3b2a | weathered brown skin with freckles, mud on the shins, a ridged scar across the chest | dull grey cast-lead drainpipe in soldered sections with brass solder lines and water running down | a broad freckled cheerful face with a gap-toothed grin, a scar on the collarbone, bright brown eyes |
+| matron-kilnworth | Matron Prudence Kilnworth (Karate) | #e2c4ac / #28406e | pale lined skin, rain-wet, a fine scar through the left eyebrow | glazed white bone porcelain painted with blue willow branches and swallows, cracks mended with gold | a long handsome lined face, grey eyes, a thin mouth, a scar through the left eyebrow |
+| bartholomew-mule | The Great Bartholomew Mule (Wrestling) | #c48a64 / #7a1420 | tanned sweating skin with thick chest hair and old claw scars, staples at the shoulder seams | thick matted brown bear fur, black claws and pads, a shaved seam sewn with black gut and brass staples | a broad sweating handsome face with a waxed black handlebar moustache and a broken nose |
+| bosun-rook | Bosun Absalom Rook (Muay Thai) | #8a5a3c / #1e2a36 | deep sun-darkened weathered skin with naval tattoos of a ship, an anchor and a list of names | weathered grey ship's oak with curved grain, rusted iron bands, black tar seams and barnacles | a craggy weathered face with a huge white braided beard, deep-set blue eyes, a scar through the left eye |
+| lady-bulwark | Lady Hester Bulwark (Boxing) | #f0d2bc / #3c4a2e | fair smooth skin, a flush at the cheeks, rain on it, a faint split lip | mirror-polished blued steel rams with engraved brass end caps, red rubber hoses, white-faced gauges | a fine-boned cool aristocratic face, grey-green eyes, a straight nose, chestnut hair pinned up |
+| professor-thrip | Professor Emmeline Thrip (Kung Fu) | #d8c0a4 / #2e4a2a | pale freckled skin with green insect faceting starting at the eyes and the wrists | segmented lacquer-green insect chitin with rows of black-tipped serrated spines and translucent edges | a narrow pale serious freckled face with large dark eyes behind thick spectacles, green faceting at the corners |
+| columbine-vesper | Columbine Vesper (Tae Kwon Do) | #b88464 / #5a2a6a | smooth warm brown skin with a dancer's muscle, glistening with rain | clear blown-glass tubes and a glass globe knee filled with swirling violet-white glowing gas, brass ferrules | a delicate high-cheekboned face with dark painted eyes, a beauty spot, black hair in a high bun |
+| mortimer-crape | Mr. Mortimer Crape (Judo Based) | #e0d6cc / #141214 | deathly pale papery skin, cold and grey under the eyes | faceted polished black jet plates over cream whalebone stays, laced with black silk ribbon in a cross pattern | a long pale kind mournful face painted with a faint white skull mask, sunken eyes, long white hair |
+| sir-peregrine | Sir Peregrine Ashby-Lisle, Bt. (Samurai Sword) | #f2dcc8 / #2a2a34 | fair, smooth, well-kept skin, a fine duelling scar on the right cheek | polished black ebony under a fine hallmarked silver filigree of leaves and a family crest, sharpened silver nails | a handsome fine-featured smiling face, blue eyes, a small blond moustache, a duelling scar on the right cheek |
+| cuthbert-inkle | Mr. Cuthbert Inkle (Amateur) | #ddb894 / #3a3428 | pale freckled skin, ink-stained fingertips, the faint start of a moustache | a mismatched pawnbroker's fitting: leather straps and buckles at the joint, a brown paper pawn ticket on a string; the limb itself rolled from the other crafts | a thin pale anxious freckled face, round wire spectacles, a weak chin |
+
+Cloth, keyed to the accent colour:
+
+- **constable-winch:** heavy navy wool serge, wet, with silver buttons and black leather straps
+- **hezekiah-smelt:** black wool frock coat with soot, a grey silk waistcoat, gold watch chain
+- **nell-sluice:** knitted grey wool shawl over a patched brown cotton dress, soaked and muddy
+- **matron-kilnworth:** starched white cotton apron and cap over a dark blue wool dress, red-lined cape
+- **bartholomew-mule:** crimson velvet and leopard-print strongman's leotard, a gold belt set with paste diamonds
+- **bosun-rook:** navy wool pea-coat, rolled canvas trousers, a red silk sash embroidered with a ship's name
+- **lady-bulwark:** white silk blouse, hunting-green wool riding skirt, laced brown leather corset belt
+- **professor-thrip:** brown tweed jacket with leather elbow patches, a cream blouse, a dark green bustled skirt
+- **columbine-vesper:** torn white and violet tulle tutu, a laced violet satin bodice, long white satin gloves
+- **mortimer-crape:** black wool frock coat and silk waistcoat, black crape mourning band, rain-dark
+- **sir-peregrine:** charcoal wool morning coat with a silk lapel, dove-grey silk waistcoat, grey striped trousers, white spats
+- **cuthbert-inkle:** shiny threadbare brown wool frock coat, a frayed shirt with paper cuffs, a cheap celluloid collar
+
+The source of truth for every idea, colour and seed is `public/tex/spec.json`,
+which mirrors the `texture` block of each fighter in
+`src/data/characters.json` (a test keeps them equal).
 
 Write the prompts in plain material terms, for example:
 - skin: *"seamless tileable texture, close-up of [skin idea], [colour words], flat even lighting, no shadows, top-down photo scan, highly detailed, 4k material"*
-- face: *"front orthographic view of a devil's face, [face idea], [colour words] skin, flat even studio lighting, symmetric, neutral background, game character texture"*
-- negative: *"text, watermark, logo, signature, frame, border, perspective, shadows, vignette, hands, multiple faces"*
+- limb: *"seamless tileable texture, close-up of [limb idea], [colour words], flat even lighting, no shadows, top-down material scan, highly detailed, 4k material"*
+- face: *"front orthographic view of a person's face, [face idea], [colour words] skin, flat even studio lighting, symmetric, neutral background, game character texture"*
+- negative: `negative_material` and `negative_face` in `public/tex/spec.json`
 
-Lock a seed per fighter so the skin, cloth and face can be regenerated
+Hats, helmets, monocles and big whiskers are drawn by the renderer in 3D
+(`src/render/kit.ts`), so keep them out of the faces: the face is brow to
+chin. A moustache or a beard in a face idea is painted on the skin. Some face
+ideas name facial hair, which `negative_face` lists as `hair`; leave `hair` out
+of the negative for those faces, or the moustache will not come. Where a face
+idea names the hair on the head, it only says what colour it is: the face
+still stops at the brow.
+
+`cuthbert-inkle` fights in borrowed limbs: his limb surface is the pawnbroker's
+fitting (straps, buckles, a pawn ticket), and the limb itself is drawn in the
+other crafts.
+
+Lock a seed per fighter so the skin, cloth, limb and face can be regenerated
 consistently.
 
 ## Stages
@@ -181,12 +210,17 @@ consistently.
 2. Check that the total size of `public/tex/` is under 25 MB.
 3. Commit on `textures/comfy` and push that branch, **not `main`**.
 4. Report back: which ComfyUI/PyTorch route worked on the 9070 XT, the models
-   and licences, the total size, and the 21 fighter contact sheets. The next
+   and licences, the total size, and the 12 fighter contact sheets. The next
    agent will then load these in `src/render/` (per-stage lazy loading, with the
    procedural surfaces kept as a fallback) and turn off the colour tint for
    textured fighters.
 
 ## What was delivered
+
+The first set was made for the old roster of 21 devils. When the roster was
+replaced, its fighter files were removed; the stage files, the workflows and
+everything learned below stay. The notes are kept as the record of how it was
+done.
 
 The set is on the branch `textures/comfy`, under `public/tex/`:
 

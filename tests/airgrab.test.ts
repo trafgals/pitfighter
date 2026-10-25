@@ -85,7 +85,7 @@ describe("air grabs", () => {
     expect(rb.kinds).toContain("bounce");
     expect(bounce.fighters[1].state).toBe("air");
 
-    const thrown = juggled(styleOf("Rush"));
+    const thrown = juggled(styleOf("Samurai Sword"));
     const x0 = thrown.fighters[1].x;
     tap(thrown, 0, BTN.GRAB);
     finish(thrown);

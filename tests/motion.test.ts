@@ -97,7 +97,7 @@ describe("the move set", () => {
   });
 
   it("a slower style's strike lands later: the clip follows the style's frame data", () => {
-    const { w, f } = settled(1); // Power: +4 frames on every strike
+    const { w, f } = settled(1); // Mighty: +6 frames on every strike
     const fast = settled(3); // Karate: -2
     const T = (x: { w: World; f: Fighter }) => x.w.eff(x.f, "jab2").startup;
     expect(T({ w, f })).toBeGreaterThan(T(fast));
@@ -106,7 +106,7 @@ describe("the move set", () => {
     const e = w.eff(f, "jab2");
     const Tm: Timing = { hit: e.startup, act: e.startup + e.active, end: e.total };
     const at = (t: number) => limbGap(clip.limb, sampleClip(clip, t, Tm, base), sampleClip(clip, e.startup, Tm, base));
-    expect(at(T(fast))).toBeGreaterThan(0.3); // on Karate's hit frame Power's fist is still coming
+    expect(at(T(fast))).toBeGreaterThan(0.3); // on Karate's hit frame Mighty's fist is still coming
     expect(at(e.startup)).toBe(0);
   });
 
@@ -196,7 +196,7 @@ describe("the specials", () => {
     }
   });
 
-  it("HELLSPIN turns a whole circle over its active frames with the leg out", () => {
+  it("the spin turns a whole circle over its active frames with the leg out", () => {
     const { m, at } = poseAt(style("spSpin"), "spSpin");
     let turned = 0;
     let prev = at(m.startup - 1).ry;

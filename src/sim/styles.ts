@@ -1,5 +1,5 @@
-// One original hell fighter per Urban Reign fighting style. The style names are
-// the 21 style labels in Urban Reign's own message table (ids 1347-1367,
+// Twelve original fighters, each on one of Urban Reign's fighting styles. The
+// style names are labels from Urban Reign's own message table (ids 1347-1367,
 // dumped from EE RAM); the characters, names and looks are ours.
 //
 // A style is a set of modifiers on the shared frame data, so every fighter

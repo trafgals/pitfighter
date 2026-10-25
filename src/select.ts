@@ -1,5 +1,5 @@
 // Character select: any device joins with its high-strike button or Start,
-// moves a cursor over the 21 styles, confirms with high strike or Start, backs
+// moves a cursor over the 12 fighters, confirms with high strike or Start, backs
 // out with grab. Start on a device that is in and ready starts the match once
 // everyone who joined is ready. Empty slots are filled with CPU fighters up to
 // the chosen fighter count: 4 by default, so the first four humans each take a
@@ -18,7 +18,7 @@ import { CONTROLS_HELP, type DeviceId, type DeviceRead, type Input } from "./inp
 import { PLAYER_COLORS } from "./render/scene";
 import { DEFAULT_STAGE, MATCH_TYPES, arenasOf, matchTypeById, stageById, typeOf, type MatchTypeId, type StageId } from "./sim/stages";
 
-const COLS = 7;
+const COLS = 6;
 const RELEASED: DeviceRead = { x: 0, y: 0, buttons: 0, start: false, moves: false, left: false, right: false, up: false, down: false };
 const hex = (c: number) => "#" + c.toString(16).padStart(6, "0");
 
@@ -58,7 +58,7 @@ export class Select {
   ) {
     this.el = root;
     root.innerHTML = `
-      <header><h1>PITFIGHTER</h1><p class="sub">Up to eight devils. One pit. No rules.</p></header>
+      <header><h1>PITFIGHTER</h1><p class="sub">Up to eight ladies and gentlemen. One pit. Do mind the blood.</p></header>
       <section class="stagepick">
         <button class="arrow prev" aria-label="Previous match type">&#9664;</button>
         <div class="stagecard"><div class="kicker"></div><h2 class="stname"></h2><p class="stblurb"></p><p class="starenas"></p></div>
