@@ -12,6 +12,7 @@
 // on the body and appears as a pickup on the floor.
 import * as THREE from "three";
 import type { Rag, Settle } from "./ragdoll";
+import { airLeft } from "./ragdoll";
 import { LIMBS, type Fighter, type PartId } from "../sim/types";
 import { CHARGE, DASH, DOWN, EVADE, HOP_AIR, HOP_CYCLE, TAUNT } from "../sim/moves";
 import { STYLES } from "../sim/styles";
@@ -847,11 +848,17 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
       play(THROWN, t, stateTiming(f.dur || 24));
       break;
     case "air":
-    case "airslammed":
-      // up in a juggle (or carried in an air grab): laid out in the throw's flight, held there until the floor
-      play(THROWN, Math.min(t, 12), stateTiming(24));
+    case "airslammed": {
+      // up in a juggle (or carried in an air grab): the throw's flight, by how far through the flight the body is, so it
+      // rises arms up, lies back over the top of the arc and comes down flat on its back, the landing's own first pose.
+      // A pop puts more flight ahead and tips the body back up a little; each hit twists it the other way
+      const left = airLeft(f);
+      const u = f.t / (f.t + left || 1);
+      play(THROWN, u * 24, stateTiming(24));
+      p.rz += (f.juggle % 2 ? 0.3 : -0.3) * Math.sin(Math.PI * u);
       label = f.state === "air" ? "juggled" : "air grabbed";
       break;
+    }
     case "airslam":
       // the air grab: the thrower's turn, stretched over the grab
       play(THROWER, t, stateTiming(f.dur || 40));

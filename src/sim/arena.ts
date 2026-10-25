@@ -127,6 +127,10 @@ export abstract class Arena {
   /** KO'd fighters come back; false: KO and falls eliminate, and the last one standing wins */
   abstract readonly respawn: boolean;
   abstract spawns(n: number): Spawn[];
+  /** Where a KO'd fighter comes back: their own spawn point, unless the stage has taken it away. */
+  respawnAt(_w: World, f: Fighter): { x: number; y: number } {
+    return { x: f.spawnX, y: f.spawnY };
+  }
   init(_w: World): void {}
   /** Walls, solid props, burning ground and edges for one fighter, after it moved. */
   abstract bound(w: World, f: Fighter): void;
@@ -712,6 +716,11 @@ class CollapsingTower extends Arena {
     return k >= 0 && w.s.arena.tiles[k] !== -1;
   }
 
+  /** (Practice only: nobody comes back for real.) The spawn tile if it is still sound, else the nearest sound tile toward the middle. */
+  respawnAt(w: World, f: Fighter): { x: number; y: number } {
+    return this.danger(w, f, f.spawnX, f.spawnY) ? this.safe(w, f) : { x: f.spawnX, y: f.spawnY };
+  }
+
   bound(w: World, f: Fighter): void {
     if (!this.onFloor(w, f.x, f.y)) w.fall(f);
   }
@@ -849,6 +858,11 @@ class HindenburgBlimp extends Arena {
 
   canWalk(_w: World, _f: Fighter, x: number, y: number): boolean {
     return onDeck(x, y); // nobody walks off a deck: only a knockdown or a throw sends you over
+  }
+
+  /** (Practice only.) The spawn point unless the fire has reached it, else the deck's middle ahead of the fire. */
+  respawnAt(w: World, f: Fighter): { x: number; y: number } {
+    return this.danger(w, f, f.spawnX, f.spawnY) ? this.safe(w, f) : { x: f.spawnX, y: f.spawnY };
   }
 
   boundPickup(w: World, p: Pickup): void {

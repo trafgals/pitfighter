@@ -156,6 +156,12 @@ Each style also has a special, paid for with fury:
   crowd that swells on big moments. Each blow lurches the camera along its
   line; a heavy one tilts it and flashes the picture white. A KO slows time,
   and the blow that wins the match nearly stops it while the camera closes in.
+- **Juggled bodies:** up in a juggle a body is on the ragdoll from the launch
+  to the floor, one fall with the knockdown it lands in. It tumbles through a
+  throw's flight by how far along the arc it is: arms up as it rises, laid back
+  over the top, flat on its back for the landing. Its limbs feel every change in
+  the body's speed (the launch, each pop, the bounce), lag behind and whip after
+  it, and float in between, falling with the body (`tests/airborne.test.ts`).
 - **Silhouettes:** every fighter has its own size, horns, tail and gear (a
   straw hat, a stetson, boxing gloves, a beard, spiked pauldrons, a work
   lanyard), so they read apart from across the pit before any colour.
@@ -190,7 +196,7 @@ On the character select:
 - pick the kind of match by clicking the arrows or a name on the banner, with `[` / `]` or `H` / `Y`, or with L2 / R2 on a pad; a CPU brawl on its next arena plays behind the menu;
 - or click a fighter to join on it with the keyboard, and click FIGHT! to start;
 - turn the blood on or off with `G` (the game remembers your choice);
-- switch practice on or off with `P` (R3 on a pad, or the PRACTICE button). In practice the CPUs are dummies that stand there and take it. Nobody wins, the KO'd come back on every arena, and fury never runs out. A body nobody has hurt for 1.5 seconds is whole again, torn-off limbs included (`tests/practice.test.ts`);
+- switch practice on or off with `P` (R3 on a pad, or the PRACTICE button). In practice the CPUs are dummies that stand there and take it. Nobody wins, the KO'd come back on every arena, and fury never runs out. On the falling arenas, the KO'd come back on sound floor, never onto roof that has gone or into the blimp's fire. A body nobody has hurt for 1.5 seconds is whole again, torn-off limbs included (`tests/practice.test.ts`);
 - start with Enter or Start.
 
 Each match opens with a 3, 2, 1 countdown. While it runs, every human's

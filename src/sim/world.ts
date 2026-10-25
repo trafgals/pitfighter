@@ -1188,8 +1188,9 @@ export class World {
   private respawn(f: Fighter): void {
     this.s.pickups = this.s.pickups.filter((p) => p.owner !== f.id);
     f.parts = freshParts(f.style, (p) => this.grow(f, p));
-    f.x = f.spawnX;
-    f.y = f.spawnY;
+    const at = this.arena.respawnAt(this, f); // never back onto floor that has gone
+    f.x = at.x;
+    f.y = at.y;
     f.facing = Math.atan2(-f.y, -f.x);
     f.slideX = f.slideY = 0;
     f.z = f.vz = 0;
