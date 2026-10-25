@@ -2,58 +2,14 @@
 // colour: its size, the shape of its horns, its tail, and a piece or two of
 // gear (a hat, a beard, gloves, spikes). All of it rides on the bones, so the
 // skeleton, the animation and the sim never see it. One kit per fighting style.
+//
+// The kits themselves are part of the character design and live in
+// src/data/characters.json; this module draws them.
 import * as THREE from "three";
+import type { Gear, Horns, Tail } from "../data/types";
 
-export type Horns = "goat" | "bull" | "ram" | "long" | "swept" | "nubs" | "spikes" | "broken" | "crown";
-export type Tail = "spade" | "long" | "stub" | "barbed";
-export type Gear =
-  | "mohawk"
-  | "topknot"
-  | "beard"
-  | "headband"
-  | "gloves"
-  | "pauldrons"
-  | "spines"
-  | "wings"
-  | "beret"
-  | "kasa"
-  | "stetson"
-  | "lanyard"
-  | "obi"
-  | "tusks"
-  | "title";
-
-export interface Kit {
-  /** the body's scale (1: an ordinary devil) */
-  size: number;
-  horns: Horns;
-  tail: Tail;
-  gear: Gear[];
-}
-
-export const KITS: Record<string, Kit> = {
-  "All-Round": { size: 1, horns: "goat", tail: "spade", gear: [] },
-  Power: { size: 1.2, horns: "bull", tail: "stub", gear: ["pauldrons", "tusks"] },
-  Street: { size: 1, horns: "broken", tail: "spade", gear: ["mohawk"] },
-  Karate: { size: 1, horns: "spikes", tail: "spade", gear: ["headband"] },
-  Wrestling: { size: 1.17, horns: "ram", tail: "stub", gear: ["title"] },
-  "Muay Thai": { size: 0.98, horns: "nubs", tail: "long", gear: ["headband"] },
-  Boxing: { size: 1.02, horns: "spikes", tail: "spade", gear: ["gloves"] },
-  Rush: { size: 1.02, horns: "swept", tail: "barbed", gear: ["spines"] },
-  Speed: { size: 0.8, horns: "long", tail: "long", gear: ["wings"] },
-  "Kung Fu": { size: 0.97, horns: "nubs", tail: "long", gear: ["topknot"] },
-  Mighty: { size: 1.28, horns: "crown", tail: "stub", gear: ["pauldrons", "spines"] },
-  Submission: { size: 1.05, horns: "ram", tail: "barbed", gear: ["spines"] },
-  Military: { size: 1.05, horns: "nubs", tail: "stub", gear: ["beret", "pauldrons"] },
-  Capoeira: { size: 0.95, horns: "long", tail: "long", gear: [] },
-  "Tae Kwon Do": { size: 0.93, horns: "swept", tail: "spade", gear: ["headband", "topknot"] },
-  "Samurai Sword": { size: 1, horns: "long", tail: "spade", gear: ["kasa"] },
-  Master: { size: 0.94, horns: "ram", tail: "long", gear: ["beard"] },
-  Gun: { size: 1, horns: "goat", tail: "spade", gear: ["stetson"] },
-  "Martial Arts": { size: 0.97, horns: "nubs", tail: "spade", gear: ["headband"] },
-  "Judo Based": { size: 1.06, horns: "bull", tail: "stub", gear: ["obi"] },
-  Amateur: { size: 0.95, horns: "nubs", tail: "stub", gear: ["lanyard"] },
-};
+export type { Gear, Horns, Kit, Tail } from "../data/types";
+export { KITS } from "../data/characters";
 
 /** A horn, tail or spine along `pts`: a tube that tapers from `r` at the root to a point (or to `end` of r, blunt). */
 export function taper(pts: THREE.Vector3[], r: number, end = 0.06, seg = 16, radial = 10): THREE.BufferGeometry {
