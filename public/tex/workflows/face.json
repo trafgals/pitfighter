@@ -370,7 +370,7 @@
         "430",
         0
       ],
-      "seed": 6377,
+      "seed": 4377,
       "steps": 4,
       "cfg": 1.0,
       "sampler_name": "euler",
@@ -1350,7 +1350,7 @@
         "1550",
         0
       ],
-      "seed": 6336,
+      "seed": 5336,
       "steps": 4,
       "cfg": 1.0,
       "sampler_name": "euler",
@@ -1910,7 +1910,7 @@
         "2190",
         0
       ],
-      "seed": 8884,
+      "seed": 5884,
       "steps": 4,
       "cfg": 1.0,
       "sampler_name": "euler",
@@ -2330,7 +2330,7 @@
         "2670",
         0
       ],
-      "seed": 8295,
+      "seed": 6295,
       "steps": 4,
       "cfg": 1.0,
       "sampler_name": "euler",
@@ -2750,7 +2750,7 @@
         "3150",
         0
       ],
-      "seed": 7706,
+      "seed": 6706,
       "steps": 4,
       "cfg": 1.0,
       "sampler_name": "euler",
