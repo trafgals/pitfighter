@@ -31,7 +31,7 @@ describe("strikes", () => {
     expect(w.fighters[1].parts.torso.hp).toBe(w.fighters[1].parts.torso.max);
   });
 
-  it("a mashed high string is a true combo that ends in a knockdown", () => {
+  it("a mashed high string is a true combo that ends in a launch", () => {
     const w = duel();
     const b = w.fighters[1];
     let hits = 0;
@@ -45,7 +45,7 @@ describe("strikes", () => {
     expect(STYLES[0].string).toBe(2);
     expect(hits).toBeGreaterThanOrEqual(3);
     expect(gapInStun).toBe(false);
-    expect(["down", "wakeup", "idle"]).toContain(b.state);
+    expect(["air", "down", "wakeup", "idle"]).toContain(b.state);
     expect(w.s.events.length).toBeGreaterThanOrEqual(0);
   });
 

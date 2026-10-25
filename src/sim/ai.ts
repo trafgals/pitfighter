@@ -59,6 +59,17 @@ export class Bot {
     };
     if (!alive(me) || s.winner >= 0) return out;
 
+    if (me.state === "air") {
+      // juggled: steer out of reach of whoever hit last (a better CPU pushes harder)
+      const a = s.fighters[me.lastHitBy];
+      if (a) {
+        const away = Math.atan2(me.y - a.y, me.x - a.x);
+        out.x = Math.cos(away) * this.skill;
+        out.y = Math.sin(away) * this.skill;
+      }
+      return out;
+    }
+
     if (me.state === "held") {
       if (me.t < 12 && this.rng.chance(this.skill * 0.12)) press(BTN.REV);
       return out;

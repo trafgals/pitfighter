@@ -17,6 +17,7 @@ import {
   type WorldState,
 } from "./types";
 import {
+  AIR,
   BUFFER,
   COMBO_FLOOR,
   COMBO_SCALE,
@@ -70,7 +71,9 @@ const BIT_INDEX: Record<number, number> = Object.fromEntries(BUTTONS.map((b, i) 
 const LIMB_TORSO_SHARE = 0.35; // part of every limb/head hit that also lands on the torso
 export const BODY_R = 0.33;
 // states a knock leaves you in: falling from one of them credits whoever hit you last
-const KNOCKED = new Set(["down", "hitstun", "blockstun", "thrown", "reversed", "dizzy"]);
+const KNOCKED = new Set(["down", "hitstun", "blockstun", "thrown", "reversed", "dizzy", "air"]);
+/** Launched and still up: the juggle states. */
+export const airborne = (f: Fighter): boolean => f.state === "air";
 
 export function arms(f: Fighter): number {
   return (f.parts.armL.attached ? 1 : 0) + (f.parts.armR.attached ? 1 : 0);
@@ -148,6 +151,12 @@ export class World {
         dirX: 0,
         dirY: 0,
         running: false,
+        z: 0,
+        vz: 0,
+        juggle: 0,
+        bounced: false,
+        stickX: 0,
+        stickY: 0,
         state: "idle",
         t: 0,
         dur: 0,
@@ -292,6 +301,8 @@ export class World {
     const edges = inp.buttons & ~f.prevButtons;
     for (const b of BUTTONS) if (edges & b) f.pressed[BIT_INDEX[b]] = this.s.frame;
     f.prevButtons = inp.buttons;
+    f.stickX = inp.x;
+    f.stickY = inp.y;
   }
 
   buffered(f: Fighter, b: number, since = this.s.frame - BUFFER): boolean {
@@ -394,6 +405,14 @@ export class World {
       case "evade":
         if (f.t < EVADE.move) this.travel(f, f.dirX * EVADE.speed, f.dirY * EVADE.speed);
         break;
+      case "air": {
+        // Soul Calibur's air control: the stick drifts the body, harder for every hit taken up here
+        const st = this.stick(inp);
+        const k = Math.min(AIR.steerMax, AIR.steer * f.juggle) * st.mag;
+        f.slideX += st.dx * k;
+        f.slideY += st.dy * k;
+        break;
+      }
       case "attack":
         this.updateAttack(f, inp);
         break;
@@ -818,6 +837,7 @@ export class World {
   private hittable(d: Fighter, height: Height): boolean {
     if (!alive(d) || d.state === "thrown" || d.state === "driving" || d.invuln > 0) return false;
     if (d.state === "down") return height === "low"; // only low strikes reach a downed body
+    if (d.state === "air") return d.z < (height === "low" ? AIR.low : AIR.high); // a body flown too high is out of reach
     if (d.state === "wakeup") return false;
     return true;
   }
@@ -860,6 +880,10 @@ export class World {
 
     if (d.state === "holding" || d.state === "held") this.release(d);
     if (d.state === "reattach") this.dropReattach(d);
+    if (d.state === "air" || (m.launch && !crowd)) {
+      this.juggle(d, a, dx, dy, m);
+      return;
+    }
     if (knock) {
       this.knockDown(d, dx, dy, Math.max(m.push, 0.8));
       if (crowd) {
@@ -871,6 +895,37 @@ export class World {
       this.setState(d, "hitstun", m.hitstun);
       d.slideX = (dx * m.push) / 8;
       d.slideY = (dy * m.push) / 8;
+    }
+  }
+
+  /**
+   * A launcher sends the victim up; every later blow while they are up pops
+   * them a little higher (up to AIR.maxPops) and pushes them on, and a stick
+   * held away from the attacker as it lands flies them further for every hit
+   * of the juggle so far. Gravity stays the same however long it runs.
+   */
+  private juggle(d: Fighter, a: Fighter, dx: number, dy: number, m: Move): void {
+    const fresh = d.state !== "air";
+    if (fresh) {
+      if (d.state === "dizzy") d.parts.head.hp = DIZZY.headReset;
+      this.setState(d, "air");
+      d.juggle = 1;
+      d.bounced = false;
+      d.vz = Math.max(d.vz, AIR.launch);
+      this.ev({ kind: "launch", a: a.id, b: d.id });
+    } else {
+      d.juggle++;
+      if (d.juggle <= AIR.maxPops) d.vz = Math.max(d.vz, 0) + AIR.pop;
+    }
+    // a launch goes straight up, so the next blow can follow it
+    const k = fresh ? 0 : 1 / 40;
+    d.slideX = dx * m.push * k;
+    d.slideY = dy * m.push * k;
+    const st = this.stick({ x: d.stickX, y: d.stickY, buttons: 0 });
+    const away = st.dx * dx + st.dy * dy;
+    if (!fresh && away > 0.3) {
+      d.slideX += dx * AIR.flee * d.juggle * away;
+      d.slideY += dy * AIR.flee * d.juggle * away;
     }
   }
 
@@ -1026,6 +1081,8 @@ export class World {
     f.y = f.spawnY;
     f.facing = Math.atan2(-f.y, -f.x);
     f.slideX = f.slideY = 0;
+    f.z = f.vz = 0;
+    f.juggle = 0;
     f.combo = 0;
     f.recentHits = [];
     f.lastHitBy = -1;
@@ -1055,7 +1112,7 @@ export class World {
     let bd = 1e9;
     for (const d of this.s.fighters) {
       if (d.id === f.id || !this.inCone(f, d, reach, GRAB.arc)) continue;
-      if (d.invuln > 0 || ["ko", "falling", "driving", "down", "wakeup", "thrown", "held", "holding"].includes(d.state)) continue;
+      if (d.invuln > 0 || ["ko", "falling", "driving", "down", "wakeup", "thrown", "held", "holding", "air"].includes(d.state)) continue;
       const dd = dist(f, d);
       if (dd < bd) {
         bd = dd;
@@ -1103,7 +1160,8 @@ export class World {
       if (f.state === "seated" || f.state === "driving" || this.frozen[f.id]) continue;
       f.x += f.slideX;
       f.y += f.slideY;
-      const decay = f.state === "thrown" ? 1 : 0.85;
+      if (f.state === "air" || f.z > 0) this.fly(f);
+      const decay = f.state === "thrown" ? 1 : f.state === "air" ? AIR.drag : 0.85;
       f.slideX *= decay;
       f.slideY *= decay;
       if (Math.abs(f.slideX) < 1e-4) f.slideX = 0;
@@ -1116,6 +1174,7 @@ export class World {
         const b = fs[j];
         if (!alive(a) || !alive(b) || a.state === "thrown" || b.state === "thrown" || a.state === "driving" || b.state === "driving") continue;
         if (a.partner === b.id && (a.state === "holding" || a.state === "held")) continue;
+        if (Math.abs(a.z - b.z) > 1) continue; // one flies over the other
         const dx = b.x - a.x;
         const dy = b.y - a.y;
         const d = Math.hypot(dx, dy);
@@ -1137,6 +1196,25 @@ export class World {
       }
     }
     for (const f of fs) if (f.state !== "falling") this.arena.bound(this, f);
+  }
+
+  /** Height under the floaty gravity: one bounce off the floor, then down. */
+  private fly(f: Fighter): void {
+    f.z += f.vz;
+    f.vz -= AIR.g;
+    if (f.z > 0) return;
+    f.z = 0;
+    const fall = -f.vz;
+    f.vz = 0;
+    if (f.state !== "air") return;
+    if (!f.bounced && fall > AIR.bounceMin) {
+      f.bounced = true;
+      f.vz = fall * AIR.bounce;
+      this.ev({ kind: "bounce", a: f.id });
+      return;
+    }
+    f.juggle = 0;
+    this.setState(f, "down", DOWN.dur);
   }
 
   private updatePickups(): void {
@@ -1197,6 +1275,9 @@ export class World {
       mix(f.fury);
       mix(f.vehicle);
       mix(f.running ? 1 : 0);
+      mix(f.z);
+      mix(f.vz);
+      mix(f.juggle);
       mix(f.out ? 1 : 0);
       for (const p of PARTS) mix(f.parts[p].hp + (f.parts[p].attached ? 1000 : 0));
     }

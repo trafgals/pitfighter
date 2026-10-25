@@ -143,6 +143,15 @@ export class Sfx {
       this.tone(t, o, "sine", 90, 38, 0.8, 0.22);
       this.noiseHit(t, o, "lowpass", 500, 90, 0.7, 0.55, 0.22);
     },
+    // up into a juggle: a rising whoosh; off the floor again: a softer thud
+    launch: (t, o) => {
+      this.noiseHit(t, o, "bandpass", 400, 2400, 1.1, 0.3, 0.35);
+      this.tone(t, o, "sine", 140, 420, 0.3, 0.3);
+    },
+    bounce: (t, o) => {
+      this.tone(t, o, "sine", 110, 50, 0.6, 0.16);
+      this.noiseHit(t, o, "lowpass", 500, 120, 0.6, 0.4, 0.16);
+    },
     detach: (t, o) => {
       this.noiseHit(t, o, "bandpass", 1400, 260, 3, 0.6, 0.22);
       this.tone(t, o, "sawtooth", 320, 70, 0.18, 0.2);

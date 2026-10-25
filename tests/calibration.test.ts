@@ -45,7 +45,7 @@ describe("Urban Reign calibration", () => {
     const w = duel(1.0, [style, ALL_ROUND], RAW);
     const hits: number[] = [];
     run(w, 120, (inp, i) => {
-      if (i % 6 === 0) inp[0].buttons = BTN.HIGH;
+      if (i % 6 === 0 && w.fighters[1].state !== "air") inp[0].buttons = BTN.HIGH; // the finisher launches: stop there
       if (hitOn(w)) hits.push(w.s.frame);
     });
     expect(hits.length).toBe(4);

@@ -67,6 +67,9 @@ export type FighterState =
   | "holding"
   | "held"
   | "thrown"
+  | "air" // launched: floating, juggled, steering with the stick until the floor
+  | "airslam" // an air grab: carrying the victim down
+  | "airslammed"
   | "down"
   | "wakeup"
   | "dizzy"
@@ -91,6 +94,12 @@ export interface Fighter {
   dirX: number; // the direction of a dash or an evade (unit)
   dirY: number;
   running: boolean; // Cross held while moving
+  z: number; // height above the floor (m): only a launched body leaves it
+  vz: number; // m/frame, up +
+  juggle: number; // hits taken in the air since the launch: the more, the harder the victim can steer
+  bounced: boolean; // this juggle has bounced off the floor once already
+  stickX: number; // the stick as last read (steering in the air)
+  stickY: number;
   state: FighterState;
   t: number; // frames spent in the current state
   dur: number; // planned length of the current state (0 = open ended)
@@ -211,7 +220,11 @@ export interface GameEvent {
     | "collapse"
     | "wind"
     | "impact" // the blimp hits the ground
-    | "capture";
+    | "capture"
+    | "launch" // a launcher sends a fighter up
+    | "bounce" // a juggled body bounces off the floor
+    | "airgrab" // caught out of the air (what: the grab's name)
+    | "crunch"; // a flying body hits a wall, a prop or another fighter
   a: number; // actor
   b?: number; // other party
   part?: PartId;

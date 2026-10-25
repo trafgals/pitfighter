@@ -32,19 +32,27 @@ their look is `src/render/stageviews.ts`. A match is started with
 The combat is modelled on the feel of Namco's *Urban Reign*:
 
 - frame-data strikes measured from the real game: a 12f jab, strings that combo on hit, and heavy enders that knock down;
+- juggles: the neutral string's finisher launches, as Urban Reign's does, and blows in the air keep the body up;
 - a deflect that catches a strike, high or low, landing on its frames 2�14;
 - grapples with knees and directional throws;
 - no guard (as in Urban Reign): evades, dashes and runs instead; combo damage scaling and wake-up invulnerability;
 - soft lock-on, and R1 to lock on and strafe;
 - multi-target hits, kinetic pushback when you land a reversal, and dogpile protection.
 
-Pitfighter changes two things (`src/sim/moves.ts`, `tests/tweaks.test.ts`):
+Pitfighter changes three things (`src/sim/moves.ts`, `tests/tweaks.test.ts`, `tests/juggle.test.ts`):
 
-- **Charged openers.** Hold □ or ✕ to charge the first strike of a string. It
+- **Charged openers.** Hold ○ to charge the first strike of a string. It
   waits on its last startup frame while you hold, for up to 1 s, and fires on
   release with up to double damage and knockback. A full charge knocks down.
   A tap is the normal strike, and the follow-ups of a string never charge.
   You glow while you charge, and you can be hit out of it.
+- **Air control.** A juggled body floats on a soft gravity (two thirds of
+  Earth's) that never grows, however long the juggle runs. Every blow in the
+  air pops it up again, up to eight. The victim steers with the stick, as in
+  Soul Calibur, and harder for every hit taken in the air. Holding the stick
+  away from the attacker as a blow lands flies them further off, more for every
+  hit so far, so a long juggle gets easier to escape. A body flown above 1.9 m
+  is out of reach. It bounces once off the floor and then lies there.
 - **Whiffed reversals.** A reversal that counters nothing takes 3x as long to
   recover from (63 frames after its window instead of 21), so spamming
   reversal gets punished. A reversal that lands ends at once, as before.

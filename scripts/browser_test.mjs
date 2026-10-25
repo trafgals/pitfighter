@@ -321,6 +321,34 @@ async function main() {
   check(px.lit > 200 && px.colours > 40, `canvas renders the arena (${px.lit} lit px, ${px.colours} colours)`);
   await page.screenshot({ path: path.join(OUT, "3_match_fight.png") });
 
+  // a juggle: the CPUs' strings launch, and the launched body is drawn up in the air
+  const launch = await withTimeout(
+    page.evaluate(() => {
+      const g = window.__game;
+      let who = -1;
+      for (let i = 0; i < 5400 && g.mode === "match" && who < 0; i++) {
+        g.step(1);
+        const e = g.world.s.events.find((q) => q.kind === "launch");
+        if (e) who = e.b;
+      }
+      if (who >= 0) for (let i = 0; i < 30 && g.world.fighters[who].state === "air" && g.world.fighters[who].z < 0.6; i++) g.step(1);
+      return { who, frame: g.world.s.frame, played: g.sfx.played.launch ?? 0 };
+    }),
+    40_000,
+    "wait for a launch",
+  );
+  if (launch.who >= 0) {
+    await new Promise((r) => setTimeout(r, 80));
+    const up = await page.evaluate((who) => {
+      const g = window.__game;
+      const f = g.world.fighters[who];
+      return { state: f.state, z: f.z, y: g.scene.fighters[who].root.position.y };
+    }, launch.who);
+    check(up.state !== "air" || (up.z > 0.3 && Math.abs(up.y - up.z) < 0.05), `a launched fighter is drawn up in the air (${JSON.stringify(up)})`);
+    if (up.state === "air") await page.screenshot({ path: path.join(OUT, "6_juggle.png") });
+  }
+  check(launch.who >= 0 && launch.played > 0, `the CPUs' strings launched someone, with sound (fighter ${launch.who} at frame ${launch.frame})`);
+
   // the end of the match: the winning KO slows time nearly to a stop, and the camera closes in on the body
   const end = await withTimeout(
     page.evaluate(() => {

@@ -604,6 +604,8 @@ export interface Cue {
   age: number;
   blend: Pose | null;
 }
+/** Came down out of the air already lying flat: a throw or a juggle. */
+export const flung = (from: Fighter["state"] | null): boolean => from === "thrown" || from === "air";
 export const noCue = (): Cue => ({ last: null, from: null, throwAge: 99, react: null, face: 1, lie: 0, side: 1, key: "", start: 0, at: 0, age: 0, blend: null });
 
 /** What targetPose decided, besides the pose: which feet carry the weight, and what is playing (for the debug overlay and the strips). */
@@ -844,11 +846,16 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
     case "thrown":
       play(THROWN, t, stateTiming(f.dur || 24));
       break;
+    case "air":
+      // up in a juggle: laid out in the throw's flight, held there until the floor
+      play(THROWN, Math.min(t, 12), stateTiming(24));
+      label = "juggled";
+      break;
     case "down":
     case "ko":
       // off the back of a throw the body is already on the floor: only the bounce
       {
-        const c = cue.from === "thrown" ? DOWN_LANDED : cue.face > 0 ? DOWN_BACK : DOWN_FRONT;
+        const c = flung(cue.from) ? DOWN_LANDED : cue.face > 0 ? DOWN_BACK : DOWN_FRONT;
         play(c, f.state === "ko" ? Math.max(t, FALL_LAND + 10) : t, stateTiming(DOWN.dur));
         label = c === DOWN_LANDED ? "landed" : c === DOWN_BACK ? "down back" : "down front";
       }
@@ -942,7 +949,7 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
     p.kneeL = p.kneeR = 0.4;
   }
   if (nLegs < 2) plant = "none"; // a hop or a drag: no foot stays put
-  if (nLegs === 0 && !["down", "ko", "thrown", "held", "wakeup", "driving", "falling"].includes(f.state)) {
+  if (nLegs === 0 && !["down", "ko", "thrown", "air", "held", "wakeup", "driving", "falling"].includes(f.state)) {
     // upright on the stumps, springing off the floor: high in the air, squashed low on landing
     const ph = f.hopPhase % HOP_CYCLE;
     const air = ph < HOP_AIR ? Math.sin((ph / HOP_AIR) * Math.PI) : 0;

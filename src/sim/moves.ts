@@ -44,6 +44,7 @@ export interface Move {
   next?: string; // string follow-up, cancellable once this move has connected
   kind: "punch" | "kick" | "head" | "special";
   dash?: number; // metres per frame the attacker travels during the active frames
+  launch?: boolean; // a launcher: the victim goes up into a juggle instead of down
   rehit?: number; // the move can hit the same fighter again every `rehit` active frames
 }
 
@@ -51,7 +52,8 @@ export const MOVES: Record<string, Move> = {
   jab1: { id: "jab1", startup: 12, active: 3, recovery: 28, dmg: 4, hitstun: 41, blockstun: 26, height: "high", reach: 1.25, arc: 0.55, push: 0.15, knockdown: false, next: "jab2", kind: "punch" },
   jab2: { id: "jab2", startup: 9, active: 3, recovery: 24, dmg: 5, hitstun: 41, blockstun: 22, height: "high", reach: 1.25, arc: 0.55, push: 0.2, knockdown: false, next: "jab3", kind: "punch" },
   jab3: { id: "jab3", startup: 11, active: 3, recovery: 24, dmg: 5, hitstun: 41, blockstun: 22, height: "high", reach: 1.3, arc: 0.55, push: 0.2, knockdown: false, next: "punchFin", kind: "punch" },
-  punchFin: { id: "punchFin", startup: 17, active: 4, recovery: 26, dmg: 9, hitstun: 0, blockstun: 25, height: "high", reach: 1.4, arc: 0.5, push: 1.4, knockdown: true, kind: "punch" },
+  // the string's finisher launches, as Urban Reign's neutral string does
+  punchFin: { id: "punchFin", startup: 17, active: 4, recovery: 26, dmg: 9, hitstun: 0, blockstun: 25, height: "high", reach: 1.4, arc: 0.5, push: 1.4, knockdown: true, kind: "punch", launch: true },
   kick1: { id: "kick1", startup: 18, active: 3, recovery: 27, dmg: 5, hitstun: 41, blockstun: 25, height: "low", reach: 1.45, arc: 0.5, push: 0.2, knockdown: false, next: "kick2", kind: "kick" },
   kick2: { id: "kick2", startup: 20, active: 3, recovery: 28, dmg: 6, hitstun: 41, blockstun: 26, height: "low", reach: 1.45, arc: 0.5, push: 0.25, knockdown: false, next: "sweep", kind: "kick" },
   sweep: { id: "sweep", startup: 26, active: 4, recovery: 30, dmg: 7, hitstun: 0, blockstun: 29, height: "low", reach: 1.6, arc: 0.35, push: 0.8, knockdown: true, kind: "kick" },
@@ -138,3 +140,22 @@ export const TAUNT = { dur: 70, fury: 25 };
 export const HOP_CYCLE = 24;
 export const HOP_AIR = 14;
 export const BUFFER = 8; // input buffer for presses, frames
+
+// Juggles. Urban Reign's neutral string launches; here the body then floats on
+// a soft, floaty gravity so more blows can follow, and every blow in the air
+// pops it up again. The juggled fighter steers with the stick (Soul Calibur's
+// air control), harder for every hit taken in the air, and pushing away from
+// the attacker as a hit lands flies them further off: the longer a juggle
+// runs, the likelier it slips out of reach. Gravity never grows with the hits;
+// a juggle ends when it is steered out of reach, grabbed, or lands.
+//   launch / pop    m/frame up on the launcher / on each air hit (pops stop after maxPops)
+//   g               m/frame^2 (0.0018: 6.5 m/s^2, about two thirds of Earth's)
+//   steer, steerMax stick drift per frame per air hit, and its cap
+//   flee            m/frame pushed away per air hit, for a stick held away from the blow
+//   drag            the drift kept each frame in the air
+//   high / low      how high a high / low strike still reaches a body in the air
+//   bounce          the first landing bounces back up this hard (once), if falling faster than bounceMin
+export const AIR = { launch: 0.062, pop: 0.034, maxPops: 8, g: 0.0018, steer: 0.0011, steerMax: 0.0066, flee: 0.012, drag: 0.96, high: 1.9, low: 0.75, bounce: 0.32, bounceMin: 0.035 };
+// A body flying fast into a wall, a prop or a fighter: `speed` m/frame or more crunches,
+// for `dmg` per m/frame on a limb (and the usual share on the torso); it rebounds at `rebound`.
+export const CRUNCH = { speed: 0.05, dmg: 90, rebound: 0.45, knock: 0.06 };
