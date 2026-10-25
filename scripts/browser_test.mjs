@@ -31,7 +31,7 @@ const teardown = async (code) => {
 // The watchdog is a safety net against a hang, not a deadline. It is generous
 // because the test draws with whatever the machine has: a software renderer
 // takes a quarter of a second a frame, and the whole run is mostly real time.
-const WATCHDOG_MS = Number(process.env.BROWSER_TEST_TIMEOUT_MS || 420_000);
+const WATCHDOG_MS = Number(process.env.BROWSER_TEST_TIMEOUT_MS || 600_000);
 const watchdog = setTimeout(() => {
   console.error(`TIMEOUT: browser test exceeded ${WATCHDOG_MS / 1000} s`);
   teardown(1);
@@ -75,6 +75,17 @@ async function main() {
   page.on("pageerror", (e) => errors.push(String(e)));
   page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
 
+  // Wait for the game to reach a state instead of waiting a fixed time: the
+  // runner draws on the CPU (SwiftShader) and can take a quarter of a second a
+  // frame, so wall clock is not a stand-in for "the game got there".
+  const until = async (fn, arg, what) => {
+    const ok = await page
+      .waitForFunction(fn, { timeout: 20_000, polling: "raf" }, arg)
+      .then(() => true, () => false);
+    if (!ok) console.log(`      (timed out waiting for ${what})`);
+    return ok;
+  };
+
   await withTimeout(page.goto(`${SITE}/?seed=5`, { waitUntil: "load" }), 20_000, "load page");
   await page.waitForFunction(() => window.__game && window.__game.mode === "select", { timeout: 10_000 });
   check(true, "page boots to the character select");
@@ -116,9 +127,9 @@ async function main() {
       arenas: document.querySelector(".starenas").textContent,
     }));
   const b0 = await behind();
-  await new Promise((r) => setTimeout(r, 400));
+  const brawl = await until((f) => (window.__game.world?.s.frame ?? -1) > f, b0.frame, "the brawl behind the menu to start");
   const b1 = await behind();
-  check(b0.world === "hell-toilet" && b1.frame > b0.frame, `a CPU brawl plays on the next arena behind the menu (${JSON.stringify(b0)} -> frame ${b1.frame})`);
+  check(b0.world === "hell-toilet" && brawl && b1.frame > b0.frame, `a CPU brawl plays on the next arena behind the menu (${JSON.stringify(b0)} -> frame ${b1.frame})`);
   check(b0.type === "king" && b0.name === "King of the Hill" && /Hell Toilet/.test(b0.arenas) && /Castle Under Siege/.test(b0.arenas), `the menu picks a match type, not a stage, and lists its arenas (${JSON.stringify(b0)})`);
   await page.click(".stagepick .next");
   const b2 = await behind();
@@ -256,8 +267,17 @@ async function main() {
     const masses = fs.map((f) => f.parts.armR.trait.mass);
     const on = fs.findIndex((f) => f.parts.armR.attached);
     // only the arms on a body: a torn-off arm keeps its roll, so its owner's empty socket and whoever wears it now show the same one
-    const worn = fs.filter((f) => f.parts.armR.attached).map((f) => f.parts.armR.trait.mass);
-    return { distinct: new Set(worn.map((m) => m.toFixed(4))).size, n: worn.length, mass: masses[on], scale: g.scene.fighters[on].limbs.armR.scale.x };
+    const worn = fs.filter((f) => f.parts.armR.attached);
+    // the whole roll, not just the mass: the mass is clamped to 0.75..1.35, so two
+    // heavy styles can and do come out with the same mass, and that is not two
+    // arms wearing the same roll
+    const distinct = new Set(
+      worn.map((f) => {
+        const t = f.parts.armR.trait;
+        return `${t.tip}|${t.mass.toFixed(4)}|${t.length.toFixed(4)}|${t.swing.toFixed(4)}|${t.arc.toFixed(4)}`;
+      }),
+    ).size;
+    return { distinct, n: worn.length, mass: masses[on], scale: g.scene.fighters[on].limbs.armR.scale.x };
   });
   check(limbs.n >= 4 && limbs.distinct === limbs.n, `every right arm on a body rolled its own traits (${limbs.distinct} distinct of ${limbs.n} worn)`);
   check(Math.abs(limbs.scale - Math.pow(limbs.mass, 0.8)) < 1e-6, `the fist on screen is sized by the arm's mass (${limbs.mass.toFixed(3)} -> ${limbs.scale.toFixed(3)})`);
@@ -309,8 +329,14 @@ async function main() {
   check(feel.flash > 0.3, `the heavy hit flashed the picture white-hot (${feel.flash.toFixed(2)})`);
   await new Promise((r) => setTimeout(r, 60));
   await page.screenshot({ path: path.join(OUT, "4_heavy_hit.png") });
-  // the blood those hits drew: drops thrown, and splats where they landed
-  await new Promise((r) => setTimeout(r, 1200));
+  // the blood those hits drew: drops thrown, and splats where they landed.
+  // Wait for both numbers the check asks about, so it cannot read the stats
+  // before the drops have all been thrown
+  await until(
+    (n) => window.__game.scene.fx.stats.splats > n.s && window.__game.scene.fx.stats.drops > n.d,
+    { s: 20, d: 50 },
+    "the blood to splat",
+  );
   const gore = await page.evaluate(() => ({ ...window.__game.scene.fx.stats, wounded: window.__game.scene.fighters.filter((v) => v.wounds.torso.n + v.wounds.head.n > 0).length }));
   check(gore.wounded > 0, `the hurt are bloodied: ${gore.wounded} fighters' skins carry wounds`);
   check(gore.drops > 50 && gore.splats > 20, `hits draw blood that splats on the floor (${gore.drops} drops, ${gore.splats} splats)`);
@@ -336,24 +362,41 @@ async function main() {
     await page.screenshot({ path: path.join(OUT, "5_special.png") });
   }
 
-  // the canvas actually renders a lit 3D scene (not a black frame)
+  // the canvas actually renders a lit 3D scene (not a black frame).
+  // A heavy blow blows the whole picture white for a few frames - the tone
+  // mapping exposure follows the flash - and a slow motion finale can hold it
+  // there, so a single read can catch the screen washed out or black. Look over
+  // a short window and keep the best read: a rendered arena has hundreds of
+  // colours, a flash or a dark frame has one or two.
+  const litCanvas = () =>
+    page.evaluate(async () => {
+      const c = document.querySelector("#view");
+      const read = () => {
+        const g = document.createElement("canvas");
+        g.width = 64;
+        g.height = 40;
+        const ctx = g.getContext("2d");
+        ctx.drawImage(c, 0, 0, 64, 40);
+        const d = ctx.getImageData(0, 0, 64, 40).data;
+        let lit = 0;
+        const colours = new Set();
+        for (let i = 0; i < d.length; i += 4) {
+          if (d[i] + d[i + 1] + d[i + 2] > 120) lit++;
+          colours.add(((d[i] >> 4) << 8) | ((d[i + 1] >> 4) << 4) | (d[i + 2] >> 4));
+        }
+        return { lit, colours: colours.size };
+      };
+      let best = { lit: 0, colours: 0 };
+      for (let i = 0; i < 16; i++) {
+        const px = read();
+        if (px.colours > best.colours) best = px;
+        if (px.lit > 200 && px.colours > 40) return px;
+        await new Promise((r) => setTimeout(r, 120));
+      }
+      return best;
+    });
   await new Promise((r) => setTimeout(r, 500));
-  const px = await page.evaluate(() => {
-    const c = document.querySelector("#view");
-    const g = document.createElement("canvas");
-    g.width = 64;
-    g.height = 40;
-    const ctx = g.getContext("2d");
-    ctx.drawImage(c, 0, 0, 64, 40);
-    const d = ctx.getImageData(0, 0, 64, 40).data;
-    let lit = 0;
-    const colours = new Set();
-    for (let i = 0; i < d.length; i += 4) {
-      if (d[i] + d[i + 1] + d[i + 2] > 120) lit++;
-      colours.add(((d[i] >> 4) << 8) | ((d[i + 1] >> 4) << 4) | (d[i + 2] >> 4));
-    }
-    return { lit, colours: colours.size };
-  });
+  const px = await litCanvas();
   check(px.lit > 200 && px.colours > 40, `canvas renders the arena (${px.lit} lit px, ${px.colours} colours)`);
   await page.screenshot({ path: path.join(OUT, "3_match_fight.png") });
 
@@ -430,11 +473,15 @@ async function main() {
   console.log("      match end:", JSON.stringify(end));
   check(end.mode === "over" && end.finale, `the match ended on a closing shot (${end.mode}, finale ${end.finale})`);
   if (end.ko) check(end.slow < 0.3, `the winning KO slowed time to ${end.slow.toFixed(2)}`);
-  await new Promise((r) => setTimeout(r, 450));
-  const still = await page.evaluate(() => window.__game.scene.timeScale);
-  if (end.ko) check(still < 1, `the slow motion holds a moment in real time (${still.toFixed(2)})`);
+  if (end.ko) {
+    // a real time wait, not a wait for the state: the hold is the claim, and
+    // time is already slowed, so waiting for it to be slowed proves nothing
+    await new Promise((r) => setTimeout(r, 450));
+    const still = await page.evaluate(() => window.__game.scene.timeScale);
+    check(still < 1, `the slow motion holds a moment in real time (${still.toFixed(2)})`);
+  }
   await page.screenshot({ path: path.join(OUT, "6_finale.png") });
-  await new Promise((r) => setTimeout(r, 2500));
+  await until(() => window.__game.scene.timeScale === 1, null, "time to run at full speed again");
   const back = await page.evaluate(() => window.__game.scene.timeScale);
   check(back === 1, `then time runs at full speed again (${back})`);
 
@@ -471,23 +518,6 @@ async function main() {
   check(padMatch.length === 4 && padMatch[0] && padMatch.slice(1).every((h) => !h), `a third Start starts the match with the pad as P1 and 3 CPUs (${JSON.stringify(padMatch)})`);
 
   // every other stage: start an 8-CPU match with ?stage=, play it, look at it
-  const litCanvas = () =>
-    page.evaluate(() => {
-      const c = document.querySelector("#view");
-      const g = document.createElement("canvas");
-      g.width = 64;
-      g.height = 40;
-      const ctx = g.getContext("2d");
-      ctx.drawImage(c, 0, 0, 64, 40);
-      const d = ctx.getImageData(0, 0, 64, 40).data;
-      let lit = 0;
-      const colours = new Set();
-      for (let i = 0; i < d.length; i += 4) {
-        if (d[i] + d[i + 1] + d[i + 2] > 120) lit++;
-        colours.add(((d[i] >> 4) << 8) | ((d[i + 1] >> 4) << 4) | (d[i + 2] >> 4));
-      }
-      return { lit, colours: colours.size };
-    });
   const STAGE_RUNS = [
     { id: "construction-site", frames: 1500 },
     { id: "collapsing-tower", frames: 1800 },
@@ -606,14 +636,17 @@ async function main() {
     sheets: document.querySelectorAll("#moves .sheet").length,
     frame: window.__game.world.s.frame,
   }));
-  await new Promise((r) => setTimeout(r, 400));
+  // the move list holds the fight: the frame it was opened on is still the frame
+  // several rendered frames later
+  await frames();
+  await frames();
   const held = await page.evaluate(() => window.__game.world.s.frame);
   check(ml.open && ml.sheets === 2 && /Air grab: [A-Z]/.test(ml.text) && /Launcher/.test(ml.text) && /Sweep/.test(ml.text), `Tab opens the move list: a sheet per fighter when nobody is human, strings and the air grab (${ml.sheets} sheets)`);
   check(held === ml.frame, `the move list holds the fight (frame ${ml.frame} -> ${held})`);
   await page.keyboard.press("Tab");
-  await new Promise((r) => setTimeout(r, 400));
+  const again = await until((f) => window.__game.world.s.frame > f, held, "the fight to go on");
   const gone = await page.evaluate(() => ({ open: document.querySelector("#moves").classList.contains("show"), frame: window.__game.world.s.frame }));
-  check(!gone.open && gone.frame > held, `Tab again closes it and the fight goes on (frame ${held} -> ${gone.frame})`);
+  check(!gone.open && again && gone.frame > held, `Tab again closes it and the fight goes on (frame ${held} -> ${gone.frame})`);
   await page.screenshot({ path: path.join(OUT, "9_practice.png") });
   check(errors.length === 0, `practice: no page errors${errors.length ? ": " + errors.slice(0, 3).join(" | ") : ""}`);
 
@@ -649,7 +682,9 @@ async function main() {
           requestAnimationFrame(tick);
         }),
     ),
-    60_000,
+    // 120 frames on a software renderer is 30 s of drawing, and the first
+    // frames also pay for the shaders: the runner is shared and slow at times
+    180_000,
     "measure frame time",
   );
   console.log(`      frame time: ${JSON.stringify(ft)}`);
