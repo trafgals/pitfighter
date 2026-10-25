@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { FURY, KO_FRAMES, PRACTICE } from "../src/sim/moves";
 import type { StageId } from "../src/sim/stages";
 import { World } from "../src/sim/world";
+import { onDeck, tileAt, tileRing } from "../src/sim/arena";
 import { run } from "./helpers";
 
 const world = (practice: boolean, stage: StageId = "hell-toilet") => new World({ seed: 3, styles: [0, 1], humans: [true, false], stage, practice });
@@ -36,6 +37,34 @@ describe("practice", () => {
       expect(f.out, `practice ${practice}`).toBe(!practice);
       if (practice) expect(f.parts.torso.hp).toBe(f.parts.torso.max);
     }
+  });
+
+  it("they come back on sound floor: never onto roof that has fallen, or into the blimp's fire", () => {
+    const w = world(true, "collapsing-tower");
+    const f = w.fighters[1];
+    // the whole outer roof is gone, the spawn tile with it
+    w.s.arena.tiles = w.s.arena.tiles.map((_, k) => (tileRing(k) > 0.5 ? -1 : 0));
+    expect(w.s.arena.tiles[tileAt(f.spawnX, f.spawnY)]).toBe(-1);
+    w.damage(f, "torso", 1e4, 0);
+    run(w, KO_FRAMES + 30);
+    expect(w.s.arena.tiles[tileAt(f.x, f.y)]).toBe(0);
+    expect(["idle", "walk"]).toContain(f.state);
+
+    const b = world(true, "hindenburg-blimp");
+    const g = b.fighters[0];
+    b.s.arena.fireX = g.spawnX - 3; // the fire is past where they started
+    b.damage(g, "torso", 1e4, 1);
+    run(b, KO_FRAMES + 2);
+    expect(g.x).toBeLessThan(b.s.arena.fireX - 1);
+    expect(onDeck(g.x, g.y)).toBe(true);
+  });
+
+  it("where the floor is sound they come back where they started", () => {
+    const w = world(true, "collapsing-tower");
+    const f = w.fighters[1];
+    w.damage(f, "torso", 1e4, 0);
+    run(w, KO_FRAMES + 2);
+    expect([f.x, f.y]).toEqual([f.spawnX, f.spawnY]);
   });
 
   it(`a body nobody has hurt for ${PRACTICE.refill} frames is whole again; one still being hit is not`, () => {

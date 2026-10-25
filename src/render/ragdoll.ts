@@ -16,7 +16,17 @@
 // lie there through the knockdown, and the get-up blends out of that pose.
 // The bones are then turned to lie along the ragdoll's points. The ragdoll
 // works in the root's frame, so the sim's own slide along the floor carries it.
+//
+// Up in a juggle the body is on the ragdoll from the launch to the floor, one
+// fall with the landing. The root flies the sim's arc, and every change in its
+// speed (the launch, each pop, a push, the bounce) is felt by the limbs as
+// the opposite jolt: they lag behind the blow and whip after it, and in
+// between, falling with the body, they float. The trunk is the body the sim
+// flies, so it holds its clip (AIR_TRUNK), coming fully onto it over the last
+// AIR_LAND frames before the floor: it tumbles through the throw's flight and
+// is laid out on the landing's pose when it lands.
 import * as THREE from "three";
+import { AIR } from "../sim/moves";
 import type { Fighter } from "../sim/types";
 import type { Body, Target } from "./body";
 import { FALL_LAND } from "./motion";
@@ -33,6 +43,21 @@ export const LIMP = 0.015;
 export const SETTLE = 10;
 /** Frames the get-up takes to blend out of the pose the body lay in. */
 export const WAKE_BLEND = 12;
+/** Up in a juggle: the frames before the floor over which the trunk's motor comes on full. */
+export const AIR_LAND = 10;
+/** Up in a juggle: the trunk's motor (it is the body the sim flies, so it holds its clip), and how fast every point's own swing dies away (per frame). */
+export const AIR_TRUNK = 0.35;
+const AIR_DAMP = 0.94;
+/** The most a single sim step's jolt can change the points' speed (m per sim frame): a teleport is not a blow. */
+const JOLT_MAX = 0.12;
+
+/** Sim frames until an airborne body is on the floor: its fall under the sim's gravity, or the air grab's slam. */
+export function airLeft(f: Fighter): number {
+  if (f.state === "airslammed") return Math.max(0, f.dur - f.t);
+  return (f.vz + Math.sqrt(f.vz * f.vz + 2 * AIR.g * Math.max(0, f.z))) / AIR.g;
+}
+const airborne = (s: Fighter["state"] | null) => s === "air" || s === "airslammed";
+
 /** Constraint passes per frame. */
 const ITER = 8;
 
@@ -119,6 +144,8 @@ export interface Rag {
   /** at rest: each point in the frame of what it lies on (the arms on the chest, the legs on the pelvis), or null while it moves */
   rest: THREE.Vector3[] | null;
   restAxes: THREE.Vector3[] | null;
+  /** up in the air: the root's place (world) and speed (per sim frame) at the last sim step, and that step (the fighter's t) */
+  fly: { pos: THREE.Vector3; vel: THREE.Vector3; t: number } | null;
 }
 
 /** A get-up (or a KO) blending out of the pose the body lay in: the body's and the bones' turn, and the body's place. */
@@ -128,9 +155,11 @@ export interface Settle {
 }
 
 /** The frames a fall is on the ragdoll, and the frame it lands: null when the body is on its clip alone. */
-export function ragWindow(f: Fighter, tp: Target, from: Fighter["state"] | null): { land: number; floor: boolean } | null {
+export function ragWindow(f: Fighter, tp: Target, from: Fighter["state"] | null): { land: number; floor: boolean; left?: number } | null {
+  // up in a juggle: no landing frame of its own (the knockdown it ends in lands at once), only the frames left to the floor
+  if (airborne(f.state)) return { land: Infinity, floor: true, left: airLeft(f) };
   // a knockdown lands partway in; off the back of a throw the body is already down
-  if (f.state === "down") return { land: from === "thrown" || from === "air" || from === "airslammed" ? 0 : FALL_LAND, floor: true };
+  if (f.state === "down") return { land: from === "thrown" || airborne(from) ? 0 : FALL_LAND, floor: true };
   if (f.state === "thrown" && tp.T) return { land: tp.T.end, floor: true };
   if (f.state === "falling") return { land: Infinity, floor: false };
   return null;
@@ -241,8 +270,8 @@ export function ragdoll(b: Body, f: Fighter, tp: Target, dt: number, from: Fight
   b.settle = null;
   const target = ragPoints(b);
   const sc = b.body.scale.x;
-  // a throw and the knockdown it ends in are one fall
-  const key = f.state === "down" && (from === "thrown" || from === "air" || from === "airslammed") ? "thrown" : f.state;
+  // a throw, a juggle (and its air grab) and the knockdown it ends in are one fall
+  const key = (f.state === "down" && (from === "thrown" || airborne(from))) || airborne(f.state) ? "thrown" : f.state;
   if (!b.rag || b.rag.key !== key) {
     // it starts where the body is, with the blow's push: the higher the point, the harder, so the body tips over
     const kick = f.state === "down" ? KICK.clone().set(KICK.x - 0.6 * side, KICK.y, KICK.z * face) : new THREE.Vector3();
@@ -258,14 +287,15 @@ export function ragdoll(b: Body, f: Fighter, tp: Target, dt: number, from: Fight
       snap: null,
       rest: null,
       restAxes: null,
+      fly: null,
     };
   }
   const r = b.rag;
   const x = r.x;
-  const u = win.land > 0 ? Math.min(1, f.t / win.land) : 1;
+  const u = win.left !== undefined ? Math.max(0, Math.min(1, 1 - win.left / AIR_LAND)) : win.land > 0 ? Math.min(1, f.t / win.land) : 1;
   const ramp = u * u * (3 - 2 * u) * u;
   const landed = f.t >= win.land;
-  const power = landed ? 1 : POWER_MIN + (1 - POWER_MIN) * ramp;
+  const power = landed ? 1 : win.left !== undefined ? AIR_TRUNK + (1 - AIR_TRUNK) * ramp : POWER_MIN + (1 - POWER_MIN) * ramp;
   const limb = landed ? LIMP : POWER_MIN + (LIMB_LAND - POWER_MIN) * ramp;
 
   // each hinge's axis: the clip's own, carried round by how far the ragdoll has turned its upper bone
@@ -280,13 +310,18 @@ export function ragdoll(b: Body, f: Fighter, tp: Target, dt: number, from: Fight
     axis.addScaledVector(now, -axis.dot(now)).normalize();
   });
 
+  // the floor, in the root's frame: under it by the body's height in the air
+  const floorY = airborne(f.state) ? -f.z : 0;
+  if (!airborne(f.state)) r.fly = null;
   if (f.stop === 0) {
+    if (airborne(f.state)) jolt(b, r, f, dt);
     // verlet: carry on, fall
     for (let i = 0; i < x.length; i++) {
       // lying on the floor, the limbs come to rest
-      const vel = v1.subVectors(x[i], r.prev[i]).multiplyScalar(landed ? 0.85 : 0.995);
+      const vel = v1.subVectors(x[i], r.prev[i]).multiplyScalar(landed ? 0.85 : airborne(f.state) ? AIR_DAMP : 0.995);
       r.prev[i].copy(x[i]);
-      x[i].add(vel).y += G * dt * dt;
+      // up in the air the body is falling as the sim has it, and the limbs fall with it
+      x[i].add(vel).y += airborne(f.state) ? 0 : G * dt * dt;
     }
     // the motor pulls each point toward the clip (moving the point drags its velocity with it only in part)
     for (let i = 0; i < x.length; i++) {
@@ -295,7 +330,7 @@ export function ragdoll(b: Body, f: Fighter, tp: Target, dt: number, from: Fight
       x[i].add(pull);
       r.prev[i].addScaledVector(pull, 1 - k * 0.5);
     }
-    for (let it = 0; it < ITER; it++) constrain(r, win.floor, sc);
+    for (let it = 0; it < ITER; it++) constrain(r, win.floor, sc, floorY);
     // landed, the trunk is on its clip, and the limbs within their limits on it
     if (landed) {
       for (let i = 0; i < TRUNK; i++) {
@@ -376,14 +411,37 @@ export function ragdoll(b: Body, f: Fighter, tp: Target, dt: number, from: Fight
   return power;
 }
 
+/**
+ * Up in the air, the root's change of speed since the last sim step, felt by every point the other way: the body is
+ * carried by the blow and its limbs lag behind. Spread over the render frames of a sim step, as the root's move is.
+ */
+function jolt(b: Body, r: Rag, f: Fighter, dt: number): void {
+  const pos = b.root.getWorldPosition(new THREE.Vector3());
+  // the first frame up: it was standing still, so the launch itself is the first jolt
+  r.fly ??= { pos: pos.clone(), vel: new THREE.Vector3(), t: f.t };
+  if (f.t === r.fly.t) return;
+  const vel = pos.clone().sub(r.fly.pos).divideScalar(Math.max(1, f.t - r.fly.t));
+  const dv = vel.clone().sub(r.fly.vel);
+  r.fly.pos.copy(pos);
+  r.fly.vel.copy(vel);
+  r.fly.t = f.t;
+  if (dv.length() > JOLT_MAX) return; // a teleport (a respawn, a carry starting), not a blow
+  // falling, the limbs fall with the body: only what is not gravity is a blow
+  if (f.state === "air") dv.y += AIR.g;
+  // into the root's frame, and from per sim frame to per render frame; the trunk is the body the sim moves, so only the
+  // head and the limbs are left behind
+  dv.applyQuaternion(b.root.getWorldQuaternion(qa).invert()).multiplyScalar(dt * 60);
+  for (let i = TRUNK; i < r.x.length; i++) r.x[i].sub(dv);
+}
+
 /** One pass: the bones' lengths and the floor, the trunk's shape and its spine, then the joints' limits, each moving only the bone below it. */
-function constrain(r: Rag, floor: boolean, sc: number): void {
+function constrain(r: Rag, floor: boolean, sc: number, floorY = 0): void {
   const x = r.x;
   STICKS.forEach(([a, c], i) => i >= LIMB && stick(x, a, c, r.len[i], r.len[i]));
   if (floor)
     for (let i = 0; i < x.length; i++) {
       const p = x[i];
-      const rad = RADIUS[i] * sc;
+      const rad = RADIUS[i] * sc + floorY;
       if (p.y < rad) {
         // the floor stops it, and drags along it: no bounce
         p.y = rad;

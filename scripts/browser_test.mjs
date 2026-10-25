@@ -242,9 +242,11 @@ async function main() {
     const fs = g.world.fighters;
     const masses = fs.map((f) => f.parts.armR.trait.mass);
     const on = fs.findIndex((f) => f.parts.armR.attached);
-    return { distinct: new Set(masses.map((m) => m.toFixed(4))).size, n: fs.length, mass: masses[on], scale: g.scene.fighters[on].limbs.armR.scale.x };
+    // only the arms on a body: a torn-off arm keeps its roll, so its owner's empty socket and whoever wears it now show the same one
+    const worn = fs.filter((f) => f.parts.armR.attached).map((f) => f.parts.armR.trait.mass);
+    return { distinct: new Set(worn.map((m) => m.toFixed(4))).size, n: worn.length, mass: masses[on], scale: g.scene.fighters[on].limbs.armR.scale.x };
   });
-  check(limbs.distinct === limbs.n, `every fighter's arm rolled its own traits (${limbs.distinct} distinct of ${limbs.n})`);
+  check(limbs.n >= 4 && limbs.distinct === limbs.n, `every right arm on a body rolled its own traits (${limbs.distinct} distinct of ${limbs.n} worn)`);
   check(Math.abs(limbs.scale - Math.pow(limbs.mass, 0.8)) < 1e-6, `the fist on screen is sized by the arm's mass (${limbs.mass.toFixed(3)} -> ${limbs.scale.toFixed(3)})`);
 
   // hit feel: hitstop in the sim, sparks and rings in the scene, sound from the synth
