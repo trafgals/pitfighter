@@ -28,10 +28,14 @@ const teardown = async (code) => {
   } catch {}
   process.exit(code);
 };
+// The watchdog is a safety net against a hang, not a deadline. It is generous
+// because the test draws with whatever the machine has: a software renderer
+// takes a quarter of a second a frame, and the whole run is mostly real time.
+const WATCHDOG_MS = Number(process.env.BROWSER_TEST_TIMEOUT_MS || 420_000);
 const watchdog = setTimeout(() => {
-  console.error("TIMEOUT: browser test exceeded 240 s");
+  console.error(`TIMEOUT: browser test exceeded ${WATCHDOG_MS / 1000} s`);
   teardown(1);
-}, 240_000);
+}, WATCHDOG_MS);
 
 const withTimeout = (p, ms, what) =>
   Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error(`timeout (${ms} ms): ${what}`)), ms))]);
@@ -190,13 +194,22 @@ async function main() {
   const radii = setup.map((f) => Math.hypot(f.x, f.y).toFixed(2));
   check(new Set(radii).size === 1, `everyone spawns on the edge circle (${radii[0]} m)`);
 
-  // the human really controls P1: hold D (east) for half a second, then jab
+  // the human really controls P1: hold D (east) until the sim has run half a
+  // second of frames, then jab. Counting frames rather than wall time keeps
+  // the check the same on a fast GPU and on a software renderer, where a whole
+  // frame can take a quarter of a second.
   const x0 = await page.evaluate(() => window.__game.world.fighters[0].x);
+  const moveFrame0 = await page.evaluate(() => window.__game.world.s.frame);
   await page.keyboard.down("KeyD");
-  await new Promise((r) => setTimeout(r, 500));
+  await withTimeout(
+    page.waitForFunction((f) => window.__game.world.s.frame - f >= 30, { timeout: 60_000 }, moveFrame0),
+    65_000,
+    "hold D for 30 frames",
+  );
   await page.keyboard.up("KeyD");
   const x1 = await page.evaluate(() => window.__game.world.fighters[0].x);
-  check(x1 - x0 > 0.3, `keyboard moves P1 (dx = ${(x1 - x0).toFixed(2)} m)`);
+  const moveFrame1 = await page.evaluate(() => window.__game.world.s.frame);
+  check(x1 - x0 > 0.3, `keyboard moves P1 (dx = ${(x1 - x0).toFixed(2)} m over ${moveFrame1 - moveFrame0} frames)`);
   await page.keyboard.down("KeyJ");
   const st = await page.waitForFunction(() => window.__game.world.fighters[0].state === "attack" && window.__game.world.fighters[0].move, { timeout: 2000 }).then(
     (h) => h.jsonValue(),
