@@ -1,0 +1,2942 @@
+{
+  "110": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "111": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "112": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "173": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "front orthographic view of a devil's face, ordinary, mildly smug, warm brick red skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "clip": [
+        "111",
+        0
+      ]
+    }
+  },
+  "174": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "173",
+        0
+      ],
+      "guidance": 3.5
+    }
+  },
+  "175": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, perspective, depth of field, shadows, vignette, hands, multiple faces, two faces, profile view, three-quarter view, hair, horns, neck, shoulders, clothing, helmet, scenery, background objects, gradient background, asymmetrical, blurry, low quality",
+      "clip": [
+        "111",
+        0
+      ]
+    }
+  },
+  "176": {
+    "class_type": "EmptySD3LatentImage",
+    "_meta": {
+      "title": "Empty latent"
+    },
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    }
+  },
+  "177": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample"
+    },
+    "inputs": {
+      "model": [
+        "110",
+        0
+      ],
+      "seed": 4103,
+      "steps": 4,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "positive": [
+        "174",
+        0
+      ],
+      "negative": [
+        "175",
+        0
+      ],
+      "latent_image": [
+        "176",
+        0
+      ]
+    }
+  },
+  "178": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "177",
+        0
+      ],
+      "vae": [
+        "112",
+        0
+      ]
+    }
+  },
+  "209": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "178",
+        0
+      ],
+      "filename_prefix": "outputs/gen/dale-damnation__face"
+    }
+  },
+  "270": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "271": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "272": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "333": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "front orthographic view of a devil's face, heavy brow, broken nose, dark rust brown skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "clip": [
+        "271",
+        0
+      ]
+    }
+  },
+  "334": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "333",
+        0
+      ],
+      "guidance": 3.5
+    }
+  },
+  "335": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, perspective, depth of field, shadows, vignette, hands, multiple faces, two faces, profile view, three-quarter view, hair, horns, neck, shoulders, clothing, helmet, scenery, background objects, gradient background, asymmetrical, blurry, low quality",
+      "clip": [
+        "271",
+        0
+      ]
+    }
+  },
+  "336": {
+    "class_type": "EmptySD3LatentImage",
+    "_meta": {
+      "title": "Empty latent"
+    },
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    }
+  },
+  "337": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample"
+    },
+    "inputs": {
+      "model": [
+        "270",
+        0
+      ],
+      "seed": 4240,
+      "steps": 4,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "positive": [
+        "334",
+        0
+      ],
+      "negative": [
+        "335",
+        0
+      ],
+      "latent_image": [
+        "336",
+        0
+      ]
+    }
+  },
+  "338": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "337",
+        0
+      ],
+      "vae": [
+        "272",
+        0
+      ]
+    }
+  },
+  "369": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "338",
+        0
+      ],
+      "filename_prefix": "outputs/gen/brimstone-bruno__face"
+    }
+  },
+  "430": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "431": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "432": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "493": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "front orthographic view of a devil's face, stubble shadow, scarred lip, sooty tan brown skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "clip": [
+        "431",
+        0
+      ]
+    }
+  },
+  "494": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "493",
+        0
+      ],
+      "guidance": 3.5
+    }
+  },
+  "495": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, perspective, depth of field, shadows, vignette, hands, multiple faces, two faces, profile view, three-quarter view, hair, horns, neck, shoulders, clothing, helmet, scenery, background objects, gradient background, asymmetrical, blurry, low quality",
+      "clip": [
+        "431",
+        0
+      ]
+    }
+  },
+  "496": {
+    "class_type": "EmptySD3LatentImage",
+    "_meta": {
+      "title": "Empty latent"
+    },
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    }
+  },
+  "497": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample"
+    },
+    "inputs": {
+      "model": [
+        "430",
+        0
+      ],
+      "seed": 4377,
+      "steps": 4,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "positive": [
+        "494",
+        0
+      ],
+      "negative": [
+        "495",
+        0
+      ],
+      "latent_image": [
+        "496",
+        0
+      ]
+    }
+  },
+  "498": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "497",
+        0
+      ],
+      "vae": [
+        "432",
+        0
+      ]
+    }
+  },
+  "529": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "498",
+        0
+      ],
+      "filename_prefix": "outputs/gen/gutter-gus__face"
+    }
+  },
+  "590": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "591": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "592": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "653": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "front orthographic view of a devil's face, calm, narrow eyes, grey eyebrows, pale ash white skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "clip": [
+        "591",
+        0
+      ]
+    }
+  },
+  "654": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "653",
+        0
+      ],
+      "guidance": 3.5
+    }
+  },
+  "655": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, perspective, depth of field, shadows, vignette, hands, multiple faces, two faces, profile view, three-quarter view, hair, horns, neck, shoulders, clothing, helmet, scenery, background objects, gradient background, asymmetrical, blurry, low quality",
+      "clip": [
+        "591",
+        0
+      ]
+    }
+  },
+  "656": {
+    "class_type": "EmptySD3LatentImage",
+    "_meta": {
+      "title": "Empty latent"
+    },
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    }
+  },
+  "657": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample"
+    },
+    "inputs": {
+      "model": [
+        "590",
+        0
+      ],
+      "seed": 4514,
+      "steps": 4,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "positive": [
+        "654",
+        0
+      ],
+      "negative": [
+        "655",
+        0
+      ],
+      "latent_image": [
+        "656",
+        0
+      ]
+    }
+  },
+  "658": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "657",
+        0
+      ],
+      "vae": [
+        "592",
+        0
+      ]
+    }
+  },
+  "689": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "658",
+        0
+      ],
+      "filename_prefix": "outputs/gen/sensei-smoulder__face"
+    }
+  },
+  "750": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "751": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "752": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "813": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "front orthographic view of a devil's face, grinning, face paint stripes, deep violet purple skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "clip": [
+        "751",
+        0
+      ]
+    }
+  },
+  "814": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "813",
+        0
+      ],
+      "guidance": 3.5
+    }
+  },
+  "815": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, perspective, depth of field, shadows, vignette, hands, multiple faces, two faces, profile view, three-quarter view, hair, horns, neck, shoulders, clothing, helmet, scenery, background objects, gradient background, asymmetrical, blurry, low quality",
+      "clip": [
+        "751",
+        0
+      ]
+    }
+  },
+  "816": {
+    "class_type": "EmptySD3LatentImage",
+    "_meta": {
+      "title": "Empty latent"
+    },
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    }
+  },
+  "817": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample"
+    },
+    "inputs": {
+      "model": [
+        "750",
+        0
+      ],
+      "seed": 4651,
+      "steps": 4,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "positive": [
+        "814",
+        0
+      ],
+      "negative": [
+        "815",
+        0
+      ],
+      "latent_image": [
+        "816",
+        0
+      ]
+    }
+  },
+  "818": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "817",
+        0
+      ],
+      "vae": [
+        "752",
+        0
+      ]
+    }
+  },
+  "849": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "818",
+        0
+      ],
+      "filename_prefix": "outputs/gen/big-lou-cipher__face"
+    }
+  },
+  "910": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "911": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "912": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "973": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "front orthographic view of a devil's face, fierce glare, sweat-slick brow, heavy dark eyebrows, scarred cheek, burnt orange skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "clip": [
+        "911",
+        0
+      ]
+    }
+  },
+  "974": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "973",
+        0
+      ],
+      "guidance": 3.5
+    }
+  },
+  "975": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, perspective, depth of field, shadows, vignette, hands, multiple faces, two faces, profile view, three-quarter view, hair, horns, neck, shoulders, clothing, helmet, scenery, background objects, gradient background, asymmetrical, blurry, low quality",
+      "clip": [
+        "911",
+        0
+      ]
+    }
+  },
+  "976": {
+    "class_type": "EmptySD3LatentImage",
+    "_meta": {
+      "title": "Empty latent"
+    },
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    }
+  },
+  "977": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample"
+    },
+    "inputs": {
+      "model": [
+        "910",
+        0
+      ],
+      "seed": 4788,
+      "steps": 4,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "positive": [
+        "974",
+        0
+      ],
+      "negative": [
+        "975",
+        0
+      ],
+      "latent_image": [
+        "976",
+        0
+      ]
+    }
+  },
+  "978": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "977",
+        0
+      ],
+      "vae": [
+        "912",
+        0
+      ]
+    }
+  },
+  "1009": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "978",
+        0
+      ],
+      "filename_prefix": "outputs/gen/eight-limbed-ash__face"
+    }
+  },
+  "1070": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "1071": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "1072": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "1133": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "front orthographic view of a devil's face, swollen eye, flattened nose, cobalt blue skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "clip": [
+        "1071",
+        0
+      ]
+    }
+  },
+  "1134": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "1133",
+        0
+      ],
+      "guidance": 3.5
+    }
+  },
+  "1135": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, perspective, depth of field, shadows, vignette, hands, multiple faces, two faces, profile view, three-quarter view, hair, horns, neck, shoulders, clothing, helmet, scenery, background objects, gradient background, asymmetrical, blurry, low quality",
+      "clip": [
+        "1071",
+        0
+      ]
+    }
+  },
+  "1136": {
+    "class_type": "EmptySD3LatentImage",
+    "_meta": {
+      "title": "Empty latent"
+    },
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    }
+  },
+  "1137": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample"
+    },
+    "inputs": {
+      "model": [
+        "1070",
+        0
+      ],
+      "seed": 4925,
+      "steps": 4,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "positive": [
+        "1134",
+        0
+      ],
+      "negative": [
+        "1135",
+        0
+      ],
+      "latent_image": [
+        "1136",
+        0
+      ]
+    }
+  },
+  "1138": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "1137",
+        0
+      ],
+      "vae": [
+        "1072",
+        0
+      ]
+    }
+  },
+  "1169": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "1138",
+        0
+      ],
+      "filename_prefix": "outputs/gen/knuckles-inferno__face"
+    }
+  },
+  "1230": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "1231": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "1232": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "1293": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "front orthographic view of a devil's face, snarling, bared teeth, deep blood red skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "clip": [
+        "1231",
+        0
+      ]
+    }
+  },
+  "1294": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "1293",
+        0
+      ],
+      "guidance": 3.5
+    }
+  },
+  "1295": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, perspective, depth of field, shadows, vignette, hands, multiple faces, two faces, profile view, three-quarter view, hair, horns, neck, shoulders, clothing, helmet, scenery, background objects, gradient background, asymmetrical, blurry, low quality",
+      "clip": [
+        "1231",
+        0
+      ]
+    }
+  },
+  "1296": {
+    "class_type": "EmptySD3LatentImage",
+    "_meta": {
+      "title": "Empty latent"
+    },
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    }
+  },
+  "1297": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample"
+    },
+    "inputs": {
+      "model": [
+        "1230",
+        0
+      ],
+      "seed": 5062,
+      "steps": 4,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "positive": [
+        "1294",
+        0
+      ],
+      "negative": [
+        "1295",
+        0
+      ],
+      "latent_image": [
+        "1296",
+        0
+      ]
+    }
+  },
+  "1298": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "1297",
+        0
+      ],
+      "vae": [
+        "1232",
+        0
+      ]
+    }
+  },
+  "1329": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "1298",
+        0
+      ],
+      "filename_prefix": "outputs/gen/rage-reaper__face"
+    }
+  },
+  "1390": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "1391": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "1392": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "1453": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "front orthographic view of a devil's face, big eyes, impish grin, bright pinkish red skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "clip": [
+        "1391",
+        0
+      ]
+    }
+  },
+  "1454": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "1453",
+        0
+      ],
+      "guidance": 3.5
+    }
+  },
+  "1455": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, perspective, depth of field, shadows, vignette, hands, multiple faces, two faces, profile view, three-quarter view, hair, horns, neck, shoulders, clothing, helmet, scenery, background objects, gradient background, asymmetrical, blurry, low quality",
+      "clip": [
+        "1391",
+        0
+      ]
+    }
+  },
+  "1456": {
+    "class_type": "EmptySD3LatentImage",
+    "_meta": {
+      "title": "Empty latent"
+    },
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    }
+  },
+  "1457": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample"
+    },
+    "inputs": {
+      "model": [
+        "1390",
+        0
+      ],
+      "seed": 5199,
+      "steps": 4,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "positive": [
+        "1454",
+        0
+      ],
+      "negative": [
+        "1455",
+        0
+      ],
+      "latent_image": [
+        "1456",
+        0
+      ]
+    }
+  },
+  "1458": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "1457",
+        0
+      ],
+      "vae": [
+        "1392",
+        0
+      ]
+    }
+  },
+  "1489": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "1458",
+        0
+      ],
+      "filename_prefix": "outputs/gen/quickfire-imp__face"
+    }
+  },
+  "1550": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "1551": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "1552": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "1613": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "front orthographic view of a devil's face, long thin moustache marks, deep crimson red skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "clip": [
+        "1551",
+        0
+      ]
+    }
+  },
+  "1614": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "1613",
+        0
+      ],
+      "guidance": 3.5
+    }
+  },
+  "1615": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, perspective, depth of field, shadows, vignette, hands, multiple faces, two faces, profile view, three-quarter view, hair, horns, neck, shoulders, clothing, helmet, scenery, background objects, gradient background, asymmetrical, blurry, low quality",
+      "clip": [
+        "1551",
+        0
+      ]
+    }
+  },
+  "1616": {
+    "class_type": "EmptySD3LatentImage",
+    "_meta": {
+      "title": "Empty latent"
+    },
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    }
+  },
+  "1617": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample"
+    },
+    "inputs": {
+      "model": [
+        "1550",
+        0
+      ],
+      "seed": 5336,
+      "steps": 4,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "positive": [
+        "1614",
+        0
+      ],
+      "negative": [
+        "1615",
+        0
+      ],
+      "latent_image": [
+        "1616",
+        0
+      ]
+    }
+  },
+  "1618": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "1617",
+        0
+      ],
+      "vae": [
+        "1552",
+        0
+      ]
+    }
+  },
+  "1649": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "1618",
+        0
+      ],
+      "filename_prefix": "outputs/gen/crimson-crane__face"
+    }
+  },
+  "1710": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "1711": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "1712": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "1773": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "front orthographic view of a devil's face, stony, deep-set eyes, grey brown stone skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "clip": [
+        "1711",
+        0
+      ]
+    }
+  },
+  "1774": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "1773",
+        0
+      ],
+      "guidance": 3.5
+    }
+  },
+  "1775": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, perspective, depth of field, shadows, vignette, hands, multiple faces, two faces, profile view, three-quarter view, hair, horns, neck, shoulders, clothing, helmet, scenery, background objects, gradient background, asymmetrical, blurry, low quality",
+      "clip": [
+        "1711",
+        0
+      ]
+    }
+  },
+  "1776": {
+    "class_type": "EmptySD3LatentImage",
+    "_meta": {
+      "title": "Empty latent"
+    },
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    }
+  },
+  "1777": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample"
+    },
+    "inputs": {
+      "model": [
+        "1710",
+        0
+      ],
+      "seed": 5473,
+      "steps": 4,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "positive": [
+        "1774",
+        0
+      ],
+      "negative": [
+        "1775",
+        0
+      ],
+      "latent_image": [
+        "1776",
+        0
+      ]
+    }
+  },
+  "1778": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "1777",
+        0
+      ],
+      "vae": [
+        "1712",
+        0
+      ]
+    }
+  },
+  "1809": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "1778",
+        0
+      ],
+      "filename_prefix": "outputs/gen/hellmountain__face"
+    }
+  },
+  "1870": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "1871": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "1872": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "1933": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "front orthographic view of a devil's face, slit pupils, wide jaw, mossy green skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "clip": [
+        "1871",
+        0
+      ]
+    }
+  },
+  "1934": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "1933",
+        0
+      ],
+      "guidance": 3.5
+    }
+  },
+  "1935": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, perspective, depth of field, shadows, vignette, hands, multiple faces, two faces, profile view, three-quarter view, hair, horns, neck, shoulders, clothing, helmet, scenery, background objects, gradient background, asymmetrical, blurry, low quality",
+      "clip": [
+        "1871",
+        0
+      ]
+    }
+  },
+  "1936": {
+    "class_type": "EmptySD3LatentImage",
+    "_meta": {
+      "title": "Empty latent"
+    },
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    }
+  },
+  "1937": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample"
+    },
+    "inputs": {
+      "model": [
+        "1870",
+        0
+      ],
+      "seed": 5610,
+      "steps": 4,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "positive": [
+        "1934",
+        0
+      ],
+      "negative": [
+        "1935",
+        0
+      ],
+      "latent_image": [
+        "1936",
+        0
+      ]
+    }
+  },
+  "1938": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "1937",
+        0
+      ],
+      "vae": [
+        "1872",
+        0
+      ]
+    }
+  },
+  "1969": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "1938",
+        0
+      ],
+      "filename_prefix": "outputs/gen/choke-chimera__face"
+    }
+  },
+  "2030": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "2031": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "2032": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "2093": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "front orthographic view of a devil's face, square jaw, permanent scowl, olive green skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "clip": [
+        "2031",
+        0
+      ]
+    }
+  },
+  "2094": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "2093",
+        0
+      ],
+      "guidance": 3.5
+    }
+  },
+  "2095": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, perspective, depth of field, shadows, vignette, hands, multiple faces, two faces, profile view, three-quarter view, hair, horns, neck, shoulders, clothing, helmet, scenery, background objects, gradient background, asymmetrical, blurry, low quality",
+      "clip": [
+        "2031",
+        0
+      ]
+    }
+  },
+  "2096": {
+    "class_type": "EmptySD3LatentImage",
+    "_meta": {
+      "title": "Empty latent"
+    },
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    }
+  },
+  "2097": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample"
+    },
+    "inputs": {
+      "model": [
+        "2030",
+        0
+      ],
+      "seed": 5747,
+      "steps": 4,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "positive": [
+        "2094",
+        0
+      ],
+      "negative": [
+        "2095",
+        0
+      ],
+      "latent_image": [
+        "2096",
+        0
+      ]
+    }
+  },
+  "2098": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "2097",
+        0
+      ],
+      "vae": [
+        "2032",
+        0
+      ]
+    }
+  },
+  "2129": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "2098",
+        0
+      ],
+      "filename_prefix": "outputs/gen/sergeant-sulphur__face"
+    }
+  },
+  "2190": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "2191": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "2192": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "2253": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "front orthographic view of a devil's face, joyful, wide smile, warm amber tan skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "clip": [
+        "2191",
+        0
+      ]
+    }
+  },
+  "2254": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "2253",
+        0
+      ],
+      "guidance": 3.5
+    }
+  },
+  "2255": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, perspective, depth of field, shadows, vignette, hands, multiple faces, two faces, profile view, three-quarter view, hair, horns, neck, shoulders, clothing, helmet, scenery, background objects, gradient background, asymmetrical, blurry, low quality",
+      "clip": [
+        "2191",
+        0
+      ]
+    }
+  },
+  "2256": {
+    "class_type": "EmptySD3LatentImage",
+    "_meta": {
+      "title": "Empty latent"
+    },
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    }
+  },
+  "2257": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample"
+    },
+    "inputs": {
+      "model": [
+        "2190",
+        0
+      ],
+      "seed": 5884,
+      "steps": 4,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "positive": [
+        "2254",
+        0
+      ],
+      "negative": [
+        "2255",
+        0
+      ],
+      "latent_image": [
+        "2256",
+        0
+      ]
+    }
+  },
+  "2258": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "2257",
+        0
+      ],
+      "vae": [
+        "2192",
+        0
+      ]
+    }
+  },
+  "2289": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "2258",
+        0
+      ],
+      "filename_prefix": "outputs/gen/cinder-ginga__face"
+    }
+  },
+  "2350": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "2351": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "2352": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "2413": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "front orthographic view of a devil's face, sharp, focused, red eyeliner marks, porcelain white skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "clip": [
+        "2351",
+        0
+      ]
+    }
+  },
+  "2414": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "2413",
+        0
+      ],
+      "guidance": 3.5
+    }
+  },
+  "2415": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, perspective, depth of field, shadows, vignette, hands, multiple faces, two faces, profile view, three-quarter view, hair, horns, neck, shoulders, clothing, helmet, scenery, background objects, gradient background, asymmetrical, blurry, low quality",
+      "clip": [
+        "2351",
+        0
+      ]
+    }
+  },
+  "2416": {
+    "class_type": "EmptySD3LatentImage",
+    "_meta": {
+      "title": "Empty latent"
+    },
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    }
+  },
+  "2417": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample"
+    },
+    "inputs": {
+      "model": [
+        "2350",
+        0
+      ],
+      "seed": 6021,
+      "steps": 4,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "positive": [
+        "2414",
+        0
+      ],
+      "negative": [
+        "2415",
+        0
+      ],
+      "latent_image": [
+        "2416",
+        0
+      ]
+    }
+  },
+  "2418": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "2417",
+        0
+      ],
+      "vae": [
+        "2352",
+        0
+      ]
+    }
+  },
+  "2449": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "2418",
+        0
+      ],
+      "filename_prefix": "outputs/gen/hellkick-hana__face"
+    }
+  },
+  "2510": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "2511": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "2512": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "2573": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "front orthographic view of a devil's face, stern, a scar across one eye, slate grey skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "clip": [
+        "2511",
+        0
+      ]
+    }
+  },
+  "2574": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "2573",
+        0
+      ],
+      "guidance": 3.5
+    }
+  },
+  "2575": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, perspective, depth of field, shadows, vignette, hands, multiple faces, two faces, profile view, three-quarter view, hair, horns, neck, shoulders, clothing, helmet, scenery, background objects, gradient background, asymmetrical, blurry, low quality",
+      "clip": [
+        "2511",
+        0
+      ]
+    }
+  },
+  "2576": {
+    "class_type": "EmptySD3LatentImage",
+    "_meta": {
+      "title": "Empty latent"
+    },
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    }
+  },
+  "2577": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample"
+    },
+    "inputs": {
+      "model": [
+        "2510",
+        0
+      ],
+      "seed": 6158,
+      "steps": 4,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "positive": [
+        "2574",
+        0
+      ],
+      "negative": [
+        "2575",
+        0
+      ],
+      "latent_image": [
+        "2576",
+        0
+      ]
+    }
+  },
+  "2578": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "2577",
+        0
+      ],
+      "vae": [
+        "2512",
+        0
+      ]
+    }
+  },
+  "2609": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "2578",
+        0
+      ],
+      "filename_prefix": "outputs/gen/ronin-of-gehenna__face"
+    }
+  },
+  "2670": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "2671": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "2672": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "2733": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "front orthographic view of a devil's face, long white brows, wise squint, dark dried red skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "clip": [
+        "2671",
+        0
+      ]
+    }
+  },
+  "2734": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "2733",
+        0
+      ],
+      "guidance": 3.5
+    }
+  },
+  "2735": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, perspective, depth of field, shadows, vignette, hands, multiple faces, two faces, profile view, three-quarter view, hair, horns, neck, shoulders, clothing, helmet, scenery, background objects, gradient background, asymmetrical, blurry, low quality",
+      "clip": [
+        "2671",
+        0
+      ]
+    }
+  },
+  "2736": {
+    "class_type": "EmptySD3LatentImage",
+    "_meta": {
+      "title": "Empty latent"
+    },
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    }
+  },
+  "2737": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample"
+    },
+    "inputs": {
+      "model": [
+        "2670",
+        0
+      ],
+      "seed": 6295,
+      "steps": 4,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "positive": [
+        "2734",
+        0
+      ],
+      "negative": [
+        "2735",
+        0
+      ],
+      "latent_image": [
+        "2736",
+        0
+      ]
+    }
+  },
+  "2738": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "2737",
+        0
+      ],
+      "vae": [
+        "2672",
+        0
+      ]
+    }
+  },
+  "2769": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "2738",
+        0
+      ],
+      "filename_prefix": "outputs/gen/the-old-devil__face"
+    }
+  },
+  "2830": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "2831": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "2832": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "2893": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "front orthographic view of a devil's face, cocky half-smile, one brow raised, charcoal black grey skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "clip": [
+        "2831",
+        0
+      ]
+    }
+  },
+  "2894": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "2893",
+        0
+      ],
+      "guidance": 3.5
+    }
+  },
+  "2895": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, perspective, depth of field, shadows, vignette, hands, multiple faces, two faces, profile view, three-quarter view, hair, horns, neck, shoulders, clothing, helmet, scenery, background objects, gradient background, asymmetrical, blurry, low quality",
+      "clip": [
+        "2831",
+        0
+      ]
+    }
+  },
+  "2896": {
+    "class_type": "EmptySD3LatentImage",
+    "_meta": {
+      "title": "Empty latent"
+    },
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    }
+  },
+  "2897": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample"
+    },
+    "inputs": {
+      "model": [
+        "2830",
+        0
+      ],
+      "seed": 6432,
+      "steps": 4,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "positive": [
+        "2894",
+        0
+      ],
+      "negative": [
+        "2895",
+        0
+      ],
+      "latent_image": [
+        "2896",
+        0
+      ]
+    }
+  },
+  "2898": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "2897",
+        0
+      ],
+      "vae": [
+        "2832",
+        0
+      ]
+    }
+  },
+  "2929": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "2898",
+        0
+      ],
+      "filename_prefix": "outputs/gen/hellfire-flick__face"
+    }
+  },
+  "2990": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "2991": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "2992": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "3053": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "front orthographic view of a devil's face, open-mouthed battle yell, golden tan skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "clip": [
+        "2991",
+        0
+      ]
+    }
+  },
+  "3054": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "3053",
+        0
+      ],
+      "guidance": 3.5
+    }
+  },
+  "3055": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, perspective, depth of field, shadows, vignette, hands, multiple faces, two faces, profile view, three-quarter view, hair, horns, neck, shoulders, clothing, helmet, scenery, background objects, gradient background, asymmetrical, blurry, low quality",
+      "clip": [
+        "2991",
+        0
+      ]
+    }
+  },
+  "3056": {
+    "class_type": "EmptySD3LatentImage",
+    "_meta": {
+      "title": "Empty latent"
+    },
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    }
+  },
+  "3057": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample"
+    },
+    "inputs": {
+      "model": [
+        "2990",
+        0
+      ],
+      "seed": 6569,
+      "steps": 4,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "positive": [
+        "3054",
+        0
+      ],
+      "negative": [
+        "3055",
+        0
+      ],
+      "latent_image": [
+        "3056",
+        0
+      ]
+    }
+  },
+  "3058": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "3057",
+        0
+      ],
+      "vae": [
+        "2992",
+        0
+      ]
+    }
+  },
+  "3089": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "3058",
+        0
+      ],
+      "filename_prefix": "outputs/gen/brother-blaze__face"
+    }
+  },
+  "3150": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "3151": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "3152": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "3213": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "front orthographic view of a devil's face, composed, heavy-lidded, pale bone ash skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "clip": [
+        "3151",
+        0
+      ]
+    }
+  },
+  "3214": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "3213",
+        0
+      ],
+      "guidance": 3.5
+    }
+  },
+  "3215": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, perspective, depth of field, shadows, vignette, hands, multiple faces, two faces, profile view, three-quarter view, hair, horns, neck, shoulders, clothing, helmet, scenery, background objects, gradient background, asymmetrical, blurry, low quality",
+      "clip": [
+        "3151",
+        0
+      ]
+    }
+  },
+  "3216": {
+    "class_type": "EmptySD3LatentImage",
+    "_meta": {
+      "title": "Empty latent"
+    },
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    }
+  },
+  "3217": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample"
+    },
+    "inputs": {
+      "model": [
+        "3150",
+        0
+      ],
+      "seed": 6706,
+      "steps": 4,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "positive": [
+        "3214",
+        0
+      ],
+      "negative": [
+        "3215",
+        0
+      ],
+      "latent_image": [
+        "3216",
+        0
+      ]
+    }
+  },
+  "3218": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "3217",
+        0
+      ],
+      "vae": [
+        "3152",
+        0
+      ]
+    }
+  },
+  "3249": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "3218",
+        0
+      ],
+      "filename_prefix": "outputs/gen/ashen-judoka__face"
+    }
+  },
+  "3310": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "3311": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "3312": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "3373": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "front orthographic view of a devil's face, nervous, wide-eyed, heavy eye bags, pale grey skin, flat even studio lighting, symmetric, solid black background, head cropped from brow to chin, no neck, game character texture",
+      "clip": [
+        "3311",
+        0
+      ]
+    }
+  },
+  "3374": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "3373",
+        0
+      ],
+      "guidance": 3.5
+    }
+  },
+  "3375": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, perspective, depth of field, shadows, vignette, hands, multiple faces, two faces, profile view, three-quarter view, hair, horns, neck, shoulders, clothing, helmet, scenery, background objects, gradient background, asymmetrical, blurry, low quality",
+      "clip": [
+        "3311",
+        0
+      ]
+    }
+  },
+  "3376": {
+    "class_type": "EmptySD3LatentImage",
+    "_meta": {
+      "title": "Empty latent"
+    },
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    }
+  },
+  "3377": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample"
+    },
+    "inputs": {
+      "model": [
+        "3310",
+        0
+      ],
+      "seed": 6843,
+      "steps": 4,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "positive": [
+        "3374",
+        0
+      ],
+      "negative": [
+        "3375",
+        0
+      ],
+      "latent_image": [
+        "3376",
+        0
+      ]
+    }
+  },
+  "3378": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "3377",
+        0
+      ],
+      "vae": [
+        "3312",
+        0
+      ]
+    }
+  },
+  "3409": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "3378",
+        0
+      ],
+      "filename_prefix": "outputs/gen/fresh-soul-kevin__face"
+    }
+  }
+}

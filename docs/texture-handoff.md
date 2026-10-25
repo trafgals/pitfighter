@@ -185,3 +185,31 @@ consistently.
    agent will then load these in `src/render/` (per-stage lazy loading, with the
    procedural surfaces kept as a fallback) and turn off the colour tint for
    textured fighters.
+
+## What was delivered
+
+The set is on the branch `textures/comfy`, under `public/tex/`:
+
+```
+public/tex/README.md      how the set was made and how to regenerate it
+public/tex/manifest.json  one entry per file: model, licence, prompt, negative, seed, steps, workflow, post
+public/tex/spec.json      the prompt and the seed for every surface - the source of truth
+public/tex/fighters/<slug>/{skin,skin_h,cloth,cloth_h,face}.webp
+public/tex/stages/<stage>/<surface>.webp, <surface>_h.webp
+public/tex/stages/hell-toilet/basalt_glow.webp
+public/tex/workflows/*.json  the API-format ComfyUI graphs
+public/tex/contact/*.png     2x2 tiling previews plus the face
+```
+
+- **Route:** ComfyUI 0.33.0 on native ROCm - the Windows portable build
+  already had PyTorch 2.9.1+rocm7.2.1 for gfx1201, so nothing had to be
+  installed. The server has to be started with `--cuda-device 1`, because
+  ComfyUI enumerates the iGPU and the 9070 XT in an order that changes
+  between boots.
+- **Model:** FLUX.1 [schnell] in fp8, Apache-2.0, from the ungated
+  `Comfy-Org/Flux-1-Schnell` mirror. FLUX.1 [dev] was on disk and was not
+  used, because its licence is not commercial.
+- `cloth_h.webp` is beyond the tree above, but `src/render/textures.ts` bakes
+  a bump map for the cloth as well as for the skin, so the file is there to
+  be used or ignored.
+- The renderer change is deliberately not in this branch.
