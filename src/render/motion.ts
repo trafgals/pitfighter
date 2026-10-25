@@ -32,6 +32,10 @@
 import type { Pose } from "./body";
 import { GRAB, HOLD, REVERSAL } from "../sim/moves";
 import { STYLES } from "../sim/styles";
+import { FAMILY_OF as CHARACTER_FAMILIES } from "../data/characters";
+import type { Family } from "../data/types";
+
+export type { Family };
 
 export type Phase = "s" | "up" | "load" | "snap" | "hit" | "act" | "rec" | "end";
 export type Ease = "in" | "out" | "io" | "lin";
@@ -500,7 +504,7 @@ const headbutt: Clip = strike("head", { spineX: -0.35, headX: -0.4, y: -0.02, z:
 export type MoveClips = Record<"jab1" | "jab2" | "jab3" | "punchFin" | "kick1" | "kick2" | "sweep" | "headbutt", Clip>;
 const fam = (c: Omit<MoveClips, "headbutt">): MoveClips => ({ ...c, headbutt });
 
-export const FAMILIES = {
+export const FAMILIES: Record<Family, MoveClips> = {
   // jab, cross, lead hook, rear uppercut; the kicks are scrappy
   boxing: fam({ jab1: P.jab("L"), jab2: P.cross("R"), jab3: P.hook("L"), punchFin: P.upper("R"), kick1: K.stomp("R"), kick2: K.knee("L"), sweep: reap("R") }),
   // straight lines: lead punch, reverse punch, backfist, a lunging punch; front kick, roundhouse, spinning sweep
@@ -518,32 +522,8 @@ export const FAMILIES = {
   // the hands only set up the feet: roundhouse, axe kick, spinning heel
   kicker: fam({ jab1: P.jab("L"), jab2: P.cross("R"), jab3: P.backfist("L"), punchFin: P.hook("R"), kick1: K.round("L"), kick2: K.axe("R"), sweep: K.spinHeel("R") }),
 };
-export type Family = keyof typeof FAMILIES;
-
-/** The family each Urban Reign style label fights in. */
-export const FAMILY_OF: Record<string, Family> = {
-  Boxing: "boxing",
-  Amateur: "boxing",
-  Karate: "karate",
-  "Martial Arts": "karate",
-  "All-Round": "karate",
-  Military: "karate",
-  "Muay Thai": "muay",
-  "Kung Fu": "kungfu",
-  Master: "kungfu",
-  Speed: "kungfu",
-  Street: "brawler",
-  Rush: "brawler",
-  Gun: "brawler",
-  "Samurai Sword": "brawler",
-  Power: "power",
-  Mighty: "power",
-  Wrestling: "power",
-  "Judo Based": "grappler",
-  Submission: "grappler",
-  "Tae Kwon Do": "kicker",
-  Capoeira: "kicker",
-};
+/** The family each Urban Reign style label fights in, from the character design. */
+export const FAMILY_OF: Record<string, Family> = CHARACTER_FAMILIES;
 
 export const familyOf = (style: number): Family => FAMILY_OF[STYLES[style]?.style] ?? "karate";
 

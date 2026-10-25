@@ -1,4 +1,5 @@
 import type { LimbTrait } from "./limbs";
+import type { Height } from "../data/types";
 // Shared simulation types and constants. Everything here is plain data so a
 // world can be hashed, cloned and replayed.
 
@@ -54,7 +55,7 @@ export interface Part {
   trait: LimbTrait;
 }
 
-export type Height = "high" | "low";
+export type { Height } from "../data/types";
 
 export type FighterState =
   | "idle"

@@ -1,0 +1,1209 @@
+{
+  "schema": "pitfighter-characters/1",
+  "specials": {
+    "spSpin": {
+      "name": "HELLSPIN",
+      "move": {
+        "id": "spSpin",
+        "startup": 10,
+        "active": 10,
+        "recovery": 26,
+        "dmg": 10,
+        "hitstun": 0,
+        "blockstun": 28,
+        "height": "high",
+        "reach": 1.7,
+        "arc": -1,
+        "push": 1.6,
+        "knockdown": true,
+        "kind": "special"
+      }
+    },
+    "spCharge": {
+      "name": "BRIMSTONE CHARGE",
+      "move": {
+        "id": "spCharge",
+        "startup": 12,
+        "active": 18,
+        "recovery": 28,
+        "dmg": 9,
+        "hitstun": 0,
+        "blockstun": 26,
+        "height": "high",
+        "reach": 1,
+        "arc": 0.3,
+        "push": 1.8,
+        "knockdown": true,
+        "kind": "special",
+        "dash": 0.16
+      }
+    },
+    "spFlurry": {
+      "name": "INFERNAL FLURRY",
+      "move": {
+        "id": "spFlurry",
+        "startup": 8,
+        "active": 24,
+        "recovery": 24,
+        "dmg": 2.5,
+        "hitstun": 30,
+        "blockstun": 12,
+        "height": "high",
+        "reach": 1.3,
+        "arc": 0.5,
+        "push": 0.08,
+        "knockdown": false,
+        "kind": "special",
+        "rehit": 4
+      }
+    },
+    "spSlam": {
+      "name": "PIT SLAM",
+      "move": {
+        "id": "spSlam",
+        "startup": 22,
+        "active": 3,
+        "recovery": 30,
+        "dmg": 11,
+        "hitstun": 0,
+        "blockstun": 30,
+        "height": "low",
+        "reach": 2,
+        "arc": -1,
+        "push": 1.4,
+        "knockdown": true,
+        "kind": "special"
+      }
+    },
+    "spBlade": {
+      "name": "PITCHFORK ARC",
+      "move": {
+        "id": "spBlade",
+        "startup": 14,
+        "active": 5,
+        "recovery": 28,
+        "dmg": 12,
+        "hitstun": 0,
+        "blockstun": 28,
+        "height": "high",
+        "reach": 2.3,
+        "arc": 0,
+        "push": 1.4,
+        "knockdown": true,
+        "kind": "special"
+      }
+    },
+    "spFire": {
+      "name": "HELLFIRE FLICK",
+      "move": {
+        "id": "spFire",
+        "startup": 16,
+        "active": 6,
+        "recovery": 30,
+        "dmg": 10,
+        "hitstun": 0,
+        "blockstun": 26,
+        "height": "high",
+        "reach": 4.5,
+        "arc": 0.93,
+        "push": 1.2,
+        "knockdown": true,
+        "kind": "special"
+      }
+    }
+  },
+  "characters": [
+    {
+      "id": "dale-damnation",
+      "name": "Dale Damnation",
+      "style": "All-Round",
+      "blurb": "A regular sinner who's good at everything and great at nothing.",
+      "body": "#b33a3a",
+      "accent": "#2b1a1a",
+      "family": "karate",
+      "special": "spFlurry",
+      "stats": {
+        "speed": 1,
+        "startup": 0,
+        "punch": 1,
+        "kick": 1,
+        "grab": 1,
+        "reach": 1,
+        "string": 2,
+        "torso": 1,
+        "grabReach": 1
+      },
+      "kit": {
+        "size": 1,
+        "horns": "goat",
+        "tail": "spade",
+        "gear": []
+      },
+      "look": {
+        "def": 0.8195906923618168,
+        "scar": 1,
+        "paint": 1,
+        "wrinkles": false,
+        "stubble": false,
+        "veins": true
+      },
+      "texture": {
+        "seed": 4101,
+        "skin": {
+          "idea": "plain red devil hide, light pores, faint veins",
+          "colour": "warm brick red"
+        },
+        "cloth": {
+          "idea": "worn satin fabric, soft sheen, slight pilling",
+          "colour": "dark charcoal grey"
+        },
+        "face": {
+          "idea": "ordinary, mildly smug",
+          "colour": "warm brick red"
+        }
+      }
+    },
+    {
+      "id": "brimstone-bruno",
+      "name": "Brimstone Bruno",
+      "style": "Power",
+      "blurb": "Slow, enormous, hits like a falling furnace.",
+      "body": "#7a2e1e",
+      "accent": "#111111",
+      "family": "power",
+      "special": "spCharge",
+      "stats": {
+        "speed": 0.85,
+        "startup": 4,
+        "punch": 1.35,
+        "kick": 1.2,
+        "grab": 1.2,
+        "reach": 1,
+        "string": 2,
+        "torso": 1.25,
+        "grabReach": 1
+      },
+      "kit": {
+        "size": 1.2,
+        "horns": "bull",
+        "tail": "stub",
+        "gear": [
+          "pauldrons",
+          "tusks"
+        ]
+      },
+      "look": {
+        "def": 0.9142237462336197,
+        "scar": 1,
+        "paint": 3,
+        "wrinkles": false,
+        "stubble": true,
+        "veins": true
+      },
+      "texture": {
+        "seed": 4238,
+        "skin": {
+          "idea": "thick cracked hide like cooled lava crust, glowing seams very faint",
+          "colour": "dark rust brown"
+        },
+        "cloth": {
+          "idea": "heavy black leather with thick stitched straps and a metal buckle",
+          "colour": "black"
+        },
+        "face": {
+          "idea": "heavy brow, broken nose",
+          "colour": "dark rust brown"
+        }
+      }
+    },
+    {
+      "id": "gutter-gus",
+      "name": "Gutter Gus",
+      "style": "Street",
+      "blurb": "Learned to fight in the alleys behind the Ninth Circle.",
+      "body": "#8a5a3a",
+      "accent": "#3a3a3a",
+      "family": "brawler",
+      "special": "spFlurry",
+      "stats": {
+        "speed": 1,
+        "startup": 0,
+        "punch": 1.1,
+        "kick": 0.95,
+        "grab": 1.1,
+        "reach": 1,
+        "string": 2,
+        "torso": 1,
+        "grabReach": 1
+      },
+      "kit": {
+        "size": 1,
+        "horns": "broken",
+        "tail": "spade",
+        "gear": [
+          "mohawk"
+        ]
+      },
+      "look": {
+        "def": 1.2486192781943828,
+        "scar": 0,
+        "paint": 1,
+        "wrinkles": false,
+        "stubble": true,
+        "veins": true
+      },
+      "texture": {
+        "seed": 4375,
+        "skin": {
+          "idea": "grimy tanned leather skin with soot smudges, old scrapes",
+          "colour": "sooty tan brown"
+        },
+        "cloth": {
+          "idea": "faded grey denim with frayed edges and worn seams",
+          "colour": "faded grey blue"
+        },
+        "face": {
+          "idea": "stubble shadow, scarred lip, bald smooth rounded skull, no horns, no ears, head cropped from the brow to the chin",
+          "colour": "sooty tan brown"
+        }
+      }
+    },
+    {
+      "id": "sensei-smoulder",
+      "name": "Sensei Smoulder",
+      "style": "Karate",
+      "blurb": "Crisp, straight lines; his fists leave scorch marks.",
+      "body": "#d9d0c0",
+      "accent": "#1a1a1a",
+      "family": "karate",
+      "special": "spSpin",
+      "stats": {
+        "speed": 1,
+        "startup": -2,
+        "punch": 1.1,
+        "kick": 1.05,
+        "grab": 1,
+        "reach": 1,
+        "string": 2,
+        "torso": 1,
+        "grabReach": 1
+      },
+      "kit": {
+        "size": 1,
+        "horns": "spikes",
+        "tail": "spade",
+        "gear": [
+          "headband"
+        ]
+      },
+      "look": {
+        "def": 1.23128529752139,
+        "scar": 0,
+        "paint": 2,
+        "wrinkles": false,
+        "stubble": true,
+        "veins": true
+      },
+      "texture": {
+        "seed": 4512,
+        "skin": {
+          "idea": "pale ash-white skin with fine charcoal scorch marks",
+          "colour": "pale ash white"
+        },
+        "cloth": {
+          "idea": "heavy black cotton gi canvas, tight weave",
+          "colour": "black"
+        },
+        "face": {
+          "idea": "calm, narrow eyes, grey eyebrows",
+          "colour": "pale ash white"
+        }
+      }
+    },
+    {
+      "id": "big-lou-cipher",
+      "name": "Big Lou Cipher",
+      "style": "Wrestling",
+      "blurb": "Every hug in hell ends in a piledriver.",
+      "body": "#6b2a6b",
+      "accent": "#f0c000",
+      "family": "power",
+      "special": "spSlam",
+      "stats": {
+        "speed": 0.9,
+        "startup": 0,
+        "punch": 0.9,
+        "kick": 1,
+        "grab": 1.5,
+        "reach": 1,
+        "string": 2,
+        "torso": 1.15,
+        "grabReach": 1.25
+      },
+      "kit": {
+        "size": 1.17,
+        "horns": "ram",
+        "tail": "stub",
+        "gear": [
+          "title"
+        ]
+      },
+      "look": {
+        "def": 0.8159548001363873,
+        "scar": 1,
+        "paint": 3,
+        "wrinkles": true,
+        "stubble": true,
+        "veins": false
+      },
+      "texture": {
+        "seed": 4649,
+        "skin": {
+          "idea": "purple oily stretched skin with gold-foil tattoo flecks",
+          "colour": "deep violet purple"
+        },
+        "cloth": {
+          "idea": "quilted gold satin with stitched panels",
+          "colour": "antique gold"
+        },
+        "face": {
+          "idea": "grinning, face paint stripes, bald smooth rounded skull, no horns, no ears, head cropped from the brow to the chin",
+          "colour": "deep violet purple"
+        }
+      }
+    },
+    {
+      "id": "eight-limbed-ash",
+      "name": "Eight-Limbed Ash",
+      "style": "Muay Thai",
+      "blurb": "Knees, elbows, shins - and the ashes of all four.",
+      "body": "#c06020",
+      "accent": "#202020",
+      "family": "muay",
+      "special": "spFlurry",
+      "stats": {
+        "speed": 1,
+        "startup": 0,
+        "punch": 0.95,
+        "kick": 1.3,
+        "grab": 1.2,
+        "reach": 1,
+        "string": 2,
+        "torso": 1,
+        "grabReach": 1
+      },
+      "kit": {
+        "size": 0.98,
+        "horns": "nubs",
+        "tail": "long",
+        "gear": [
+          "headband"
+        ]
+      },
+      "look": {
+        "def": 0.7825271429494023,
+        "scar": 0,
+        "paint": 2,
+        "wrinkles": false,
+        "stubble": true,
+        "veins": false
+      },
+      "texture": {
+        "seed": 4786,
+        "skin": {
+          "idea": "orange hide dusted with ash, knotted scar tissue",
+          "colour": "burnt orange"
+        },
+        "cloth": {
+          "idea": "matte black wrapped cloth, folded overlapping bands",
+          "colour": "charcoal black"
+        },
+        "face": {
+          "idea": "fierce glare, sweat-slick brow, heavy dark eyebrows, bald smooth crown",
+          "colour": "burnt orange skin with pale ash dust"
+        }
+      }
+    },
+    {
+      "id": "knuckles-inferno",
+      "name": "Knuckles Inferno",
+      "style": "Boxing",
+      "blurb": "Never learned to kick. Never needed to.",
+      "body": "#2a4aa0",
+      "accent": "#d0d0d0",
+      "family": "boxing",
+      "special": "spFlurry",
+      "stats": {
+        "speed": 1,
+        "startup": -2,
+        "punch": 1.3,
+        "kick": 0.6,
+        "grab": 1,
+        "reach": 1,
+        "string": 3,
+        "torso": 1,
+        "grabReach": 1
+      },
+      "kit": {
+        "size": 1.02,
+        "horns": "spikes",
+        "tail": "spade",
+        "gear": [
+          "gloves"
+        ]
+      },
+      "look": {
+        "def": 1.1241097009857184,
+        "scar": 2,
+        "paint": 1,
+        "wrinkles": true,
+        "stubble": true,
+        "veins": true
+      },
+      "texture": {
+        "seed": 4923,
+        "skin": {
+          "idea": "cobalt-blue smooth skin with bruising mottles",
+          "colour": "cobalt blue"
+        },
+        "cloth": {
+          "idea": "pale silver grey silky satin, fine weave",
+          "colour": "pale silver grey"
+        },
+        "face": {
+          "idea": "swollen eye, flattened nose",
+          "colour": "cobalt blue"
+        }
+      }
+    },
+    {
+      "id": "rage-reaper",
+      "name": "Rage Reaper",
+      "style": "Rush",
+      "blurb": "All forward pressure, no reverse gear.",
+      "body": "#a01010",
+      "accent": "#000000",
+      "family": "brawler",
+      "special": "spCharge",
+      "stats": {
+        "speed": 1.15,
+        "startup": -2,
+        "punch": 1.05,
+        "kick": 1,
+        "grab": 1,
+        "reach": 1,
+        "string": 2,
+        "torso": 0.9,
+        "grabReach": 1
+      },
+      "kit": {
+        "size": 1.02,
+        "horns": "swept",
+        "tail": "barbed",
+        "gear": [
+          "spines"
+        ]
+      },
+      "look": {
+        "def": 0.7876666715601459,
+        "scar": 2,
+        "paint": 1,
+        "wrinkles": false,
+        "stubble": false,
+        "veins": false
+      },
+      "texture": {
+        "seed": 5060,
+        "skin": {
+          "idea": "deep red raw ridged skin like exposed muscle fibre",
+          "colour": "deep blood red"
+        },
+        "cloth": {
+          "idea": "matte black leather strapping, creased",
+          "colour": "black"
+        },
+        "face": {
+          "idea": "snarling, bared teeth, bald smooth rounded skull, no horns, no ears, head cropped from the brow to the chin",
+          "colour": "deep blood red"
+        }
+      }
+    },
+    {
+      "id": "quickfire-imp",
+      "name": "Quickfire Imp",
+      "style": "Speed",
+      "blurb": "Small, fast and impossible to pin down.",
+      "body": "#e05050",
+      "accent": "#400000",
+      "family": "kungfu",
+      "special": "spSpin",
+      "stats": {
+        "speed": 1.3,
+        "startup": -4,
+        "punch": 0.75,
+        "kick": 0.75,
+        "grab": 1,
+        "reach": 1,
+        "string": 2,
+        "torso": 0.8,
+        "grabReach": 1
+      },
+      "kit": {
+        "size": 0.8,
+        "horns": "long",
+        "tail": "long",
+        "gear": [
+          "wings"
+        ]
+      },
+      "look": {
+        "def": 0.7913860698579811,
+        "scar": 1,
+        "paint": 0,
+        "wrinkles": false,
+        "stubble": true,
+        "veins": true
+      },
+      "texture": {
+        "seed": 5197,
+        "skin": {
+          "idea": "bright pinkish-red fine lizard scales",
+          "colour": "bright pinkish red"
+        },
+        "cloth": {
+          "idea": "dark maroon satin with thin straps",
+          "colour": "dark maroon"
+        },
+        "face": {
+          "idea": "big eyes, impish grin, bald smooth rounded skull, no horns, no ears, head cropped from the brow to the chin",
+          "colour": "bright pinkish red"
+        }
+      }
+    },
+    {
+      "id": "crimson-crane",
+      "name": "Crimson Crane",
+      "style": "Kung Fu",
+      "blurb": "Long flowing strings that never seem to end.",
+      "body": "#c03030",
+      "accent": "#f0d060",
+      "family": "kungfu",
+      "special": "spSpin",
+      "stats": {
+        "speed": 1,
+        "startup": -2,
+        "punch": 0.9,
+        "kick": 1.05,
+        "grab": 1,
+        "reach": 1,
+        "string": 3,
+        "torso": 1,
+        "grabReach": 1
+      },
+      "kit": {
+        "size": 0.97,
+        "horns": "nubs",
+        "tail": "long",
+        "gear": [
+          "topknot"
+        ]
+      },
+      "look": {
+        "def": 1.0079326279577798,
+        "scar": 2,
+        "paint": 2,
+        "wrinkles": false,
+        "stubble": false,
+        "veins": true
+      },
+      "texture": {
+        "seed": 5334,
+        "skin": {
+          "idea": "red skin with gold painted scrollwork fading into it",
+          "colour": "deep crimson red"
+        },
+        "cloth": {
+          "idea": "pale gold silk brocade, woven pattern",
+          "colour": "pale yellow gold"
+        },
+        "face": {
+          "idea": "long thin moustache marks, bald smooth crown, sharp cheekbones",
+          "colour": "deep crimson red skin"
+        }
+      }
+    },
+    {
+      "id": "hellmountain",
+      "name": "Hellmountain",
+      "style": "Mighty",
+      "blurb": "Not a fighter so much as a geological event.",
+      "body": "#4a3a30",
+      "accent": "#902010",
+      "family": "power",
+      "special": "spSlam",
+      "stats": {
+        "speed": 0.75,
+        "startup": 6,
+        "punch": 1.5,
+        "kick": 1.3,
+        "grab": 1.3,
+        "reach": 1,
+        "string": 1,
+        "torso": 1.4,
+        "grabReach": 1
+      },
+      "kit": {
+        "size": 1.28,
+        "horns": "crown",
+        "tail": "stub",
+        "gear": [
+          "pauldrons",
+          "spines"
+        ]
+      },
+      "look": {
+        "def": 0.9714958808850497,
+        "scar": 2,
+        "paint": 1,
+        "wrinkles": true,
+        "stubble": false,
+        "veins": true
+      },
+      "texture": {
+        "seed": 5471,
+        "skin": {
+          "idea": "basalt rock plates and moss-dark crevices, like a cliff face",
+          "colour": "grey brown stone"
+        },
+        "cloth": {
+          "idea": "rough dark red sackcloth, coarse jute weave",
+          "colour": "dark rust red"
+        },
+        "face": {
+          "idea": "stony, deep-set eyes",
+          "colour": "grey brown stone"
+        }
+      }
+    },
+    {
+      "id": "choke-chimera",
+      "name": "Choke Chimera",
+      "style": "Submission",
+      "blurb": "Once it has you, it does not let go.",
+      "body": "#3a6a3a",
+      "accent": "#101010",
+      "family": "grappler",
+      "special": "spSlam",
+      "stats": {
+        "speed": 1,
+        "startup": 0,
+        "punch": 0.85,
+        "kick": 0.9,
+        "grab": 1.4,
+        "reach": 1,
+        "string": 2,
+        "torso": 1,
+        "grabReach": 1.15
+      },
+      "kit": {
+        "size": 1.05,
+        "horns": "ram",
+        "tail": "barbed",
+        "gear": [
+          "spines"
+        ]
+      },
+      "look": {
+        "def": 0.7782112198299729,
+        "scar": 3,
+        "paint": 2,
+        "wrinkles": false,
+        "stubble": true,
+        "veins": true
+      },
+      "texture": {
+        "seed": 5608,
+        "skin": {
+          "idea": "green reptilian scales mixed with patches of coarse fur",
+          "colour": "mossy green"
+        },
+        "cloth": {
+          "idea": "black oiled leather with straps and a brass buckle",
+          "colour": "black"
+        },
+        "face": {
+          "idea": "slit pupils, wide jaw",
+          "colour": "mossy green"
+        }
+      }
+    },
+    {
+      "id": "sergeant-sulphur",
+      "name": "Sergeant Sulphur",
+      "style": "Military",
+      "blurb": "Drills the damned at 4 a.m. for eternity.",
+      "body": "#4a5a2a",
+      "accent": "#202010",
+      "family": "karate",
+      "special": "spCharge",
+      "stats": {
+        "speed": 1,
+        "startup": 0,
+        "punch": 1.05,
+        "kick": 1.05,
+        "grab": 1.15,
+        "reach": 1,
+        "string": 2,
+        "torso": 1.1,
+        "grabReach": 1
+      },
+      "kit": {
+        "size": 1.05,
+        "horns": "nubs",
+        "tail": "stub",
+        "gear": [
+          "beret",
+          "pauldrons"
+        ]
+      },
+      "look": {
+        "def": 1.0290683080791496,
+        "scar": 0,
+        "paint": 2,
+        "wrinkles": true,
+        "stubble": false,
+        "veins": false
+      },
+      "texture": {
+        "seed": 5745,
+        "skin": {
+          "idea": "olive skin with yellow sulphur crust in the creases",
+          "colour": "olive green"
+        },
+        "cloth": {
+          "idea": "stiff dark olive drill cotton, pressed",
+          "colour": "dark olive"
+        },
+        "face": {
+          "idea": "square jaw, permanent scowl",
+          "colour": "olive green"
+        }
+      }
+    },
+    {
+      "id": "cinder-ginga",
+      "name": "Cinder Ginga",
+      "style": "Capoeira",
+      "blurb": "Dances over the lava, kicks from impossible angles.",
+      "body": "#d08040",
+      "accent": "#2a1a0a",
+      "family": "kicker",
+      "special": "spSpin",
+      "stats": {
+        "speed": 1.1,
+        "startup": 0,
+        "punch": 0.8,
+        "kick": 1.25,
+        "grab": 1,
+        "reach": 1.12,
+        "string": 2,
+        "torso": 1,
+        "grabReach": 1
+      },
+      "kit": {
+        "size": 0.95,
+        "horns": "long",
+        "tail": "long",
+        "gear": []
+      },
+      "look": {
+        "def": 0.9332816228969023,
+        "scar": 1,
+        "paint": 2,
+        "wrinkles": false,
+        "stubble": false,
+        "veins": false
+      },
+      "texture": {
+        "seed": 5882,
+        "skin": {
+          "idea": "warm amber skin with glowing ember speckles",
+          "colour": "warm amber tan"
+        },
+        "cloth": {
+          "idea": "dark brown cotton cord and canvas",
+          "colour": "dark brown"
+        },
+        "face": {
+          "idea": "joyful, wide smile, bald smooth rounded skull, no horns, no ears, head cropped from the brow to the chin",
+          "colour": "warm amber tan"
+        }
+      }
+    },
+    {
+      "id": "hellkick-hana",
+      "name": "Hellkick Hana",
+      "style": "Tae Kwon Do",
+      "blurb": "Her feet are faster than your hands.",
+      "body": "#f0f0f0",
+      "accent": "#a00000",
+      "family": "kicker",
+      "special": "spSpin",
+      "stats": {
+        "speed": 1,
+        "startup": -2,
+        "punch": 0.85,
+        "kick": 1.35,
+        "grab": 1,
+        "reach": 1.1,
+        "string": 2,
+        "torso": 1,
+        "grabReach": 1
+      },
+      "kit": {
+        "size": 0.93,
+        "horns": "swept",
+        "tail": "spade",
+        "gear": [
+          "headband",
+          "topknot"
+        ]
+      },
+      "look": {
+        "def": 0.765867772733327,
+        "scar": 3,
+        "paint": 0,
+        "wrinkles": false,
+        "stubble": false,
+        "veins": true
+      },
+      "texture": {
+        "seed": 6019,
+        "skin": {
+          "idea": "porcelain-white skin with thin red crack lines like repaired ceramic",
+          "colour": "porcelain white"
+        },
+        "cloth": {
+          "idea": "deep red cotton dobok weave with a black trim edge",
+          "colour": "crimson red"
+        },
+        "face": {
+          "idea": "sharp, focused, red eyeliner marks",
+          "colour": "porcelain white"
+        }
+      }
+    },
+    {
+      "id": "ronin-of-gehenna",
+      "name": "Ronin of Gehenna",
+      "style": "Samurai Sword",
+      "blurb": "Lost his blade at the gates; fights with a pitchfork's reach.",
+      "body": "#303040",
+      "accent": "#c0a030",
+      "family": "brawler",
+      "special": "spBlade",
+      "stats": {
+        "speed": 1,
+        "startup": 2,
+        "punch": 1.1,
+        "kick": 1,
+        "grab": 1,
+        "reach": 1.3,
+        "string": 2,
+        "torso": 1,
+        "grabReach": 1
+      },
+      "kit": {
+        "size": 1,
+        "horns": "long",
+        "tail": "spade",
+        "gear": [
+          "kasa"
+        ]
+      },
+      "look": {
+        "def": 0.9561826826189644,
+        "scar": 0,
+        "paint": 2,
+        "wrinkles": false,
+        "stubble": true,
+        "veins": true
+      },
+      "texture": {
+        "seed": 6156,
+        "skin": {
+          "idea": "slate-grey skin like lacquered armour plates, chipped at the edges",
+          "colour": "slate grey"
+        },
+        "cloth": {
+          "idea": "gold lacquered plate, riveted and chipped",
+          "colour": "antique gold"
+        },
+        "face": {
+          "idea": "stern, a scar across one eye, bald smooth rounded skull, no horns, no ears, head cropped from the brow to the chin",
+          "colour": "slate grey"
+        }
+      }
+    },
+    {
+      "id": "the-old-devil",
+      "name": "The Old Devil",
+      "style": "Master",
+      "blurb": "Older than sin, and annoyingly patient.",
+      "body": "#902020",
+      "accent": "#e0e0e0",
+      "family": "kungfu",
+      "special": "spBlade",
+      "stats": {
+        "speed": 0.95,
+        "startup": -2,
+        "punch": 1.1,
+        "kick": 1.1,
+        "grab": 1.1,
+        "reach": 1,
+        "string": 2,
+        "torso": 1,
+        "grabReach": 1
+      },
+      "kit": {
+        "size": 0.94,
+        "horns": "ram",
+        "tail": "long",
+        "gear": [
+          "beard"
+        ]
+      },
+      "look": {
+        "def": 0.9493154739495367,
+        "scar": 1,
+        "paint": 2,
+        "wrinkles": true,
+        "stubble": false,
+        "veins": true
+      },
+      "texture": {
+        "seed": 6293,
+        "skin": {
+          "idea": "wrinkled dark-red skin, liver spots, very old",
+          "colour": "dark dried red"
+        },
+        "cloth": {
+          "idea": "pale silver white silk weave, soft drape",
+          "colour": "pale silver white"
+        },
+        "face": {
+          "idea": "wise squint, deep wrinkles, liver spots, bald smooth crown",
+          "colour": "dark dried red leathery skin"
+        }
+      }
+    },
+    {
+      "id": "hellfire-flick",
+      "name": "Hellfire Flick",
+      "style": "Gun",
+      "blurb": "Flicks fireballs from his fingertips - well, short ones.",
+      "body": "#404040",
+      "accent": "#ff6000",
+      "family": "brawler",
+      "special": "spFire",
+      "stats": {
+        "speed": 1,
+        "startup": 2,
+        "punch": 0.85,
+        "kick": 1,
+        "grab": 1,
+        "reach": 1.4,
+        "string": 2,
+        "torso": 1,
+        "grabReach": 1
+      },
+      "kit": {
+        "size": 1,
+        "horns": "goat",
+        "tail": "spade",
+        "gear": [
+          "stetson"
+        ]
+      },
+      "look": {
+        "def": 1.0546730211470277,
+        "scar": 0,
+        "paint": 3,
+        "wrinkles": true,
+        "stubble": true,
+        "veins": true
+      },
+      "texture": {
+        "seed": 6430,
+        "skin": {
+          "idea": "charcoal skin with orange glowing burn veins",
+          "colour": "charcoal black grey"
+        },
+        "cloth": {
+          "idea": "heat scorched orange leather, blistered and blackened at the edges",
+          "colour": "burnt orange"
+        },
+        "face": {
+          "idea": "cocky half-smile, one brow raised, bald smooth crown, scorched cheek",
+          "colour": "charcoal grey-black skin with orange embers in the cracks"
+        }
+      }
+    },
+    {
+      "id": "brother-blaze",
+      "name": "Brother Blaze",
+      "style": "Martial Arts",
+      "blurb": "Fast hands, faster feet, yells a lot.",
+      "body": "#e0a040",
+      "accent": "#202020",
+      "family": "karate",
+      "special": "spFlurry",
+      "stats": {
+        "speed": 1,
+        "startup": -4,
+        "punch": 1,
+        "kick": 1.1,
+        "grab": 1,
+        "reach": 1,
+        "string": 3,
+        "torso": 0.95,
+        "grabReach": 1
+      },
+      "kit": {
+        "size": 0.97,
+        "horns": "nubs",
+        "tail": "spade",
+        "gear": [
+          "headband"
+        ]
+      },
+      "look": {
+        "def": 0.8766365985735319,
+        "scar": 2,
+        "paint": 2,
+        "wrinkles": true,
+        "stubble": false,
+        "veins": true
+      },
+      "texture": {
+        "seed": 6567,
+        "skin": {
+          "idea": "golden-tan skin with a sweat sheen and small burn spots",
+          "colour": "golden tan"
+        },
+        "cloth": {
+          "idea": "black cotton jersey, soft and stretchy",
+          "colour": "black"
+        },
+        "face": {
+          "idea": "battle yell, open mouth, teeth bared, bald smooth rounded skull, no horns, no ears, head cropped from the brow to the chin",
+          "colour": "golden tan"
+        }
+      }
+    },
+    {
+      "id": "ashen-judoka",
+      "name": "Ashen Judoka",
+      "style": "Judo Based",
+      "blurb": "Turns your weight into your problem.",
+      "body": "#e8e0d0",
+      "accent": "#101040",
+      "family": "grappler",
+      "special": "spSlam",
+      "stats": {
+        "speed": 1,
+        "startup": 0,
+        "punch": 1.05,
+        "kick": 1,
+        "grab": 1.35,
+        "reach": 1,
+        "string": 2,
+        "torso": 1,
+        "grabReach": 1.1
+      },
+      "kit": {
+        "size": 1.06,
+        "horns": "bull",
+        "tail": "stub",
+        "gear": [
+          "obi"
+        ]
+      },
+      "look": {
+        "def": 0.9226426658802666,
+        "scar": 0,
+        "paint": 0,
+        "wrinkles": true,
+        "stubble": false,
+        "veins": false
+      },
+      "texture": {
+        "seed": 6704,
+        "skin": {
+          "idea": "pale ashen skin with soft grey smudges",
+          "colour": "pale bone ash"
+        },
+        "cloth": {
+          "idea": "midnight blue heavy cotton twill",
+          "colour": "midnight blue"
+        },
+        "face": {
+          "idea": "composed, heavy-lidded eyes, bald smooth rounded skull, no horns, no ears, head cropped from the brow to the chin",
+          "colour": "pale bone ash"
+        }
+      }
+    },
+    {
+      "id": "fresh-soul-kevin",
+      "name": "Fresh Soul Kevin",
+      "style": "Amateur",
+      "blurb": "Died this morning. Still in his work lanyard.",
+      "body": "#9a9a9a",
+      "accent": "#3a6aa0",
+      "family": "boxing",
+      "special": "spCharge",
+      "stats": {
+        "speed": 1,
+        "startup": 2,
+        "punch": 0.85,
+        "kick": 0.85,
+        "grab": 0.85,
+        "reach": 1,
+        "string": 2,
+        "torso": 0.9,
+        "grabReach": 1
+      },
+      "kit": {
+        "size": 0.95,
+        "horns": "nubs",
+        "tail": "stub",
+        "gear": [
+          "lanyard"
+        ]
+      },
+      "look": {
+        "def": 0.9451732343994081,
+        "scar": 0,
+        "paint": 0,
+        "wrinkles": false,
+        "stubble": false,
+        "veins": true
+      },
+      "texture": {
+        "seed": 6841,
+        "skin": {
+          "idea": "grey slightly translucent ghostly skin, faint office-pallor blotches",
+          "colour": "pale grey"
+        },
+        "cloth": {
+          "idea": "pale blue grey office shirt cotton with a faint pinstripe",
+          "colour": "pale blue grey"
+        },
+        "face": {
+          "idea": "nervous, wide-eyed, heavy eye bags",
+          "colour": "pale grey"
+        }
+      }
+    }
+  ]
+}

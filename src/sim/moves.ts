@@ -26,27 +26,16 @@
 // Damage, reach and the knockdown pushes are this game's own and were not
 // calibrated. There is no guard in Urban Reign; blockstun keeps every move
 // 4 frames minus on block.
-import type { Height } from "./types";
+import type { Move, SpecialId } from "../data/types";
+import { SPECIALS } from "../data/characters";
 
-export interface Move {
-  id: string;
-  startup: number; // first active frame (t counts from 0 on the press frame)
-  active: number;
-  recovery: number;
-  dmg: number;
-  hitstun: number; // 0 with knockdown = the hit knocks down
-  blockstun: number;
-  height: Height;
-  reach: number;
-  arc: number; // cos of the half angle of the hit cone
-  push: number; // knockback distance on hit
-  knockdown: boolean;
-  next?: string; // string follow-up, cancellable once this move has connected
-  kind: "punch" | "kick" | "head" | "special";
-  dash?: number; // metres per frame the attacker travels during the active frames
-  launch?: boolean; // a launcher: the victim goes up into a juggle instead of down
-  rehit?: number; // the move can hit the same fighter again every `rehit` active frames
-}
+export type { Move, SpecialId };
+
+/** The six specials are part of the character design, so their frame data comes
+ *  from src/data/characters.json alongside the fighter that throws them. */
+const SPECIAL_MOVES: Record<SpecialId, Move> = Object.fromEntries(
+  (Object.keys(SPECIALS) as SpecialId[]).map((id) => [id, SPECIALS[id].move]),
+) as Record<SpecialId, Move>;
 
 export const MOVES: Record<string, Move> = {
   jab1: { id: "jab1", startup: 12, active: 3, recovery: 28, dmg: 4, hitstun: 41, blockstun: 26, height: "high", reach: 1.25, arc: 0.55, push: 0.15, knockdown: false, next: "jab2", kind: "punch" },
@@ -64,23 +53,10 @@ export const MOVES: Record<string, Move> = {
   // The style specials (L2, or Square + Cross together), paid for with fury.
   // They are Pitfighter's own: a reversal cannot catch them, so they are the
   // answer to a fighter who sits in reversal.
-  spSpin: { id: "spSpin", startup: 10, active: 10, recovery: 26, dmg: 10, hitstun: 0, blockstun: 28, height: "high", reach: 1.7, arc: -1, push: 1.6, knockdown: true, kind: "special" },
-  spCharge: { id: "spCharge", startup: 12, active: 18, recovery: 28, dmg: 9, hitstun: 0, blockstun: 26, height: "high", reach: 1.0, arc: 0.3, push: 1.8, knockdown: true, kind: "special", dash: 0.16 },
-  spFlurry: { id: "spFlurry", startup: 8, active: 24, recovery: 24, dmg: 2.5, hitstun: 30, blockstun: 12, height: "high", reach: 1.3, arc: 0.5, push: 0.08, knockdown: false, kind: "special", rehit: 4 },
-  spSlam: { id: "spSlam", startup: 22, active: 3, recovery: 30, dmg: 11, hitstun: 0, blockstun: 30, height: "low", reach: 2.0, arc: -1, push: 1.4, knockdown: true, kind: "special" },
-  spBlade: { id: "spBlade", startup: 14, active: 5, recovery: 28, dmg: 12, hitstun: 0, blockstun: 28, height: "high", reach: 2.3, arc: 0, push: 1.4, knockdown: true, kind: "special" },
-  spFire: { id: "spFire", startup: 16, active: 6, recovery: 30, dmg: 10, hitstun: 0, blockstun: 26, height: "high", reach: 4.5, arc: 0.93, push: 1.2, knockdown: true, kind: "special" },
+  ...SPECIAL_MOVES,
 };
 
-export type SpecialId = "spSpin" | "spCharge" | "spFlurry" | "spSlam" | "spBlade" | "spFire";
-export const SPECIAL_NAMES: Record<SpecialId, string> = {
-  spSpin: "HELLSPIN",
-  spCharge: "BRIMSTONE CHARGE",
-  spFlurry: "INFERNAL FLURRY",
-  spSlam: "PIT SLAM",
-  spBlade: "PITCHFORK ARC",
-  spFire: "HELLFIRE FLICK",
-};
+export { SPECIAL_NAMES } from "../data/characters";
 
 // Fury: the special meter. Landing a hit, taking one, reversing and throwing
 // fill it; a special costs `cost`, so a full bar holds two. A KO empties it.
