@@ -105,7 +105,12 @@ Each style also has a special, paid for with fury:
 - **Feedback:** sparks, dust and flash rings on impacts, a hit flash on the
   victim, camera shake with a punch-in on heavy hits, bloom, and synthesised
   sound (Web Audio, no sample files): impacts, swings, a lava rumble, and a
-  crowd that swells on big moments.
+  crowd that swells on big moments. Each blow lurches the camera along its
+  line; a heavy one tilts it and flashes the picture white. A KO slows time,
+  and the blow that wins the match nearly stops it while the camera closes in.
+- **Silhouettes:** every fighter has its own size, horns, tail and gear (a
+  straw hat, a stetson, boxing gloves, a beard, spiked pauldrons, a work
+  lanyard), so they read apart from across the pit before any colour.
 
 ## Controls
 

@@ -18,6 +18,7 @@ import { STYLES } from "../sim/styles";
 import { legs, type World } from "../sim/world";
 import { painted, surface, type Surface } from "./textures";
 import { armRecipe, faceRecipe, jawRecipe, lookOf, torsoRecipe } from "./anatomy";
+import { KITS, buildGear, buildHorns, buildTail } from "./kit";
 import {
   CLINCH,
   DOWN_BACK,
@@ -296,7 +297,9 @@ export function buildBody(f: Fighter): Body {
   // the trunk, the arms and the head have their own skin, with the style's anatomy painted on it
   const look = lookOf(f.style, st);
   const painting = (s: Surface) => new THREE.MeshStandardMaterial({ color: st.color, roughness: 0.6, emissive: 0x000000, ...s, bumpScale: 2.5 });
-  const big = st.torso > 1.1 ? 1.15 : st.torso < 0.9 ? 0.88 : 1;
+  // the style's silhouette: its size, horns, tail and gear (kit.ts)
+  const kit = KITS[st.style];
+  const big = kit.size;
   const root = new THREE.Group();
   const body = new THREE.Group();
   body.scale.setScalar(big);
@@ -462,10 +465,6 @@ export function buildBody(f: Fighter): Body {
   jaw.position.set(0, 0.07, 0.04);
   head.add(jaw);
   for (const s of [-1, 1]) {
-    const horn = mesh(new THREE.ConeGeometry(0.04, 0.22, 14), accent);
-    horn.position.set(0.1 * s, 0.3, 0);
-    horn.rotation.z = -0.5 * s;
-    head.add(horn);
     const eye = new THREE.Mesh(new THREE.SphereGeometry(0.028, 8, 6), eyeMat);
     eye.position.set(0.055 * s, 0.17, 0.135);
     head.add(eye);
@@ -517,15 +516,11 @@ export function buildBody(f: Fighter): Body {
     an.add(foot, sole);
   }
 
-  // the devil's tail
-  const tail = new THREE.Group();
-  tail.position.set(0, 0.02, -0.13);
-  const curve = new THREE.CatmullRomCurve3([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, -0.18, -0.15), new THREE.Vector3(0, -0.2, -0.38), new THREE.Vector3(0, 0.02, -0.5)]);
-  tail.add(mesh(new THREE.TubeGeometry(curve, 24, 0.022, 10), accent));
-  const tip = mesh(new THREE.ConeGeometry(0.05, 0.1, 4), accent); // the spade stays four-sided
-  tip.position.set(0, 0.07, -0.5);
-  tail.add(tip);
+  // the horns, the devil's tail, and the style's gear
+  head.add(buildHorns(kit.horns, accent));
+  const tail = buildTail(kit.tail, accent);
   hips.add(tail);
+  buildGear(kit.gear, { head, spine, armL, armR, elbowL, elbowR, fore: FORE }, { accent, accentColour: st.accent });
 
   const limbs = { armL, armR, legL, legR, head, torso: spine } as Record<PartId, THREE.Object3D>;
   // where a limb is torn off: wet red meat round a white knob of bone, on the shoulder or hip it came from
