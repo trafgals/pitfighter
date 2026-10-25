@@ -103,8 +103,8 @@ export class Select {
       const bedge = (b: number) => (now.buttons & b) !== 0 && (was.buttons & b) === 0;
       const slot = this.slots.find((s) => s.device === dev);
       // anyone can flip through the match types, joined or not
-      if (bedge(BTN.SPECIAL)) this.cycleType(-1);
-      if (bedge(BTN.USE)) this.cycleType(1);
+      if (bedge(BTN.TAUNT)) this.cycleType(-1);
+      if (bedge(BTN.SPECIAL)) this.cycleType(1);
       // Start never starts the match from a device that is not in it: it joins
       // that device (and readies it, a second time) instead of filling the pit with CPUs
       if (edge("start") && slot?.ready) start = true;
@@ -112,8 +112,8 @@ export class Select {
         if ((bedge(BTN.HIGH) || edge("start")) && this.join(dev, (this.slots.length * 3) % STYLES.length)) changed = true;
         continue;
       }
-      if (bedge(BTN.TARGET)) this.setCount(this.fighters - 1);
-      if (bedge(BTN.GUARD)) this.setCount(this.fighters + 1);
+      if (bedge(BTN.USE)) this.setCount(this.fighters - 1);
+      if (bedge(BTN.LOCK)) this.setCount(this.fighters + 1);
       if (!slot.ready) {
         const n = STYLES.length;
         if (edge("left")) slot.style = (slot.style + n - 1) % n;

@@ -36,6 +36,8 @@ import {
   REVERSAL,
   REVERSAL_WHIFF_TOTAL,
   CHARGE,
+  DASH,
+  EVADE,
   FURY,
   HITSTOP,
   hitstopFor,
@@ -43,6 +45,7 @@ import {
   SPECIAL_NAMES,
   SPEED,
   STRING_STARTS,
+  TAUNT,
   THROW,
   type Move,
 } from "./moves";
@@ -62,10 +65,9 @@ export interface MatchConfig {
 }
 
 export const BASE_HP: Record<PartId, number> = { head: 40, torso: 100, armL: 30, armR: 30, legL: 35, legR: 35 };
-const BUTTONS = [BTN.HIGH, BTN.LOW, BTN.GRAB, BTN.REV, BTN.GUARD, BTN.TARGET, BTN.USE, BTN.SPECIAL];
+const BUTTONS = [BTN.HIGH, BTN.LOW, BTN.GRAB, BTN.REV, BTN.LOCK, BTN.TARGET, BTN.USE, BTN.SPECIAL, BTN.TAUNT, BTN.DASH];
 const BIT_INDEX: Record<number, number> = Object.fromEntries(BUTTONS.map((b, i) => [b, i]));
 const LIMB_TORSO_SHARE = 0.35; // part of every limb/head hit that also lands on the torso
-const GUARD_ARC = Math.cos((75 * Math.PI) / 180);
 export const BODY_R = 0.33;
 // states a knock leaves you in: falling from one of them credits whoever hit you last
 const KNOCKED = new Set(["down", "hitstun", "blockstun", "thrown", "reversed", "dizzy"]);
@@ -81,7 +83,7 @@ export function alive(f: Fighter): boolean {
   return f.state !== "ko" && f.state !== "falling";
 }
 export function actionable(f: Fighter): boolean {
-  return f.state === "idle" || f.state === "walk" || f.state === "guard";
+  return f.state === "idle" || f.state === "walk";
 }
 
 function freshParts(style: number): Fighter["parts"] {
@@ -143,6 +145,9 @@ export class World {
         facing: sp[id].facing,
         slideX: 0,
         slideY: 0,
+        dirX: 0,
+        dirY: 0,
+        running: false,
         state: "idle",
         t: 0,
         dur: 0,
@@ -255,22 +260,22 @@ export class World {
   }
 
   /**
-   * L2, or Square + Cross pressed within SPECIAL_CHORD frames of each other.
-   * `opener` is the button whose string opener is already running (its press was consumed).
+   * R2, or Circle + Triangle pressed within SPECIAL_CHORD frames of each other
+   * (Urban Reign's SPA). `opener` is the button whose move is already running (its press was consumed).
    */
   private specialPressed(f: Fighter, opener = 0): boolean {
     if (this.buffered(f, BTN.SPECIAL)) return true;
-    if (opener) return this.buffered(f, opener === BTN.HIGH ? BTN.LOW : BTN.HIGH, this.s.frame - SPECIAL_CHORD);
-    const hi = f.pressed[BIT_INDEX[BTN.HIGH]];
-    const lo = f.pressed[BIT_INDEX[BTN.LOW]];
-    return this.buffered(f, BTN.HIGH) && this.buffered(f, BTN.LOW) && Math.abs(hi - lo) <= SPECIAL_CHORD;
+    if (opener) return this.buffered(f, opener === BTN.GRAB ? BTN.HIGH : BTN.GRAB, this.s.frame - SPECIAL_CHORD);
+    const st = f.pressed[BIT_INDEX[BTN.HIGH]];
+    const gr = f.pressed[BIT_INDEX[BTN.GRAB]];
+    return this.buffered(f, BTN.HIGH) && this.buffered(f, BTN.GRAB) && Math.abs(st - gr) <= SPECIAL_CHORD;
   }
 
   /** Start the style's special if the fighter asked for it and has the fury and a limb to do it with. */
   private trySpecial(f: Fighter, opener = 0): boolean {
     if (f.fury < FURY.cost || !this.specialPressed(f, opener)) return false;
     if (arms(f) === 0 && legs(f) < 2) return false;
-    for (const b of [BTN.SPECIAL, BTN.HIGH, BTN.LOW]) this.consume(f, b);
+    for (const b of [BTN.SPECIAL, BTN.HIGH, BTN.LOW, BTN.GRAB]) this.consume(f, b);
     f.fury -= FURY.cost;
     this.startMove(f, STYLES[f.style].special);
     this.ev({ kind: "special", a: f.id });
@@ -312,7 +317,8 @@ export class World {
       f.move = null;
       f.chain = false;
     }
-    if (st === "idle" || st === "walk" || st === "guard") f.combo = 0;
+    if (st === "idle" || st === "walk") f.combo = 0;
+    if (st !== "walk") f.running = false;
   }
 
   /** Effective numbers of a strike for this fighter's style and body. */
@@ -357,6 +363,7 @@ export class World {
     f.chain = false;
     f.charge = 0;
     f.chargeHeld = id === STRING_STARTS.high || id === STRING_STARTS.low;
+    if (id === "dashStrike") return; // a charge goes where it was running
     const t = this.lockTarget(f);
     if (t && dist(f, t) < 3) f.facing = Math.atan2(t.y - f.y, t.x - f.x);
   }
@@ -379,8 +386,13 @@ export class World {
     switch (f.state) {
       case "idle":
       case "walk":
-      case "guard":
         this.updateActionable(f, inp);
+        break;
+      case "dash":
+        this.updateDash(f, inp);
+        break;
+      case "evade":
+        if (f.t < EVADE.move) this.travel(f, f.dirX * EVADE.speed, f.dirY * EVADE.speed);
         break;
       case "attack":
         this.updateAttack(f, inp);
@@ -459,6 +471,10 @@ export class World {
       case "sitting":
         this.setState(f, "seated");
         break;
+      case "taunt":
+        this.addFury(f, TAUNT.fury);
+        this.setState(f, "idle");
+        break;
       case "ko":
         if (this.arena.respawn) this.respawn(f);
         else f.dur = 0; // out for good
@@ -471,10 +487,28 @@ export class World {
     }
   }
 
+  /** The stick, as a unit direction and how far it is pushed (0..1). */
+  private stick(inp: PlayerInput): { dx: number; dy: number; mag: number } {
+    const mag = Math.hypot(inp.x, inp.y);
+    return mag > 0.2 ? { dx: inp.x / mag, dy: inp.y / mag, mag: Math.min(1, mag) } : { dx: 0, dy: 0, mag: 0 };
+  }
+
+  /** Move by (dx, dy), but never over an edge. */
+  private travel(f: Fighter, dx: number, dy: number): void {
+    f.x += dx;
+    f.y += dy;
+    if (!this.arena.canWalk(this, f, f.x, f.y)) {
+      f.x -= dx;
+      f.y -= dy;
+    }
+  }
+
   private updateActionable(f: Fighter, inp: PlayerInput): void {
     const nArms = arms(f);
     const nLegs = legs(f);
-    const guardHeld = (inp.buttons & BTN.GUARD) !== 0;
+    const lockHeld = (inp.buttons & BTN.LOCK) !== 0;
+    const st = this.stick(inp);
+    const running = f.running;
 
     if (this.buffered(f, BTN.TARGET)) {
       this.consume(f, BTN.TARGET);
@@ -484,16 +518,25 @@ export class World {
       this.consume(f, BTN.USE);
       if (this.doUse(f)) return;
     }
+    if (this.buffered(f, BTN.TAUNT)) {
+      this.consume(f, BTN.TAUNT);
+      this.setState(f, "taunt", TAUNT.dur);
+      return;
+    }
     if (this.buffered(f, BTN.REV)) {
-      const height: Height = guardHeld || nArms === 0 ? "low" : "high";
-      if (height === "high" || nLegs > 0) {
-        this.consume(f, BTN.REV);
+      this.consume(f, BTN.REV);
+      // Square with a direction: evade that way; on its own: deflect whatever comes
+      if (st.mag > 0.5 && nLegs > 0) {
+        this.setState(f, "evade", EVADE.dur);
+        f.dirX = st.dx;
+        f.dirY = st.dy;
+        f.invuln = Math.max(f.invuln, EVADE.invuln);
+      } else {
         this.setState(f, "reversal", REVERSAL_WHIFF_TOTAL); // a landed reversal ends early
-        f.revHeight = height;
         const t = this.lockTarget(f);
         if (t && dist(f, t) < 3) f.facing = Math.atan2(t.y - f.y, t.x - f.x);
-        return;
       }
+      return;
     }
     if (this.trySpecial(f)) return;
     if (this.buffered(f, BTN.GRAB)) {
@@ -510,7 +553,11 @@ export class World {
     }
     if (this.buffered(f, BTN.HIGH)) {
       this.consume(f, BTN.HIGH);
-      this.startMove(f, nArms > 0 ? STRING_STARTS.high : "headbutt");
+      // the stick pulled back, away from where the fighter faces: the low string
+      const back = st.mag > 0.5 && st.dx * Math.cos(f.facing) + st.dy * Math.sin(f.facing) < -0.5;
+      if (running) this.startMove(f, "dashStrike");
+      else if (back && nLegs === 2) this.startMove(f, STRING_STARTS.low);
+      else this.startMove(f, nArms > 0 ? STRING_STARTS.high : "headbutt");
       return;
     }
     if (this.buffered(f, BTN.LOW) && nLegs === 2) {
@@ -518,45 +565,62 @@ export class World {
       this.startMove(f, STRING_STARTS.low);
       return;
     }
-
-    const canGuard = guardHeld && nArms > 0 && nLegs === 2;
-    if (canGuard && f.state !== "guard") this.setState(f, "guard");
-    else if (!canGuard && f.state === "guard") this.setState(f, "idle");
+    if (this.buffered(f, BTN.DASH) && nLegs > 0) {
+      this.consume(f, BTN.DASH);
+      this.setState(f, "dash", DASH.dur);
+      f.dirX = st.mag ? st.dx : Math.cos(f.facing);
+      f.dirY = st.mag ? st.dy : Math.sin(f.facing);
+      f.facing = Math.atan2(f.dirY, f.dirX);
+      return;
+    }
 
     // movement
-    const mag = Math.hypot(inp.x, inp.y);
     let moving = false;
-    if (mag > 0.2) {
-      const k = Math.min(1, mag) / mag;
-      const dx = inp.x * k;
-      const dy = inp.y * k;
+    if (st.mag) {
+      // Cross held: run (two legs, and not while locked on)
+      const run = (inp.buttons & BTN.DASH) !== 0 && nLegs === 2 && !lockHeld;
       let sp: number;
-      if (nLegs === 2) sp = (f.state === "guard" ? SPEED.guard : SPEED.walk) * limbMod(f, LEGS, "speed");
+      if (nLegs === 2) sp = (run ? SPEED.run : SPEED.walk) * limbMod(f, LEGS, "speed");
       else sp = f.hopPhase % HOP_CYCLE < HOP_AIR ? (nLegs === 1 ? SPEED.hop : SPEED.bounce) * (HOP_CYCLE / HOP_AIR) : 0;
-      f.x += dx * sp;
-      f.y += dy * sp;
-      // walking never takes you over an edge
-      if (!this.arena.canWalk(this, f, f.x, f.y)) {
-        f.x -= dx * sp;
-        f.y -= dy * sp;
-      }
+      this.travel(f, st.dx * st.mag * sp, st.dy * st.mag * sp);
       moving = true;
       if (f.state === "idle") this.setState(f, "walk");
+      f.running = run;
       const t = this.lockTarget(f);
-      if (!(t && dist(f, t) < 4.5)) turnToward(f, Math.atan2(dy, dx), 0.3);
+      if (run || !(t && (lockHeld || dist(f, t) < 4.5))) turnToward(f, Math.atan2(st.dy, st.dx), run ? 0.4 : 0.3);
     } else if (f.state === "walk") this.setState(f, "idle");
     if (nLegs < 2 && (moving || f.hopPhase % HOP_CYCLE !== 0)) f.hopPhase++;
     else if (nLegs === 2) f.hopPhase = 0;
 
+    // the soft lock turns you to the nearest foe close by; R1 holds you on your target wherever it is
     const t = this.lockTarget(f);
-    if (t && dist(f, t) < 4.5) turnToward(f, Math.atan2(t.y - f.y, t.x - f.x), 0.25);
+    if (t && !f.running && (lockHeld || dist(f, t) < 4.5)) turnToward(f, Math.atan2(t.y - f.y, t.x - f.x), lockHeld ? 0.4 : 0.25);
+  }
+
+  /** Cross: the burst, then a run if the button is still held; Circle out of it is the shoulder charge. */
+  private updateDash(f: Fighter, inp: PlayerInput): void {
+    if (f.t >= DASH.strikeFrom && this.buffered(f, BTN.HIGH)) {
+      this.consume(f, BTN.HIGH);
+      this.startMove(f, "dashStrike");
+      return;
+    }
+    if (f.t < DASH.move) {
+      const k = legs(f) === 2 ? 1 : 0.6;
+      this.travel(f, f.dirX * DASH.speed * k, f.dirY * DASH.speed * k);
+    } else if ((inp.buttons & BTN.DASH) !== 0 && legs(f) === 2 && Math.hypot(inp.x, inp.y) > 0.2) {
+      this.setState(f, "walk");
+      f.running = true;
+    }
   }
 
   private updateAttack(f: Fighter, inp: PlayerInput): void {
     if (!f.move) return;
-    if (f.move === "grab") return;
-    // the first button of a Square + Cross chord already started an opener: the special replaces it
-    const opener = f.move === STRING_STARTS.high ? BTN.HIGH : f.move === STRING_STARTS.low ? BTN.LOW : 0;
+    // the first button of a Circle + Triangle chord already started its move: the special replaces it
+    const opener = f.move === STRING_STARTS.high || f.move === STRING_STARTS.low ? BTN.HIGH : f.move === "grab" ? BTN.GRAB : 0;
+    if (f.move === "grab") {
+      if (f.t <= SPECIAL_CHORD) this.trySpecial(f, opener);
+      return;
+    }
     if (opener && f.t <= SPECIAL_CHORD && this.trySpecial(f, opener)) return;
     const m = this.eff(f, f.move);
     if (m.dash && f.t >= m.startup && f.t < m.startup + m.active) {
@@ -768,21 +832,14 @@ export class World {
   private strike(a: Fighter, d: Fighter, m: Move & { total: number }): void {
     // reversal: right height, inside the window, facing the attacker
     // (a special cannot be reversed)
-    if (m.kind !== "special" && d.state === "reversal" && this.inReversalWindow(d) && d.revHeight === m.height && this.facingDot(d, a) > 0) {
+    // (Urban Reign's Square deflects high and low alike; there is no guard)
+    if (m.kind !== "special" && d.state === "reversal" && this.inReversalWindow(d) && this.facingDot(d, a) > 0) {
+      d.revHeight = m.height;
       this.reverse(d, a);
       return;
     }
     const dx = Math.cos(a.facing);
     const dy = Math.sin(a.facing);
-    if (d.state === "guard" && this.facingDot(d, a) > GUARD_ARC) {
-      this.setState(d, "blockstun", m.blockstun);
-      d.slideX = (dx * m.push * 0.5) / 8;
-      d.slideY = (dy * m.push * 0.5) / 8;
-      a.moveLanded = true; // strings stay cancellable on block, like UR's pressure strings
-      const stop = this.freeze(a, d, HITSTOP.block);
-      this.ev({ kind: "block", a: a.id, b: d.id, stop });
-      return;
-    }
     a.moveLanded = true;
     const otg = d.state === "down";
     const dmg = m.dmg * this.comboScale(d) * (otg ? DOWN.otgScale : 1) * (d.state === "reversal" ? 1.2 : 1);
@@ -1006,7 +1063,7 @@ export class World {
       }
     }
     if (!best) return;
-    if (best.state === "reversal" && this.inReversalWindow(best) && best.revHeight === "high" && this.facingDot(best, f) > 0) {
+    if (best.state === "reversal" && this.inReversalWindow(best) && this.facingDot(best, f) > 0) {
       this.reverse(best, f);
       return;
     }
@@ -1139,6 +1196,7 @@ export class World {
       mix(f.stop);
       mix(f.fury);
       mix(f.vehicle);
+      mix(f.running ? 1 : 0);
       mix(f.out ? 1 : 0);
       for (const p of PARTS) mix(f.parts[p].hp + (f.parts[p].attached ? 1000 : 0));
     }

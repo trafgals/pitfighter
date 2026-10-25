@@ -12,7 +12,7 @@ stage decides the arena and how a match is won.
 | Stage | How it plays | How you win |
 |---|---|---|
 | **Hell Toilet** | A ring of hellfire with the last toilet in hell in the middle. Hellfire geysers erupt across the floor. Any hit knocks the sitter off the throne. | Sit on the toilet for 15 seconds in total (progress is kept between sittings). |
-| **Construction Site** | Everyone starts in a different construction vehicle: bulldozer, excavator, dump truck, forklift, steamroller, cement mixer, loader and crane truck. Steer with the stick, boost with high strike, get out (or into a free machine) with USE. Machines crash into each other, run people over and get wrecked by crashes and by strikes; a wreck throws its driver out. The crane drops steel beams. | First to 4 KOs. KO'd fighters come back. |
+| **Construction Site** | Everyone starts in a different construction vehicle: bulldozer, excavator, dump truck, forklift, steamroller, cement mixer, loader and crane truck. Steer with the stick, boost with strike, get out (or into a free machine) with USE. Machines crash into each other, run people over and get wrecked by crashes and by strikes; a wreck throws its driver out. The crane drops steel beams. | First to 4 KOs. KO'd fighters come back. |
 | **Collapsing Tower** | A rooftop of 8 x 8 tiles high above the city. Tiles crack and fall, mostly from the edges in, faster as the match goes on; the centre four never fall. You cannot walk off an edge, but a knockdown or a throw can send you over. | Last one standing. Nobody comes back. |
 | **Hindenburg Blimp** | On top of the burning airship: the fire creeps forward from the tail and gusts of wind push everyone toward the edge. Knock someone over the edge and they are gone. After 30 seconds it hits the ground: the impact throws everyone flat, the wreck is walled in by twisted frame, and the fire burns everyone a little more every second until nobody is left. | Last one standing. Nobody comes back. |
 | **Castle Under Siege** | The wall walk of a besieged castle. The parapet stops you, except at the two breaches the siege has knocked in it, which are a long way down. Catapult stones knock you down, arrow volleys sting. | Raise your banner at the flagpole: the fighter nearest the pole raises theirs, 10 seconds alone wins, and it rises at half speed while someone else is in the circle. KO'd fighters come back. |
@@ -32,10 +32,10 @@ their look is `src/render/stageviews.ts`. A match is started with
 The combat is modelled on the feel of Namco's *Urban Reign*:
 
 - frame-data strikes measured from the real game: a 12f jab, strings that combo on hit, and heavy enders that knock down;
-- high/low reversals that catch a strike landing on their frames 2�14;
+- a deflect that catches a strike, high or low, landing on its frames 2�14;
 - grapples with knees and directional throws;
-- guard, combo damage scaling and wake-up invulnerability;
-- soft lock-on;
+- no guard (as in Urban Reign): evades, dashes and runs instead; combo damage scaling and wake-up invulnerability;
+- soft lock-on, and R1 to lock on and strafe;
 - multi-target hits, kinetic pushback when you land a reversal, and dogpile protection.
 
 Pitfighter changes two things (`src/sim/moves.ts`, `tests/tweaks.test.ts`):
@@ -60,10 +60,10 @@ owner's colours and fighting like them: a boxer's arm punches like a boxer.
 Its owner grows a new one 12 s later. *Pick up* on someone else's limb punts
 it away. A limb that lands in the hellfire burns, and grows back 12 s later.
 
-- One leg: you hop. You're slower, can't guard and can't low kick.
+- One leg: you hop. You're slower, can't run and can't low kick.
 - No legs: you bounce along on your torso.
 - One arm: slower, weaker punches and weaker throws.
-- No arms: Square becomes a headbutt, and you can't grab or high-reverse.
+- No arms: Circle becomes a headbutt, and you can't grab.
 - Head at 0 HP: you're dizzy. Torso at 0 HP: you're torn apart and respawn at your spot on the edge.
 
 ## Fighters
@@ -124,26 +124,31 @@ Each style also has a special, paid for with fury:
 
 ## Controls
 
+The layout is Urban Reign's: Circle strikes, Triangle grapples, Square
+dodges, Cross runs.
+
 | Action | Pad | Keyboard P1 | Keyboard P2 |
 |---|---|---|---|
 | move | stick / d-pad | WASD | arrows |
-| high strike (string) | □ | J | Num4 |
-| low strike (string) | ✕ | K | Num5 |
-| grab, then □ knee / ○ throw toward the stick; over a limb, put it on | ○ | L | Num6 |
-| high reversal | △ | I | Num8 |
-| low reversal | R1 + △ | Shift + I | Num0 + Num8 |
-| guard | R1 | Shift | Num0 |
-| switch target | L1 | U | Num7 |
-| pick up limb / sit / stand | R2 | O | Num9 |
-| special (costs fury) | L2, or □ + ✕ together | H, or J + K | Num1, or Num4 + Num5 |
+| strike (string) | ○ | J | Num6 |
+| low strike (string) | stick back + ○ | back + J | back + Num6 |
+| grapple, then ○ knee / △ throw toward the stick; over a limb, put it on | △ | K | Num8 |
+| deflect (catches high and low) | □ | L | Num4 |
+| evade (a sidestep nothing touches) | □ + a direction | L + a direction | Num4 + a direction |
+| dash; hold to run; ○ out of it is a shoulder charge | ✕ | Shift | Num2 |
+| lock on and strafe (hold) | R1 | Q | Num9 |
+| switch target | R3 | U | Num0 |
+| pick up limb / sit / stand | L1 | O | Num7 |
+| taunt (a whole one fills fury) | L2 | H | Num1 |
+| special (costs fury) | ○ + △ together, or R2 | J + K, or Y | Num6 + Num8, or Num3 |
 | mute | | M | |
 
 On the character select:
 
-- join with the high-strike button;
-- pick a fighter with the stick, confirm with high strike, back out with grab;
-- a match has 4 fighters by default: the first four humans to join each take a CPU's place, and every human after that adds a fighter (up to 8); set the number with `-` / `+` (or L1 / R1 on a pad);
-- pick the kind of match by clicking the arrows or a name on the banner, with `[` / `]` or `H` / `O`, or with L2 / R2 on a pad; a CPU brawl on its next arena plays behind the menu;
+- join with the strike button (○ on a pad, J on the keyboard);
+- pick a fighter with the stick, confirm with strike, back out with grapple;
+- a match has 4 fighters by default: the first four humans to join each take a CPU's place, and every human after that adds a fighter (up to 8); set the number with `-` / `+` (`O` / `Q`, or L1 / R1 on a pad);
+- pick the kind of match by clicking the arrows or a name on the banner, with `[` / `]` or `H` / `Y`, or with L2 / R2 on a pad; a CPU brawl on its next arena plays behind the menu;
 - or click a fighter to join on it with the keyboard, and click FIGHT! to start;
 - turn the blood on or off with `G` (the game remembers your choice);
 - start with Enter or Start.

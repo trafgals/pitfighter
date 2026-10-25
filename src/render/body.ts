@@ -13,7 +13,7 @@
 import * as THREE from "three";
 import type { Rag, Settle } from "./ragdoll";
 import { LIMBS, type Fighter, type PartId } from "../sim/types";
-import { CHARGE, DOWN, HOP_AIR, HOP_CYCLE } from "../sim/moves";
+import { CHARGE, DASH, DOWN, EVADE, HOP_AIR, HOP_CYCLE, TAUNT } from "../sim/moves";
 import { STYLES } from "../sim/styles";
 import { legs, type World } from "../sim/world";
 import { painted, surface, type Surface } from "./textures";
@@ -709,17 +709,66 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
       p.armL[0] += sw * 0.08;
       p.armR[0] -= sw * 0.08;
       p.tail = Math.sin(time * 6) * 0.5;
+      if (f.running) {
+        // Cross held: a sprint, leaning into it, the arms pumping
+        p.spineX += 0.35;
+        p.headX -= 0.2;
+        p.armL = [-0.5 + sw * 0.9, 0, 0.2];
+        p.armR = [-0.5 - sw * 0.9, 0, -0.2];
+        p.elbowL = p.elbowR = -1.5;
+        p.tail = -0.5;
+      }
       break;
-    case "guard":
-      plant = "gait"; // shuffling behind the guard
+    case "dash": {
+      // Cross: driving off the back foot, low and leaning, arms pumping
+      plant = "none";
+      const k = Math.min(1, t / 4) * Math.max(0, 1 - Math.max(0, t - DASH.move) / (DASH.dur - DASH.move));
+      const st = Math.sin(t * 0.9);
+      p.spineX = 0.1 + 0.45 * k;
+      p.headX = -0.25 * k;
+      p.y -= 0.12 * k;
+      p.legL = [-0.2 - 0.9 * st * k, 0.08];
+      p.legR = [-0.2 + 0.9 * st * k, -0.08];
+      p.kneeL = 0.5 + 0.6 * Math.max(0, st) * k;
+      p.kneeR = 0.5 + 0.6 * Math.max(0, -st) * k;
+      p.armL = [0.9 * st * k - 0.3, 0, 0.25];
+      p.armR = [-0.9 * st * k - 0.3, 0, -0.25];
+      p.elbowL = p.elbowR = -1.4;
+      p.tail = -0.6 * k;
+      rate = 30;
+      break;
+    }
+    case "evade": {
+      // Square with a direction: a sidestep, the body dipping and leaning away from the line
       blade();
-      guardArms();
-      p.spineX = 0.2;
-      p.headX = 0.15;
-      p.y = -0.1;
-      p.kneeL = 0.75;
-      p.kneeR = 0.6;
+      guardArms(0.8);
+      plant = "none";
+      const side = Math.sin(Math.atan2(f.dirY, f.dirX) - f.facing); // + to the fighter's left
+      const k = Math.sin(Math.min(1, t / EVADE.move) * Math.PI);
+      p.y -= 0.16 * k;
+      p.rz = -0.28 * side * k;
+      p.spineZ = -0.2 * side * k;
+      p.kneeL += 0.5 * k;
+      p.kneeR += 0.5 * k;
+      p.legL = [p.legL[0], p.legL[1] + 0.25 * side * k];
+      p.legR = [p.legR[0], p.legR[1] + 0.25 * side * k];
+      rate = 28;
       break;
+    }
+    case "taunt": {
+      // L2: chest out, arms wide, beckoning the next sinner in
+      plant = "both";
+      const k = Math.min(1, t / 10) * Math.min(1, (TAUNT.dur - t) / 10);
+      const beck = Math.max(0, Math.sin(t * 0.35));
+      p.spineX = -0.25 * k;
+      p.headX = -0.3 * k;
+      p.armL = [-0.4 * k, 0, 1.3 * k];
+      p.armR = [-1.2 * k - 0.4 * beck * k, 0, -0.7 * k];
+      p.elbowL = -0.4;
+      p.elbowR = -0.6 - 1.2 * beck * k;
+      p.tail = Math.sin(time * 9) * 0.8 * k;
+      break;
+    }
     case "attack": {
       if (!f.move) break;
       rate = 34;
@@ -878,14 +927,14 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
   }
 
   // the soft-lock target: standing, stalking or guarding, the head and the guard turn to it
-  if (f.state === "idle" || f.state === "walk" || f.state === "guard") {
+  if (f.state === "idle" || f.state === "walk") {
     const a = lookAngle(f, w);
     p.headY += a * 0.55;
     p.spineY += a * 0.3;
   }
 
   // one leg: hop; no legs: bounce along on the torso
-  if (nLegs === 1 && (f.state === "walk" || f.state === "idle" || f.state === "guard")) {
+  if (nLegs === 1 && (f.state === "walk" || f.state === "idle")) {
     const ph = f.hopPhase % HOP_CYCLE;
     p.y += ph < HOP_AIR ? Math.sin((ph / HOP_AIR) * Math.PI) * 0.22 : 0;
     p.legL = [-0.15, 0];

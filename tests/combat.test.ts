@@ -60,30 +60,26 @@ describe("strikes", () => {
     expect(dmgs[1]).toBeLessThan(MOVES.jab2.dmg);
   });
 
-  it("guard blocks strikes from the front but not from behind", () => {
+  it("there is no guard, as in Urban Reign: R1 locks on instead, and holding it does not stop a jab", () => {
     const w = duel();
-    run(w, 3, (inp) => (inp[1].buttons = BTN.GUARD));
-    tap(w, 0, BTN.HIGH, (inp) => (inp[1].buttons = BTN.GUARD));
-    let blocked = false;
-    run(w, MOVES.jab1.startup + 6, (inp) => {
-      inp[1].buttons = BTN.GUARD;
-      if (w.s.events.some((e) => e.kind === "block")) blocked = true;
-    });
-    expect(blocked).toBe(true);
-    expect(w.fighters[1].parts.torso.hp).toBe(w.fighters[1].parts.torso.max);
-
-    const w2 = duel();
-    w2.fighters[1].facing = 0; // turned away
-    run(w2, 3, (inp) => (inp[1].buttons = BTN.GUARD));
-    w2.fighters[1].facing = 0;
-    tap(w2, 0, BTN.HIGH, (inp) => (inp[1].buttons = BTN.GUARD));
+    run(w, 3, (inp) => (inp[1].buttons = BTN.LOCK));
+    tap(w, 0, BTN.HIGH, (inp) => (inp[1].buttons = BTN.LOCK));
     let hit = false;
-    run(w2, MOVES.jab1.startup + 6, (inp) => {
-      inp[1].buttons = BTN.GUARD;
-      w2.fighters[1].facing = 0;
-      if (hitFrame(w2)) hit = true;
+    run(w, MOVES.jab1.startup + 6, (inp) => {
+      inp[1].buttons = BTN.LOCK;
+      if (hitFrame(w)) hit = true;
     });
     expect(hit).toBe(true);
+    expect(w.s.events.some((e) => e.kind === "block")).toBe(false);
+  });
+
+  it("Circle with the stick pulled back throws the low string", () => {
+    const w = duel(3);
+    tap(w, 0, BTN.HIGH, (inp) => (inp[0].x = -1)); // fighter 0 faces +x: back is -x
+    expect(w.fighters[0].move).toBe("kick1");
+    const v = duel(3);
+    tap(v, 0, BTN.HIGH, (inp) => (inp[0].x = 1)); // forward: still the high string
+    expect(v.fighters[0].move).toBe("jab1");
   });
 
   it("strikes hit every fighter in the cone (multi-target)", () => {
@@ -118,26 +114,14 @@ describe("reversals", () => {
     expect(w.fighters[1].parts.torso.hp).toBe(w.fighters[1].parts.torso.max);
   });
 
-  it("the wrong height loses: a high reversal does not stop a low kick", () => {
+  it("Square deflects a low kick too: Urban Reign's deflection takes high and low alike", () => {
     const w = duel();
     tap(w, 0, BTN.LOW);
     run(w, MOVES.kick1.startup - 10);
     tap(w, 1, BTN.REV);
-    let hit = false;
-    run(w, 14, () => {
-      if (hitFrame(w)) hit = true;
-    });
-    expect(hit).toBe(true);
-    expect(w.fighters[0].state).not.toBe("reversed");
-  });
-
-  it("R1+Triangle is a low reversal that beats a low kick", () => {
-    const w = duel();
-    tap(w, 0, BTN.LOW);
-    run(w, MOVES.kick1.startup - 10);
-    tap(w, 1, BTN.REV | BTN.GUARD);
     run(w, 14);
     expect(w.fighters[0].state).toBe("reversed");
+    expect(w.fighters[1].revHeight).toBe("low");
   });
 
   it("a mistimed reversal is punished", () => {

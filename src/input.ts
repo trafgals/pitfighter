@@ -20,7 +20,7 @@ const KEYMAPS: Record<string, { up: string; down: string; left: string; right: s
     left: "KeyA",
     right: "KeyD",
     start: "Enter",
-    btn: { KeyJ: BTN.HIGH, KeyK: BTN.LOW, KeyL: BTN.GRAB, KeyI: BTN.REV, ShiftLeft: BTN.GUARD, KeyU: BTN.TARGET, KeyO: BTN.USE, KeyH: BTN.SPECIAL },
+    btn: { KeyJ: BTN.HIGH, KeyK: BTN.GRAB, KeyL: BTN.REV, ShiftLeft: BTN.DASH, KeyQ: BTN.LOCK, KeyU: BTN.TARGET, KeyO: BTN.USE, KeyH: BTN.TAUNT, KeyY: BTN.SPECIAL },
   },
   kb2: {
     up: "ArrowUp",
@@ -28,20 +28,24 @@ const KEYMAPS: Record<string, { up: string; down: string; left: string; right: s
     left: "ArrowLeft",
     right: "ArrowRight",
     start: "NumpadEnter",
-    btn: { Numpad4: BTN.HIGH, Numpad5: BTN.LOW, Numpad6: BTN.GRAB, Numpad8: BTN.REV, Numpad0: BTN.GUARD, Numpad7: BTN.TARGET, Numpad9: BTN.USE, Numpad1: BTN.SPECIAL },
+    // the numpad's 8 / 4 / 6 / 2 sit where a pad's Triangle / Square / Circle / Cross do
+    btn: { Numpad6: BTN.HIGH, Numpad8: BTN.GRAB, Numpad4: BTN.REV, Numpad2: BTN.DASH, Numpad9: BTN.LOCK, Numpad0: BTN.TARGET, Numpad7: BTN.USE, Numpad1: BTN.TAUNT, Numpad3: BTN.SPECIAL },
   },
 };
 
-// standard mapping: 0 Cross, 1 Circle, 2 Square, 3 Triangle, 4 L1, 5 R1, 6 L2, 7 R2, 9 Start, 12-15 d-pad
-const PAD_BTN: [number, number][] = [
-  [2, BTN.HIGH],
-  [0, BTN.LOW],
-  [1, BTN.GRAB],
-  [3, BTN.REV],
-  [5, BTN.GUARD],
-  [4, BTN.TARGET],
-  [7, BTN.USE],
-  [6, BTN.SPECIAL],
+// standard mapping: 0 Cross, 1 Circle, 2 Square, 3 Triangle, 4 L1, 5 R1, 6 L2, 7 R2, 9 Start, 11 R3, 12-15 d-pad.
+// Urban Reign's layout: Circle strike, Triangle grapple, Square dodge / deflect,
+// Cross run / dash, L1 pick up, L2 taunt, R1 lock on, Circle + Triangle the special.
+export const PAD_BTN: [number, number][] = [
+  [1, BTN.HIGH],
+  [3, BTN.GRAB],
+  [2, BTN.REV],
+  [0, BTN.DASH],
+  [4, BTN.USE],
+  [5, BTN.LOCK],
+  [6, BTN.TAUNT],
+  [7, BTN.SPECIAL],
+  [11, BTN.TARGET],
 ];
 
 export class Input {
@@ -118,7 +122,7 @@ export class Input {
 }
 
 export const CONTROLS_HELP = [
-  "P1 keys: WASD move · J high · K low · L grab/throw · I reversal (Shift+I low reversal) · Shift guard · U switch target · O pick up / sit · H (or J+K) special",
-  "P2 keys: arrows · Num4 high · Num5 low · Num6 grab · Num8 reversal · Num0 guard · Num7 target · Num9 pick up / sit · Num1 (or Num4+Num5) special",
-  "Pads: □ high · ✕ low · ○ grab/throw · △ reversal (R1+△ low) · R1 guard · L1 target · R2 pick up / sit · L2 (or □+✕) special",
+  "P1 keys: WASD move · J strike (back+J low) · K grapple/throw · L deflect (+direction: evade) · Shift dash, hold to run · Q hold to lock on · U switch target · O pick up / sit · H taunt · Y (or J+K) special",
+  "P2 keys: arrows · Num6 strike · Num8 grapple · Num4 deflect/evade · Num2 dash/run · Num9 lock on · Num0 target · Num7 pick up / sit · Num1 taunt · Num3 (or Num6+Num8) special",
+  "Pads: ○ strike (back+○ low) · △ grapple/throw · □ deflect (+stick: evade) · ✕ dash, hold to run · R1 lock on · R3 target · L1 pick up / sit · L2 taunt · ○+△ (or R2) special",
 ];

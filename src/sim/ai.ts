@@ -88,7 +88,7 @@ export class Bot {
 
     const enemies = s.fighters.filter((o) => o.id !== me.id && alive(o));
 
-    // 1. reactive defence: reversal / guard against a strike in its startup
+    // 1. reactive defence against a strike in its startup: deflect it (Square), or evade it (Square + a direction)
     for (const e of enemies) {
       if (e.state !== "attack" || !e.move || dist(e, me) > 2.2) continue;
       const toMe = Math.atan2(me.y - e.y, me.x - e.x);
@@ -97,13 +97,15 @@ export class Bot {
       const startup = m ? m.startup : 5;
       if (e.t >= startup) continue;
       if (this.rng.chance(this.skill * 0.18)) {
-        const low = m ? m.height === "low" : false;
-        if (low) out.buttons |= BTN.GUARD;
         press(BTN.REV);
         return out;
       }
-      if (m && arms(me) > 0 && legs(me) === 2 && this.rng.chance(this.skill * 0.3)) {
-        out.buttons |= BTN.GUARD;
+      if (m && legs(me) > 0 && this.rng.chance(this.skill * 0.12)) {
+        // sidestep off the line of the blow
+        const side = toMe + (me.id % 2 === 0 ? 1 : -1) * Math.PI * 0.5;
+        out.x = Math.cos(side);
+        out.y = Math.sin(side);
+        press(BTN.REV);
         return out;
       }
     }
@@ -169,24 +171,35 @@ export class Bot {
           if (this.plan === "string") press(BTN.HIGH);
           else if (this.plan === "low") press(BTN.LOW);
           else if (this.plan === "grab") press(BTN.GRAB);
-          else if (this.rng.chance(0.5)) out.buttons |= arms(me) > 0 && legs(me) === 2 ? BTN.GUARD : 0;
           return out;
         }
       }
     }
 
-    if (goal) this.steer(out, me, goal);
+    if (goal) {
+      this.steer(out, me, goal);
+      // a long way to go: run (Cross held)
+      if (dist(me, goal) > 4 && legs(me) === 2) out.buttons |= BTN.DASH;
+    }
     if (use) press(BTN.USE);
     return out;
   }
 
-  /** Wait for a turn: orbit the target at CIRCLE_R, guarding now and then. */
+  /** Wait for a turn: orbit the target at CIRCLE_R, locked on to it, taunting now and then. */
   private circle(w: World, out: PlayerInput, me: Fighter, tgt: Fighter): PlayerInput {
     const dir = me.id % 2 === 0 ? 1 : -1;
     const a = Math.atan2(me.y - tgt.y, me.x - tgt.x) + dir * 0.45;
     // stay on the floor
     this.steer(out, me, w.arena.clampGoal(tgt.x + Math.cos(a) * CIRCLE_R, tgt.y + Math.sin(a) * CIRCLE_R));
-    if (dist(me, tgt) < 1.6 && arms(me) > 0 && legs(me) === 2 && this.rng.chance(0.3)) out.buttons |= BTN.GUARD;
+    out.buttons |= BTN.LOCK;
+    if (dist(me, tgt) > 2.2 && me.fury < FURY.cost && this.rng.chance(0.004)) {
+      out.x = out.y = 0;
+      out.buttons &= ~BTN.LOCK;
+      if (w.s.frame - this.lastPress >= 2) {
+        out.buttons |= BTN.TAUNT;
+        this.lastPress = w.s.frame;
+      }
+    }
     return out;
   }
 

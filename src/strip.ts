@@ -9,7 +9,7 @@
 //   strip.html?set=moves&family=boxing     the strings, the special, the headbutt
 //   strip.html?set=reactions               3 heights x light / heavy x both sides
 //   strip.html?set=down                    knockdowns, get-ups, the throw
-//   strip.html?set=locomotion&family=muay  idle, guard, a walk and a run
+//   strip.html?set=locomotion&family=muay  idle, a taunt, a walk and a run
 //
 // tools/strip.mjs drives it headless and saves the pictures to test-output/strips/.
 import * as THREE from "three";
@@ -156,7 +156,7 @@ function rows(): Row[] {
   });
   return [
     { name: "idle", style: sStyle, frames: 90, start: (f) => Object.assign(f, { state: "idle" }) },
-    { name: "guard", style: sStyle, frames: 30, start: (f) => Object.assign(f, { state: "guard" }) },
+    { name: "taunt", style: sStyle, frames: 30, start: (f) => Object.assign(f, { state: "taunt", dur: 70 }) },
     walk(1.2),
     walk(3),
   ];

@@ -12,17 +12,23 @@ export const SPAWN_R = 8;
 export const TOILET_R = 0.95; // how close you must be to sit down
 export const TOILET_FRAMES = 900; // seated frames needed to win (15 s in total; progress is kept between sittings)
 
-// Buttons (bitmask). Pad mapping lives in src/input.ts.
+// Buttons (bitmask), laid out as Urban Reign's: Circle strikes, Triangle
+// grapples, Square dodges / deflects, Cross runs. Pad mapping lives in src/input.ts.
 export const BTN = {
-  HIGH: 1, // Square: high strike string
-  LOW: 2, // Cross: low strike string
-  GRAB: 4, // Circle: grapple; in a hold, throw
-  REV: 8, // Triangle: high reversal (R1+Triangle: low reversal)
-  GUARD: 16, // R1
-  TARGET: 32, // L1: switch soft-lock target
-  USE: 64, // R2: pick up limb / sit on the toilet / get in or out of a vehicle
-  SPECIAL: 128, // L2 (or Square + Cross together): the style's special, costs fury
+  HIGH: 1, // Circle: the strike string (with the stick pulled back: the low string)
+  LOW: 2, // the low string straight away (CPUs and tests; a pad gets it with back + Circle)
+  GRAB: 4, // Triangle: grapple, or pick up a limb; in a hold, throw
+  REV: 8, // Square: deflect (stick neutral) or evade (with a direction); held, break free
+  LOCK: 16, // R1, held: lock on to the target and strafe round it
+  TARGET: 32, // R3: switch target
+  USE: 64, // L1: pick up a limb / sit on the toilet / get in or out of a vehicle
+  SPECIAL: 128, // R2 (or Circle + Triangle together): the style's special, costs fury
+  TAUNT: 256, // L2: taunt; a whole one fills fury
+  DASH: 512, // Cross: a burst of speed; held, run
 } as const;
+/** Urban Reign's names for the two face buttons that changed meaning */
+export const STRIKE = BTN.HIGH;
+export const DODGE = BTN.REV;
 
 export interface PlayerInput {
   x: number; // stick, -1..1
@@ -50,7 +56,9 @@ export type Height = "high" | "low";
 export type FighterState =
   | "idle"
   | "walk"
-  | "guard"
+  | "dash" // Cross: a burst along the stick
+  | "evade" // Square with a direction: a sidestep that nothing touches
+  | "taunt" // L2
   | "attack"
   | "hitstun"
   | "blockstun"
@@ -80,6 +88,9 @@ export interface Fighter {
   facing: number; // radians, 0 = +x
   slideX: number; // knockback velocity (m/frame), decays
   slideY: number;
+  dirX: number; // the direction of a dash or an evade (unit)
+  dirY: number;
+  running: boolean; // Cross held while moving
   state: FighterState;
   t: number; // frames spent in the current state
   dur: number; // planned length of the current state (0 = open ended)

@@ -55,7 +55,9 @@ export const MOVES: Record<string, Move> = {
   kick1: { id: "kick1", startup: 18, active: 3, recovery: 27, dmg: 5, hitstun: 41, blockstun: 25, height: "low", reach: 1.45, arc: 0.5, push: 0.2, knockdown: false, next: "kick2", kind: "kick" },
   kick2: { id: "kick2", startup: 20, active: 3, recovery: 28, dmg: 6, hitstun: 41, blockstun: 26, height: "low", reach: 1.45, arc: 0.5, push: 0.25, knockdown: false, next: "sweep", kind: "kick" },
   sweep: { id: "sweep", startup: 26, active: 4, recovery: 30, dmg: 7, hitstun: 0, blockstun: 29, height: "low", reach: 1.6, arc: 0.35, push: 0.8, knockdown: true, kind: "kick" },
-  // No arms: Square becomes a slow headbutt.
+  // Circle out of a run or a dash: a shoulder charge that knocks down.
+  dashStrike: { id: "dashStrike", startup: 10, active: 8, recovery: 26, dmg: 8, hitstun: 0, blockstun: 26, height: "high", reach: 1.05, arc: 0.4, push: 1.5, knockdown: true, kind: "head", dash: 0.09 },
+  // No arms: Circle becomes a slow headbutt.
   headbutt: { id: "headbutt", startup: 18, active: 3, recovery: 26, dmg: 6, hitstun: 41, blockstun: 24, height: "high", reach: 0.95, arc: 0.6, push: 0.5, knockdown: false, kind: "head" },
   // The style specials (L2, or Square + Cross together), paid for with fury.
   // They are Pitfighter's own: a reversal cannot catch them, so they are the
@@ -124,7 +126,14 @@ export const REGROW_FRAMES = 720;
 export const SIT_FRAMES = 20;
 export const GEYSER = { warn: 60, erupt: 20, radius: 1.3, dmg: 10, minGap: 240, maxGap: 420 };
 export const LAVA = { tick: 10, dmg: 2 };
-export const SPEED = { walk: 0.05, guard: 0.02, hop: 0.045, bounce: 0.03 };
+export const SPEED = { walk: 0.05, run: 0.1, hop: 0.045, bounce: 0.03 };
+// Cross: a dash covers about 1.6 m in its first `move` frames, then eases into
+// a run if the button is still held. Square with a direction: Urban Reign's
+// evade, a 34 frame sidestep (its decoded record) that nothing touches over the
+// deflect window's frames. L2: a taunt; one played to the end fills fury.
+export const DASH = { dur: 20, move: 12, speed: 0.13, strikeFrom: 4 };
+export const EVADE = { dur: 34, move: 14, speed: 0.075, invuln: 15 };
+export const TAUNT = { dur: 70, fury: 25 };
 // one leg: hop, moving only in the air; no legs: bounce along on the torso, the same way but slower
 export const HOP_CYCLE = 24;
 export const HOP_AIR = 14;
