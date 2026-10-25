@@ -88,10 +88,29 @@ function freshParts(style: number): Fighter["parts"] {
   const parts = {} as Fighter["parts"];
   for (const p of PARTS) {
     const max = Math.round(BASE_HP[p] * (p === "torso" ? STYLES[style].torso : 1));
-    parts[p] = { hp: max, max, attached: true, regrow: 0 };
+    parts[p] = { hp: max, max, attached: true, regrow: 0, style };
   }
   return parts;
 }
+
+type LimbMod = "punch" | "kick" | "grab" | "grabReach" | "reach" | "speed" | "startup";
+/**
+ * One of the style's numbers, as the limbs that throw it have it: the arms for
+ * punches and grabs, the legs for kicks and walking. A transplanted limb
+ * brings its first owner's numbers with it; with none left, the body's own.
+ */
+export function limbMod(f: Fighter, limbs: readonly PartId[], key: LimbMod): number {
+  let sum = 0;
+  let n = 0;
+  for (const p of limbs) {
+    if (!f.parts[p].attached) continue;
+    sum += STYLES[f.parts[p].style][key];
+    n++;
+  }
+  return n ? sum / n : STYLES[f.style][key];
+}
+const ARMS = ["armL", "armR"] as const;
+const LEGS = ["legL", "legR"] as const;
 
 export class World {
   s: WorldState;
@@ -300,11 +319,13 @@ export class World {
   eff(f: Fighter, id: string): Move & { total: number } {
     const m = MOVES[id];
     const st = STYLES[f.style];
-    let startup = m.startup + st.startup;
+    // punches are the arms' and kicks the legs' (a transplant strikes like its first owner); the rest is the body's
+    const by = m.kind === "punch" ? ARMS : m.kind === "kick" ? LEGS : null;
+    let startup = m.startup + (by ? Math.round(limbMod(f, by, "startup")) : st.startup);
     if (m.kind === "punch" && arms(f) === 1) startup += 2;
     startup = Math.max(3, startup);
     // a special scales with the style's best damage multiplier
-    const mult = m.kind === "punch" ? st.punch : m.kind === "kick" ? st.kick : m.kind === "special" ? Math.max(st.punch, st.kick, st.grab) : 1;
+    const mult = m.kind === "punch" ? limbMod(f, ARMS, "punch") : m.kind === "kick" ? limbMod(f, LEGS, "kick") : m.kind === "special" ? Math.max(st.punch, st.kick, st.grab) : 1;
     let dmg = m.dmg * mult * (m.kind === "punch" && arms(f) === 1 ? 0.8 : 1);
     let push = m.push;
     let knockdown = m.knockdown;
@@ -314,7 +335,7 @@ export class World {
       push *= 1 + CHARGE.push * k;
       knockdown ||= k >= 1;
     }
-    return { ...m, startup, dmg, push, knockdown, reach: m.reach * st.reach, total: startup + m.active + m.recovery };
+    return { ...m, startup, dmg, push, knockdown, reach: m.reach * (by ? limbMod(f, by, "reach") : st.reach), total: startup + m.active + m.recovery };
   }
 
   /** The string follow-up allowed for this style (high strings have style.string jabs). */
@@ -348,6 +369,7 @@ export class World {
       const part = f.parts[p];
       if (part.regrow > 0 && --part.regrow === 0 && !part.attached) {
         part.attached = true;
+        part.style = f.style;
         part.hp = Math.round(part.max * REATTACH.hpFrac);
         this.ev({ kind: "regrow", a: f.id, part: p });
       }
@@ -474,10 +496,17 @@ export class World {
       }
     }
     if (this.trySpecial(f)) return;
-    if (this.buffered(f, BTN.GRAB) && nArms > 0) {
-      this.consume(f, BTN.GRAB);
-      this.startMove(f, "grab");
-      return;
+    if (this.buffered(f, BTN.GRAB)) {
+      // standing over a limb that fits a gap: pick it up and put it on, whoever it came from
+      if (this.takeLimb(f, true)) {
+        this.consume(f, BTN.GRAB);
+        return;
+      }
+      if (nArms > 0) {
+        this.consume(f, BTN.GRAB);
+        this.startMove(f, "grab");
+        return;
+      }
     }
     if (this.buffered(f, BTN.HIGH)) {
       this.consume(f, BTN.HIGH);
@@ -502,9 +531,8 @@ export class World {
       const dx = inp.x * k;
       const dy = inp.y * k;
       let sp: number;
-      if (nLegs === 2) sp = (f.state === "guard" ? SPEED.guard : SPEED.walk) * STYLES[f.style].speed;
-      else if (nLegs === 1) sp = f.hopPhase % HOP_CYCLE < HOP_AIR ? SPEED.hop * (HOP_CYCLE / HOP_AIR) : 0;
-      else sp = SPEED.crawl;
+      if (nLegs === 2) sp = (f.state === "guard" ? SPEED.guard : SPEED.walk) * limbMod(f, LEGS, "speed");
+      else sp = f.hopPhase % HOP_CYCLE < HOP_AIR ? (nLegs === 1 ? SPEED.hop : SPEED.bounce) * (HOP_CYCLE / HOP_AIR) : 0;
       f.x += dx * sp;
       f.y += dy * sp;
       // walking never takes you over an edge
@@ -517,8 +545,8 @@ export class World {
       const t = this.lockTarget(f);
       if (!(t && dist(f, t) < 4.5)) turnToward(f, Math.atan2(dy, dx), 0.3);
     } else if (f.state === "walk") this.setState(f, "idle");
-    if (nLegs === 1 && (moving || f.hopPhase % HOP_CYCLE !== 0)) f.hopPhase++;
-    else if (nLegs !== 1) f.hopPhase = 0;
+    if (nLegs < 2 && (moving || f.hopPhase % HOP_CYCLE !== 0)) f.hopPhase++;
+    else if (nLegs === 2) f.hopPhase = 0;
 
     const t = this.lockTarget(f);
     if (t && dist(f, t) < 4.5) turnToward(f, Math.atan2(t.y - f.y, t.x - f.x), 0.25);
@@ -577,7 +605,7 @@ export class World {
       this.consume(f, BTN.HIGH);
       f.holdCool = HOLD.kneeCool;
       f.holdStrikes++;
-      const dmg = HOLD.knee * STYLES[f.style].grab * this.comboScale(p);
+      const dmg = HOLD.knee * limbMod(f, ARMS, "grab") * this.comboScale(p);
       p.combo++;
       this.damage(p, "torso", dmg, f.id);
       this.addFury(f, FURY.hit);
@@ -589,7 +617,7 @@ export class World {
       this.consume(f, BTN.GRAB);
       const mag = Math.hypot(inp.x, inp.y);
       const dir = mag > 0.3 ? Math.atan2(inp.y, inp.x) : f.facing;
-      const dmg = THROW.dmg * STYLES[f.style].grab * (arms(f) === 1 ? 0.6 : 1) * this.comboScale(p);
+      const dmg = THROW.dmg * limbMod(f, ARMS, "grab") * (arms(f) === 1 ? 0.6 : 1) * this.comboScale(p);
       this.release(f);
       this.setState(p, "thrown", THROW.dur);
       p.moveHits = [f.id];
@@ -635,27 +663,51 @@ export class World {
   }
 
   // ---------------------------------------------------------------- use
-  private doUse(f: Fighter): boolean {
+  /**
+   * Pick up the nearest limb on the floor that fits one of f's gaps (an arm in
+   * either shoulder, a leg in either hip) and put it on; with `any`, other
+   * fighters' limbs too, else only f's own. Its first owner starts growing a
+   * new one.
+   */
+  private takeLimb(f: Fighter, any: boolean): boolean {
     const s = this.s;
+    const gap = (part: PartId): PartId | null => {
+      const pair: readonly PartId[] = part.startsWith("arm") ? ARMS : LEGS;
+      // the same side first
+      for (const q of [part, ...pair.filter((x) => x !== part)]) if (!f.parts[q].attached) return q;
+      return null;
+    };
     let best = -1;
     let bd = REATTACH.range;
     s.pickups.forEach((p, i) => {
-      if (p.owner !== f.id || p.burning > 0 || p.z > 0.25) return;
-      const d = Math.hypot(p.x - f.x, p.y - f.y);
+      if ((!any && p.owner !== f.id) || p.burning > 0 || p.z > 0.25 || !gap(p.part)) return;
+      // your own comes first
+      const d = Math.hypot(p.x - f.x, p.y - f.y) - (p.owner === f.id ? 0.01 : 0);
       if (d < bd) {
         bd = d;
         best = i;
       }
     });
-    if (best >= 0) {
-      const p = s.pickups[best];
-      s.pickups.splice(best, 1);
-      const part = f.parts[p.part];
-      part.hp = Math.max(1, Math.round(part.max * REATTACH.hpFrac));
-      f.reattachPart = p.part;
-      this.setState(f, "reattach", REATTACH.dur);
-      return true;
+    if (best < 0) return false;
+    const p = s.pickups[best];
+    const slot = gap(p.part)!;
+    s.pickups.splice(best, 1);
+    const part = f.parts[slot];
+    part.hp = Math.max(1, Math.round(part.max * REATTACH.hpFrac));
+    part.style = p.style;
+    part.regrow = 0;
+    if (p.owner !== f.id) {
+      const lost = s.fighters[p.owner].parts[p.part];
+      if (!lost.attached && lost.regrow === 0) lost.regrow = REGROW_FRAMES;
     }
+    f.reattachPart = slot;
+    this.setState(f, "reattach", REATTACH.dur);
+    return true;
+  }
+
+  private doUse(f: Fighter): boolean {
+    const s = this.s;
+    if (this.takeLimb(f, false)) return true;
     if (this.arena.use(this, f)) return true;
     for (const p of s.pickups) {
       if (p.owner === f.id || p.burning > 0 || p.z > 0.25) continue;
@@ -858,6 +910,7 @@ export class World {
       id: this.s.nextPickupId++,
       owner: d.id,
       part,
+      style: p.style,
       hp: p.max,
       x: d.x,
       y: d.y,
@@ -880,6 +933,7 @@ export class World {
       id: this.s.nextPickupId++,
       owner: d.id,
       part,
+      style: d.parts[part].style,
       hp: d.parts[part].max,
       x: d.x,
       y: d.y,
@@ -939,7 +993,7 @@ export class World {
     if (f.state !== "attack" || f.move !== "grab") return;
     const t = f.t - 1;
     if (t < GRAB.startup || t >= GRAB.startup + GRAB.active) return;
-    const reach = GRAB.reach * STYLES[f.style].grabReach;
+    const reach = GRAB.reach * limbMod(f, ARMS, "grabReach");
     let best: Fighter | null = null;
     let bd = 1e9;
     for (const d of this.s.fighters) {

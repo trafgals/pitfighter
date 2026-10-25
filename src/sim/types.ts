@@ -41,6 +41,8 @@ export interface Part {
   max: number;
   attached: boolean;
   regrow: number; // frames until a limb burnt in the lava grows back (0 = not regrowing)
+  /** the style the limb came from: its own fighter's, or whoever it was torn off (a transplant fights like its first owner) */
+  style: number;
 }
 
 export type Height = "high" | "low";
@@ -115,6 +117,8 @@ export interface Pickup {
   id: number;
   owner: number;
   part: PartId;
+  /** the style of the fighter the limb grew on, which it keeps wherever it is attached */
+  style: number;
   hp: number;
   x: number;
   y: number;

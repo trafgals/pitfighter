@@ -3,7 +3,7 @@
 // body goes).
 import * as THREE from "three";
 import { describe, expect, it } from "vitest";
-import { applyPose, buildBody, stance } from "../src/render/body";
+import { applyPose, buildBody, stance, syncLimbs } from "../src/render/body";
 import { KITS, taper } from "../src/render/kit";
 import { STYLES } from "../src/sim/styles";
 import { World } from "../src/sim/world";
@@ -84,5 +84,16 @@ describe("silhouettes", () => {
     expect(radiusAt(0)).toBeCloseTo(0.1, 3);
     expect(radiusAt(8)).toBeCloseTo(0.005, 3);
     expect(radiusAt(4)).toBeLessThan(radiusAt(0));
+  });
+
+  it("a transplanted limb wears its first owner's colours; the rest of the body keeps its own", () => {
+    const f = fighterOf(0);
+    const b = buildBody(f);
+    f.parts.armR.style = 6;
+    syncLimbs(b, f);
+    const hex = (m: THREE.MeshStandardMaterial) => m.color.getHex();
+    expect(hex(b.limbLook.armR.skin[0])).toBe(new THREE.Color(STYLES[6].color).getHex());
+    expect(hex(b.limbLook.armR.accent[0])).toBe(new THREE.Color(STYLES[6].accent).getHex());
+    expect(hex(b.limbLook.armL.skin[0])).toBe(new THREE.Color(STYLES[0].color).getHex());
   });
 });

@@ -69,8 +69,8 @@ window.addEventListener("keydown", (e) => {
   if (mode !== "select") return;
   if (e.code === "Minus" || e.code === "NumpadSubtract") select.setCount(select.fighters - 1);
   if (e.code === "Equal" || e.code === "NumpadAdd") select.setCount(select.fighters + 1);
-  if (e.code === "BracketLeft") select.cycleStage(-1);
-  if (e.code === "BracketRight") select.cycleStage(1);
+  if (e.code === "BracketLeft") select.cycleType(-1);
+  if (e.code === "BracketRight") select.cycleType(1);
   if (e.code === "KeyG") {
     scene.gore = !scene.gore;
     select.setGore(scene.gore);
