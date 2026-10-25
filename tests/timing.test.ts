@@ -40,10 +40,11 @@ interface Row {
   peak: number;
 }
 
-function measure(style: number, move: string): Row | null {
+/** With `seed`, the fighter's limbs are rolled (src/sim/limbs.ts); without, they are the plain ones the table is for. */
+function measure(style: number, move: string, seed?: number): Row | null {
   const clip = clipFor(style, move);
   if (!clip || clip.limb === "body" || clip.limb === "head" || clip.limb === "both") return null;
-  const w = new World({ seed: 3, styles: [style, 0], humans: [true, true] });
+  const w = new World({ seed: seed ?? 3, styles: [style, 0], humans: [true, true], limbs: seed !== undefined });
   const f = w.fighters[0];
   const b = buildBody(f);
   Object.assign(f, { state: "idle", t: 0, stop: 0 });
@@ -85,6 +86,21 @@ describe("the timing table", () => {
       expect(r.contact - r.hit, why).toBe(0);
       expect(Math.abs(r.peak - r.hit), why).toBeLessThanOrEqual(1);
     }
+  });
+
+  it("rolled limbs strike sooner or later, and the body still lands its contact pose on the sim's hit frame", () => {
+    const hits = new Set<number>();
+    for (const seed of [11, 12, 13])
+      for (let s = 0; s < STYLES.length; s += 4)
+        for (const move of MOVES) {
+          const r = measure(s, move, seed);
+          if (!r) continue;
+          hits.add(r.hit - (measure(s, move)?.hit ?? 0));
+          const why = `${r.style} ${r.move} (seed ${seed})`;
+          expect(r.contact - r.hit, why).toBe(0);
+          expect(Math.abs(r.peak - r.hit), why).toBeLessThanOrEqual(2); // a slow limb's whip peaks a little less sharply
+        }
+    expect(hits.size).toBeGreaterThan(4); // the rolls really do move the hit frames about
   });
 
   it("docs/animation.md has the measured table", () => {

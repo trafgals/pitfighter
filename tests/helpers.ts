@@ -4,9 +4,12 @@ import type { Fighter } from "../src/sim/types";
 
 export { BTN };
 
-/** A two-fighter world with both fighters placed face to face `gap` metres apart. */
-export function duel(gap = 1.0, styles = [0, 0], hitstop = true): World {
-  const w = new World({ seed: 1, styles, humans: styles.map(() => true), hitstop });
+/**
+ * A two-fighter world with both fighters placed face to face `gap` metres apart.
+ * Their limbs are the plain ones the frame data is written for (`limbs` rolls them).
+ */
+export function duel(gap = 1.0, styles = [0, 0], hitstop = true, limbs = false): World {
+  const w = new World({ seed: 1, styles, humans: styles.map(() => true), hitstop, limbs });
   const [a, b] = w.fighters;
   a.x = -gap / 2;
   a.y = 0;

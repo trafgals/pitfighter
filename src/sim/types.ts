@@ -1,3 +1,4 @@
+import type { LimbTrait } from "./limbs";
 // Shared simulation types and constants. Everything here is plain data so a
 // world can be hashed, cloned and replayed.
 
@@ -49,6 +50,8 @@ export interface Part {
   regrow: number; // frames until a limb burnt in the lava grows back (0 = not regrowing)
   /** the style the limb came from: its own fighter's, or whoever it was torn off (a transplant fights like its first owner) */
   style: number;
+  /** the limb's own roll: how heavy, long and fast it is and what it hits with (it goes wherever the limb goes) */
+  trait: LimbTrait;
 }
 
 export type Height = "high" | "low";
@@ -98,6 +101,7 @@ export interface Fighter {
   vz: number; // m/frame, up +
   juggle: number; // hits taken in the air since the launch: the more, the harder the victim can steer
   bounced: boolean; // this juggle has bounced off the floor once already
+  grown: number; // limbs grown so far (each new one rolls its own traits)
   carryZ: number; // an air grab: the height the victim was caught at
   stickX: number; // the stick as last read (steering in the air)
   stickY: number;
@@ -140,6 +144,7 @@ export interface Pickup {
   part: PartId;
   /** the style of the fighter the limb grew on, which it keeps wherever it is attached */
   style: number;
+  trait: LimbTrait;
   hp: number;
   x: number;
   y: number;

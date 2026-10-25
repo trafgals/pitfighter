@@ -52,6 +52,7 @@ import {
   type Move,
 } from "./moves";
 import { AIR_GRAB, AIR_GRABS, type AirGrab } from "./airgrabs";
+import { PLAIN, rollLimb, shape, striker, type LimbTrait } from "./limbs";
 import { STYLES } from "./styles";
 import { Rng } from "./rng";
 import { DEFAULT_STAGE, type StageId } from "./stages";
@@ -65,6 +66,7 @@ export interface MatchConfig {
   humans?: boolean[];
   stage?: StageId; // default: Hell Toilet
   hitstop?: boolean; // default true; the calibration tests switch it off to compare raw timings
+  limbs?: boolean; // default true: every limb rolls its own traits; off, every limb is the plain one the frame data is written for
 }
 
 export const BASE_HP: Record<PartId, number> = { head: 40, torso: 100, armL: 30, armR: 30, legL: 35, legR: 35 };
@@ -91,11 +93,11 @@ export function actionable(f: Fighter): boolean {
   return f.state === "idle" || f.state === "walk";
 }
 
-function freshParts(style: number): Fighter["parts"] {
+function freshParts(style: number, roll: (p: PartId) => LimbTrait): Fighter["parts"] {
   const parts = {} as Fighter["parts"];
   for (const p of PARTS) {
     const max = Math.round(BASE_HP[p] * (p === "torso" ? STYLES[style].torso : 1));
-    parts[p] = { hp: max, max, attached: true, regrow: 0, style };
+    parts[p] = { hp: max, max, attached: true, regrow: 0, style, trait: LIMBS.includes(p) ? roll(p) : PLAIN };
   }
   return parts;
 }
@@ -123,6 +125,8 @@ export class World {
   s: WorldState;
   rng: Rng;
   readonly hitstop: boolean;
+  readonly limbs: boolean;
+  private readonly seed: number;
   readonly arena: Arena;
   /** fighters frozen by hitstop on the current step: they neither act nor slide nor hit */
   private frozen: boolean[] = [];
@@ -134,6 +138,8 @@ export class World {
     this.arena = makeArena(stage);
     this.rng = new Rng(cfg.seed);
     this.hitstop = cfg.hitstop ?? true;
+    this.limbs = cfg.limbs ?? true;
+    this.seed = cfg.seed;
     const sp = this.arena.spawns(n);
     this.s = {
       frame: 0,
@@ -157,6 +163,7 @@ export class World {
         vz: 0,
         juggle: 0,
         bounced: false,
+        grown: 1, // the first set of limbs is roll 0
         carryZ: 0,
         stickX: 0,
         stickY: 0,
@@ -173,7 +180,7 @@ export class World {
         fury: 0,
         revHeight: "high",
         target: -1,
-        parts: freshParts(style),
+        parts: freshParts(style, (p) => this.roll(id, p, 0, style)),
         invuln: 0,
         combo: 0,
         recentHits: [],
@@ -356,7 +363,27 @@ export class World {
       push *= 1 + CHARGE.push * k;
       knockdown ||= k >= 1;
     }
-    return { ...m, startup, dmg, push, knockdown, reach: m.reach * (by ? limbMod(f, by, "reach") : st.reach), total: startup + m.active + m.recovery };
+    const e = { ...m, startup, dmg, push, knockdown, reach: m.reach * (by ? limbMod(f, by, "reach") : st.reach), total: startup + m.active + m.recovery };
+    const limb = this.strikerOf(f, id);
+    return limb ? shape(e, f.parts[limb].trait) : e;
+  }
+
+  /** The limb that throws a strike (the other one if it is gone), or null for the body's own moves. */
+  strikerOf(f: Fighter, id: string): PartId | null {
+    const want = striker(id, MOVES[id].kind);
+    if (!want) return null;
+    if (f.parts[want].attached) return want;
+    const other = ({ armL: "armR", armR: "armL", legL: "legR", legR: "legL" } as const)[want as "armL"];
+    return f.parts[other].attached ? other : null;
+  }
+
+  /** A limb's traits: rolled from the match seed, the fighter and how many limbs it has grown (plain with limbs off). */
+  private roll(id: number, p: PartId, n: number, style: number): LimbTrait {
+    return this.limbs ? rollLimb(this.seed, id, p, n, style) : PLAIN;
+  }
+
+  private grow(f: Fighter, p: PartId): LimbTrait {
+    return this.roll(f.id, p, f.grown++, f.style);
   }
 
   /** The string follow-up allowed for this style (high strings have style.string jabs). */
@@ -392,6 +419,7 @@ export class World {
       if (part.regrow > 0 && --part.regrow === 0 && !part.attached) {
         part.attached = true;
         part.style = f.style;
+        part.trait = this.grow(f, p); // a new limb, a new roll
         part.hp = Math.round(part.max * REATTACH.hpFrac);
         this.ev({ kind: "regrow", a: f.id, part: p });
       }
@@ -808,6 +836,7 @@ export class World {
     const part = f.parts[slot];
     part.hp = Math.max(1, Math.round(part.max * REATTACH.hpFrac));
     part.style = p.style;
+    part.trait = p.trait;
     part.regrow = 0;
     if (p.owner !== f.id) {
       const lost = s.fighters[p.owner].parts[p.part];
@@ -1054,6 +1083,7 @@ export class World {
       owner: d.id,
       part,
       style: p.style,
+      trait: p.trait,
       hp: p.max,
       x: d.x,
       y: d.y,
@@ -1077,6 +1107,7 @@ export class World {
       owner: d.id,
       part,
       style: d.parts[part].style,
+      trait: d.parts[part].trait,
       hp: d.parts[part].max,
       x: d.x,
       y: d.y,
@@ -1107,7 +1138,7 @@ export class World {
 
   private respawn(f: Fighter): void {
     this.s.pickups = this.s.pickups.filter((p) => p.owner !== f.id);
-    f.parts = freshParts(f.style);
+    f.parts = freshParts(f.style, (p) => this.grow(f, p));
     f.x = f.spawnX;
     f.y = f.spawnY;
     f.facing = Math.atan2(-f.y, -f.x);
@@ -1426,7 +1457,7 @@ export class World {
       mix(f.juggle);
       mix(f.partner);
       mix(f.out ? 1 : 0);
-      for (const p of PARTS) mix(f.parts[p].hp + (f.parts[p].attached ? 1000 : 0));
+      for (const p of PARTS) mix(f.parts[p].hp + (f.parts[p].attached ? 1000 : 0) + f.parts[p].trait.mass);
     }
     for (const p of s.pickups) {
       mix(p.x);

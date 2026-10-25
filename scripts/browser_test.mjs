@@ -236,6 +236,17 @@ async function main() {
   check(stats.kos > 0 || stats.throne > 0, `fighting happened (KOs ${stats.kos}, best throne time ${stats.throne}f)`);
   check(stats.cards === 8, `HUD shows 8 fighter cards (${stats.cards})`);
 
+  // free-form limbs: every fighter's arms rolled their own traits, and a heavy one ends in a bigger fist on screen
+  const limbs = await page.evaluate(() => {
+    const g = window.__game;
+    const fs = g.world.fighters;
+    const masses = fs.map((f) => f.parts.armR.trait.mass);
+    const on = fs.findIndex((f) => f.parts.armR.attached);
+    return { distinct: new Set(masses.map((m) => m.toFixed(4))).size, n: fs.length, mass: masses[on], scale: g.scene.fighters[on].limbs.armR.scale.x };
+  });
+  check(limbs.distinct === limbs.n, `every fighter's arm rolled its own traits (${limbs.distinct} distinct of ${limbs.n})`);
+  check(Math.abs(limbs.scale - Math.pow(limbs.mass, 0.8)) < 1e-6, `the fist on screen is sized by the arm's mass (${limbs.mass.toFixed(3)} -> ${limbs.scale.toFixed(3)})`);
+
   // hit feel: hitstop in the sim, sparks and rings in the scene, sound from the synth
   const feel = await withTimeout(
     page.evaluate(() => {

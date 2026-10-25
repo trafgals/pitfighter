@@ -83,7 +83,7 @@ describe("strikes", () => {
   });
 
   it("strikes hit every fighter in the cone (multi-target)", () => {
-    const w = new World({ seed: 3, styles: [0, 0, 0] });
+    const w = new World({ seed: 3, styles: [0, 0, 0], limbs: false });
     w.s.nextGeyser = 1e9;
     const [a, b, c] = w.fighters;
     Object.assign(a, { x: 0, y: 3, facing: 0 });
@@ -151,7 +151,7 @@ describe("reversals", () => {
   });
 
   it("a reversal pushes the surrounding crowd away (kinetic pushback)", () => {
-    const w = new World({ seed: 5, styles: [0, 0, 0, 0] });
+    const w = new World({ seed: 5, styles: [0, 0, 0, 0], limbs: false });
     w.s.nextGeyser = 1e9;
     const [a, d, c1, c2] = w.fighters;
     Object.assign(d, { x: 0, y: 4, facing: Math.PI });
@@ -170,7 +170,7 @@ describe("reversals", () => {
 
 describe("grapples", () => {
   it("grab -> knee -> throw toward the stick, the thrown body bowls others over", () => {
-    const w = new World({ seed: 9, styles: [0, 0, 0] });
+    const w = new World({ seed: 9, styles: [0, 0, 0], limbs: false });
     w.s.nextGeyser = 1e9;
     const [a, b, c] = w.fighters;
     Object.assign(a, { x: 0, y: 3, facing: 0 });
@@ -215,7 +215,7 @@ describe("grapples", () => {
 
 describe("crowd protection", () => {
   it("getting hit by three different attackers in a second forces a protected knockdown", () => {
-    const w = new World({ seed: 2, styles: [0, 0, 0, 0] });
+    const w = new World({ seed: 2, styles: [0, 0, 0, 0], limbs: false });
     w.s.nextGeyser = 1e9;
     const [v, a, b, c] = w.fighters;
     Object.assign(v, { x: 0, y: 4, facing: 0 });
@@ -242,14 +242,14 @@ describe("styles", () => {
   });
 
   it("style tempo changes startup: Speed is faster than Mighty", () => {
-    const w = new World({ seed: 1, styles: [8, 10] });
+    const w = new World({ seed: 1, styles: [8, 10], limbs: false });
     expect(STYLES[8].style).toBe("Speed");
     expect(STYLES[10].style).toBe("Mighty");
     expect(w.eff(w.fighters[0], "jab1").startup).toBeLessThan(w.eff(w.fighters[1], "jab1").startup);
   });
 
   it("Boxing and Kung Fu strings are longer than All-Round's", () => {
-    const w = new World({ seed: 1, styles: [0, 6] });
+    const w = new World({ seed: 1, styles: [0, 6], limbs: false });
     expect(w.nextOf(w.fighters[0], "jab2")).toBe("punchFin");
     expect(w.nextOf(w.fighters[1], "jab2")).toBe("jab3");
     expect(w.nextOf(w.fighters[1], "jab3")).toBe("punchFin");

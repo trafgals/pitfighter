@@ -1156,6 +1156,9 @@ export function syncLimbs(b: Body, f: Fighter): void {
   for (const p of LIMBS) {
     const on = f.parts[p].attached;
     b.limbs[p].visible = on; // the hand or foot riding on the bone
+    // a heavy limb ends in a big fist or foot, a light one in a small one (src/sim/limbs.ts)
+    const heft = Math.pow(f.parts[p].trait?.mass ?? 1, 0.8);
+    if (b.limbs[p].scale.x !== heft) b.limbs[p].scale.setScalar(heft);
     b.skins[p as keyof Body["skins"]].visible = on; // and the limb's skin
     if (p in b.stumps) b.stumps[p as keyof Body["stumps"]].visible = !on;
     // a limb taken from someone else wears their colours

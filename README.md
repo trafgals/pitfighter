@@ -39,7 +39,7 @@ The combat is modelled on the feel of Namco's *Urban Reign*:
 - soft lock-on, and R1 to lock on and strafe;
 - multi-target hits, kinetic pushback when you land a reversal, and dogpile protection.
 
-Pitfighter changes five things (`src/sim/moves.ts`, `tests/tweaks.test.ts`, `tests/juggle.test.ts`):
+Pitfighter changes six things (`src/sim/moves.ts`, `tests/tweaks.test.ts`, `tests/juggle.test.ts`):
 
 - **Charged openers.** Hold ○ to charge the first strike of a string. It
   waits on its last startup frame while you hold, for up to 1 s, and fires on
@@ -62,6 +62,17 @@ Pitfighter changes five things (`src/sim/moves.ts`, `tests/tweaks.test.ts`, `tes
   juggle, flung across the floor, or with an arm torn at. Out of reach, it
   whiffs like any grapple, so the longer a juggle runs and the further it
   drifts, the riskier the cash-out.
+- **Free-form limbs.** Every limb that grows rolls its own traits
+  (`src/sim/limbs.ts`): its mass, length, how fast it whips, how wide it
+  swings, and what it hits with (a fist, a claw, a hoof, a club or a spike).
+  The style leans the roll, so a Power arm runs heavy and a Speed arm fast, but
+  no two limbs are alike. The strikes a fighter throws are generated from the
+  limb that throws them, and a string trades hands, so a body stitched together
+  from torn-off parts fights like nothing else. A transplant keeps its roll; a
+  limb that grows back is a new one. Every generated strike stays inside Urban
+  Reign's own timing: first hits on frames 9 to 38, whole actions 36 to 90
+  frames, from the decoded movesets (`tests/limbs.test.ts`). Strings stay true
+  combos whatever limbs throw them.
 - **Crunch.** A body flying fast into a wall, a prop or the toilet is hurt by
   it, limb first, and bounces back off. A juggled body flying fast is a human
   missile: it knocks down whoever it hits, and both of them are hurt. The sim
