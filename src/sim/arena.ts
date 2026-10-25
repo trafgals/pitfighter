@@ -367,7 +367,7 @@ class ConstructionSite extends Arena {
         v.cool = BOOST.cool;
       }
     }
-    for (const b of [BTN.LOW, BTN.GRAB, BTN.REV, BTN.SPECIAL, BTN.TARGET]) w.consume(f, b);
+    for (const b of [BTN.LOW, BTN.GRAB, BTN.REV, BTN.SPECIAL, BTN.TARGET, BTN.TAUNT, BTN.DASH]) w.consume(f, b);
     const st = VEHICLES[v.kind];
     const mag = Math.min(1, Math.hypot(inp.x, inp.y));
     let want = 0;
@@ -890,7 +890,7 @@ class HindenburgBlimp extends Arena {
     } else if (a.wind > 0) {
       for (const f of s.fighters) {
         if (!alive(f) || f.stop > 0 || f.state === "seated") continue;
-        f.y += a.windDir * BLIMP.windPush * (f.state === "down" ? 1.4 : f.state === "guard" ? 0.5 : 1);
+        f.y += a.windDir * BLIMP.windPush * (f.state === "down" ? 1.4 : f.state === "reversal" ? 0.5 : 1);
       }
       if (--a.wind === 0) a.nextWind = s.frame + Math.round(w.rng.range(BLIMP.windMin, BLIMP.windMax));
     }

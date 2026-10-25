@@ -45,7 +45,7 @@ describe("limbs", () => {
     expect(a.state).not.toBe("attack");
   });
 
-  it("one leg: you hop (slower, no guard, no low kicks); no legs: you bounce on the torso", () => {
+  it("one leg: you hop (slower, no run, no low kicks); no legs: you bounce on the torso", () => {
     const w = duel(6);
     const a = w.fighters[0];
     const walk = (frames: number) => {
@@ -60,8 +60,15 @@ describe("limbs", () => {
     const hop = walk(48);
     expect(hop).toBeLessThan(full);
     expect(hop).toBeCloseTo(SPEED.hop, 3);
-    run(w, 2, (inp) => (inp[0].buttons = BTN.GUARD));
-    expect(a.state).not.toBe("guard");
+    run(w, 2, (inp) => {
+      inp[0].x = -1;
+      inp[0].buttons = BTN.DASH;
+    });
+    run(w, 30, (inp) => {
+      inp[0].x = -1;
+      inp[0].buttons = BTN.DASH;
+    });
+    expect(a.running).toBe(false);
     tap(w, 0, BTN.LOW);
     expect(a.state).not.toBe("attack");
     chop(w, a, "legL", 1);

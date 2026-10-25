@@ -12,7 +12,7 @@ stage decides the arena and how a match is won.
 | Stage | How it plays | How you win |
 |---|---|---|
 | **Hell Toilet** | A ring of hellfire with the last toilet in hell in the middle. Hellfire geysers erupt across the floor. Any hit knocks the sitter off the throne. | Sit on the toilet for 15 seconds in total (progress is kept between sittings). |
-| **Construction Site** | Everyone starts in a different construction vehicle: bulldozer, excavator, dump truck, forklift, steamroller, cement mixer, loader and crane truck. Steer with the stick, boost with high strike, get out (or into a free machine) with USE. Machines crash into each other, run people over and get wrecked by crashes and by strikes; a wreck throws its driver out. The crane drops steel beams. | First to 4 KOs. KO'd fighters come back. |
+| **Construction Site** | Everyone starts in a different construction vehicle: bulldozer, excavator, dump truck, forklift, steamroller, cement mixer, loader and crane truck. Steer with the stick, boost with strike, get out (or into a free machine) with USE. Machines crash into each other, run people over and get wrecked by crashes and by strikes; a wreck throws its driver out. The crane drops steel beams. | First to 4 KOs. KO'd fighters come back. |
 | **Collapsing Tower** | A rooftop of 8 x 8 tiles high above the city. Tiles crack and fall, mostly from the edges in, faster as the match goes on; the centre four never fall. You cannot walk off an edge, but a knockdown or a throw can send you over. | Last one standing. Nobody comes back. |
 | **Hindenburg Blimp** | On top of the burning airship: the fire creeps forward from the tail and gusts of wind push everyone toward the edge. Knock someone over the edge and they are gone. After 30 seconds it hits the ground: the impact throws everyone flat, the wreck is walled in by twisted frame, and the fire burns everyone a little more every second until nobody is left. | Last one standing. Nobody comes back. |
 | **Castle Under Siege** | The wall walk of a besieged castle. The parapet stops you, except at the two breaches the siege has knocked in it, which are a long way down. Catapult stones knock you down, arrow volleys sting. | Raise your banner at the flagpole: the fighter nearest the pole raises theirs, 10 seconds alone wins, and it rises at half speed while someone else is in the circle. KO'd fighters come back. |
@@ -32,19 +32,51 @@ their look is `src/render/stageviews.ts`. A match is started with
 The combat is modelled on the feel of Namco's *Urban Reign*:
 
 - frame-data strikes measured from the real game: a 12f jab, strings that combo on hit, and heavy enders that knock down;
-- high/low reversals that catch a strike landing on their frames 2�14;
+- juggles: the neutral string's finisher launches, as Urban Reign's does, and blows in the air keep the body up;
+- a deflect that catches a strike, high or low, landing on its frames 2�14;
 - grapples with knees and directional throws;
-- guard, combo damage scaling and wake-up invulnerability;
-- soft lock-on;
+- no guard (as in Urban Reign): evades, dashes and runs instead; combo damage scaling and wake-up invulnerability;
+- soft lock-on, and R1 to lock on and strafe;
 - multi-target hits, kinetic pushback when you land a reversal, and dogpile protection.
 
-Pitfighter changes two things (`src/sim/moves.ts`, `tests/tweaks.test.ts`):
+Pitfighter changes six things (`src/sim/moves.ts`, `tests/tweaks.test.ts`, `tests/juggle.test.ts`):
 
-- **Charged openers.** Hold □ or ✕ to charge the first strike of a string. It
+- **Charged openers.** Hold ○ to charge the first strike of a string. It
   waits on its last startup frame while you hold, for up to 1 s, and fires on
   release with up to double damage and knockback. A full charge knocks down.
   A tap is the normal strike, and the follow-ups of a string never charge.
   You glow while you charge, and you can be hit out of it.
+- **Air control.** A juggled body floats on a soft gravity (two thirds of
+  Earth's) that never grows, however long the juggle runs. Every blow in the
+  air pops it up again, up to eight. The victim steers with the stick, as in
+  Soul Calibur, and harder for every hit taken in the air. Holding the stick
+  away from the attacker as a blow lands flies them further off, more for every
+  hit so far, so a long juggle gets easier to escape. A body flown above 1.9 m
+  is out of reach. It bounces once off the floor and then lies there.
+- **Air grabs.** Triangle on a juggled body within 1.45 m, and no higher
+  than an outstretched arm, catches it out of the air with the style's own air
+  grab (`src/sim/airgrabs.ts`): a suplex, a powerbomb, a slingshot, an axe-kick
+  spike, and so on. The grab belongs to the torso, so it stays the fighter's
+  whatever limbs they wear, but the arms set its strength (70% with one arm,
+  half with none). Each ends its own way: down, bounced back up into a fresh
+  juggle, flung across the floor, or with an arm torn at. Out of reach, it
+  whiffs like any grapple, so the longer a juggle runs and the further it
+  drifts, the riskier the cash-out.
+- **Free-form limbs.** Every limb that grows rolls its own traits
+  (`src/sim/limbs.ts`): its mass, length, how fast it whips, how wide it
+  swings, and what it hits with (a fist, a claw, a hoof, a club or a spike).
+  The style leans the roll, so a Power arm runs heavy and a Speed arm fast, but
+  no two limbs are alike. The strikes a fighter throws are generated from the
+  limb that throws them, and a string trades hands, so a body stitched together
+  from torn-off parts fights like nothing else. A transplant keeps its roll; a
+  limb that grows back is a new one. Every generated strike stays inside Urban
+  Reign's own timing: first hits on frames 9 to 38, whole actions 36 to 90
+  frames, from the decoded movesets (`tests/limbs.test.ts`). Strings stay true
+  combos whatever limbs throw them.
+- **Crunch.** A body flying fast into a wall, a prop or the toilet is hurt by
+  it, limb first, and bounces back off. A juggled body flying fast is a human
+  missile: it knocks down whoever it hits, and both of them are hurt. The sim
+  decides all of it (`tests/crunch.test.ts`); the ragdoll only follows.
 - **Whiffed reversals.** A reversal that counters nothing takes 3x as long to
   recover from (63 frames after its window instead of 21), so spamming
   reversal gets punished. A reversal that lands ends at once, as before.
@@ -60,10 +92,10 @@ owner's colours and fighting like them: a boxer's arm punches like a boxer.
 Its owner grows a new one 12 s later. *Pick up* on someone else's limb punts
 it away. A limb that lands in the hellfire burns, and grows back 12 s later.
 
-- One leg: you hop. You're slower, can't guard and can't low kick.
+- One leg: you hop. You're slower, can't run and can't low kick.
 - No legs: you bounce along on your torso.
 - One arm: slower, weaker punches and weaker throws.
-- No arms: Square becomes a headbutt, and you can't grab or high-reverse.
+- No arms: Circle becomes a headbutt, and you can't grab.
 - Head at 0 HP: you're dizzy. Torso at 0 HP: you're torn apart and respawn at your spot on the edge.
 
 ## Fighters
@@ -124,26 +156,31 @@ Each style also has a special, paid for with fury:
 
 ## Controls
 
+The layout is Urban Reign's: Circle strikes, Triangle grapples, Square
+dodges, Cross runs.
+
 | Action | Pad | Keyboard P1 | Keyboard P2 |
 |---|---|---|---|
 | move | stick / d-pad | WASD | arrows |
-| high strike (string) | □ | J | Num4 |
-| low strike (string) | ✕ | K | Num5 |
-| grab, then □ knee / ○ throw toward the stick; over a limb, put it on | ○ | L | Num6 |
-| high reversal | △ | I | Num8 |
-| low reversal | R1 + △ | Shift + I | Num0 + Num8 |
-| guard | R1 | Shift | Num0 |
-| switch target | L1 | U | Num7 |
-| pick up limb / sit / stand | R2 | O | Num9 |
-| special (costs fury) | L2, or □ + ✕ together | H, or J + K | Num1, or Num4 + Num5 |
+| strike (string) | ○ | J | Num6 |
+| low strike (string) | stick back + ○ | back + J | back + Num6 |
+| grapple, then ○ knee / △ throw toward the stick; over a limb, put it on | △ | K | Num8 |
+| deflect (catches high and low) | □ | L | Num4 |
+| evade (a sidestep nothing touches) | □ + a direction | L + a direction | Num4 + a direction |
+| dash; hold to run; ○ out of it is a shoulder charge | ✕ | Shift | Num2 |
+| lock on and strafe (hold) | R1 | Q | Num9 |
+| switch target | R3 | U | Num0 |
+| pick up limb / sit / stand | L1 | O | Num7 |
+| taunt (a whole one fills fury) | L2 | H | Num1 |
+| special (costs fury) | ○ + △ together, or R2 | J + K, or Y | Num6 + Num8, or Num3 |
 | mute | | M | |
 
 On the character select:
 
-- join with the high-strike button;
-- pick a fighter with the stick, confirm with high strike, back out with grab;
-- set the number of fighters with `-` / `+` (or L1 / R1 on a pad);
-- pick the kind of match by clicking the arrows or a name on the banner, with `[` / `]` or `H` / `O`, or with L2 / R2 on a pad; a CPU brawl on its next arena plays behind the menu;
+- join with the strike button (○ on a pad, J on the keyboard);
+- pick a fighter with the stick, confirm with strike, back out with grapple;
+- a match has 4 fighters by default: the first four humans to join each take a CPU's place, and every human after that adds a fighter (up to 8); set the number with `-` / `+` (`O` / `Q`, or L1 / R1 on a pad);
+- pick the kind of match by clicking the arrows or a name on the banner, with `[` / `]` or `H` / `Y`, or with L2 / R2 on a pad; a CPU brawl on its next arena plays behind the menu;
 - or click a fighter to join on it with the keyboard, and click FIGHT! to start;
 - turn the blood on or off with `G` (the game remembers your choice);
 - start with Enter or Start.

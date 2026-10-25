@@ -1,3 +1,4 @@
+import type { LimbTrait } from "./limbs";
 // Shared simulation types and constants. Everything here is plain data so a
 // world can be hashed, cloned and replayed.
 
@@ -12,17 +13,23 @@ export const SPAWN_R = 8;
 export const TOILET_R = 0.95; // how close you must be to sit down
 export const TOILET_FRAMES = 900; // seated frames needed to win (15 s in total; progress is kept between sittings)
 
-// Buttons (bitmask). Pad mapping lives in src/input.ts.
+// Buttons (bitmask), laid out as Urban Reign's: Circle strikes, Triangle
+// grapples, Square dodges / deflects, Cross runs. Pad mapping lives in src/input.ts.
 export const BTN = {
-  HIGH: 1, // Square: high strike string
-  LOW: 2, // Cross: low strike string
-  GRAB: 4, // Circle: grapple; in a hold, throw
-  REV: 8, // Triangle: high reversal (R1+Triangle: low reversal)
-  GUARD: 16, // R1
-  TARGET: 32, // L1: switch soft-lock target
-  USE: 64, // R2: pick up limb / sit on the toilet / get in or out of a vehicle
-  SPECIAL: 128, // L2 (or Square + Cross together): the style's special, costs fury
+  HIGH: 1, // Circle: the strike string (with the stick pulled back: the low string)
+  LOW: 2, // the low string straight away (CPUs and tests; a pad gets it with back + Circle)
+  GRAB: 4, // Triangle: grapple, or pick up a limb; in a hold, throw
+  REV: 8, // Square: deflect (stick neutral) or evade (with a direction); held, break free
+  LOCK: 16, // R1, held: lock on to the target and strafe round it
+  TARGET: 32, // R3: switch target
+  USE: 64, // L1: pick up a limb / sit on the toilet / get in or out of a vehicle
+  SPECIAL: 128, // R2 (or Circle + Triangle together): the style's special, costs fury
+  TAUNT: 256, // L2: taunt; a whole one fills fury
+  DASH: 512, // Cross: a burst of speed; held, run
 } as const;
+/** Urban Reign's names for the two face buttons that changed meaning */
+export const STRIKE = BTN.HIGH;
+export const DODGE = BTN.REV;
 
 export interface PlayerInput {
   x: number; // stick, -1..1
@@ -43,6 +50,8 @@ export interface Part {
   regrow: number; // frames until a limb burnt in the lava grows back (0 = not regrowing)
   /** the style the limb came from: its own fighter's, or whoever it was torn off (a transplant fights like its first owner) */
   style: number;
+  /** the limb's own roll: how heavy, long and fast it is and what it hits with (it goes wherever the limb goes) */
+  trait: LimbTrait;
 }
 
 export type Height = "high" | "low";
@@ -50,7 +59,9 @@ export type Height = "high" | "low";
 export type FighterState =
   | "idle"
   | "walk"
-  | "guard"
+  | "dash" // Cross: a burst along the stick
+  | "evade" // Square with a direction: a sidestep that nothing touches
+  | "taunt" // L2
   | "attack"
   | "hitstun"
   | "blockstun"
@@ -59,6 +70,9 @@ export type FighterState =
   | "holding"
   | "held"
   | "thrown"
+  | "air" // launched: floating, juggled, steering with the stick until the floor
+  | "airslam" // an air grab: carrying the victim down
+  | "airslammed"
   | "down"
   | "wakeup"
   | "dizzy"
@@ -80,6 +94,17 @@ export interface Fighter {
   facing: number; // radians, 0 = +x
   slideX: number; // knockback velocity (m/frame), decays
   slideY: number;
+  dirX: number; // the direction of a dash or an evade (unit)
+  dirY: number;
+  running: boolean; // Cross held while moving
+  z: number; // height above the floor (m): only a launched body leaves it
+  vz: number; // m/frame, up +
+  juggle: number; // hits taken in the air since the launch: the more, the harder the victim can steer
+  bounced: boolean; // this juggle has bounced off the floor once already
+  grown: number; // limbs grown so far (each new one rolls its own traits)
+  carryZ: number; // an air grab: the height the victim was caught at
+  stickX: number; // the stick as last read (steering in the air)
+  stickY: number;
   state: FighterState;
   t: number; // frames spent in the current state
   dur: number; // planned length of the current state (0 = open ended)
@@ -119,6 +144,7 @@ export interface Pickup {
   part: PartId;
   /** the style of the fighter the limb grew on, which it keeps wherever it is attached */
   style: number;
+  trait: LimbTrait;
   hp: number;
   x: number;
   y: number;
@@ -200,7 +226,11 @@ export interface GameEvent {
     | "collapse"
     | "wind"
     | "impact" // the blimp hits the ground
-    | "capture";
+    | "capture"
+    | "launch" // a launcher sends a fighter up
+    | "bounce" // a juggled body bounces off the floor
+    | "airgrab" // caught out of the air (what: the grab's name)
+    | "crunch"; // a flying body hits a wall, a prop or another fighter
   a: number; // actor
   b?: number; // other party
   part?: PartId;

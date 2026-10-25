@@ -13,7 +13,7 @@
 import * as THREE from "three";
 import type { Rag, Settle } from "./ragdoll";
 import { LIMBS, type Fighter, type PartId } from "../sim/types";
-import { CHARGE, DOWN, HOP_AIR, HOP_CYCLE } from "../sim/moves";
+import { CHARGE, DASH, DOWN, EVADE, HOP_AIR, HOP_CYCLE, TAUNT } from "../sim/moves";
 import { STYLES } from "../sim/styles";
 import { legs, type World } from "../sim/world";
 import { painted, surface, type Surface } from "./textures";
@@ -604,6 +604,8 @@ export interface Cue {
   age: number;
   blend: Pose | null;
 }
+/** Came down out of the air already lying flat: a throw or a juggle. */
+export const flung = (from: Fighter["state"] | null): boolean => from === "thrown" || from === "air" || from === "airslammed";
 export const noCue = (): Cue => ({ last: null, from: null, throwAge: 99, react: null, face: 1, lie: 0, side: 1, key: "", start: 0, at: 0, age: 0, blend: null });
 
 /** What targetPose decided, besides the pose: which feet carry the weight, and what is playing (for the debug overlay and the strips). */
@@ -709,17 +711,66 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
       p.armL[0] += sw * 0.08;
       p.armR[0] -= sw * 0.08;
       p.tail = Math.sin(time * 6) * 0.5;
+      if (f.running) {
+        // Cross held: a sprint, leaning into it, the arms pumping
+        p.spineX += 0.35;
+        p.headX -= 0.2;
+        p.armL = [-0.5 + sw * 0.9, 0, 0.2];
+        p.armR = [-0.5 - sw * 0.9, 0, -0.2];
+        p.elbowL = p.elbowR = -1.5;
+        p.tail = -0.5;
+      }
       break;
-    case "guard":
-      plant = "gait"; // shuffling behind the guard
+    case "dash": {
+      // Cross: driving off the back foot, low and leaning, arms pumping
+      plant = "none";
+      const k = Math.min(1, t / 4) * Math.max(0, 1 - Math.max(0, t - DASH.move) / (DASH.dur - DASH.move));
+      const st = Math.sin(t * 0.9);
+      p.spineX = 0.1 + 0.45 * k;
+      p.headX = -0.25 * k;
+      p.y -= 0.12 * k;
+      p.legL = [-0.2 - 0.9 * st * k, 0.08];
+      p.legR = [-0.2 + 0.9 * st * k, -0.08];
+      p.kneeL = 0.5 + 0.6 * Math.max(0, st) * k;
+      p.kneeR = 0.5 + 0.6 * Math.max(0, -st) * k;
+      p.armL = [0.9 * st * k - 0.3, 0, 0.25];
+      p.armR = [-0.9 * st * k - 0.3, 0, -0.25];
+      p.elbowL = p.elbowR = -1.4;
+      p.tail = -0.6 * k;
+      rate = 30;
+      break;
+    }
+    case "evade": {
+      // Square with a direction: a sidestep, the body dipping and leaning away from the line
       blade();
-      guardArms();
-      p.spineX = 0.2;
-      p.headX = 0.15;
-      p.y = -0.1;
-      p.kneeL = 0.75;
-      p.kneeR = 0.6;
+      guardArms(0.8);
+      plant = "none";
+      const side = Math.sin(Math.atan2(f.dirY, f.dirX) - f.facing); // + to the fighter's left
+      const k = Math.sin(Math.min(1, t / EVADE.move) * Math.PI);
+      p.y -= 0.16 * k;
+      p.rz = -0.28 * side * k;
+      p.spineZ = -0.2 * side * k;
+      p.kneeL += 0.5 * k;
+      p.kneeR += 0.5 * k;
+      p.legL = [p.legL[0], p.legL[1] + 0.25 * side * k];
+      p.legR = [p.legR[0], p.legR[1] + 0.25 * side * k];
+      rate = 28;
       break;
+    }
+    case "taunt": {
+      // L2: chest out, arms wide, beckoning the next sinner in
+      plant = "both";
+      const k = Math.min(1, t / 10) * Math.min(1, (TAUNT.dur - t) / 10);
+      const beck = Math.max(0, Math.sin(t * 0.35));
+      p.spineX = -0.25 * k;
+      p.headX = -0.3 * k;
+      p.armL = [-0.4 * k, 0, 1.3 * k];
+      p.armR = [-1.2 * k - 0.4 * beck * k, 0, -0.7 * k];
+      p.elbowL = -0.4;
+      p.elbowR = -0.6 - 1.2 * beck * k;
+      p.tail = Math.sin(time * 9) * 0.8 * k;
+      break;
+    }
     case "attack": {
       if (!f.move) break;
       rate = 34;
@@ -795,11 +846,23 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
     case "thrown":
       play(THROWN, t, stateTiming(f.dur || 24));
       break;
+    case "air":
+    case "airslammed":
+      // up in a juggle (or carried in an air grab): laid out in the throw's flight, held there until the floor
+      play(THROWN, Math.min(t, 12), stateTiming(24));
+      label = f.state === "air" ? "juggled" : "air grabbed";
+      break;
+    case "airslam":
+      // the air grab: the thrower's turn, stretched over the grab
+      play(THROWER, t, stateTiming(f.dur || 40));
+      impact = f.stop > 0;
+      label = "air grab";
+      break;
     case "down":
     case "ko":
       // off the back of a throw the body is already on the floor: only the bounce
       {
-        const c = cue.from === "thrown" ? DOWN_LANDED : cue.face > 0 ? DOWN_BACK : DOWN_FRONT;
+        const c = flung(cue.from) ? DOWN_LANDED : cue.face > 0 ? DOWN_BACK : DOWN_FRONT;
         play(c, f.state === "ko" ? Math.max(t, FALL_LAND + 10) : t, stateTiming(DOWN.dur));
         label = c === DOWN_LANDED ? "landed" : c === DOWN_BACK ? "down back" : "down front";
       }
@@ -878,14 +941,14 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
   }
 
   // the soft-lock target: standing, stalking or guarding, the head and the guard turn to it
-  if (f.state === "idle" || f.state === "walk" || f.state === "guard") {
+  if (f.state === "idle" || f.state === "walk") {
     const a = lookAngle(f, w);
     p.headY += a * 0.55;
     p.spineY += a * 0.3;
   }
 
   // one leg: hop; no legs: bounce along on the torso
-  if (nLegs === 1 && (f.state === "walk" || f.state === "idle" || f.state === "guard")) {
+  if (nLegs === 1 && (f.state === "walk" || f.state === "idle")) {
     const ph = f.hopPhase % HOP_CYCLE;
     p.y += ph < HOP_AIR ? Math.sin((ph / HOP_AIR) * Math.PI) * 0.22 : 0;
     p.legL = [-0.15, 0];
@@ -893,7 +956,7 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
     p.kneeL = p.kneeR = 0.4;
   }
   if (nLegs < 2) plant = "none"; // a hop or a drag: no foot stays put
-  if (nLegs === 0 && !["down", "ko", "thrown", "held", "wakeup", "driving", "falling"].includes(f.state)) {
+  if (nLegs === 0 && !["down", "ko", "thrown", "air", "airslammed", "held", "wakeup", "driving", "falling"].includes(f.state)) {
     // upright on the stumps, springing off the floor: high in the air, squashed low on landing
     const ph = f.hopPhase % HOP_CYCLE;
     const air = ph < HOP_AIR ? Math.sin((ph / HOP_AIR) * Math.PI) : 0;
@@ -1093,6 +1156,9 @@ export function syncLimbs(b: Body, f: Fighter): void {
   for (const p of LIMBS) {
     const on = f.parts[p].attached;
     b.limbs[p].visible = on; // the hand or foot riding on the bone
+    // a heavy limb ends in a big fist or foot, a light one in a small one (src/sim/limbs.ts)
+    const heft = Math.pow(f.parts[p].trait?.mass ?? 1, 0.8);
+    if (b.limbs[p].scale.x !== heft) b.limbs[p].scale.setScalar(heft);
     b.skins[p as keyof Body["skins"]].visible = on; // and the limb's skin
     if (p in b.stumps) b.stumps[p as keyof Body["stumps"]].visible = !on;
     // a limb taken from someone else wears their colours

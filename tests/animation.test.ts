@@ -494,11 +494,11 @@ describe("transitions", () => {
       }
   });
 
-  it("standing, stalking or guarding, the head and the chest turn to the soft-lock target", () => {
+  it("standing or stalking, the head and the chest turn to the soft-lock target", () => {
     for (const side of [1, -1]) {
       const { w, f, b, time } = standing(0);
       const o = w.fighters[1];
-      Object.assign(f, { state: "guard", t: 0, x: 0, y: 0, facing: 0, target: 1 });
+      Object.assign(f, { state: "idle", t: 0, x: 0, y: 0, facing: 0, target: 1 });
       Object.assign(o, { x: 0.8, y: 2 * side });
       const base = targetPose({ ...f, target: -1 } as Fighter, w, time.t, b.hurt, b.cue).p;
       for (let i = 0; i < 40; i++) step(b, f, w, time);

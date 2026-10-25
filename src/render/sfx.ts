@@ -143,6 +143,23 @@ export class Sfx {
       this.tone(t, o, "sine", 90, 38, 0.8, 0.22);
       this.noiseHit(t, o, "lowpass", 500, 90, 0.7, 0.55, 0.22);
     },
+    // up into a juggle: a rising whoosh; off the floor again: a softer thud
+    launch: (t, o) => {
+      this.noiseHit(t, o, "bandpass", 400, 2400, 1.1, 0.3, 0.35);
+      this.tone(t, o, "sine", 140, 420, 0.3, 0.3);
+    },
+    airgrab: (t, o) => {
+      this.noiseHit(t, o, "lowpass", 700, 250, 0.8, 0.5, 0.09);
+      this.tone(t, o, "triangle", 330, 660, 0.25, 0.12);
+    },
+    crunch: (t, o) => {
+      this.noiseHit(t, o, "lowpass", 1400, 160, 1.3, 0.6, 0.28);
+      this.tone(t, o, "square", 95, 40, 0.35, 0.14);
+    },
+    bounce: (t, o) => {
+      this.tone(t, o, "sine", 110, 50, 0.6, 0.16);
+      this.noiseHit(t, o, "lowpass", 500, 120, 0.6, 0.4, 0.16);
+    },
     detach: (t, o) => {
       this.noiseHit(t, o, "bandpass", 1400, 260, 3, 0.6, 0.22);
       this.tone(t, o, "sawtooth", 320, 70, 0.18, 0.2);
@@ -328,7 +345,7 @@ export class Sfx {
       if (q.kind === "crash") k = Math.min(1, ((q as { dmg?: number }).dmg ?? 4) / 12);
       voice(t, pan, k);
       this.played[key] = (this.played[key] ?? 0) + 1;
-      if (["ko", "reversal", "crowd", "special", "win", "fall", "wreck", "impact"].includes(q.kind)) this.hype = Math.min(1, this.hype + 0.5);
+      if (["ko", "reversal", "crowd", "special", "win", "fall", "wreck", "impact", "crunch", "airgrab"].includes(q.kind)) this.hype = Math.min(1, this.hype + 0.5);
       if (q.kind === "hit") this.hype = Math.min(1, this.hype + 0.04 * k);
     }
     if (this.crowd) {

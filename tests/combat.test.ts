@@ -31,7 +31,7 @@ describe("strikes", () => {
     expect(w.fighters[1].parts.torso.hp).toBe(w.fighters[1].parts.torso.max);
   });
 
-  it("a mashed high string is a true combo that ends in a knockdown", () => {
+  it("a mashed high string is a true combo that ends in a launch", () => {
     const w = duel();
     const b = w.fighters[1];
     let hits = 0;
@@ -45,7 +45,7 @@ describe("strikes", () => {
     expect(STYLES[0].string).toBe(2);
     expect(hits).toBeGreaterThanOrEqual(3);
     expect(gapInStun).toBe(false);
-    expect(["down", "wakeup", "idle"]).toContain(b.state);
+    expect(["air", "down", "wakeup", "idle"]).toContain(b.state);
     expect(w.s.events.length).toBeGreaterThanOrEqual(0);
   });
 
@@ -60,34 +60,30 @@ describe("strikes", () => {
     expect(dmgs[1]).toBeLessThan(MOVES.jab2.dmg);
   });
 
-  it("guard blocks strikes from the front but not from behind", () => {
+  it("there is no guard, as in Urban Reign: R1 locks on instead, and holding it does not stop a jab", () => {
     const w = duel();
-    run(w, 3, (inp) => (inp[1].buttons = BTN.GUARD));
-    tap(w, 0, BTN.HIGH, (inp) => (inp[1].buttons = BTN.GUARD));
-    let blocked = false;
-    run(w, MOVES.jab1.startup + 6, (inp) => {
-      inp[1].buttons = BTN.GUARD;
-      if (w.s.events.some((e) => e.kind === "block")) blocked = true;
-    });
-    expect(blocked).toBe(true);
-    expect(w.fighters[1].parts.torso.hp).toBe(w.fighters[1].parts.torso.max);
-
-    const w2 = duel();
-    w2.fighters[1].facing = 0; // turned away
-    run(w2, 3, (inp) => (inp[1].buttons = BTN.GUARD));
-    w2.fighters[1].facing = 0;
-    tap(w2, 0, BTN.HIGH, (inp) => (inp[1].buttons = BTN.GUARD));
+    run(w, 3, (inp) => (inp[1].buttons = BTN.LOCK));
+    tap(w, 0, BTN.HIGH, (inp) => (inp[1].buttons = BTN.LOCK));
     let hit = false;
-    run(w2, MOVES.jab1.startup + 6, (inp) => {
-      inp[1].buttons = BTN.GUARD;
-      w2.fighters[1].facing = 0;
-      if (hitFrame(w2)) hit = true;
+    run(w, MOVES.jab1.startup + 6, (inp) => {
+      inp[1].buttons = BTN.LOCK;
+      if (hitFrame(w)) hit = true;
     });
     expect(hit).toBe(true);
+    expect(w.s.events.some((e) => e.kind === "block")).toBe(false);
+  });
+
+  it("Circle with the stick pulled back throws the low string", () => {
+    const w = duel(3);
+    tap(w, 0, BTN.HIGH, (inp) => (inp[0].x = -1)); // fighter 0 faces +x: back is -x
+    expect(w.fighters[0].move).toBe("kick1");
+    const v = duel(3);
+    tap(v, 0, BTN.HIGH, (inp) => (inp[0].x = 1)); // forward: still the high string
+    expect(v.fighters[0].move).toBe("jab1");
   });
 
   it("strikes hit every fighter in the cone (multi-target)", () => {
-    const w = new World({ seed: 3, styles: [0, 0, 0] });
+    const w = new World({ seed: 3, styles: [0, 0, 0], limbs: false });
     w.s.nextGeyser = 1e9;
     const [a, b, c] = w.fighters;
     Object.assign(a, { x: 0, y: 3, facing: 0 });
@@ -118,26 +114,14 @@ describe("reversals", () => {
     expect(w.fighters[1].parts.torso.hp).toBe(w.fighters[1].parts.torso.max);
   });
 
-  it("the wrong height loses: a high reversal does not stop a low kick", () => {
+  it("Square deflects a low kick too: Urban Reign's deflection takes high and low alike", () => {
     const w = duel();
     tap(w, 0, BTN.LOW);
     run(w, MOVES.kick1.startup - 10);
     tap(w, 1, BTN.REV);
-    let hit = false;
-    run(w, 14, () => {
-      if (hitFrame(w)) hit = true;
-    });
-    expect(hit).toBe(true);
-    expect(w.fighters[0].state).not.toBe("reversed");
-  });
-
-  it("R1+Triangle is a low reversal that beats a low kick", () => {
-    const w = duel();
-    tap(w, 0, BTN.LOW);
-    run(w, MOVES.kick1.startup - 10);
-    tap(w, 1, BTN.REV | BTN.GUARD);
     run(w, 14);
     expect(w.fighters[0].state).toBe("reversed");
+    expect(w.fighters[1].revHeight).toBe("low");
   });
 
   it("a mistimed reversal is punished", () => {
@@ -167,7 +151,7 @@ describe("reversals", () => {
   });
 
   it("a reversal pushes the surrounding crowd away (kinetic pushback)", () => {
-    const w = new World({ seed: 5, styles: [0, 0, 0, 0] });
+    const w = new World({ seed: 5, styles: [0, 0, 0, 0], limbs: false });
     w.s.nextGeyser = 1e9;
     const [a, d, c1, c2] = w.fighters;
     Object.assign(d, { x: 0, y: 4, facing: Math.PI });
@@ -186,7 +170,7 @@ describe("reversals", () => {
 
 describe("grapples", () => {
   it("grab -> knee -> throw toward the stick, the thrown body bowls others over", () => {
-    const w = new World({ seed: 9, styles: [0, 0, 0] });
+    const w = new World({ seed: 9, styles: [0, 0, 0], limbs: false });
     w.s.nextGeyser = 1e9;
     const [a, b, c] = w.fighters;
     Object.assign(a, { x: 0, y: 3, facing: 0 });
@@ -231,7 +215,7 @@ describe("grapples", () => {
 
 describe("crowd protection", () => {
   it("getting hit by three different attackers in a second forces a protected knockdown", () => {
-    const w = new World({ seed: 2, styles: [0, 0, 0, 0] });
+    const w = new World({ seed: 2, styles: [0, 0, 0, 0], limbs: false });
     w.s.nextGeyser = 1e9;
     const [v, a, b, c] = w.fighters;
     Object.assign(v, { x: 0, y: 4, facing: 0 });
@@ -258,14 +242,14 @@ describe("styles", () => {
   });
 
   it("style tempo changes startup: Speed is faster than Mighty", () => {
-    const w = new World({ seed: 1, styles: [8, 10] });
+    const w = new World({ seed: 1, styles: [8, 10], limbs: false });
     expect(STYLES[8].style).toBe("Speed");
     expect(STYLES[10].style).toBe("Mighty");
     expect(w.eff(w.fighters[0], "jab1").startup).toBeLessThan(w.eff(w.fighters[1], "jab1").startup);
   });
 
   it("Boxing and Kung Fu strings are longer than All-Round's", () => {
-    const w = new World({ seed: 1, styles: [0, 6] });
+    const w = new World({ seed: 1, styles: [0, 6], limbs: false });
     expect(w.nextOf(w.fighters[0], "jab2")).toBe("punchFin");
     expect(w.nextOf(w.fighters[1], "jab2")).toBe("jab3");
     expect(w.nextOf(w.fighters[1], "jab3")).toBe("punchFin");

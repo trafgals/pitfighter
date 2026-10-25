@@ -124,6 +124,19 @@ async function main() {
   check(b3.type === "kos" && b3.pick === "construction-site" && b3.world === "construction-site", `clicking a match type picks it (${JSON.stringify(b3)})`);
   await page.click('.stage[data-type="king"]');
   await page.screenshot({ path: path.join(OUT, "1b_select_live.png") });
+  // 4 fighters by default: the first four humans each replace a CPU, the fifth and later add a fighter
+  const grow = await page.evaluate(() => {
+    const sel = window.__game.select;
+    const seen = [sel.fighters];
+    for (let i = 0; i < 6; i++) {
+      sel.join(`probe${i}`, i);
+      seen.push(sel.fighters);
+    }
+    sel.slots = [];
+    sel.setCount(4);
+    return seen;
+  });
+  check(JSON.stringify(grow) === JSON.stringify([4, 4, 4, 4, 4, 5, 6]), `4 fighters by default; humans 1-4 replace CPUs, each one after adds a fighter (${JSON.stringify(grow)})`);
 
   // P1 joins on the keyboard, moves the cursor two styles right, confirms, starts
   // the game reads the keyboard once per animation frame, and a slow software
@@ -141,6 +154,10 @@ async function main() {
   await press("KeyD");
   const chosen = await page.evaluate(() => window.__game.select.slots.map((s) => [s.device, s.style, s.ready]));
   check(JSON.stringify(chosen) === JSON.stringify([["kb1", 2, false]]), `kb1 joined and picked style 2 (${JSON.stringify(chosen)})`);
+  const joinedCount = await page.evaluate(() => window.__game.select.fighters);
+  check(joinedCount === 4, `one human in a 4-fighter pit: they took a CPU's place (${joinedCount} fighters)`);
+  // the brawl checks below want a full pit
+  await page.evaluate(() => window.__game.select.setCount(8));
   await press("KeyJ");
   await press("BracketRight");
   const stageNext = await page.evaluate(() => window.__game.select.stage);
@@ -191,7 +208,15 @@ async function main() {
   // let real time run, then fast-forward the sim to see a lot of fighting
   await new Promise((r) => setTimeout(r, 2000));
   await page.screenshot({ path: path.join(OUT, "2_match_start.png") });
-  const f1 = await withTimeout(page.evaluate(() => window.__game.step(3600)), 30_000, "fast-forward 3600 frames");
+  const f1 = await withTimeout(page.evaluate(() => {
+      // the throne could end the match early: hold every sitter just short of it until the checks are done
+      const g = window.__game;
+      for (let i = 0; i < 3600 && g.mode === "match"; i++) {
+        g.step(1);
+        g.world.fighters.forEach((f) => (f.toilet = Math.min(f.toilet, 600)));
+      }
+      return g.world.s.frame;
+    }), 30_000, "fast-forward 3600 frames");
   const stats = await page.evaluate(() => {
     const w = window.__game.world;
     return {
@@ -211,6 +236,17 @@ async function main() {
   check(stats.kos > 0 || stats.throne > 0, `fighting happened (KOs ${stats.kos}, best throne time ${stats.throne}f)`);
   check(stats.cards === 8, `HUD shows 8 fighter cards (${stats.cards})`);
 
+  // free-form limbs: every fighter's arms rolled their own traits, and a heavy one ends in a bigger fist on screen
+  const limbs = await page.evaluate(() => {
+    const g = window.__game;
+    const fs = g.world.fighters;
+    const masses = fs.map((f) => f.parts.armR.trait.mass);
+    const on = fs.findIndex((f) => f.parts.armR.attached);
+    return { distinct: new Set(masses.map((m) => m.toFixed(4))).size, n: fs.length, mass: masses[on], scale: g.scene.fighters[on].limbs.armR.scale.x };
+  });
+  check(limbs.distinct === limbs.n, `every fighter's arm rolled its own traits (${limbs.distinct} distinct of ${limbs.n})`);
+  check(Math.abs(limbs.scale - Math.pow(limbs.mass, 0.8)) < 1e-6, `the fist on screen is sized by the arm's mass (${limbs.mass.toFixed(3)} -> ${limbs.scale.toFixed(3)})`);
+
   // hit feel: hitstop in the sim, sparks and rings in the scene, sound from the synth
   const feel = await withTimeout(
     page.evaluate(() => {
@@ -220,6 +256,7 @@ async function main() {
       let heavy = null;
       for (let i = 0; i < 1800 && g.mode === "match"; i++) {
         g.step(1);
+        g.world.fighters.forEach((f) => (f.toilet = Math.min(f.toilet, 600))); // keep the match going: no throne win while we look
         const w = g.world;
         if (w.fighters.some((f) => f.stop > 0)) frozen++;
         specials += w.s.events.filter((e) => e.kind === "special").length;
@@ -269,6 +306,7 @@ async function main() {
       let n = 0;
       for (let i = 0; i < 5400 && g.mode === "match" && n === 0; i++) {
         g.step(1);
+        g.world.fighters.forEach((f) => (f.toilet = Math.min(f.toilet, 600))); // keep the match going: no throne win while we look
         n += g.world.s.events.filter((e) => e.kind === "special").length;
       }
       return { n, played: g.sfx.played.special ?? 0, frame: g.world.s.frame };
@@ -303,6 +341,62 @@ async function main() {
   });
   check(px.lit > 200 && px.colours > 40, `canvas renders the arena (${px.lit} lit px, ${px.colours} colours)`);
   await page.screenshot({ path: path.join(OUT, "3_match_fight.png") });
+
+  // a juggle: the CPUs' strings launch, and the launched body is drawn up in the air
+  const launch = await withTimeout(
+    page.evaluate(() => {
+      const g = window.__game;
+      let who = -1;
+      for (let i = 0; i < 5400 && g.mode === "match" && who < 0; i++) {
+        g.step(1);
+        g.world.fighters.forEach((f) => (f.toilet = Math.min(f.toilet, 600))); // keep the match going: no throne win while we look
+        const e = g.world.s.events.find((q) => q.kind === "launch");
+        if (e) who = e.b;
+      }
+      if (who >= 0) for (let i = 0; i < 30 && g.world.fighters[who].state === "air" && g.world.fighters[who].z < 0.6; i++) g.step(1);
+      return { who, frame: g.world.s.frame, played: g.sfx.played.launch ?? 0 };
+    }),
+    40_000,
+    "wait for a launch",
+  );
+  if (launch.who >= 0) {
+    // read it straight after a drawn frame, so the body and the sim are on the same step
+    const up = await page.evaluate(
+      (who) =>
+        new Promise((done) =>
+          requestAnimationFrame(() =>
+            requestAnimationFrame(() => {
+              const g = window.__game;
+              const f = g.world.fighters[who];
+              done({ state: f.state, z: f.z, y: g.scene.fighters[who].root.position.y });
+            }),
+          ),
+        ),
+      launch.who,
+    );
+    check(up.state !== "air" || (up.z > 0.3 && Math.abs(up.y - up.z) < 0.05), `a launched fighter is drawn up in the air (${JSON.stringify(up)})`);
+    if (up.state === "air") await page.screenshot({ path: path.join(OUT, "6_juggle.png") });
+  }
+  // and the CPUs cash juggles out with their style's air grab, named on the banner
+  const ag = await withTimeout(
+    page.evaluate(() => {
+      const g = window.__game;
+      let e = null;
+      for (let i = 0; i < 5400 && g.mode === "match" && !e; i++) {
+        g.step(1);
+        g.world.fighters.forEach((f) => (f.toilet = Math.min(f.toilet, 600))); // keep the match going: no throne win while we look
+        e = g.world.s.events.find((q) => q.kind === "airgrab") ?? null;
+      }
+      return { what: e?.what ?? null, played: g.sfx.played.airgrab ?? 0, frame: g.world.s.frame };
+    }),
+    40_000,
+    "wait for an air grab",
+  );
+  await new Promise((r) => setTimeout(r, 120));
+  const agBanner = await page.evaluate(() => document.querySelector(".banner")?.textContent ?? "");
+  if (ag.what) await page.screenshot({ path: path.join(OUT, "7_airgrab.png") });
+  check(!!ag.what && agBanner.includes(ag.what), `a CPU cashed a juggle out with an air grab, named on the banner (${ag.what} at frame ${ag.frame}; banner "${agBanner}")`);
+  check(launch.who >= 0 && launch.played > 0, `the CPUs' strings launched someone, with sound (fighter ${launch.who} at frame ${launch.frame})`);
 
   // the end of the match: the winning KO slows time nearly to a stop, and the camera closes in on the body
   const end = await withTimeout(
@@ -359,7 +453,7 @@ async function main() {
   await padPress(9);
   await page.waitForFunction(() => window.__game.mode === "match", { timeout: 10_000 });
   const padMatch = await page.evaluate(() => window.__game.world.fighters.map((f) => f.human));
-  check(padMatch.length === 8 && padMatch[0] && padMatch.slice(1).every((h) => !h), `a third Start starts the match with the pad as P1 and 7 CPUs (${JSON.stringify(padMatch)})`);
+  check(padMatch.length === 4 && padMatch[0] && padMatch.slice(1).every((h) => !h), `a third Start starts the match with the pad as P1 and 3 CPUs (${JSON.stringify(padMatch)})`);
 
   // every other stage: start an 8-CPU match with ?stage=, play it, look at it
   const litCanvas = () =>

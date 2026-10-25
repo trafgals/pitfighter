@@ -69,7 +69,7 @@ describe("hitstop", () => {
     expect(seen).toContain("jab2");
   });
 
-  it("reversals, blocks and throws freeze too", () => {
+  it("reversals and throws freeze too", () => {
     const w = duel(1.0);
     tap(w, 1, BTN.REV);
     tap(w, 0, BTN.HIGH);
@@ -81,15 +81,6 @@ describe("hitstop", () => {
     expect(rev?.stop).toBe(HITSTOP.reversal);
     expect(REVERSAL.stun).toBeGreaterThan(0);
 
-    const g = duel(1.0);
-    run(g, 1, (inp) => (inp[1].buttons = BTN.GUARD));
-    tap(g, 0, BTN.HIGH, (inp) => (inp[1].buttons = BTN.GUARD));
-    let block;
-    for (let i = 0; i < 20 && !block; i++) {
-      run(g, 1, (inp) => (inp[1].buttons = BTN.GUARD));
-      block = g.s.events.find((e) => e.kind === "block");
-    }
-    expect(block?.stop).toBe(HITSTOP.block);
   });
 });
 
@@ -102,15 +93,15 @@ describe("fury and specials", () => {
     expect(w.fighters[1].fury).toBe(FURY.taken);
   });
 
-  it("without fury, Square + Cross is just a strike", () => {
-    const w = duel(1.0);
-    tap(w, 0, BTN.HIGH | BTN.LOW);
+  it("without fury, Circle + Triangle is just a grapple", () => {
+    const w = duel(3.0);
+    tap(w, 0, BTN.HIGH | BTN.GRAB);
     run(w, 2);
-    expect(w.fighters[0].move).toBe("jab1");
+    expect(w.fighters[0].move).toBe("grab");
   });
 
-  it("with fury, Square + Cross (or L2) starts the style's special and spends fury", () => {
-    for (const buttons of [BTN.HIGH | BTN.LOW, BTN.SPECIAL]) {
+  it("with fury, Circle + Triangle (or R2) starts the style's special and spends fury", () => {
+    for (const buttons of [BTN.HIGH | BTN.GRAB, BTN.SPECIAL]) {
       const style = styleWith("spSpin");
       const w = duel(1.0, [style, 0]);
       w.fighters[0].fury = FURY.max;
@@ -126,7 +117,7 @@ describe("fury and specials", () => {
     w.fighters[0].fury = FURY.cost;
     tap(w, 0, BTN.HIGH);
     expect(w.fighters[0].move).toBe("jab1");
-    tap(w, 0, BTN.LOW);
+    tap(w, 0, BTN.GRAB);
     expect(w.fighters[0].move).toBe("spBlade");
   });
 

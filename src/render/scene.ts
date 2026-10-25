@@ -343,6 +343,33 @@ export class Scene {
           this.shake = Math.min(1, this.shake + 0.3);
           this.hype = Math.min(1, this.hype + 0.2);
           break;
+        case "launch": {
+          // up it goes: a ring at the feet, and the crowd likes it
+          const d = fs[q.b ?? -1];
+          if (d) this.fx.ring(at(d, 0.05), 0xffd060, 1.4, 0.3, true);
+          this.hype = Math.min(1, this.hype + 0.15);
+          break;
+        }
+        case "airgrab": {
+          const d = fs[q.b ?? -1];
+          if (d) this.fx.ring(at(d, d.z + 0.8), 0xffd060, 0.8, 0.2);
+          this.shake = Math.min(1, this.shake + 0.2);
+          this.hype = Math.min(1, this.hype + 0.3);
+          break;
+        }
+        case "crunch": {
+          // a flying body into a wall, a prop or a fighter: debris, and the camera takes the blow with it
+          const f = fs[q.a];
+          if (!f) break;
+          const dmg = q.dmg ?? 6;
+          this.fx.burst(at(f, Math.max(0.5, f.z + 0.6)), { count: 18, speed: 2.4, color: 0x8a8070, life: 0.6, gravity: 3, up: 0.8, dust: true });
+          this.fx.ring(at(f, Math.max(0.5, f.z + 0.6)), 0xffffff, 0.9, 0.18);
+          this.impact.hit(toV(-f.slideX, -f.slideY).normalize(), dmg, dmg >= 8);
+          this.shake = Math.min(1, this.shake + 0.35);
+          this.hype = Math.min(1, this.hype + 0.2);
+          break;
+        }
+        case "bounce":
         case "land": {
           const f = fs[q.a];
           if (!f) break;
@@ -547,7 +574,7 @@ export class Scene {
     let n = 0;
     s.fighters.forEach((f, i) => {
       const v = this.fighters[i];
-      v.root.position.copy(toV(f.x, f.y));
+      v.root.position.copy(toV(f.x, f.y, f.z)); // up in a juggle
       v.root.rotation.y = yaw(f.facing);
       const car = f.state === "driving" ? s.arena.vehicles[f.vehicle] : undefined;
       if (car) {
@@ -557,7 +584,7 @@ export class Scene {
       }
       if (f.state === "falling") {
         // over the edge: a long drop
-        v.root.position.y -= 0.5 * 0.012 * f.t * f.t;
+        v.root.position.y -= 0.5 * 0.006 * f.t * f.t; // floaty, like the juggles
       }
       syncLimbs(v, f);
       if (this.gore) {

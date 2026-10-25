@@ -550,7 +550,7 @@ export const familyOf = (style: number): Family => FAMILY_OF[STYLES[style]?.styl
 /** The clip a style throws a move with, or null for the moves drawn by formula (the specials). */
 export function clipFor(style: number, move: string): Clip | null {
   const f = FAMILIES[familyOf(style)] as Record<string, Clip>;
-  return f[move] ?? SPECIALS[move] ?? REACTIONS[move] ?? null;
+  return f[move] ?? SPECIALS[move === "dashStrike" ? "spCharge" : move] ?? REACTIONS[move] ?? null;
 }
 
 // ------------------------------------------------------------ the specials
