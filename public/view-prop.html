@@ -220,11 +220,11 @@
   </div>
 
   <div class="metrics-panel" id="metrics-panel">
-    <div>Triangles: <span id="m-tris">4,992</span></div>
-    <div>File Size: <span id="m-size">407 KB</span></div>
+    <div>Triangles: <span id="m-tris">6,016</span></div>
+    <div>File Size: <span id="m-size">420 KB</span></div>
     <div>Topology: <span id="m-solid" style="color: #48bb78;">Clean Quad-based Shell</span></div>
     <div>Texture: <span id="m-vol">2048×2048 PBR Albedo Map</span></div>
-    <div>Badge & Felt: <span id="m-back" style="color: #48bb78;">Sharp Brunwick Star & Wool</span></div>
+    <div>Badge & Felt: <span id="m-back" style="color: #48bb78;">Right-Side Up Star & Wool</span></div>
   </div>
 
   <div class="hint-panel">
@@ -233,7 +233,7 @@
 
   <model-viewer 
     id="viewer"
-    src="./models/props/winch_custodian_helmet_clean_pbr.glb" 
+    src="./models/props/winch_custodian_helmet_clean_pbr.glb?v=2" 
     alt="Custodian Helmet 3D Model" 
     auto-rotate 
     camera-controls 
@@ -250,14 +250,14 @@
 
     const models = {
       clean: {
-        src: './models/props/winch_custodian_helmet_clean_pbr.glb',
-        desc: 'Production PBR Custodian Helmet (UV-Unwrapped, 2048² Texture, Real Brunswick Star)',
-        tris: '4,992',
-        size: '407 KB',
+        src: './models/props/winch_custodian_helmet_clean_pbr.glb?v=2',
+        desc: 'Production PBR Custodian Helmet (UV-Unwrapped, 2048² Texture, Right-Side Up Brunswick Star)',
+        tris: '6,016',
+        size: '420 KB',
         solid: 'Clean Quad-based Shell',
         solidColor: '#48bb78',
         vol: '2048×2048 PBR Albedo Map',
-        back: 'Sharp Brunswick Star & Wool',
+        back: 'Right-Side Up Star & Wool',
         backColor: '#48bb78'
       },
       ultra: {
