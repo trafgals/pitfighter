@@ -55,4 +55,6 @@ export const STYLES: Style[] = CHARACTERS.map((c) => ({
   accent: num(c.accent),
   ...c.stats,
   special: c.special,
+  specialName: c.specialName,
+  airGrab: c.airGrab,
 }));

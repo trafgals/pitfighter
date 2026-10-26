@@ -71,7 +71,7 @@ Pitfighter changes seven things (`src/sim/moves.ts`, `tests/tweaks.test.ts`, `te
 - **Free-form limbs.** Every limb that grows rolls its own traits
   (`src/sim/limbs.ts`): its mass, length, how fast it whips, how wide it
   swings, and what it hits with (a fist, a claw, a hoof, a club or a spike).
-  The style leans the roll, so a Power arm runs heavy and a Speed arm fast, but
+  The style leans the roll, so a Mighty arm runs heavy and a Kung Fu arm fast, but
   no two limbs are alike. The strikes a fighter throws are generated from the
   limb that throws them, and a string trades hands, so a body stitched together
   from torn-off parts fights like nothing else. A transplant keeps its roll; a
@@ -106,37 +106,51 @@ it away. A limb that lands in the hellfire burns, and grows back 12 s later.
 
 ## Fighters
 
-There is one fighter per *Urban Reign* fighting style, 21 in all. The style
-names come from the game's own message table, ids 1347–1367.
+The pit is the Sump of Old Sorrow, a city where it has rained for ninety-one
+years. Its finest ladies and gentlemen beat one another to death there for
+charity, in their best clothes. There are twelve fighters, each on one of the
+*Urban Reign* fighting styles (the style names come from the game's own message
+table, ids 1347–1367). Each fighter's limbs are made in a craft of their own,
+which sets how they look and how every hit sounds.
 
-| Style | Fighter | Style | Fighter |
+| Style | Fighter | Limbs | Special |
 |---|---|---|---|
-| All-Round | Dale Damnation | Mighty | Hellmountain |
-| Power | Brimstone Bruno | Submission | Choke Chimera |
-| Street | Gutter Gus | Military | Sergeant Sulphur |
-| Karate | Sensei Smoulder | Capoeira | Cinder Ginga |
-| Wrestling | Big Lou Cipher | Tae Kwon Do | Hellkick Hana |
-| Muay Thai | Eight-Limbed Ash | Samurai Sword | Ronin of Gehenna |
-| Boxing | Knuckles Inferno | Master | The Old Devil |
-| Rush | Rage Reaper | Gun | Hellfire Flick |
-| Speed | Quickfire Imp | Martial Arts | Brother Blaze |
-| Kung Fu | Crimson Crane | Judo Based | Ashen Judoka |
-| | | Amateur | Fresh Soul Kevin |
+| All-Round | Constable Obadiah Winch | Clockwork Brass | THE RIOT ACT (flurry) |
+| Mighty | Mr. Hezekiah Smelt | Foundry Iron | FULL STEAM AHEAD (charge) |
+| Street | Nell Sluice | Drainpipe Lead | THE SLUICE GATE (charge) |
+| Karate | Matron Prudence Kilnworth | Kiln Porcelain | THE ROUNDS (spin) |
+| Wrestling | The Great Bartholomew Mule | Grafted Bear | THE DANCING BEAR (slam) |
+| Muay Thai | Bosun Absalom Rook | Ship's Oak | THE CAT O' NINE (flurry) |
+| Boxing | Lady Hester Bulwark | Hydraulic Steel | A HUNDRED POUNDS TO THE INCH (flurry) |
+| Kung Fu | Professor Emmeline Thrip | Mantis Chitin | THE WHIRLING MANTIS (spin) |
+| Tae Kwon Do | Columbine Vesper | Aether Glass | THE FOOTLIGHTS (fire) |
+| Judo Based | Mr. Mortimer Crape | Jet and Whalebone | INTERMENT (slam) |
+| Samurai Sword | Sir Peregrine Ashby-Lisle, Bt. | Silver and Ebony | A THOUSAND PARDONS (blade) |
+| Amateur | Mr. Cuthbert Inkle | Pawnshop Patchwork | THE OVERDRAFT (charge) |
 
 A style is a set of modifiers on the shared frame data: tempo, reach, string
 length, and damage split between punches, kicks and grapples. Every fighter
 keeps the same core feel. See `src/sim/styles.ts`.
 
-Each style also has a special, paid for with fury:
+Each fighter also has a special, paid for with fury. It is one of six shapes,
+and each fighter calls theirs by its own name:
 
-| Special | Styles |
-|---|---|
-| Flurry (four quick hits) | All-Round, Street, Muay Thai, Boxing, Martial Arts |
-| Charge (a dash through the crowd) | Power, Rush, Military, Amateur |
-| Spin (hits all round) | Karate, Speed, Kung Fu, Capoeira, Tae Kwon Do |
-| Slam (a low shockwave) | Wrestling, Mighty, Submission, Judo Based |
-| Blade (a long sweep) | Samurai Sword, Master |
-| Fire (a long jet) | Gun |
+| Shape | What it does | Fighters |
+|---|---|---|
+| Flurry | four quick hits | Winch, Rook, Bulwark |
+| Charge | a dash through the crowd | Smelt, Sluice, Inkle |
+| Spin | hits all round | Kilnworth, Thrip |
+| Slam | a low shockwave | Mule, Crape |
+| Blade | a long sweep | Sir Peregrine |
+| Fire | a long jet | Vesper |
+
+Everything about a fighter is in one file, `src/data/characters.json`: the
+numbers the sim plays, and the whole design for the moves, looks and sounds
+still to be built. That design covers every move in the full *Urban Reign* verb
+set, the crowd (the Gallery, which throws weapons and spare limbs into the pit
+when a fighter appeals to it after a good blow), each fighter's Tincture (the
+other self it lets out), their art and their sound cues. `systems` says which
+of those verbs the game has today. See [docs/characters.md](docs/characters.md).
 
 ## Combat feel
 
@@ -162,9 +176,9 @@ Each style also has a special, paid for with fury:
   over the top, flat on its back for the landing. Its limbs feel every change in
   the body's speed (the launch, each pop, the bounce), lag behind and whip after
   it, and float in between, falling with the body (`tests/airborne.test.ts`).
-- **Silhouettes:** every fighter has its own size, horns, tail and gear (a
-  straw hat, a stetson, boxing gloves, a beard, spiked pauldrons, a work
-  lanyard), so they read apart from across the pit before any colour.
+- **Silhouettes:** every fighter has its own size and gear (a top hat, a
+  constable's helmet, mutton chops, a monocle, a stovepipe, piston forearms),
+  so they read apart from across the pit before any colour.
 
 ## Controls
 

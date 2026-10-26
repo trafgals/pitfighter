@@ -1,8 +1,9 @@
 // The shapes the character design must have.
 //
-// The design itself lives in `src/data/characters.json`: one entry per fighter,
-// and the frame data of the six specials. This file is the contract that
-// JSON has to meet, and it holds no imports at all, so anything may read it.
+// The design itself lives in `src/data/characters.json`: the world, the limb
+// crafts, the move vocabulary, the systems, the frame data of the six specials,
+// and one entry per fighter. This file is the contract that JSON has to meet,
+// and it holds no imports at all, so anything may read it.
 //
 // Nothing here is behaviour. The game reads the design through
 // `src/data/characters.ts`; the tools that generate assets from it read the
@@ -43,9 +44,9 @@ export interface Special {
 }
 
 /** The shape of a fighter's horns. */
-export type Horns = "goat" | "bull" | "ram" | "long" | "swept" | "nubs" | "spikes" | "broken" | "crown";
+export type Horns = "none" | "goat" | "bull" | "ram" | "long" | "swept" | "nubs" | "spikes" | "broken" | "crown";
 /** The shape of a fighter's tail. */
-export type Tail = "spade" | "long" | "stub" | "barbed";
+export type Tail = "none" | "spade" | "long" | "stub" | "barbed";
 /** A piece of gear a fighter wears. */
 export type Gear =
   | "mohawk"
@@ -62,11 +63,23 @@ export type Gear =
   | "lanyard"
   | "obi"
   | "tusks"
-  | "title";
+  | "title"
+  | "custodian"
+  | "whiskers"
+  | "pistons"
+  | "flatcap"
+  | "nursecap"
+  | "tophat"
+  | "monocle"
+  | "stovepipe"
+  | "bowler"
+  | "goggles"
+  | "weepers"
+  | "moustache";
 
 /** What makes a fighter read as itself from across the pit, before any colour. */
 export interface Kit {
-  /** the body's scale (1: an ordinary devil) */
+  /** the body's scale (1: an ordinary fighter) */
   size: number;
   horns: Horns;
   tail: Tail;
@@ -105,12 +118,171 @@ export interface TextureIdea {
   colour: string;
 }
 
-/** A fighter's textures: the hide, the cloth and the face. */
+/** A fighter's textures: the hide, the cloth, the face, and the craft of its limbs. */
 export interface Texture {
   seed: number;
   skin: TextureIdea;
   cloth: TextureIdea;
   face: TextureIdea;
+  limb: TextureIdea;
+}
+
+/** How an air grab ends (src/sim/airgrabs.ts). */
+export type AirGrabEnd = "down" | "bounce" | "throw" | "limb";
+
+/** A fighter's air grab: frames from the catch. */
+export interface AirGrab {
+  name: string;
+  dur: number; // the attacker's frames, catch to recovered
+  slam: number; // the frame the victim hits the floor
+  lift: number; // metres the victim is carried up before the slam
+  dmg: number;
+  end: AirGrabEnd;
+  dist?: number; // throw: how far
+}
+
+// ---------------------------------------------------------------- the moveset
+//
+// Every move a fighter has, written as design: what it is, where it sits in the
+// vocabulary (its archetype, whose frame envelope it must keep to), and how it
+// looks and sounds. Most of it is not in the game yet: `systems` says which
+// verbs are, and `sim` on a move names the sim move that stands in for it today.
+
+/** A strike: frames are 60 Hz, `startup` the first active frame counted from 0. */
+export interface StrikeDesign {
+  id: string;
+  name: string;
+  input: string;
+  archetype: string; // a key of vocabulary.strikes
+  limb: string;
+  height: "high" | "mid" | "low";
+  startup: number;
+  active: number;
+  recovery: number;
+  dmg: number;
+  hits?: number;
+  knockdown?: boolean;
+  launch?: boolean;
+  target?: "head" | "body" | "legs"; // the regional strikes
+  sim?: string; // the sim move (src/sim/moves.ts) that plays it today
+  anim: string;
+  sfx: string;
+  vfx: string;
+}
+
+/** A grapple-class action: one duration, catch to recovered. */
+export interface GrappleDesign {
+  id: string;
+  name: string;
+  input: string;
+  archetype: string; // a key of vocabulary.grapples
+  duration: number;
+  dmg: number;
+  end?: "throw"; // the throw flings them away rather than dropping them
+  sim?: string;
+  anim: string;
+  sfx: string;
+  vfx?: string;
+}
+
+/** Everything a fighter can do: the full Urban Reign verb set, in Pitfighter's buttons. */
+export interface Moveset {
+  high: StrikeDesign[]; // the high string, opener to finisher: stats.string + 1 strikes
+  low: StrikeDesign[]; // the low string: three strikes
+  branches: StrikeDesign[];
+  regional: StrikeDesign[];
+  dash: StrikeDesign[];
+  dive: StrikeDesign[];
+  down: StrikeDesign[];
+  headbutt: StrikeDesign[];
+  double: StrikeDesign[];
+  hold: GrappleDesign;
+  clinch: GrappleDesign[];
+  throws: GrappleDesign[]; // △, ← △, ↓ △, → △ in the hold
+  back: GrappleDesign;
+  wall: GrappleDesign;
+  grappleDash: GrappleDesign;
+  diveGrab: GrappleDesign;
+  ground: GrappleDesign;
+  deflects: GrappleDesign[];
+  special: { name: string; sim: SpecialId; anim: string; sfx: string; vfx: string };
+  arts: (StrikeDesign | GrappleDesign)[]; // R2 + ↑, →, ↓, ←
+  status: { name: string; drink: number; lasts: number; anim: string; effects: { note: string } & Record<string, number | string>; look: string; voice: string };
+  duo: { partner: string; name: string; archetype: "cinematic"; duration: number; dmg: number; anim: string };
+  weapons: { affinity: string[]; signature: string; style: string };
+  appeal: { anim: string; line: string; gift: string };
+}
+
+/** A colour, named. */
+export interface Swatch {
+  hex: string;
+  name: string;
+}
+
+/** A sound to generate, in tools/sfx/prompts.json's shape. */
+export interface SoundCue {
+  id: string;
+  category: string;
+  note: string;
+  prompt: string;
+  seed: number;
+}
+
+/** Who a fighter is: everything the writers, the artists and the voice need. */
+export interface Profile {
+  age: number;
+  from: string;
+  trade: string;
+  height: string;
+  bio: string;
+  personality: string;
+  manners: string;
+  violence: string;
+  otherSelf: string;
+  rivals: { id: string; why: string }[];
+  partner: { id: string; why: string };
+  quotes: { intro: string; appeal: string; victory: string; defeat: string };
+}
+
+/** The craft a fighter's limbs are made in (`crafts`), and how it sits on this body. */
+export interface Limbs {
+  craft: string;
+  arms: string;
+  legs: string;
+  tip: string;
+  lean: { mass: number; length: number; swing: number };
+  wear: string;
+}
+
+/** The brief for the artists. */
+export interface Art {
+  silhouette: string;
+  build: string;
+  palette: { primary: Swatch; secondary: Swatch; metal: Swatch; light: Swatch };
+  costume: string;
+  alternates: { name: string; note: string }[];
+  limbs: string;
+  face: string;
+  hair: string;
+  gore: string;
+  vfx: string[];
+  idle: string;
+  intro: string;
+  victory: string;
+  defeat: string;
+  portrait: string;
+}
+
+/** The brief for the voice, the sound and the music. */
+export interface Sound {
+  voice: { casting: string; accent: string; texture: string };
+  lines: { intro: string[]; appeal: string[]; hit: string[]; hurt: string[]; special: string; tincture: string; victory: string[]; defeat: string };
+  efforts: string;
+  footsteps: string;
+  foley: string;
+  impact: { craft: string; nuance: string };
+  music: { title: string; brief: string; tempo: number; instruments: string[] };
+  cues: SoundCue[];
 }
 
 /** One fighter, whole. */
@@ -120,12 +292,23 @@ export interface Character {
   style: string; // the Urban Reign style label
   blurb: string;
   body: string; // the body colour, as "#rrggbb"
-  accent: string; // the horns and trim
+  accent: string; // the trim
   family: Family;
   special: SpecialId;
+  specialName: string; // what the HUD shouts when this fighter does its special
   stats: Stats;
   kit: Kit;
   look: Look;
+  airGrab: AirGrab;
+  short: string; // the name on the HUD
+  title: string;
+  lineage: string[]; // the Urban Reign styles it stands for
+  ratings: { power: number; speed: number; reach: number; grapple: number; defence: number; technique: number; difficulty: number }; // 1..5
+  profile: Profile;
+  limbs: Limbs;
+  moves: Moveset;
+  art: Art;
+  sound: Sound;
   texture: Texture;
 }
 
@@ -135,7 +318,7 @@ export interface Style {
   name: string;
   blurb: string;
   color: number; // body colour
-  accent: number; // horns / trim
+  accent: number; // trim
   speed: number;
   startup: number;
   punch: number;
@@ -146,4 +329,6 @@ export interface Style {
   torso: number;
   grabReach: number;
   special: SpecialId;
+  specialName: string;
+  airGrab: AirGrab;
 }

@@ -74,7 +74,7 @@ describe("crowd AI", () => {
   });
 
   it("bots spend fury on their specials", () => {
-    const w = new World({ seed: 11, styles: [0, 3, 4, 15, 17, 1, 6, 9], humans: Array(8).fill(false) });
+    const w = new World({ seed: 11, styles: [0, 3, 4, 10, 11, 1, 6, 9], humans: Array(8).fill(false) });
     const bots = w.fighters.map((f) => new Bot(f.id, 11));
     let specials = 0;
     for (let i = 0; i < 60 * 90 && w.s.winner < 0; i++) {

@@ -235,16 +235,16 @@ describe("crowd protection", () => {
 });
 
 describe("styles", () => {
-  it("there is one fighter per Urban Reign style (21)", () => {
-    expect(STYLES.length).toBe(21);
-    expect(new Set(STYLES.map((s) => s.style)).size).toBe(21);
-    expect(new Set(STYLES.map((s) => s.name)).size).toBe(21);
+  it("there are twelve fighters, each with an Urban Reign style of its own", () => {
+    expect(STYLES.length).toBe(12);
+    expect(new Set(STYLES.map((s) => s.style)).size).toBe(12);
+    expect(new Set(STYLES.map((s) => s.name)).size).toBe(12);
   });
 
-  it("style tempo changes startup: Speed is faster than Mighty", () => {
-    const w = new World({ seed: 1, styles: [8, 10], limbs: false });
-    expect(STYLES[8].style).toBe("Speed");
-    expect(STYLES[10].style).toBe("Mighty");
+  it("style tempo changes startup: Kung Fu is faster than Mighty", () => {
+    const w = new World({ seed: 1, styles: [7, 1], limbs: false });
+    expect(STYLES[7].style).toBe("Kung Fu");
+    expect(STYLES[1].style).toBe("Mighty");
     expect(w.eff(w.fighters[0], "jab1").startup).toBeLessThan(w.eff(w.fighters[1], "jab1").startup);
   });
 

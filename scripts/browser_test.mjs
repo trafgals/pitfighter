@@ -90,7 +90,7 @@ async function main() {
   await page.waitForFunction(() => window.__game && window.__game.mode === "select", { timeout: 10_000 });
   check(true, "page boots to the character select");
   const cards = await page.$$eval(".sc", (els) => els.length);
-  check(cards === 21, `select shows one fighter per Urban Reign style (${cards})`);
+  check(cards === 12, `select shows the twelve fighters (${cards})`);
   const title = await page.evaluate(() => ({ doc: document.title, h1: document.querySelector("#select h1")?.textContent }));
   check(title.doc === "Pitfighter" && title.h1 === "PITFIGHTER", `the game is called Pitfighter (${JSON.stringify(title)})`);
   const types = await page.$$eval(".stage", (els) => els.map((e) => ({ id: e.dataset.type, on: e.classList.contains("on") })));

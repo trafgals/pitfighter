@@ -117,7 +117,7 @@ export class Hud {
       else if (e.kind === "detach" && e.part) this.say(`${nm(e.a)} LOST ${e.part.startsWith("arm") ? "AN ARM" : "A LEG"}!`, 50);
       else if (e.kind === "crowd") this.say(`${nm(e.a)} ESCAPES THE DOGPILE`, 50);
       else if (e.kind === "airgrab") this.say(`${nm(e.a)} ${e.what}!`, 55);
-      else if (e.kind === "special") this.say(`${nm(e.a)} ${World.specialName(STYLES[s.fighters[e.a].style].special)}!`, 50);
+      else if (e.kind === "special") this.say(`${nm(e.a)} ${World.specialName(s.fighters[e.a])}!`, 50);
       else if (e.kind === "win") this.say(winLine(s.stage, e.a), 100000);
     }
     if (this.bannerT > 0 && --this.bannerT === 0) this.banner.classList.remove("show");

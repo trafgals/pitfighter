@@ -522,7 +522,7 @@ export function buildBody(f: Fighter): Body {
     an.add(foot, sole);
   }
 
-  // the horns, the devil's tail, and the style's gear
+  // the horns and tail if the style has them, and its gear
   head.add(buildHorns(kit.horns, accent));
   const tail = buildTail(kit.tail, accent);
   hips.add(tail);

@@ -110,8 +110,8 @@ describe("limbs", () => {
 
   it("Circle over someone else's limb puts it on you, and it fights like its first owner", () => {
     const boxer = STYLES.findIndex((s) => s.style === "Boxing");
-    const dale = STYLES.findIndex((s) => s.style === "All-Round");
-    const w = duel(4, [dale, boxer]);
+    const constable = STYLES.findIndex((s) => s.style === "All-Round");
+    const w = duel(4, [constable, boxer]);
     const [a, b] = w.fighters;
     const jab = w.eff(a, "jab1").dmg;
     chop(w, a, "armR", 1);
@@ -129,8 +129,8 @@ describe("limbs", () => {
     expect(a.parts.armR.style).toBe(boxer);
     expect(w.s.pickups).toHaveLength(0);
     // one boxer's arm and one of Dale's: the punches land halfway between the two
-    const both = (STYLES[dale].punch + STYLES[boxer].punch) / 2;
-    expect(w.eff(a, "jab1").dmg).toBeCloseTo((jab / STYLES[dale].punch) * both, 5);
+    const both = (STYLES[constable].punch + STYLES[boxer].punch) / 2;
+    expect(w.eff(a, "jab1").dmg).toBeCloseTo((jab / STYLES[constable].punch) * both, 5);
     // and the boxer grows a new one
     expect(b.parts.armL.regrow).toBeGreaterThan(0);
   });

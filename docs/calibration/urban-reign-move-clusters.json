@@ -1,0 +1,1518 @@
+{
+ "source": "docs/calibration/urban-reign-movesets.json, clustered by tools/ur-calibration/clusters.cjs",
+ "frames": "60 Hz; startup is the first active frame counted from 0, length the whole action",
+ "method": "every strike action (state 6) with a hit list, split by what carries the first hit (arm, leg, or body) and by its place in the strike graph (opener, link, ender, lone; two-hit strikes on their own), then k-means on the startup, the length and the recovery within each group, adding a cluster only while it explains 35% of what is left",
+ "strikes": 1909,
+ "setAside": {
+  "noHit": 15,
+  "sentinel": 22,
+  "frameZero": 40,
+  "cinematic": 8
+ },
+ "distinctMovesets": 71,
+ "clusters": [
+  {
+   "id": "arm-ender-measured",
+   "group": "arm ender",
+   "count": 119,
+   "inMovesets": 30,
+   "movesets": 36,
+   "startup": {
+    "p10": 13,
+    "p50": 18,
+    "p90": 26,
+    "min": 1,
+    "max": 29
+   },
+   "length": {
+    "p10": 51,
+    "p50": 65,
+    "p90": 75,
+    "min": 31,
+    "max": 81
+   },
+   "recovery": {
+    "p50": 46
+   },
+   "active": {
+    "p50": 3
+   },
+   "limb": {
+    "rear arm": 87,
+    "lead arm": 31,
+    "both arms": 1
+   },
+   "height": {
+    "high": 66,
+    "mid": 52,
+    "low": 1
+   },
+   "fromGrapple": 6,
+   "slots": {
+    "neutral": 27,
+    "regional R": 27,
+    "regional L": 27
+   },
+   "examples": [
+    1391,
+    2321,
+    1153,
+    2032,
+    2354,
+    2563
+   ]
+  },
+  {
+   "id": "arm-ender-committed",
+   "group": "arm ender",
+   "count": 56,
+   "inMovesets": 12,
+   "movesets": 16,
+   "startup": {
+    "p10": 27,
+    "p50": 33,
+    "p90": 59,
+    "min": 20,
+    "max": 73
+   },
+   "length": {
+    "p10": 83,
+    "p50": 91,
+    "p90": 116,
+    "min": 77,
+    "max": 135
+   },
+   "recovery": {
+    "p50": 57
+   },
+   "active": {
+    "p50": 4
+   },
+   "limb": {
+    "rear arm": 33,
+    "both arms": 12,
+    "lead arm": 11
+   },
+   "height": {
+    "high": 27,
+    "mid": 26,
+    "low": 3
+   },
+   "fromGrapple": 1,
+   "slots": {
+    "neutral": 11,
+    "regional R": 11,
+    "regional L": 11,
+    "slot 4": 2,
+    "slot 3": 1
+   },
+   "examples": [
+    2726,
+    2364,
+    1805,
+    2974,
+    1422,
+    1488
+   ]
+  },
+  {
+   "id": "arm-ender-committed-2",
+   "group": "arm ender",
+   "count": 12,
+   "inMovesets": 1,
+   "movesets": 2,
+   "startup": {
+    "p10": 91,
+    "p50": 116,
+    "p90": 128,
+    "min": 91,
+    "max": 128
+   },
+   "length": {
+    "p10": 140,
+    "p50": 165,
+    "p90": 187,
+    "min": 140,
+    "max": 187
+   },
+   "recovery": {
+    "p50": 50
+   },
+   "active": {
+    "p50": 6
+   },
+   "limb": {
+    "rear arm": 5,
+    "both arms": 4,
+    "lead arm": 3
+   },
+   "height": {
+    "mid": 6,
+    "low": 3,
+    "high": 3
+   },
+   "fromGrapple": 0,
+   "slots": {
+    "neutral": 1,
+    "regional R": 1,
+    "regional L": 1
+   },
+   "examples": [
+    2181,
+    1533,
+    1536,
+    1540,
+    2173,
+    2290
+   ]
+  },
+  {
+   "id": "arm-link-measured",
+   "group": "arm link",
+   "count": 263,
+   "inMovesets": 98,
+   "movesets": 52,
+   "startup": {
+    "p10": 10,
+    "p50": 15,
+    "p90": 20,
+    "min": 1,
+    "max": 27
+   },
+   "length": {
+    "p10": 41,
+    "p50": 53,
+    "p90": 62,
+    "min": 16,
+    "max": 66
+   },
+   "recovery": {
+    "p50": 39
+   },
+   "active": {
+    "p50": 3
+   },
+   "limb": {
+    "rear arm": 162,
+    "lead arm": 100,
+    "both arms": 1
+   },
+   "height": {
+    "high": 143,
+    "mid": 119,
+    "low": 1
+   },
+   "fromGrapple": 0,
+   "slots": {
+    "neutral": 92,
+    "regional R": 87,
+    "regional L": 87
+   },
+   "examples": [
+    1392,
+    1389,
+    1390,
+    2108,
+    2318,
+    2319
+   ]
+  },
+  {
+   "id": "arm-link-heavy",
+   "group": "arm link",
+   "count": 78,
+   "inMovesets": 27,
+   "movesets": 22,
+   "startup": {
+    "p10": 18,
+    "p50": 24,
+    "p90": 31,
+    "min": 15,
+    "max": 58
+   },
+   "length": {
+    "p10": 70,
+    "p50": 83,
+    "p90": 113,
+    "min": 68,
+    "max": 113
+   },
+   "recovery": {
+    "p50": 56
+   },
+   "active": {
+    "p50": 3
+   },
+   "limb": {
+    "rear arm": 51,
+    "lead arm": 15,
+    "both arms": 12
+   },
+   "height": {
+    "high": 50,
+    "mid": 27,
+    "low": 1
+   },
+   "fromGrapple": 0,
+   "slots": {
+    "neutral": 27,
+    "regional R": 23,
+    "regional L": 23,
+    "slot 4": 4
+   },
+   "examples": [
+    2031,
+    2089,
+    2169,
+    2362,
+    2363,
+    1802
+   ]
+  },
+  {
+   "id": "arm-link-committed",
+   "group": "arm link",
+   "count": 25,
+   "inMovesets": 0,
+   "movesets": 0,
+   "startup": {
+    "p10": 24,
+    "p50": 51,
+    "p90": 89,
+    "min": 20,
+    "max": 117
+   },
+   "length": {
+    "p10": 140,
+    "p50": 152,
+    "p90": 187,
+    "min": 135,
+    "max": 187
+   },
+   "recovery": {
+    "p50": 101
+   },
+   "active": {
+    "p50": 3
+   },
+   "limb": {
+    "rear arm": 15,
+    "lead arm": 8,
+    "both arms": 2
+   },
+   "height": {
+    "mid": 18,
+    "high": 4,
+    "low": 3
+   },
+   "fromGrapple": 0,
+   "slots": {},
+   "examples": [
+    1535,
+    1538,
+    1539,
+    1978,
+    2175,
+    2183
+   ]
+  },
+  {
+   "id": "arm-lone-measured",
+   "group": "arm lone",
+   "count": 120,
+   "inMovesets": 20,
+   "movesets": 24,
+   "startup": {
+    "p10": 13,
+    "p50": 16,
+    "p90": 21,
+    "min": 7,
+    "max": 29
+   },
+   "length": {
+    "p10": 52,
+    "p50": 61,
+    "p90": 67,
+    "min": 31,
+    "max": 71
+   },
+   "recovery": {
+    "p50": 43
+   },
+   "active": {
+    "p50": 3
+   },
+   "limb": {
+    "rear arm": 82,
+    "lead arm": 34,
+    "both arms": 4
+   },
+   "height": {
+    "high": 64,
+    "mid": 52,
+    "low": 4
+   },
+   "fromGrapple": 0,
+   "slots": {
+    "slot 3": 10,
+    "neutral": 6,
+    "regional R": 4,
+    "regional L": 4
+   },
+   "examples": [
+    2369,
+    1249,
+    1741,
+    2100,
+    3064,
+    3065
+   ]
+  },
+  {
+   "id": "arm-lone-heavy",
+   "group": "arm lone",
+   "count": 65,
+   "inMovesets": 3,
+   "movesets": 2,
+   "startup": {
+    "p10": 15,
+    "p50": 25,
+    "p90": 39,
+    "min": 15,
+    "max": 41
+   },
+   "length": {
+    "p10": 72,
+    "p50": 84,
+    "p90": 91,
+    "min": 59,
+    "max": 95
+   },
+   "recovery": {
+    "p50": 55
+   },
+   "active": {
+    "p50": 4
+   },
+   "limb": {
+    "rear arm": 48,
+    "lead arm": 11,
+    "both arms": 6
+   },
+   "height": {
+    "high": 44,
+    "mid": 16,
+    "low": 5
+   },
+   "fromGrapple": 0,
+   "slots": {
+    "neutral": 2,
+    "regional R": 1,
+    "regional L": 1
+   },
+   "examples": [
+    1486,
+    1487,
+    2102,
+    1210,
+    1247,
+    1261
+   ]
+  },
+  {
+   "id": "arm-lone-committed",
+   "group": "arm lone",
+   "count": 31,
+   "inMovesets": 0,
+   "movesets": 0,
+   "startup": {
+    "p10": 51,
+    "p50": 57,
+    "p90": 61,
+    "min": 39,
+    "max": 75
+   },
+   "length": {
+    "p10": 105,
+    "p50": 117,
+    "p90": 137,
+    "min": 98,
+    "max": 150
+   },
+   "recovery": {
+    "p50": 59
+   },
+   "active": {
+    "p50": 4
+   },
+   "limb": {
+    "rear arm": 26,
+    "both arms": 5
+   },
+   "height": {
+    "mid": 18,
+    "high": 13
+   },
+   "fromGrapple": 0,
+   "slots": {},
+   "examples": [
+    1439,
+    1441,
+    1531,
+    1541,
+    1772,
+    1834
+   ]
+  },
+  {
+   "id": "arm-opener-quick",
+   "group": "arm opener",
+   "count": 345,
+   "inMovesets": 119,
+   "movesets": 58,
+   "startup": {
+    "p10": 11,
+    "p50": 11,
+    "p90": 19,
+    "min": 10,
+    "max": 36
+   },
+   "length": {
+    "p10": 41,
+    "p50": 52,
+    "p90": 68,
+    "min": 26,
+    "max": 86
+   },
+   "recovery": {
+    "p50": 40
+   },
+   "active": {
+    "p50": 3
+   },
+   "limb": {
+    "rear arm": 175,
+    "lead arm": 168,
+    "both arms": 2
+   },
+   "height": {
+    "high": 264,
+    "mid": 76,
+    "low": 5
+   },
+   "fromGrapple": 0,
+   "slots": {
+    "regional L": 42,
+    "regional R": 39,
+    "neutral": 33,
+    "diving": 4,
+    "slot 4": 2,
+    "slot 3": 1
+   },
+   "examples": [
+    1395,
+    1396,
+    1388,
+    2725,
+    2030,
+    2088
+   ]
+  },
+  {
+   "id": "arm-opener-measured",
+   "group": "arm opener",
+   "count": 22,
+   "inMovesets": 0,
+   "movesets": 0,
+   "startup": {
+    "p10": 15,
+    "p50": 20,
+    "p90": 57,
+    "min": 12,
+    "max": 117
+   },
+   "length": {
+    "p10": 92,
+    "p50": 116,
+    "p90": 187,
+    "min": 91,
+    "max": 187
+   },
+   "recovery": {
+    "p50": 93
+   },
+   "active": {
+    "p50": 5
+   },
+   "limb": {
+    "rear arm": 15,
+    "both arms": 6,
+    "lead arm": 1
+   },
+   "height": {
+    "mid": 15,
+    "high": 7
+   },
+   "fromGrapple": 0,
+   "slots": {},
+   "examples": [
+    1269,
+    1348,
+    1382,
+    1524,
+    1534,
+    1537
+   ]
+  },
+  {
+   "id": "body-ender-heavy",
+   "group": "body ender",
+   "count": 15,
+   "inMovesets": 3,
+   "movesets": 3,
+   "startup": {
+    "p10": 16,
+    "p50": 25,
+    "p90": 41,
+    "min": 12,
+    "max": 96
+   },
+   "length": {
+    "p10": 38,
+    "p50": 76,
+    "p90": 81,
+    "min": 7,
+    "max": 160
+   },
+   "recovery": {
+    "p50": 50
+   },
+   "active": {
+    "p50": 4
+   },
+   "limb": {
+    "trunk": 11,
+    "body": 4
+   },
+   "height": {
+    "high": 12,
+    "mid": 3
+   },
+   "fromGrapple": 0,
+   "slots": {
+    "neutral": 2,
+    "regional R": 2,
+    "regional L": 2,
+    "slot 3": 1
+   },
+   "examples": [
+    1279,
+    1775,
+    2208,
+    1147,
+    1148,
+    1510
+   ]
+  },
+  {
+   "id": "body-link-committed",
+   "group": "body link",
+   "count": 9,
+   "inMovesets": 1,
+   "movesets": 1,
+   "startup": {
+    "p10": 28,
+    "p50": 60,
+    "p90": 60,
+    "min": 17,
+    "max": 93
+   },
+   "length": {
+    "p10": 79,
+    "p50": 178,
+    "p90": 178,
+    "min": 67,
+    "max": 178
+   },
+   "recovery": {
+    "p50": 118
+   },
+   "active": {
+    "p50": 79
+   },
+   "limb": {
+    "trunk": 9
+   },
+   "height": {
+    "mid": 7,
+    "high": 2
+   },
+   "fromGrapple": 0,
+   "slots": {
+    "regional R": 1,
+    "regional L": 1
+   },
+   "examples": [
+    1880,
+    2284,
+    2285,
+    2286,
+    2287,
+    2288
+   ]
+  },
+  {
+   "id": "body-lone-measured",
+   "group": "body lone",
+   "count": 16,
+   "inMovesets": 2,
+   "movesets": 2,
+   "startup": {
+    "p10": 13,
+    "p50": 17,
+    "p90": 52,
+    "min": 12,
+    "max": 55
+   },
+   "length": {
+    "p10": 61,
+    "p50": 67,
+    "p90": 101,
+    "min": 12,
+    "max": 106
+   },
+   "recovery": {
+    "p50": 50
+   },
+   "active": {
+    "p50": 4
+   },
+   "limb": {
+    "body": 8,
+    "trunk": 8
+   },
+   "height": {
+    "high": 8,
+    "mid": 8
+   },
+   "fromGrapple": 0,
+   "slots": {
+    "slot 3": 2
+   },
+   "examples": [
+    1129,
+    2481,
+    1197,
+    1209,
+    1214,
+    1504
+   ]
+  },
+  {
+   "id": "body-opener-committed",
+   "group": "body opener",
+   "count": 6,
+   "inMovesets": 1,
+   "movesets": 1,
+   "startup": {
+    "p10": 23,
+    "p50": 50,
+    "p90": 60,
+    "min": 19,
+    "max": 60
+   },
+   "length": {
+    "p10": 77,
+    "p50": 102,
+    "p90": 178,
+    "min": 73,
+    "max": 178
+   },
+   "recovery": {
+    "p50": 58
+   },
+   "active": {
+    "p50": 5
+   },
+   "limb": {
+    "trunk": 5,
+    "body": 1
+   },
+   "height": {
+    "high": 5,
+    "mid": 1
+   },
+   "fromGrapple": 0,
+   "slots": {
+    "slot 3": 1
+   },
+   "examples": [
+    1774,
+    1532,
+    2072,
+    2283,
+    2734,
+    2770
+   ]
+  },
+  {
+   "id": "leg-ender-measured",
+   "group": "leg ender",
+   "count": 79,
+   "inMovesets": 19,
+   "movesets": 22,
+   "startup": {
+    "p10": 14,
+    "p50": 18,
+    "p90": 24,
+    "min": 1,
+    "max": 29
+   },
+   "length": {
+    "p10": 53,
+    "p50": 62,
+    "p90": 73,
+    "min": 42,
+    "max": 94
+   },
+   "recovery": {
+    "p50": 43
+   },
+   "active": {
+    "p50": 4
+   },
+   "limb": {
+    "leg": 69,
+    "both legs": 10
+   },
+   "height": {
+    "high": 38,
+    "mid": 29,
+    "low": 12
+   },
+   "fromGrapple": 2,
+   "slots": {
+    "regional L": 17,
+    "regional R": 16,
+    "neutral": 14,
+    "slot 3": 1
+   },
+   "examples": [
+    1394,
+    1156,
+    1138,
+    1208,
+    1360,
+    1660
+   ]
+  },
+  {
+   "id": "leg-ender-committed",
+   "group": "leg ender",
+   "count": 60,
+   "inMovesets": 19,
+   "movesets": 24,
+   "startup": {
+    "p10": 26,
+    "p50": 31,
+    "p90": 45,
+    "min": 20,
+    "max": 47
+   },
+   "length": {
+    "p10": 69,
+    "p50": 80,
+    "p90": 91,
+    "min": 61,
+    "max": 101
+   },
+   "recovery": {
+    "p50": 47
+   },
+   "active": {
+    "p50": 7
+   },
+   "limb": {
+    "leg": 49,
+    "both legs": 11
+   },
+   "height": {
+    "high": 40,
+    "mid": 15,
+    "low": 5
+   },
+   "fromGrapple": 4,
+   "slots": {
+    "neutral": 16,
+    "regional R": 15,
+    "regional L": 15,
+    "slot 3": 3
+   },
+   "examples": [
+    2304,
+    2170,
+    1260,
+    2020,
+    2763,
+    2977
+   ]
+  },
+  {
+   "id": "leg-ender-committed-2",
+   "group": "leg ender",
+   "count": 8,
+   "inMovesets": 1,
+   "movesets": 10,
+   "startup": {
+    "p10": 41,
+    "p50": 64,
+    "p90": 94,
+    "min": 20,
+    "max": 94
+   },
+   "length": {
+    "p10": 118,
+    "p50": 136,
+    "p90": 167,
+    "min": 118,
+    "max": 167
+   },
+   "recovery": {
+    "p50": 73
+   },
+   "active": {
+    "p50": 3
+   },
+   "limb": {
+    "leg": 7,
+    "both legs": 1
+   },
+   "height": {
+    "high": 7,
+    "mid": 1
+   },
+   "fromGrapple": 0,
+   "slots": {
+    "diving": 4,
+    "slot 3": 1
+   },
+   "examples": [
+    1126,
+    1516,
+    1522,
+    1681,
+    1893,
+    1931
+   ]
+  },
+  {
+   "id": "leg-link-measured",
+   "group": "leg link",
+   "count": 87,
+   "inMovesets": 25,
+   "movesets": 22,
+   "startup": {
+    "p10": 12,
+    "p50": 15,
+    "p90": 21,
+    "min": 11,
+    "max": 25
+   },
+   "length": {
+    "p10": 49,
+    "p50": 56,
+    "p90": 61,
+    "min": 46,
+    "max": 68
+   },
+   "recovery": {
+    "p50": 39
+   },
+   "active": {
+    "p50": 3
+   },
+   "limb": {
+    "leg": 87
+   },
+   "height": {
+    "mid": 38,
+    "high": 33,
+    "low": 16
+   },
+   "fromGrapple": 1,
+   "slots": {
+    "neutral": 23,
+    "regional R": 21,
+    "regional L": 21,
+    "slot 3": 1
+   },
+   "examples": [
+    2303,
+    1139,
+    1298,
+    1359,
+    1673,
+    1674
+   ]
+  },
+  {
+   "id": "leg-link-heavy",
+   "group": "leg link",
+   "count": 42,
+   "inMovesets": 7,
+   "movesets": 16,
+   "startup": {
+    "p10": 19,
+    "p50": 23,
+    "p90": 39,
+    "min": 15,
+    "max": 41
+   },
+   "length": {
+    "p10": 65,
+    "p50": 74,
+    "p90": 89,
+    "min": 60,
+    "max": 91
+   },
+   "recovery": {
+    "p50": 46
+   },
+   "active": {
+    "p50": 6
+   },
+   "limb": {
+    "leg": 38,
+    "both legs": 4
+   },
+   "height": {
+    "mid": 18,
+    "high": 15,
+    "low": 9
+   },
+   "fromGrapple": 0,
+   "slots": {
+    "neutral": 7,
+    "regional R": 7,
+    "regional L": 7
+   },
+   "examples": [
+    1393,
+    1157,
+    2976,
+    2018,
+    2041,
+    2191
+   ]
+  },
+  {
+   "id": "leg-link-committed",
+   "group": "leg link",
+   "count": 10,
+   "inMovesets": 4,
+   "movesets": 2,
+   "startup": {
+    "p10": 39,
+    "p50": 43,
+    "p90": 82,
+    "min": 20,
+    "max": 82
+   },
+   "length": {
+    "p10": 109,
+    "p50": 144,
+    "p90": 167,
+    "min": 109,
+    "max": 167
+   },
+   "recovery": {
+    "p50": 85
+   },
+   "active": {
+    "p50": 6
+   },
+   "limb": {
+    "leg": 8,
+    "both legs": 2
+   },
+   "height": {
+    "mid": 5,
+    "low": 3,
+    "high": 2
+   },
+   "fromGrapple": 0,
+   "slots": {
+    "diving": 4
+   },
+   "examples": [
+    1849,
+    1850,
+    1851,
+    1852,
+    1515,
+    1521
+   ]
+  },
+  {
+   "id": "leg-lone-measured",
+   "group": "leg lone",
+   "count": 109,
+   "inMovesets": 8,
+   "movesets": 9,
+   "startup": {
+    "p10": 12,
+    "p50": 14,
+    "p90": 19,
+    "min": 8,
+    "max": 24
+   },
+   "length": {
+    "p10": 50,
+    "p50": 57,
+    "p90": 64,
+    "min": 46,
+    "max": 68
+   },
+   "recovery": {
+    "p50": 44
+   },
+   "active": {
+    "p50": 4
+   },
+   "limb": {
+    "leg": 107,
+    "both legs": 2
+   },
+   "height": {
+    "high": 39,
+    "mid": 37,
+    "low": 33
+   },
+   "fromGrapple": 0,
+   "slots": {
+    "slot 3": 6,
+    "regional R": 1,
+    "regional L": 1,
+    "neutral": 1
+   },
+   "examples": [
+    1278,
+    3031,
+    1236,
+    1505,
+    1933,
+    2038
+   ]
+  },
+  {
+   "id": "leg-lone-heavy",
+   "group": "leg lone",
+   "count": 87,
+   "inMovesets": 8,
+   "movesets": 48,
+   "startup": {
+    "p10": 17,
+    "p50": 24,
+    "p90": 31,
+    "min": 1,
+    "max": 35
+   },
+   "length": {
+    "p10": 66,
+    "p50": 72,
+    "p90": 81,
+    "min": 60,
+    "max": 101
+   },
+   "recovery": {
+    "p50": 50
+   },
+   "active": {
+    "p50": 5
+   },
+   "limb": {
+    "leg": 75,
+    "both legs": 12
+   },
+   "height": {
+    "low": 33,
+    "high": 33,
+    "mid": 21
+   },
+   "fromGrapple": 0,
+   "slots": {
+    "slot 3": 6,
+    "down": 2
+   },
+   "examples": [
+    1180,
+    1181,
+    1162,
+    1784,
+    1336,
+    2767
+   ]
+  },
+  {
+   "id": "leg-lone-committed",
+   "group": "leg lone",
+   "count": 13,
+   "inMovesets": 0,
+   "movesets": 0,
+   "startup": {
+    "p10": 41,
+    "p50": 48,
+    "p90": 60,
+    "min": 40,
+    "max": 64
+   },
+   "length": {
+    "p10": 89,
+    "p50": 112,
+    "p90": 118,
+    "min": 87,
+    "max": 153
+   },
+   "recovery": {
+    "p50": 56
+   },
+   "active": {
+    "p50": 5
+   },
+   "limb": {
+    "leg": 11,
+    "both legs": 2
+   },
+   "height": {
+    "high": 10,
+    "low": 2,
+    "mid": 1
+   },
+   "fromGrapple": 0,
+   "slots": {},
+   "examples": [
+    1145,
+    1146,
+    1275,
+    1767,
+    1862,
+    1868
+   ]
+  },
+  {
+   "id": "leg-opener-measured",
+   "group": "leg opener",
+   "count": 113,
+   "inMovesets": 16,
+   "movesets": 12,
+   "startup": {
+    "p10": 12,
+    "p50": 16,
+    "p90": 27,
+    "min": 11,
+    "max": 31
+   },
+   "length": {
+    "p10": 46,
+    "p50": 57,
+    "p90": 66,
+    "min": 16,
+    "max": 74
+   },
+   "recovery": {
+    "p50": 39
+   },
+   "active": {
+    "p50": 4
+   },
+   "limb": {
+    "leg": 111,
+    "both legs": 2
+   },
+   "height": {
+    "mid": 42,
+    "high": 38,
+    "low": 33
+   },
+   "fromGrapple": 0,
+   "slots": {
+    "diving": 7,
+    "regional R": 3,
+    "regional L": 3,
+    "slot 3": 3,
+    "neutral": 2
+   },
+   "examples": [
+    1461,
+    1462,
+    1463,
+    1464,
+    1844,
+    1845
+   ]
+  },
+  {
+   "id": "leg-opener-heavy",
+   "group": "leg opener",
+   "count": 46,
+   "inMovesets": 10,
+   "movesets": 20,
+   "startup": {
+    "p10": 16,
+    "p50": 30,
+    "p90": 40,
+    "min": 12,
+    "max": 100
+   },
+   "length": {
+    "p10": 77,
+    "p50": 84,
+    "p90": 117,
+    "min": 62,
+    "max": 167
+   },
+   "recovery": {
+    "p50": 57
+   },
+   "active": {
+    "p50": 3
+   },
+   "limb": {
+    "leg": 25,
+    "both legs": 21
+   },
+   "height": {
+    "high": 28,
+    "mid": 10,
+    "low": 8
+   },
+   "fromGrapple": 0,
+   "slots": {
+    "diving": 9,
+    "slot 3": 1
+   },
+   "examples": [
+    1175,
+    1177,
+    1182,
+    1183,
+    1454,
+    1455
+   ]
+  },
+  {
+   "id": "multi-measured",
+   "group": "multi",
+   "count": 14,
+   "inMovesets": 0,
+   "movesets": 0,
+   "startup": {
+    "p10": 10,
+    "p50": 14,
+    "p90": 14,
+    "min": 10,
+    "max": 14
+   },
+   "length": {
+    "p10": 62,
+    "p50": 65,
+    "p90": 81,
+    "min": 32,
+    "max": 81
+   },
+   "recovery": {
+    "p50": 47
+   },
+   "active": {
+    "p50": 3
+   },
+   "limb": {
+    "leg": 13,
+    "lead arm": 1
+   },
+   "height": {
+    "high": 11,
+    "mid": 3
+   },
+   "fromGrapple": 0,
+   "slots": {},
+   "examples": [
+    1161,
+    1239,
+    1240,
+    1302,
+    1303,
+    1322
+   ]
+  },
+  {
+   "id": "multi-committed",
+   "group": "multi",
+   "count": 12,
+   "inMovesets": 0,
+   "movesets": 0,
+   "startup": {
+    "p10": 24,
+    "p50": 31,
+    "p90": 33,
+    "min": 20,
+    "max": 38
+   },
+   "length": {
+    "p10": 100,
+    "p50": 105,
+    "p90": 109,
+    "min": 91,
+    "max": 116
+   },
+   "recovery": {
+    "p50": 73
+   },
+   "active": {
+    "p50": 5
+   },
+   "limb": {
+    "both legs": 11,
+    "leg": 1
+   },
+   "height": {
+    "high": 11,
+    "mid": 1
+   },
+   "fromGrapple": 0,
+   "slots": {},
+   "examples": [
+    1178,
+    1179,
+    1184,
+    1185,
+    1187,
+    1189
+   ]
+  },
+  {
+   "id": "multi-committed-2",
+   "group": "multi",
+   "count": 47,
+   "inMovesets": 4,
+   "movesets": 12,
+   "startup": {
+    "p10": 30,
+    "p50": 33,
+    "p90": 39,
+    "min": 26,
+    "max": 45
+   },
+   "length": {
+    "p10": 79,
+    "p50": 85,
+    "p90": 92,
+    "min": 69,
+    "max": 99
+   },
+   "recovery": {
+    "p50": 45
+   },
+   "active": {
+    "p50": 3
+   },
+   "limb": {
+    "both legs": 21,
+    "trunk": 9,
+    "leg": 9,
+    "both arms": 4,
+    "rear arm": 4
+   },
+   "height": {
+    "high": 46,
+    "mid": 1
+   },
+   "fromGrapple": 0,
+   "slots": {
+    "diving": 4
+   },
+   "examples": [
+    1796,
+    1797,
+    1798,
+    1799,
+    1215,
+    1556
+   ]
+  }
+ ],
+ "grappleBands": [
+  {
+   "id": "grapple-dodge-deflect",
+   "label": "dodge / deflect",
+   "count": 181,
+   "length": {
+    "p10": 32,
+    "p50": 45,
+    "p90": 51,
+    "min": 16,
+    "max": 57
+   }
+  },
+  {
+   "id": "grapple-short-grapple",
+   "label": "short grapple",
+   "count": 91,
+   "length": {
+    "p10": 63,
+    "p50": 78,
+    "p90": 89,
+    "min": 60,
+    "max": 91
+   }
+  },
+  {
+   "id": "grapple-grapple-hold",
+   "label": "grapple hold",
+   "count": 250,
+   "length": {
+    "p10": 97,
+    "p50": 101,
+    "p90": 123,
+    "min": 92,
+    "max": 129
+   }
+  },
+  {
+   "id": "grapple-throw",
+   "label": "throw",
+   "count": 183,
+   "length": {
+    "p10": 133,
+    "p50": 149,
+    "p90": 173,
+    "min": 130,
+    "max": 179
+   }
+  },
+  {
+   "id": "grapple-long-throw",
+   "label": "long throw",
+   "count": 93,
+   "length": {
+    "p10": 187,
+    "p50": 206,
+    "p90": 233,
+    "min": 181,
+    "max": 248
+   }
+  },
+  {
+   "id": "grapple-cinematic-throw",
+   "label": "cinematic throw",
+   "count": 39,
+   "length": {
+    "p10": 263,
+    "p50": 284,
+    "p90": 324,
+    "min": 250,
+    "max": 392
+   }
+  }
+ ]
+}

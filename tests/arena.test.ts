@@ -73,7 +73,7 @@ describe("arena", () => {
 
 describe("whole matches", () => {
   const playBots = (seed: number, n: number, frames: number) => {
-    const w = new World({ seed, styles: Array.from({ length: n }, (_, i) => (i * 5 + seed) % 21) });
+    const w = new World({ seed, styles: Array.from({ length: n }, (_, i) => (i * 5 + seed) % 12) });
     const bots = w.fighters.map((f) => new Bot(f.id, seed));
     const hashes: number[] = [];
     for (let i = 0; i < frames && w.s.winner < 0; i++) {

@@ -4,7 +4,7 @@
 // on, and the list changes with it. Reading it never changes the world.
 import type { AirGrabEnd } from "./sim/airgrabs";
 import type { LimbTrait } from "./sim/limbs";
-import { FLOW, MOVES, SPECIAL_NAMES, STRING_STARTS } from "./sim/moves";
+import { FLOW, MOVES, STRING_STARTS } from "./sim/moves";
 import { STYLES } from "./sim/styles";
 import { LIMBS, type Fighter, type PartId } from "./sim/types";
 import { World } from "./sim/world";
@@ -63,7 +63,7 @@ function row(w: World, f: Fighter, id: string, input: string): MoveRow {
   const note = m.launch ? "launches into a juggle" : m.knockdown ? "knocks down" : m.rehit ? `hits every ${m.rehit} frames` : "";
   return {
     id,
-    name: m.kind === "special" ? SPECIAL_NAMES[id as keyof typeof SPECIAL_NAMES] : NAMES[id] ?? id,
+    name: m.kind === "special" ? STYLES[f.style].specialName : NAMES[id] ?? id,
     input,
     limb: w.strikerOf(f, id),
     startup: e.startup,

@@ -44,7 +44,7 @@ describe("the move list", () => {
       const s = moveSheet(w, w.fighters[0]);
       expect(s.airGrab.name).toBe(AIR_GRABS[STYLES[i].style].name);
       expect(s.extras.map((r) => r.id)).toEqual(["dashStrike", STYLES[i].special]);
-      expect(s.extras[1].name).toMatch(/^[A-Z ]+$/);
+      expect(s.extras[1].name).toBe(STYLES[i].specialName);
     }
   });
 
