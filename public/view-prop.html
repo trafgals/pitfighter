@@ -192,11 +192,12 @@
 
   <header id="main-header">
     <h1>Constable Obadiah Winch — Custodian Helmet</h1>
-    <div class="subtitle" id="model-desc">TRELLIS 2 + UltraShape 1.0 Geometry Refinement (Game-Ready)</div>
+    <div class="subtitle" id="model-desc">Production PBR Helmet (Clean Geometry + 2048² UV Texture Map)</div>
     <div class="btn-group">
-      <button id="btn-ultra" class="active" onclick="switchModel('ultra')">★ UltraShape 1.0 (Watertight)</button>
-      <button id="btn-trellis" class="inactive" onclick="switchModel('trellis')">Single-Pass Trellis 2 (Void Back)</button>
-      <button id="btn-multi" class="inactive" onclick="switchModel('multi')">Multi-View (Ray-Box Collision)</button>
+      <button id="btn-clean" class="active" onclick="switchModel('clean')">★ Production PBR (Clean Topology)</button>
+      <button id="btn-ultra" class="inactive" onclick="switchModel('ultra')">UltraShape 1.0 (Voxel Block)</button>
+      <button id="btn-trellis" class="inactive" onclick="switchModel('trellis')">Trellis 2 (Hollow/Slab Glitch)</button>
+      <button id="btn-multi" class="inactive" onclick="switchModel('multi')">Multi-View (Ray Collision Box)</button>
       <input type="file" id="file-input" accept=".glb,.gltf" style="display: none;" onchange="loadFromFile(event)">
       <button class="file-btn" onclick="document.getElementById('file-input').click()">📁 Open Local .glb</button>
     </div>
@@ -219,11 +220,11 @@
   </div>
 
   <div class="metrics-panel" id="metrics-panel">
-    <div>Triangles: <span id="m-tris">34,974</span></div>
-    <div>File Size: <span id="m-size">689 KB</span></div>
-    <div>Watertight Topology: <span id="m-solid" style="color: #48bb78;">Yes (Closed Shell)</span></div>
-    <div>Volume: <span id="m-vol">+0.735 m³</span></div>
-    <div>Backface Status: <span id="m-back" style="color: #48bb78;">Healed & Smooth</span></div>
+    <div>Triangles: <span id="m-tris">4,992</span></div>
+    <div>File Size: <span id="m-size">407 KB</span></div>
+    <div>Topology: <span id="m-solid" style="color: #48bb78;">Clean Quad-based Shell</span></div>
+    <div>Texture: <span id="m-vol">2048×2048 PBR Albedo Map</span></div>
+    <div>Badge & Felt: <span id="m-back" style="color: #48bb78;">Sharp Brunwick Star & Wool</span></div>
   </div>
 
   <div class="hint-panel">
@@ -232,7 +233,7 @@
 
   <model-viewer 
     id="viewer"
-    src="./models/props/winch_custodian_helmet_ultrashape.glb" 
+    src="./models/props/winch_custodian_helmet_clean_pbr.glb" 
     alt="Custodian Helmet 3D Model" 
     auto-rotate 
     camera-controls 
@@ -242,45 +243,55 @@
   </model-viewer>
 
   <script>
-    // Detect file:// protocol and show warning
     if (window.location.protocol === 'file:') {
       document.getElementById('cors-banner').style.display = 'block';
       document.getElementById('main-header').style.top = '48px';
     }
 
     const models = {
+      clean: {
+        src: './models/props/winch_custodian_helmet_clean_pbr.glb',
+        desc: 'Production PBR Custodian Helmet (UV-Unwrapped, 2048² Texture, Real Brunswick Star)',
+        tris: '4,992',
+        size: '407 KB',
+        solid: 'Clean Quad-based Shell',
+        solidColor: '#48bb78',
+        vol: '2048×2048 PBR Albedo Map',
+        back: 'Sharp Brunswick Star & Wool',
+        backColor: '#48bb78'
+      },
       ultra: {
         src: './models/props/winch_custodian_helmet_ultrashape.glb',
-        desc: 'TRELLIS 2 + UltraShape 1.0 Geometry Refinement (Game-Ready)',
+        desc: 'TRELLIS 2 + UltraShape 1.0 Geometry Refinement (Voxel Lump Artifact)',
         tris: '34,974',
         size: '689 KB',
-        solid: 'Yes (Closed Shell)',
-        solidColor: '#48bb78',
-        vol: '+0.735 m³',
-        back: 'Healed & Watertight',
-        backColor: '#48bb78'
+        solid: 'Yes (Lumpy Boulder)',
+        solidColor: '#ed8936',
+        vol: 'Untextured Vertex Colors',
+        back: 'Thickened Slabs',
+        backColor: '#ed8936'
       },
       trellis: {
         src: './models/props/winch_custodian_helmet.glb',
-        desc: 'Single-Pass Trellis 2 (Failed Backface Density Field)',
-        tris: '34,960',
+        desc: 'Single-Pass Trellis 2 (Decimation Slab Fins + Hollow Rear Void)',
+        tris: '19,963',
         size: '429 KB',
-        solid: 'No (Open Cavity)',
+        solid: 'No (Extruded Vertical Fins)',
         solidColor: '#f56565',
-        vol: '+0.096 m³',
+        vol: 'Untextured Vertex Colors',
         back: 'Hollow Missing Shell',
         backColor: '#f56565'
       },
       multi: {
         src: './models/props/winch_custodian_helmet_multiview.glb',
-        desc: 'Multi-View Turnaround (Opposing Token Ray-Box Collision)',
+        desc: 'Multi-View Turnaround (Opposing Ray Collision Box)',
         tris: '34,984',
         size: '672 KB',
-        solid: 'No (Inverted Shell)',
-        solidColor: '#ed8936',
-        vol: '-0.462 m³',
-        back: 'Collision Ray Box',
-        backColor: '#ed8936'
+        solid: 'No (Ray-Box Envelope)',
+        solidColor: '#e53e3e',
+        vol: 'Collided Tokens',
+        back: 'Collision Envelope',
+        backColor: '#e53e3e'
       }
     };
 
@@ -316,7 +327,7 @@
       backEl.textContent = data.back;
       backEl.style.color = data.backColor;
 
-      ['ultra', 'trellis', 'multi'].forEach(k => {
+      ['clean', 'ultra', 'trellis', 'multi'].forEach(k => {
         const btn = document.getElementById('btn-' + k);
         if (k === key) {
           btn.className = 'active';
@@ -326,7 +337,6 @@
       });
     }
 
-    // Direct local file loader (bypasses CORS on file:// via URL.createObjectURL)
     function loadFromFile(event) {
       const file = event.target.files[0];
       if (file) {
@@ -334,13 +344,12 @@
         viewer.src = blobUrl;
         document.getElementById('model-desc').textContent = 'Loaded Local File: ' + file.name + ' (' + Math.round(file.size / 1024) + ' KB)';
         errorOverlay.style.display = 'none';
-        ['ultra', 'trellis', 'multi'].forEach(k => {
+        ['clean', 'ultra', 'trellis', 'multi'].forEach(k => {
           document.getElementById('btn-' + k).className = 'inactive';
         });
       }
     }
 
-    // Drag and drop handler
     window.addEventListener('dragover', (e) => e.preventDefault());
     window.addEventListener('drop', (e) => {
       e.preventDefault();
