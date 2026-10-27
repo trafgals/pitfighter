@@ -1,0 +1,240 @@
+{
+  "asset": "prop_winch_custodian_helmet",
+  "model": "public/models/props/prop_winch_custodian_helmet.glb",
+  "capturedAt": "2026-10-27T03:27:17.926Z",
+  "budget": {
+    "triangles": 35000,
+    "bytes": 1572864,
+    "dimensionsCm": {
+      "width": 22,
+      "height": 32,
+      "depth": 26
+    }
+  },
+  "triangles": 22848,
+  "bytes": 1414112,
+  "dimensionsCm": {
+    "width": 22,
+    "height": 32,
+    "depth": 26
+  },
+  "bbox": {
+    "min": [
+      -0.10999999940395355,
+      -0.044966455549001694,
+      -0.125
+    ],
+    "max": [
+      0.10999999940395355,
+      0.27503353357315063,
+      0.13500000536441803
+    ]
+  },
+  "meshes": [
+    {
+      "name": "Crown_Shell_Navy_Felt",
+      "triangles": 8256,
+      "material": 0
+    },
+    {
+      "name": "Crown_Inner_Lining",
+      "triangles": 2112,
+      "material": 1
+    },
+    {
+      "name": "Crown_Opening_Rim",
+      "triangles": 192,
+      "material": 1
+    },
+    {
+      "name": "Rolled_Leather_Welt_Band",
+      "triangles": 1728,
+      "material": 2
+    },
+    {
+      "name": "Brim_Flared_Leather",
+      "triangles": 2496,
+      "material": 3
+    },
+    {
+      "name": "Brim_Rolled_Edge",
+      "triangles": 1728,
+      "material": 3
+    },
+    {
+      "name": "Crown_Seam_Left",
+      "triangles": 560,
+      "material": 0
+    },
+    {
+      "name": "Crown_Seam_Right",
+      "triangles": 560,
+      "material": 0
+    },
+    {
+      "name": "Ear_Boss_Left",
+      "triangles": 306,
+      "material": 0
+    },
+    {
+      "name": "Ear_Boss_Right",
+      "triangles": 306,
+      "material": 0
+    },
+    {
+      "name": "Brunswick_Star_Badge_Plate",
+      "triangles": 60,
+      "material": 4
+    },
+    {
+      "name": "Brunswick_Star_Centre_Ring",
+      "triangles": 3648,
+      "material": 5
+    },
+    {
+      "name": "Brunswick_Star_Inner_Five_Point",
+      "triangles": 36,
+      "material": 5
+    },
+    {
+      "name": "Summit_Crest_Plate",
+      "triangles": 172,
+      "material": 3
+    },
+    {
+      "name": "Summit_Brass_Button",
+      "triangles": 400,
+      "material": 6
+    },
+    {
+      "name": "Summit_Brass_Stud_Front",
+      "triangles": 144,
+      "material": 6
+    },
+    {
+      "name": "Summit_Brass_Stud_Back",
+      "triangles": 144,
+      "material": 6
+    }
+  ],
+  "materials": [
+    "Crown_Navy_Felt",
+    "Crown_Inner_Lining",
+    "Welt_Dark_Leather",
+    "Brim_Black_Leather",
+    "Brass_Aged",
+    "Brass_Worn_Medallion",
+    "Brass_Aged_Plain"
+  ],
+  "renders": [
+    {
+      "view": "front",
+      "label": "Front (0deg, badge to camera)",
+      "file": "test-output/props/prop_winch_custodian_helmet/front.png",
+      "bytes": 638530
+    },
+    {
+      "view": "profile",
+      "label": "Profile (90deg, right side)",
+      "file": "test-output/props/prop_winch_custodian_helmet/profile.png",
+      "bytes": 648586
+    },
+    {
+      "view": "badge",
+      "label": "Badge close-up",
+      "file": "test-output/props/prop_winch_custodian_helmet/badge.png",
+      "bytes": 1277578
+    }
+  ],
+  "checks": [
+    {
+      "ok": true,
+      "message": "the model has triangles",
+      "detail": "22848"
+    },
+    {
+      "ok": true,
+      "message": "triangle count is under budget",
+      "detail": "22848 < 35000"
+    },
+    {
+      "ok": true,
+      "message": "file size is within budget",
+      "detail": "1.349 MB <= 1.5 MB"
+    },
+    {
+      "ok": true,
+      "message": "the mesh has no structural problems",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "no vertex position is NaN or infinite",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "message": "width matches the spec (22 cm)",
+      "detail": "22 cm"
+    },
+    {
+      "ok": true,
+      "message": "height matches the spec (32 cm)",
+      "detail": "32 cm"
+    },
+    {
+      "ok": true,
+      "message": "depth matches the spec (26 cm)",
+      "detail": "26 cm"
+    },
+    {
+      "ok": true,
+      "message": "the base opening sits on the origin's plane (y = 0)",
+      "detail": "rim y 0..0 cm"
+    },
+    {
+      "ok": true,
+      "message": "the helmet's axis is centred on X",
+      "detail": "rim centre x 0 cm"
+    },
+    {
+      "ok": true,
+      "message": "the badge is on the front face (+Z)",
+      "detail": "badge centre z 8.7 cm"
+    },
+    {
+      "ok": true,
+      "message": "the badge is centred left to right",
+      "detail": "badge centre x 0 cm"
+    },
+    {
+      "ok": true,
+      "message": "every asset the page asked for was served",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the model loads in a WebGL renderer without errors",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the renderer reported no load errors",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the renderer sees the same triangle count as the file",
+      "detail": "22848 vs 22848"
+    },
+    {
+      "ok": true,
+      "message": "every verification render has real content"
+    },
+    {
+      "ok": true,
+      "message": "the front render is a real image",
+      "detail": "638530 bytes"
+    }
+  ]
+}
