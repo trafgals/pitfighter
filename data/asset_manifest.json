@@ -1,0 +1,25 @@
+{
+  "version": "1.0",
+  "project": "pitfighter",
+  "pipeline": "flux3_h3_mcode",
+  "assets": [
+    {
+      "id": "prop_winch_custodian_helmet",
+      "name": "Victorian Custodian Bobby Helmet",
+      "character": "Constable Obadiah Winch",
+      "category": "headgear",
+      "slot": "head_socket",
+      "poly_budget": 35000,
+      "scale_dimensions_cm": {
+        "width": 22,
+        "height": 32,
+        "depth": 26
+      },
+      "status": "stage:h3-turnaround",
+      "reference_concept": "public/tex/characters/obadiah_winch_concept.png",
+      "alpha_cutout": "public/tex/props/flux3_winch_custodian_prop_alpha.png",
+      "turnaround_sheet": "public/tex/props/h3_custodian_helmet_turnaround.png",
+      "glb_output": "public/models/props/Constable_Obadiah_Winch_Custodian_Helmet.glb"
+    }
+  ]
+}
