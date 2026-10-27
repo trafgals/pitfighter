@@ -205,13 +205,35 @@ loader.load(
         state.badge.set(point[0], point[1], point[2]);
       }
     } else if (closeupTarget) {
-      let badgeMesh = null;
+      // The mesh the close-up is framed on is found by name.
+      //
+      // A name that matches more than one mesh is ambiguous. The old rule
+      // kept whichever match the scene happened to visit last, so a manifest
+      // that named "Crown" silently framed the seam at the back of the crown
+      // while the render showed something else entirely - and the run still
+      // reported every check green. A detail render that frames the wrong
+      // part is the one failure a reviewer cannot see, so it has to be
+      // refused instead.
+      //
+      // An exact name always wins, which keeps the ordinary case - a
+      // manifest naming one mesh - working exactly as before.
+      const matches = [];
       model.traverse((child) => {
-        if (child.isMesh && closeupTarget && child.name.includes(closeupTarget)) badgeMesh = child;
+        if (child.isMesh && child.name.includes(closeupTarget)) matches.push(child);
       });
+      const exact = matches.find((child) => child.name === closeupTarget);
+      const badgeMesh = exact ?? (matches.length === 1 ? matches[0] : null);
       if (badgeMesh) {
         const box = new THREE.Box3().setFromObject(badgeMesh);
         state.badge.copy(box.getCenter(new THREE.Vector3()));
+      } else if (matches.length > 1) {
+        // Several meshes answer to the name and none of them is it, so
+        // there is no way to tell which one the manifest meant. The names
+        // are listed so the manifest can be fixed.
+        state.errors.push(
+          `the close-up mesh "${closeupTarget}" is ambiguous: ${matches.map((child) => child.name).join(", ")}`,
+        );
+        state.badge.copy(state.bounds.getCenter(new THREE.Vector3()));
       } else {
         // A named mesh that is not in the model is a typo in the manifest. It
         // must not fall back to a shot of the whole model, or the close-up
