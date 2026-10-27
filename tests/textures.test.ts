@@ -83,11 +83,25 @@ describe("procedural textures", () => {
     // every texture the game can load says what made it, from what, under which licence
     const manifest = JSON.parse(fs.readFileSync("public/tex/manifest.json", "utf8")) as { files: { file: string; model: string; licence: string; seed: number }[] };
     const entry = new Map(manifest.files.map((e) => [e.file, e]));
-    for (const f of images.map(rel).filter((f) => !f.startsWith("contact/"))) {
+    // the 3D stage's reference art is not a tile: it is an approved picture the asset is
+    // drawn from, so the tile manifest has nothing to say about how it was reproduced.
+    // It carries no tile entry on purpose (public/tex/README.md), and the asset it
+    // belongs to is recorded in data/asset_manifest.json instead - so that is where
+    // it has to be found.
+    const isReference = (f: string) => f.startsWith("props/") || f.startsWith("characters/");
+    for (const f of images.map(rel).filter((f) => !f.startsWith("contact/") && !isReference(f))) {
       const e = entry.get(f);
       expect(e, f).toBeDefined();
       expect(["Apache-2.0", "CC0-1.0"], f).toContain(e!.licence);
       expect(e!.model, f).not.toMatch(/dev/i);
     }
+    // and no reference image is left unowned: every one of them is registered against
+    // a 3D asset, so the set of approved pictures is known
+    const assets = JSON.parse(fs.readFileSync("data/asset_manifest.json", "utf8")) as { assets: Record<string, unknown>[] };
+    const owned = new Set<string>();
+    for (const a of assets.assets) {
+      for (const v of Object.values(a)) if (typeof v === "string" && v.startsWith("public/tex/")) owned.add(v.slice("public/tex/".length));
+    }
+    for (const f of images.map(rel).filter(isReference)) expect(owned.has(f), f).toBe(true);
   });
 });

@@ -18,6 +18,15 @@ const params = new URLSearchParams(window.location.search);
 const modelUrl = params.get("model") || "";
 const width = Number(params.get("width") || 900);
 const height = Number(params.get("height") || 1100);
+// How much of the asset each view has to contain, in metres, and where the
+// close-up is framed. The capture script passes both in, because a prop's
+// size and its detail vary: a helmet's badge and a hat's gold band are not
+// the same distance from the camera.
+const viewFit = Number(params.get("fit") || 0.17);
+const closeupFit = Number(params.get("closeupFit") || 0.048);
+// The close-up's target is either a point in the model's own space
+// ("x,y,z") or the name of a mesh to centre on.
+const closeupTarget = params.get("closeup") || "";
 // A comma-separated list of mesh names to leave out of the shot. It is how a
 // single layer of a prop gets looked at on its own.
 const hide = (params.get("hide") || "")
@@ -91,10 +100,10 @@ const state = {
 const VIEWS = {
   // fit is the radius, in metres, the view has to contain; margin is how much
   // air to leave around it.
-  front: { azimuth: 0, elevation: 0.05, fit: 0.17, margin: 1.22, target: "centre", fov: 30 },
-  profile: { azimuth: Math.PI / 2, elevation: 0.04, fit: 0.17, margin: 1.22, target: "centre", fov: 30 },
-  rear: { azimuth: Math.PI, elevation: 0.05, fit: 0.17, margin: 1.22, target: "centre", fov: 30 },
-  badge: { azimuth: 0.12, elevation: 0.08, fit: 0.048, margin: 1.35, target: "badge", fov: 26 },
+  front: { azimuth: 0, elevation: 0.05, fit: viewFit, margin: 1.22, target: "centre", fov: 30 },
+  profile: { azimuth: Math.PI / 2, elevation: 0.04, fit: viewFit, margin: 1.22, target: "centre", fov: 30 },
+  rear: { azimuth: Math.PI, elevation: 0.05, fit: viewFit, margin: 1.22, target: "centre", fov: 30 },
+  badge: { azimuth: 0.12, elevation: 0.08, fit: closeupFit, margin: 1.35, target: "badge", fov: 26 },
 };
 
 function frame(view) {
@@ -174,14 +183,42 @@ loader.load(
     state.model = model;
     state.bounds.setFromObject(model);
 
-    // Where the badge is, so the close-up can find it without guessing.
-    let badgeMesh = null;
-    model.traverse((child) => {
-      if (child.isMesh && /Brunswick_Star_Badge_Plate/.test(child.name)) badgeMesh = child;
-    });
-    if (badgeMesh) {
-      const box = new THREE.Box3().setFromObject(badgeMesh);
-      state.badge.copy(box.getCenter(new THREE.Vector3()));
+    // Where the close-up is framed. The target is either a point given in
+    // the model's own space or the centre of a named mesh, so the shot does
+    // not have to guess where the detail is.
+    //
+    // The point is parsed strictly: a coordinate that is empty or not a
+    // number is a mistake in the manifest, and a lenient parser would either
+    // drop the bad part (shifting the rest of the point) or read an empty
+    // field as a zero - so the shot would be framed on the wrong spot and
+    // nothing would say so.
+    const parts = closeupTarget.split(",").map((part) => part.trim());
+    const isPoint = parts.length === 3 && parts.every((part) => part !== "" && Number.isFinite(Number(part)));
+    if (isPoint) {
+      const point = parts.map(Number);
+      // A focus point outside the model frames empty space, and the render
+      // still looks like a render, so it has to be refused here.
+      const inside = new THREE.Box3().copy(state.bounds).expandByScalar(0.0005);
+      if (!inside.containsPoint(new THREE.Vector3(point[0], point[1], point[2]))) {
+        state.errors.push(`the close-up focus ${closeupTarget} is outside the model`);
+      } else {
+        state.badge.set(point[0], point[1], point[2]);
+      }
+    } else if (closeupTarget) {
+      let badgeMesh = null;
+      model.traverse((child) => {
+        if (child.isMesh && closeupTarget && child.name.includes(closeupTarget)) badgeMesh = child;
+      });
+      if (badgeMesh) {
+        const box = new THREE.Box3().setFromObject(badgeMesh);
+        state.badge.copy(box.getCenter(new THREE.Vector3()));
+      } else {
+        // A named mesh that is not in the model is a typo in the manifest. It
+        // must not fall back to a shot of the whole model, or the close-up
+        // would pass validation without ever showing the detail it promised.
+        state.errors.push(`the close-up mesh "${closeupTarget}" is not in the model`);
+        state.badge.copy(state.bounds.getCenter(new THREE.Vector3()));
+      }
     } else {
       state.badge.copy(state.bounds.getCenter(new THREE.Vector3()));
     }
