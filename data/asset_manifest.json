@@ -15,11 +15,29 @@
         "height": 32,
         "depth": 26
       },
-      "status": "stage:h3-turnaround",
+      "status": "stage:minimax-code-3d",
       "reference_concept": "public/tex/characters/obadiah_winch_concept.png",
       "alpha_cutout": "public/tex/props/flux3_winch_custodian_prop_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_custodian_helmet_turnaround.png",
       "glb_output": "public/models/props/Constable_Obadiah_Winch_Custodian_Helmet.glb"
+    },
+    {
+      "id": "prop_smelt_stovepipe",
+      "name": "Ironmaster Chimney Stovepipe Hat",
+      "character": "Mr. Hezekiah Smelt",
+      "category": "headgear",
+      "slot": "head_socket",
+      "poly_budget": 35000,
+      "scale_dimensions_cm": {
+        "width": 30,
+        "height": 45,
+        "depth": 30
+      },
+      "status": "gate:1-review-alpha",
+      "reference_concept": "public/tex/props/flux3_hezekiah_smelt_00001_.png",
+      "alpha_cutout": "public/tex/props/flux3_smelt_stovepipe_alpha.png",
+      "turnaround_sheet": "public/tex/props/h3_smelt_stovepipe_turnaround.png",
+      "glb_output": "public/models/props/smelt_stovepipe_hat.glb"
     }
   ]
 }
