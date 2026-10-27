@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Final Roster Ideation Gallery — Crape, Ashby-Lisle & Inkle</title>
+  <style>
+    :root {
+      --bg: #0b0e14;
+      --card-bg: #131822;
+      --sub-card: #0d111a;
+      --border: #232b3b;
+      --gold: #d4af37;
+      --crape-accent: #8a7090;
+      --ashby-accent: #a3c2c2;
+      --inkle-accent: #e5a93c;
+      --male: #58a6ff;
+      --female: #f778ba;
+      --text: #e6edf3;
+      --muted: #8b949e;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 32px 24px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .container { max-width: 1440px; margin: 0 auto; }
+    h1 { margin: 0 0 8px; font-size: 30px; color: var(--gold); }
+    p.lead { margin: 0 0 28px; color: var(--muted); font-size: 15px; max-width: 950px; line-height: 1.6; }
+    
+    .nav-tabs {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 32px;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 12px;
+    }
+    .tab-btn {
+      background: var(--sub-card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    .tab-btn:hover {
+      border-color: var(--gold);
+      color: #fff;
+    }
+    .tab-btn.active {
+      background: rgba(212, 175, 55, 0.15);
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    .character-block {
+      margin-bottom: 64px;
+      scroll-margin-top: 24px;
+    }
+    .character-banner {
+      background: linear-gradient(135deg, rgba(30, 38, 54, 0.9), rgba(15, 20, 30, 0.95));
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin-bottom: 24px;
+    }
+    .char-tag {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 4px 10px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+    .tag-crape { background: rgba(138, 112, 144, 0.2); color: var(--crape-accent); border: 1px solid var(--crape-accent); }
+    .tag-ashby { background: rgba(163, 194, 194, 0.2); color: var(--ashby-accent); border: 1px solid var(--ashby-accent); }
+    .tag-inkle { background: rgba(229, 169, 60, 0.2); color: var(--inkle-accent); border: 1px solid var(--inkle-accent); }
+
+    .character-banner h2 { margin: 0 0 6px; font-size: 26px; color: #fff; }
+    .character-banner p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
+
+    .archetype-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 28px;
+    }
+    .archetype-header {
+      margin-bottom: 18px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+    }
+    .archetype-title {
+      margin: 0 0 4px;
+      font-size: 20px;
+      color: #fff;
+    }
+    .archetype-desc {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13.5px;
+      line-height: 1.5;
+    }
+
+    .pair-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 900px) {
+      .pair-grid { grid-template-columns: 1fr; }
+    }
+
+    .gender-card {
+      background: var(--sub-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+    }
+    .gender-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+      align-self: flex-start;
+    }
+    .badge-male { background: rgba(88, 166, 255, 0.15); color: var(--male); border: 1px solid var(--male); }
+    .badge-female { background: rgba(247, 120, 186, 0.15); color: var(--female); border: 1px solid var(--female); }
+
+    .char-name {
+      margin: 0 0 8px;
+      font-size: 17px;
+      color: #fff;
+    }
+    .img-wrap {
+      width: 100%;
+      height: 480px;
+      background: #06080c;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid #1c2230;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+      transition: transform 0.25s ease;
+    }
+    .img-wrap:hover img {
+      transform: scale(1.02);
+    }
+    .meta-box {
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .meta-box strong { color: #d0d7de; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Pitfighter Final Roster Ideation Gallery</h1>
+    <p class="lead">Exploring 5 Victorian steampunk archetypes with paired Male and Female visual concepts (30 options total) for the remaining 3 fighters in the 12-character roster, generated locally via <strong>FLUX 3</strong> on AMD Radeon RX 9070 XT.</p>
+
+    <div class="nav-tabs">
+      <a class="tab-btn" href="#crape">10. Mr. Mortimer Crape (Judo / Undertaker)</a>
+      <a class="tab-btn" href="#peregrine">11. Sir Peregrine Ashby-Lisle (Duelist / Aristocrat)</a>
+      <a class="tab-btn" href="#inkle">12. Mr. Cuthbert Inkle (Amateur / Articled Clerk)</a>
+    </div>
+
+    <!-- ==================== MORTIMER CRAPE ==================== -->
+    <div id="crape" class="character-block">
+      <div class="character-banner">
+        <span class="char-tag tag-crape">Judo Based • Grappling Specialist</span>
+        <h2>10. Mr. Mortimer Crape — "Undertaker & Joiner"</h2>
+        <p><em>"He measures you for your coffin before the bell. If you do not fit, he will make you fit."</em> — Mourning jet plates, whalebone stays, levering joints, mortuary rules, and steel-ribbed mourning umbrellas.</p>
+      </div>
+
+      <!-- Crape Option 1 -->
+      <div class="archetype-card">
+        <div class="archetype-header">
+          <h3 class="archetype-title">Archetype 1: The Jet & Whalebone Memento Mori (The Classic Crape)</h3>
+          <p class="archetype-desc">Victorian mourning dress, cream whalebone stays under faceted black jet plates, laced with black silk ribbons like a widow's corset, double-jointed elbows and wrists that bend both ways.</p>
+        </div>
+        <div class="pair-grid">
+          <div class="gender-card">
+            <span class="gender-badge badge-male">Option 1A (Male)</span>
+            <h4 class="char-name">Mortimer Crape</h4>
+            <div class="img-wrap">
+              <img src="tex/characters/ideation_crape/crape_1a_jet_male.png" alt="Mortimer Crape">
+            </div>
+            <div class="meta-box">
+              <strong>Limbs:</strong> Cream whalebone stays encased in faceted black mourning jet plates, silk corset lacing.<br/>
+              <strong>Attire:</strong> Tailored pitch-black mourning frock coat with crape hatband, weeping armbands, jet spats buttons.
+            </div>
+          </div>
+          <div class="gender-card">
+            <span class="gender-badge badge-female">Option 1B (Female)</span>
+            <h4 class="char-name">Mistress Martha Crape</h4>
+            <div class="img-wrap">
+              <img src="tex/characters/ideation_crape/crape_1b_jet_female.png" alt="Martha Crape">
+            </div>
+            <div class="meta-box">
+              <strong>Limbs:</strong> Segmented faceted black mourning jet over flexible whalebone ribs with 360° pivoting wrists.<br/>
+              <strong>Attire:</strong> High-collared black bombazine mourning dress, weeping crape veil, brass mortuary calipers.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Crape Option 2 -->
+      <div class="archetype-card">
+        <div class="archetype-header">
+          <h3 class="archetype-title">Archetype 2: The Coffin-Wright & Lead-Liner</h3>
+          <p class="archetype-desc">Industrial workshop joinery. Carved English black bog-oak limbs bound with heavy lead coffin-sealing straps, brass casket-corner brackets, zinc tacks, and iron casket handles.</p>
+        </div>
+        <div class="pair-grid">
+          <div class="gender-card">
+            <span class="gender-badge badge-male">Option 2A (Male)</span>
+            <h4 class="char-name">Gabriel Crape</h4>
+            <div class="img-wrap">
+              <img src="tex/characters/ideation_crape/crape_2a_coffinwright_male.png" alt="Gabriel Crape">
+            </div>
+            <div class="meta-box">
+              <strong>Limbs:</strong> Hand-carved black bog-oak limbs bound in lead sealing straps and coffin-corner brass brackets.<br/>
+              <strong>Attire:</strong> Oiled leather joiner apron, folding brass ruler in breast pocket, iron casket handles at belt.
+            </div>
+          </div>
+          <div class="gender-card">
+            <span class="gender-badge badge-female">Option 2B (Female)</span>
+            <h4 class="char-name">Tabitha Crape</h4>
+            <div class="img-wrap">
+              <img src="tex/characters/ideation_crape/crape_2b_coffinwright_female.png" alt="Tabitha Crape">
+            </div>
+            <div class="meta-box">
+              <strong>Limbs:</strong> Charred black oak prosthetics reinforced with lead-soldered brass hinges and casket handles.<br/>
+              <strong>Attire:</strong> Studded black cowhide apron over dark wool dress, rolled sleeves, brass nails in lapel.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Crape Option 3 -->
+      <div class="archetype-card">
+        <div class="archetype-header">
+          <h3 class="archetype-title">Archetype 3: The Crypt Bone-Mason & Ossuary Scribe</h3>
+          <p class="archetype-desc">Catacomb crypt excavator. Bleached ivory bone stays and carved ebony rods linked by anatomical brass ball-and-socket joints, mortuary sliding measurement verniers, and silver casket screws.</p>
+        </div>
+        <div class="pair-grid">
+          <div class="gender-card">
+            <span class="gender-badge badge-male">Option 3A (Male)</span>
+            <h4 class="char-name">Ebenezer Crape</h4>
+            <div class="img-wrap">
+              <img src="tex/characters/ideation_crape/crape_3a_bonemason_male.png" alt="Ebenezer Crape">
+            </div>
+            <div class="meta-box">
+              <strong>Limbs:</strong> Bleached ivory bone stays and carved ebony rods linked by anatomical brass ball-and-socket joints.<br/>
+              <strong>Attire:</strong> Raven-black frock coat dusted with grave chalk, round wire-rimmed dark mourning spectacles.
+            </div>
+          </div>
+          <div class="gender-card">
+            <span class="gender-badge badge-female">Option 3B (Female)</span>
+            <h4 class="char-name">Hester Crape</h4>
+            <div class="img-wrap">
+              <img src="tex/characters/ideation_crape/crape_3b_bonemason_female.png" alt="Hester Crape">
+            </div>
+            <div class="meta-box">
+              <strong>Limbs:</strong> Sculpted bone-white ivory stays encased in polished black jet filigree cages with sliding verniers.<br/>
+              <strong>Attire:</strong> Tattered mourning silk gown, draped black lace shawl, silver casket-screw chest bandolier.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Crape Option 4 -->
+      <div class="archetype-card">
+        <div class="archetype-header">
+          <h3 class="archetype-title">Archetype 4: The Mourning Brolly Judoka</h3>
+          <p class="archetype-desc">Austere Victorian funeral mute silhouette. Matte-black vulcanite and ebonite limbs with brass lever locks and double-jointed ankles, wielding a heavy steel-shafted black umbrella into lever throws.</p>
+        </div>
+        <div class="pair-grid">
+          <div class="gender-card">
+            <span class="gender-badge badge-male">Option 4A (Male)</span>
+            <h4 class="char-name">Silas Crape</h4>
+            <div class="img-wrap">
+              <img src="tex/characters/ideation_crape/crape_4a_brolly_male.png" alt="Silas Crape">
+            </div>
+            <div class="meta-box">
+              <strong>Limbs:</strong> Sculpted matte-black vulcanite/ebonite limbs with brass lever locks and joint levers.<br/>
+              <strong>Attire:</strong> High black silk stovepipe hat with weeping crape veil, tailored black frock coat, brolly hook.
+            </div>
+          </div>
+          <div class="gender-card">
+            <span class="gender-badge badge-female">Option 4B (Female)</span>
+            <h4 class="char-name">Lavinia Crape</h4>
+            <div class="img-wrap">
+              <img src="tex/characters/ideation_crape/crape_4b_brolly_female.png" alt="Lavinia Crape">
+            </div>
+            <div class="meta-box">
+              <strong>Limbs:</strong> Seamless matte-black ebonite prosthetics with brass caliper hinges and quick-release lever locks.<br/>
+              <strong>Attire:</strong> Fitted black velvet mourner tailcoat, pleated black wool skirt, weeping veil over shoulder.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Crape Option 5 -->
+      <div class="archetype-card">
+        <div class="archetype-header">
+          <h3 class="archetype-title">Archetype 5: The Hearse-Master</h3>
+          <p class="archetype-desc">Funeral carriage driver. Heavy black coach leaf-spring steel chassis arms, brass carriage lantern fittings, and heavy brass casket-roller wheels built into the boot soles for sweeping slides.</p>
+        </div>
+        <div class="pair-grid">
+          <div class="gender-card">
+            <span class="gender-badge badge-male">Option 5A (Male)</span>
+            <h4 class="char-name">Thaddeus Crape</h4>
+            <div class="img-wrap">
+              <img src="tex/characters/ideation_crape/crape_5a_hearse_male.png" alt="Thaddeus Crape">
+            </div>
+            <div class="meta-box">
+              <strong>Limbs:</strong> Heavy black carriage leaf-springs and iron axle joints with brass casket-roller wheel boots.<br/>
+              <strong>Attire:</strong> Multi-tiered black coachman cape, leather driving gauntlets, stovepipe hat with brass lamp mount.
+            </div>
+          </div>
+          <div class="gender-card">
+            <span class="gender-badge badge-female">Option 5B (Female)</span>
+            <h4 class="char-name">Cordelia Crape</h4>
+            <div class="img-wrap">
+              <img src="tex/characters/ideation_crape/crape_5b_hearse_female.png" alt="Cordelia Crape">
+            </div>
+            <div class="meta-box">
+              <strong>Limbs:</strong> Black coach ironwork and carriage leaf-springs with roller-bearing feet for momentum sweeps.<br/>
+              <strong>Attire:</strong> Tailored equestrian coach coat with silver buttons, driving harness, top hat with ostrich plume.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ==================== SIR PEREGRINE ASHBY-LISLE ==================== -->
+    <div id="peregrine" class="character-block">
+      <div class="character-banner">
+        <span class="char-tag tag-ashby">Samurai Sword • Fencing & Dueling Master</span>
+        <h2>11. Sir Peregrine Ashby-Lisle, Bt. — "The Most Courteous Man in Old Sorrow"</h2>
+        <p><em>"Forty-one duels, silver arms, a swordstick and impeccable manners. He is so terribly sorry."</em> — Repoussé sterling silver filigree over black ebony, fluted candlestick arms, and polite lethal swordsmanship.</p>
+      </div>
+
+      <!-- Peregrine Option 1 -->
+      <div class="archetype-card">
+        <div class="archetype-header">
+          <h3 class="archetype-title">Archetype 1: The Hallmarked Dandy Duelist (The Classic Ashby-Lisle)</h3>
+          <p class="archetype-desc">High-society aristocrat. Black ebony wood sheathed in hallmarked sterling silver filigree, fluted like candlesticks with the family crest at shoulders, and razor-sharp silver stiletto fingernails.</p>
+        </div>
+        <div class="pair-grid">
+          <div class="gender-card">
+            <span class="gender-badge badge-male">Option 1A (Male)</span>
+            <h4 class="char-name">Sir Peregrine Ashby-Lisle</h4>
+            <div class="img-wrap">
+              <img src="tex/characters/ideation_peregrine/peregrine_1a_dandy_male.png" alt="Sir Peregrine Ashby-Lisle">
+            </div>
+            <div class="meta-box">
+              <strong>Limbs:</strong> Solid black ebony wood sheathed in hallmarked repoussé sterling silver filigree with silver nails.<br/>
+              <strong>Attire:</strong> Midnight-blue evening dress coat with silk lapels, high wing collar, Ascot cravat, white spats.
+            </div>
+          </div>
+          <div class="gender-card">
+            <span class="gender-badge badge-female">Option 1B (Female)</span>
+            <h4 class="char-name">Lady Cecily Ashby-Lisle</h4>
+            <div class="img-wrap">
+              <img src="tex/characters/ideation_peregrine/peregrine_1b_dandy_female.png" alt="Lady Cecily Ashby-Lisle">
+            </div>
+            <div class="meta-box">
+              <strong>Limbs:</strong> Carved black ebony encased in pierced hallmarked silver filigree with crest medallions.<br/>
+              <strong>Attire:</strong> Tailored emerald-green velvet fencing coat with silver frogging, corseted vest, lace cravat.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Peregrine Option 2 -->
+      <div class="archetype-card">
+        <div class="archetype-header">
+          <h3 class="archetype-title">Archetype 2: The Clockwork Fencing Master</h3>
+          <p class="archetype-desc">Damascened blued-steel and polished sterling silver armature with visible jeweled escapement gears and coiled mainsprings for supersonic ripostes, velvet doublet, and vernier monocle.</p>
+        </div>
+        <div class="pair-grid">
+          <div class="gender-card">
+            <span class="gender-badge badge-male">Option 2A (Male)</span>
+            <h4 class="char-name">Sir Julian Ashby-Lisle</h4>
+            <div class="img-wrap">
+              <img src="tex/characters/ideation_peregrine/peregrine_2a_clockwork_male.png" alt="Sir Julian Ashby-Lisle">
+            </div>
+            <div class="meta-box">
+              <strong>Limbs:</strong> Damascened blued-steel and silver armature with visible jeweled escapements and coiled springs.<br/>
+              <strong>Attire:</strong> Padded black velvet duel doublet embroidered with silver wire, monocle with vernier reticle.
+            </div>
+          </div>
+          <div class="gender-card">
+            <span class="gender-badge badge-female">Option 2B (Female)</span>
+            <h4 class="char-name">Lady Vivienne Ashby-Lisle</h4>
+            <div class="img-wrap">
+              <img src="tex/characters/ideation_peregrine/peregrine_2b_clockwork_female.png" alt="Lady Vivienne Ashby-Lisle">
+            </div>
+            <div class="meta-box">
+              <strong>Limbs:</strong> Articulated blued-steel and sterling silver clockwork prosthetics with exposed balance wheels.<br/>
+              <strong>Attire:</strong> Quilted black silk fencing plastron, high collar, hair pinned in sleek braided chignon.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Peregrine Option 3 -->
+      <div class="archetype-card">
+        <div class="archetype-header">
+          <h3 class="archetype-title">Archetype 3: The Disgraced Regency Gambler</h3>
+          <p class="archetype-desc">Faded decadent grandeur. Tarnished antique sterling silver skeletal limbs featuring repoussé vine engravings and deep rose-cut garnet stones embedded in the knuckles.</p>
+        </div>
+        <div class="pair-grid">
+          <div class="gender-card">
+            <span class="gender-badge badge-male">Option 3A (Male)</span>
+            <h4 class="char-name">Sir Alistair Ashby-Lisle</h4>
+            <div class="img-wrap">
+              <img src="tex/characters/ideation_peregrine/peregrine_3a_gambler_male.png" alt="Sir Alistair Ashby-Lisle">
+            </div>
+            <div class="meta-box">
+              <strong>Limbs:</strong> Tarnished antique sterling silver skeletal limbs with vine engravings and rose-cut garnet knuckles.<br/>
+              <strong>Attire:</strong> Open-collared embroidered burgundy velvet frock coat, disheveled silk cravat, silver fob chain.
+            </div>
+          </div>
+          <div class="gender-card">
+            <span class="gender-badge badge-female">Option 3B (Female)</span>
+            <h4 class="char-name">Lady Genevieve Ashby-Lisle</h4>
+            <div class="img-wrap">
+              <img src="tex/characters/ideation_peregrine/peregrine_3b_gambler_female.png" alt="Lady Genevieve Ashby-Lisle">
+            </div>
+            <div class="meta-box">
+              <strong>Limbs:</strong> Tarnished solid sterling silver filigree studded with deep cabochon red garnets along wrists.<br/>
+              <strong>Attire:</strong> Crimson velvet riding habit with tarnished silver buttons, black silk cravat, gold signet rings.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Peregrine Option 4 -->
+      <div class="archetype-card">
+        <div class="archetype-header">
+          <h3 class="archetype-title">Archetype 4: The Gaslight Swashbuckler</h3>
+          <p class="archetype-desc">Flamboyant courtier blade. Mirror-polished chrome-silver and pearlescent ivory segmented arms, billowing silk opera cloaks, and rapier canes fitted with multi-barrel pepperbox pistol pommels.</p>
+        </div>
+        <div class="pair-grid">
+          <div class="gender-card">
+            <span class="gender-badge badge-male">Option 4A (Male)</span>
+            <h4 class="char-name">Sir Valentine Ashby-Lisle</h4>
+            <div class="img-wrap">
+              <img src="tex/characters/ideation_peregrine/peregrine_4a_swashbuckler_male.png" alt="Sir Valentine Ashby-Lisle">
+            </div>
+            <div class="meta-box">
+              <strong>Limbs:</strong> Mirror-polished chrome-silver and pearlescent ivory segmented arms with Latin motto engravings.<br/>
+              <strong>Attire:</strong> Billowing black silk-lined opera cloak, ruffled lace jabot, leather boots with silver spurs.
+            </div>
+          </div>
+          <div class="gender-card">
+            <span class="gender-badge badge-female">Option 4B (Female)</span>
+            <h4 class="char-name">Lady Beatrice Ashby-Lisle</h4>
+            <div class="img-wrap">
+              <img src="tex/characters/ideation_peregrine/peregrine_4b_swashbuckler_female.png" alt="Lady Beatrice Ashby-Lisle">
+            </div>
+            <div class="meta-box">
+              <strong>Limbs:</strong> Bright polished silver and carved ivory filigree arms with concealed miniature pepperbox barrels.<br/>
+              <strong>Attire:</strong> Dark violet velvet opera cape, silver filigree domino mask, corseted duel vest, high boots.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Peregrine Option 5 -->
+      <div class="archetype-card">
+        <div class="archetype-header">
+          <h3 class="archetype-title">Archetype 5: The Weeping Silver Mourning Duelist</h3>
+          <p class="archetype-desc">Cold aristocratic avenger. Solid chiseled silver filigree over black obsidian glass, styled with sculpted weeping silver tears streaming down the forearms.</p>
+        </div>
+        <div class="pair-grid">
+          <div class="gender-card">
+            <span class="gender-badge badge-male">Option 5A (Male)</span>
+            <h4 class="char-name">Sir Sebastian Ashby-Lisle</h4>
+            <div class="img-wrap">
+              <img src="tex/characters/ideation_peregrine/peregrine_5a_weeping_male.png" alt="Sir Sebastian Ashby-Lisle">
+            </div>
+            <div class="meta-box">
+              <strong>Limbs:</strong> Chiseled solid silver filigree over black obsidian glass with stylized weeping silver tears.<br/>
+              <strong>Attire:</strong> Pitch-black Victorian mourning coat with silk lapels, mourning pearl cravat pin, black top hat.
+            </div>
+          </div>
+          <div class="gender-card">
+            <span class="gender-badge badge-female">Option 5B (Female)</span>
+            <h4 class="char-name">Lady Eleanor Ashby-Lisle</h4>
+            <div class="img-wrap">
+              <img src="tex/characters/ideation_peregrine/peregrine_5b_weeping_female.png" alt="Lady Eleanor Ashby-Lisle">
+            </div>
+            <div class="meta-box">
+              <strong>Limbs:</strong> Sculpted obsidian glass and antique silver vine filigree with teardrop silver ornaments.<br/>
+              <strong>Attire:</strong> Black silk mourning gown with fencing cutaway, black lace veil pinned to dark velvet hat.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ==================== CUTHBERT INKLE ==================== -->
+    <div id="inkle" class="character-block">
+      <div class="character-banner">
+        <span class="char-tag tag-inkle">Amateur Brawler • Articled Scrivener</span>
+        <h2>12. Mr. Cuthbert Inkle — "The Articled Clerk"</h2>
+        <p><em>"He pawned his own arms and legs and fights in borrowed ones. Terribly sorry, he's never done this before."</em> — Mismatched pawnshop loaner limbs, fluttering yellow pawn tickets on red string, ink-stained deeds, and horrified accidental lethality.</p>
+      </div>
+
+      <!-- Inkle Option 1 -->
+      <div class="archetype-card">
+        <div class="archetype-header">
+          <h3 class="archetype-title">Archetype 1: The Crutch Street Pawnshop Patchwork (The Classic Inkle)</h3>
+          <p class="archetype-desc">Wildly mismatched borrowed loaner prosthetics with yellow parchment pawn tickets fluttering on red string: porcelain doll arm, bear paw, brass telescope leg, and iron stovepipe boot.</p>
+        </div>
+        <div class="pair-grid">
+          <div class="gender-card">
+            <span class="gender-badge badge-male">Option 1A (Male)</span>
+            <h4 class="char-name">Cuthbert Inkle</h4>
+            <div class="img-wrap">
+              <img src="tex/characters/ideation_inkle/inkle_1a_pawnshop_male.png" alt="Cuthbert Inkle">
+            </div>
+            <div class="meta-box">
+              <strong>Limbs:</strong> Cracked porcelain doll arm (#204), taxidermy bear paw (#88), brass telescope stilt, stovepipe boot.<br/>
+              <strong>Attire:</strong> Threadbare alpaca office coat, crooked wire spectacles, ink smudges, legal deeds in pockets.
+            </div>
+          </div>
+          <div class="gender-card">
+            <span class="gender-badge badge-female">Option 1B (Female)</span>
+            <h4 class="char-name">Clara Inkle</h4>
+            <div class="img-wrap">
+              <img src="tex/characters/ideation_inkle/inkle_1b_pawnshop_female.png" alt="Clara Inkle">
+            </div>
+            <div class="meta-box">
+              <strong>Limbs:</strong> Polished brass clockmaker gear-hand (#315), wooden figurehead arm (#94), porcelain leg, boiler boot.<br/>
+              <strong>Attire:</strong> Ink-splattered calico blouse, patched wool skirt, wire spectacles tied with string.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inkle Option 2 -->
+      <div class="archetype-card">
+        <div class="archetype-header">
+          <h3 class="archetype-title">Archetype 2: The Chancery Scrivener Automaton</h3>
+          <p class="archetype-desc">Scavenged legal copyist machinery. Articulated copper printing-press rollers, cluster of sharpened steel dip-pens on a brass stylus, and iron bookbinder screw-clamp legs.</p>
+        </div>
+        <div class="pair-grid">
+          <div class="gender-card">
+            <span class="gender-badge badge-male">Option 2A (Male)</span>
+            <h4 class="char-name">Barnaby Inkle</h4>
+            <div class="img-wrap">
+              <img src="tex/characters/ideation_inkle/inkle_2a_scrivener_male.png" alt="Barnaby Inkle">
+            </div>
+            <div class="meta-box">
+              <strong>Limbs:</strong> Copper printing-press roller arm, sharpened steel dip-pen stylus cluster, bookbinder vice leg.<br/>
+              <strong>Attire:</strong> Ink-soaked waistcoat, paper celluloid collar, green eye-shade visor, ink bottle on cord.
+            </div>
+          </div>
+          <div class="gender-card">
+            <span class="gender-badge badge-female">Option 2B (Female)</span>
+            <h4 class="char-name">Constance Inkle</h4>
+            <div class="img-wrap">
+              <img src="tex/characters/ideation_inkle/inkle_2b_scrivener_female.png" alt="Constance Inkle">
+            </div>
+            <div class="meta-box">
+              <strong>Limbs:</strong> Printing office ink rollers, brass paper-punch stylus fingers, heavy bookbinder press vice leg.<br/>
+              <strong>Attire:</strong> Green eye-shade visor, black cloth sleeve protectors, white blouse, ink-stained skirt.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inkle Option 3 -->
+      <div class="archetype-card">
+        <div class="archetype-header">
+          <h3 class="archetype-title">Archetype 3: The Junk-Shop Brawler</h3>
+          <p class="archetype-desc">East End scrap-metal salvage. Copper boiler water-pipe arms with steam pressure gauges, rusted cast-iron dock winch arms, and ornate cast-iron gas lamppost stem legs.</p>
+        </div>
+        <div class="pair-grid">
+          <div class="gender-card">
+            <span class="gender-badge badge-male">Option 3A (Male)</span>
+            <h4 class="char-name">Felix Inkle</h4>
+            <div class="img-wrap">
+              <img src="tex/characters/ideation_inkle/inkle_3a_junkshop_male.png" alt="Felix Inkle">
+            </div>
+            <div class="meta-box">
+              <strong>Limbs:</strong> Copper boiler pipe with pressure gauge, rusted iron dock crane winch, gas lamppost leg.<br/>
+              <strong>Attire:</strong> Oversized ragged coat pinned with safety pins, wool fingerless mittens, tattered muffler.
+            </div>
+          </div>
+          <div class="gender-card">
+            <span class="gender-badge badge-female">Option 3B (Female)</span>
+            <h4 class="char-name">Florence Inkle</h4>
+            <div class="img-wrap">
+              <img src="tex/characters/ideation_inkle/inkle_3b_junkshop_female.png" alt="Florence Inkle">
+            </div>
+            <div class="meta-box">
+              <strong>Limbs:</strong> Copper tea-kettle boiler arm with relief valve, rusted iron winch, clock pendulum rod leg.<br/>
+              <strong>Attire:</strong> Patched wool shawl over threadbare dark dress, muddy apron, fingerless knit gloves.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inkle Option 4 -->
+      <div class="archetype-card">
+        <div class="archetype-header">
+          <h3 class="archetype-title">Archetype 4: The Bailiff's Nightmare</h3>
+          <p class="archetype-desc">Terrified clerk striking horrifying accidental blows. Gold-plated clockmaker's gear-work arm with fluttering ticket #409, and brutal forged-iron butcher's meat-hanging hook arm with ticket #112.</p>
+        </div>
+        <div class="pair-grid">
+          <div class="gender-card">
+            <span class="gender-badge badge-male">Option 4A (Male)</span>
+            <h4 class="char-name">Arthur Inkle</h4>
+            <div class="img-wrap">
+              <img src="tex/characters/ideation_inkle/inkle_4a_bailiff_male.png" alt="Arthur Inkle">
+            </div>
+            <div class="meta-box">
+              <strong>Limbs:</strong> Exquisite gold-plated horology clockwork arm (#409) and forged-iron butcher's meat hook (#112).<br/>
+              <strong>Attire:</strong> Disheveled clerk suit, flying coat-tails, papers spilling from satchel, terrified scream.
+            </div>
+          </div>
+          <div class="gender-card">
+            <span class="gender-badge badge-female">Option 4B (Female)</span>
+            <h4 class="char-name">Alice Inkle</h4>
+            <div class="img-wrap">
+              <img src="tex/characters/ideation_inkle/inkle_4b_bailiff_female.png" alt="Alice Inkle">
+            </div>
+            <div class="meta-box">
+              <strong>Limbs:</strong> Jeweler's brass measuring caliper arm (#551) and massive shipyard iron gaff-hook with wax seal.<br/>
+              <strong>Attire:</strong> Dark blue clerk dress, white ink-smeared apron, hair flying, court summonses in air.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inkle Option 5 -->
+      <div class="archetype-card">
+        <div class="archetype-header">
+          <h3 class="archetype-title">Archetype 5: The Relic-Pawn Gladiator</h3>
+          <p class="archetype-desc">Absurd medieval museum mismatch. 16th-century blackened gothic tournament plate-armor gauntlet bearing 'UNCLE GIDEON - CRUTCH ST' pawn ticket, copper plumbing pipe arm, and splintered pine peg leg.</p>
+        </div>
+        <div class="pair-grid">
+          <div class="gender-card">
+            <span class="gender-badge badge-male">Option 5A (Male)</span>
+            <h4 class="char-name">Percival Inkle</h4>
+            <div class="img-wrap">
+              <img src="tex/characters/ideation_inkle/inkle_5a_relic_male.png" alt="Percival Inkle">
+            </div>
+            <div class="meta-box">
+              <strong>Limbs:</strong> Antique 16th-century gothic plate armor gauntlet, copper pipe arm, splintered pine peg leg.<br/>
+              <strong>Attire:</strong> Oversized houndstooth waistcoat, collar buttoned too tight, round fogged spectacles.
+            </div>
+          </div>
+          <div class="gender-card">
+            <span class="gender-badge badge-female">Option 5B (Female)</span>
+            <h4 class="char-name">Penelope Inkle</h4>
+            <div class="img-wrap">
+              <img src="tex/characters/ideation_inkle/inkle_5b_relic_female.png" alt="Penelope Inkle">
+            </div>
+            <div class="meta-box">
+              <strong>Limbs:</strong> Embossed brass museum armor gauntlet with pawn ticket, pine carpenter rule arm, sadiron shoe.<br/>
+              <strong>Attire:</strong> Oversized dark woolen coat, spectacles perched on nose, hair pinned hastily, court briefs.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>
