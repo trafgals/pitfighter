@@ -16,6 +16,10 @@ node scripts/capture_prop_renders.mjs prop_smelt_stovepipe
 - `report.json` - the capture report: the budgets, the bounding box, the mesh
   list and the validation checks passed.
 
+The renders are committed at 720x880 so a reviewer can open them straight from
+the issue; the full-size versions are written to `test-output/props/` by the
+capture script and are not in the repository.
+
 The model itself is `public/models/props/prop_smelt_stovepipe.glb`, and
 the spec, the frame contract and the measured figures are in
 `data/asset_manifest.json`.
