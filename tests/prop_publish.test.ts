@@ -29,17 +29,22 @@ interface Check {
 }
 
 /** A capture output the publish step can read: three renders and a report. */
-function writeFixture(id: string, checks: Check[] = [{ ok: true, message: "the model has triangles" }]) {
+function writeFixture(
+  id: string,
+  checks: Check[] = [{ ok: true, message: "the model has triangles" }],
+  width = CAPTURE_WIDTH,
+  height = CAPTURE_HEIGHT,
+) {
   const dir = path.join(SCRATCH, id);
   fs.mkdirSync(dir, { recursive: true });
   // A gradient, so a decoder that read the rows wrong produces a picture of
   // the right size but the wrong colours.
-  const pixels = new Uint8Array(CAPTURE_WIDTH * CAPTURE_HEIGHT * 4);
-  for (let y = 0; y < CAPTURE_HEIGHT; y++) {
-    for (let x = 0; x < CAPTURE_WIDTH; x++) {
-      const o = (y * CAPTURE_WIDTH + x) * 4;
-      pixels[o] = Math.round((255 * x) / (CAPTURE_WIDTH - 1));
-      pixels[o + 1] = Math.round((255 * y) / (CAPTURE_HEIGHT - 1));
+  const pixels = new Uint8Array(width * height * 4);
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const o = (y * width + x) * 4;
+      pixels[o] = Math.round((255 * x) / (width - 1));
+      pixels[o + 1] = Math.round((255 * y) / (height - 1));
       pixels[o + 2] = 40;
       pixels[o + 3] = 255;
     }
@@ -51,7 +56,7 @@ function writeFixture(id: string, checks: Check[] = [{ ok: true, message: "the m
   ];
   const renders = views.map(({ view, label }) => {
     const file = path.join(dir, `${view}.png`);
-    fs.writeFileSync(file, encodePng(CAPTURE_WIDTH, CAPTURE_HEIGHT, pixels));
+    fs.writeFileSync(file, encodePng(width, height, pixels));
     return {
       view,
       label,
@@ -79,6 +84,16 @@ function publish(args: string[]) {
     // of only being printed.
     { cwd: ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] },
   );
+}
+
+/** Runs the publish step and reports what it refused, if it refused. */
+function refuse(args: string[]) {
+  try {
+    publish(args);
+  } catch (error) {
+    return String((error as { stderr?: string }).stderr || "");
+  }
+  return "";
 }
 
 /** The width, height and colour type out of a PNG's header. */
@@ -129,15 +144,29 @@ describe("the publish step", () => {
 
   it("copies the capture's own report, and writes a README for a new asset", () => {
     const source = writeFixture(ASSET);
-    publish([ASSET, "--from", SCRATCH, "--out", PUBLISHED]);
+    // a directory of its own, so the README this run writes is the one this
+    // run wrote and not the one an earlier test left behind
+    const fresh = path.join(SCRATCH, "fresh");
+    publish([ASSET, "--from", SCRATCH, "--out", fresh]);
 
-    const copied = fs.readFileSync(path.join(PUBLISHED, ASSET, "report.json"));
+    const copied = fs.readFileSync(path.join(fresh, ASSET, "report.json"));
     const original = fs.readFileSync(path.join(source, "report.json"));
     expect(copied.equals(original)).toBe(true);
 
-    const readme = fs.readFileSync(path.join(PUBLISHED, ASSET, "README.md"), "utf8");
+    const readme = fs.readFileSync(path.join(fresh, ASSET, "README.md"), "utf8");
     expect(readme).toContain(ASSET);
     expect(readme).toContain(`${PUBLISH_WIDTH}x${PUBLISH_HEIGHT}`);
+    // and the command it gives actually publishes
+    expect(readme).toContain(`node scripts/capture_prop_renders.mjs ${ASSET} --publish`);
+  });
+
+  it("leaves an existing README alone", () => {
+    writeFixture(ASSET);
+    const kept = path.join(SCRATCH, "kept", ASSET);
+    fs.mkdirSync(kept, { recursive: true });
+    fs.writeFileSync(path.join(kept, "README.md"), "the description a human wrote");
+    publish([ASSET, "--from", SCRATCH, "--out", path.join(SCRATCH, "kept")]);
+    expect(fs.readFileSync(path.join(kept, "README.md"), "utf8")).toBe("the description a human wrote");
   });
 
   it("refuses to publish a capture that failed a check", () => {
@@ -148,18 +177,34 @@ describe("the publish step", () => {
     // its own output directory, so what is checked is what this run wrote
     // and not what an earlier run left behind
     const refused = path.join(SCRATCH, "refused");
-    let failed = false;
-    let stderr = "";
-    try {
-      publish([ASSET, "--from", SCRATCH, "--out", refused]);
-    } catch (error) {
-      failed = true;
-      stderr = String((error as { stderr?: string }).stderr || "");
-    }
-    expect(failed).toBe(true);
+    const stderr = refuse([ASSET, "--from", SCRATCH, "--out", refused]);
     expect(stderr).toContain("the badge is on the front face");
     // and nothing was published
     expect(fs.existsSync(path.join(refused, ASSET, "front.png"))).toBe(false);
+  });
+
+  it("refuses a report that carries no checks", () => {
+    writeFixture(ASSET, []);
+    const refused = path.join(SCRATCH, "no-checks");
+    const stderr = refuse([ASSET, "--from", SCRATCH, "--out", refused]);
+    expect(stderr).toContain("no checks");
+    expect(fs.existsSync(path.join(refused, ASSET, "front.png"))).toBe(false);
+  });
+
+  it("refuses a capture of another shape, because resizing it would stretch the picture", () => {
+    writeFixture(ASSET, [{ ok: true, message: "the model has triangles" }], 40, 40);
+    const refused = path.join(SCRATCH, "wrong-shape");
+    const stderr = refuse([ASSET, "--from", SCRATCH, "--out", refused]);
+    expect(stderr).toContain("stretch");
+    expect(fs.existsSync(path.join(refused, ASSET, "front.png"))).toBe(false);
+  });
+
+  it("leaves no half-written directory behind when it refuses", () => {
+    writeFixture(ASSET, [{ ok: false, message: "the model has triangles" }]);
+    const refused = path.join(SCRATCH, "no-litter");
+    refuse([ASSET, "--from", SCRATCH, "--out", refused]);
+    expect(fs.existsSync(path.join(refused, `.${ASSET}.publishing`))).toBe(false);
+    expect(fs.existsSync(path.join(refused, ASSET))).toBe(false);
   });
 
   it("writes an opaque render as RGB, the format the repository already uses", () => {
@@ -205,5 +250,35 @@ describe("the png codec", () => {
       if (resized.data[i * 4] !== 30 || resized.data[i * 4 + 1] !== 90 || resized.data[i * 4 + 2] !== 160) wrong++;
     }
     expect(wrong).toBe(0);
+  });
+
+  it("keeps a picture that has transparency, rather than scrambling it", () => {
+    const width = 40;
+    const height = 40;
+    const pixels = new Uint8Array(width * height * 4);
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const o = (y * width + x) * 4;
+        pixels[o] = 200;
+        pixels[o + 1] = 100;
+        pixels[o + 2] = 50;
+        pixels[o + 3] = x < width / 2 ? 0 : 255;
+      }
+    }
+    const resized = decodePng(resizePng(encodePng(width, height, pixels, 4), 80, 80));
+    expect([resized.width, resized.height]).toEqual([80, 80]);
+    const at = (x: number, y: number) => {
+      const o = (y * resized.width + x) * 4;
+      return [resized.data[o], resized.data[o + 1], resized.data[o + 2], resized.data[o + 3]];
+    };
+    // the opaque half keeps its colour
+    const solid = at(70, 40);
+    expect(solid[0]).toBeGreaterThan(195);
+    expect(solid[0]).toBeLessThan(205);
+    expect(solid[1]).toBeGreaterThan(95);
+    expect(solid[1]).toBeLessThan(105);
+    expect(solid[3]).toBe(255);
+    // and the transparent half stays transparent
+    expect(at(10, 40)[3]).toBe(0);
   });
 });
