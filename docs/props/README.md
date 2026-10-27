@@ -38,7 +38,7 @@ The resize used to be done by hand, and it was done wrong: the Smelt's renders
 went into the repository at 900x1100 and had to be corrected in a follow-up
 PR (#51). A step that is done by hand is a step that gets done differently
 twice. Doing it in the pipeline makes the committed size a property of the
-pipeline instead of of whoever ran it.
+pipeline instead of whoever ran it.
 
 The renders committed before this step existed were resized with the same
 Lanczos filter by a tool outside the repository, so they are the same picture

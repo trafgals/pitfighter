@@ -55,6 +55,10 @@ const sourceRoot = path.resolve(ROOT, flags.from || "test-output/props");
 const targetRoot = path.resolve(ROOT, flags.out || "docs/props");
 const sourceDir = path.join(sourceRoot, assetId);
 const targetDir = path.join(targetRoot, assetId);
+// The renders are written here first and moved into place once every one of
+// them has succeeded, so a run that fails half way through cannot leave the
+// directory holding new images next to old ones.
+const stagingDir = path.join(targetRoot, `.${assetId}.publishing`);
 const reportPath = path.join(sourceDir, "report.json");
 
 if (!fs.existsSync(reportPath)) {
@@ -68,7 +72,16 @@ const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
 // A capture that failed a check does not get published. The images would look
 // fine - a wrong frame is a wrong frame, not a broken one - so publishing them
 // would put a rejected asset in front of a reviewer as if it had passed.
-const failed = (report.checks || []).filter((check) => !check.ok);
+//
+// A report that carries no checks at all is refused for the same reason: it
+// is no proof of anything, and treating it as a pass would publish an asset
+// nobody verified.
+const checks = report.checks;
+if (!Array.isArray(checks) || !checks.length) {
+  console.error("the capture report carries no checks, so there is no proof that the asset passed");
+  process.exit(1);
+}
+const failed = checks.filter((check) => check.ok !== true);
 if (failed.length) {
   console.error(`the capture failed ${failed.length} check(s), so there is nothing to publish:`);
   for (const check of failed) console.error(`  - ${check.message}${check.detail ? ` (${check.detail})` : ""}`);
@@ -81,11 +94,16 @@ if (!renders.length) {
   process.exit(2);
 }
 
-/** Where a render in the report actually is on disk. */
+/**
+ * Where a render in the report actually is on disk.
+ *
+ * The capture's own directory comes first: the report's path says where the
+ * capture wrote its output, which is not where it is when the capture has
+ * been moved or copied somewhere else.
+ */
 function resolveRender(render) {
-  const candidates = [];
+  const candidates = [path.join(sourceDir, `${render.view}.png`)];
   if (render.file) candidates.push(path.isAbsolute(render.file) ? render.file : path.join(ROOT, render.file));
-  candidates.push(path.join(sourceDir, `${render.view}.png`));
   for (const candidate of candidates) {
     if (fs.existsSync(candidate)) return candidate;
   }
@@ -104,49 +122,75 @@ function channelMeans(image) {
   return total.map((sum) => sum / pixels);
 }
 
-fs.mkdirSync(targetDir, { recursive: true });
+fs.rmSync(stagingDir, { recursive: true, force: true });
+fs.mkdirSync(stagingDir, { recursive: true });
 console.log(`asset        ${assetId}`);
 console.log(`publishing   ${path.relative(ROOT, targetDir)}`);
 
-for (const render of renders) {
-  const source = resolveRender(render);
-  if (!source) {
-    console.error(`the report names ${render.view}.png but there is no such file`);
-    process.exit(2);
-  }
-  const sourceBytes = fs.readFileSync(source);
-  const sourceImage = decodePng(sourceBytes);
-  const published = resizePng(sourceBytes, PUBLISH_WIDTH, PUBLISH_HEIGHT);
-
-  // Read the published bytes back rather than trusting the resize: a codec
-  // that wrote the wrong header would otherwise publish an image nobody can
-  // open, and the mistake would only show up in the issue thread.
-  const check = decodePng(published);
-  if (check.width !== PUBLISH_WIDTH || check.height !== PUBLISH_HEIGHT) {
-    console.error(`the published ${render.view}.png is ${check.width}x${check.height}, not ${PUBLISH_WIDTH}x${PUBLISH_HEIGHT}`);
-    process.exit(1);
-  }
-
-  // The resize must not change the picture. A decoder that read the rows
-  // wrong still produces an image of the right size, and this is what catches
-  // it: the colours would come out rearranged rather than merely resampled.
-  const before = channelMeans(sourceImage);
-  const after = channelMeans(check);
-  for (let channel = 0; channel < 3; channel++) {
-    if (Math.abs(before[channel] - after[channel]) > 1) {
-      console.error(`the published ${render.view}.png does not match the capture (channel ${channel}: ${before[channel].toFixed(2)} vs ${after[channel].toFixed(2)})`);
-      process.exit(1);
+try {
+  for (const render of renders) {
+    const source = resolveRender(render);
+    if (!source) {
+      throw new Error(`the report names ${render.view}.png but there is no such file`);
     }
+    const sourceBytes = fs.readFileSync(source);
+    const sourceImage = decodePng(sourceBytes);
+
+    // The framing of the picture comes from the shape of the frame, so a
+    // capture of another shape would be stretched rather than resized. It is
+    // refused instead: a stretched render is a wrong render.
+    if (sourceImage.width * PUBLISH_HEIGHT !== sourceImage.height * PUBLISH_WIDTH) {
+      throw new Error(
+        `the capture is ${sourceImage.width}x${sourceImage.height}, which is not the shape of ${PUBLISH_WIDTH}x${PUBLISH_HEIGHT}; resizing it would stretch the picture`,
+      );
+    }
+
+    const published = resizePng(sourceBytes, PUBLISH_WIDTH, PUBLISH_HEIGHT);
+
+    // Read the published bytes back rather than trusting the resize: a codec
+    // that wrote the wrong header would otherwise publish an image nobody can
+    // open, and the mistake would only show up in the issue thread.
+    const check = decodePng(published);
+    if (check.width !== PUBLISH_WIDTH || check.height !== PUBLISH_HEIGHT) {
+      throw new Error(`the published ${render.view}.png is ${check.width}x${check.height}, not ${PUBLISH_WIDTH}x${PUBLISH_HEIGHT}`);
+    }
+
+    // The resize must not change the picture. A decoder that read the rows
+    // wrong still produces an image of the right size, and this is what
+    // catches it: the colours would come out rearranged rather than merely
+    // resampled.
+    const before = channelMeans(sourceImage);
+    const after = channelMeans(check);
+    for (let channel = 0; channel < 3; channel++) {
+      if (Math.abs(before[channel] - after[channel]) > 1) {
+        throw new Error(
+          `the published ${render.view}.png does not match the capture (channel ${channel}: ${before[channel].toFixed(2)} vs ${after[channel].toFixed(2)})`,
+        );
+      }
+    }
+
+    fs.writeFileSync(path.join(stagingDir, `${render.view}.png`), published);
+    console.log(
+      `  ${render.view.padEnd(8)} ${path.relative(ROOT, path.join(targetDir, `${render.view}.png`))} (${(published.length / 1024).toFixed(0)} KB, ${PUBLISH_WIDTH}x${PUBLISH_HEIGHT})`,
+    );
   }
 
-  const file = path.join(targetDir, `${render.view}.png`);
-  fs.writeFileSync(file, published);
-  console.log(`  ${render.view.padEnd(8)} ${path.relative(ROOT, file)} (${(published.length / 1024).toFixed(0)} KB, ${PUBLISH_WIDTH}x${PUBLISH_HEIGHT})`);
+  // The report is the capture's own record of what was checked, so it is
+  // copied as it stands: the numbers in it are the ones the checks produced.
+  fs.copyFileSync(reportPath, path.join(stagingDir, "report.json"));
+} catch (error) {
+  // Nothing is moved into place until every render and the report are ready,
+  // and a run that fails leaves no half-written directory behind.
+  fs.rmSync(stagingDir, { recursive: true, force: true });
+  console.error(error instanceof Error ? error.message : String(error));
+  process.exit(1);
 }
 
-// The report is the capture's own record of what was checked, so it is copied
-// as it stands: the numbers in it are the ones the checks produced.
-fs.copyFileSync(reportPath, path.join(targetDir, "report.json"));
+fs.mkdirSync(targetDir, { recursive: true });
+for (const file of fs.readdirSync(stagingDir)) {
+  fs.copyFileSync(path.join(stagingDir, file), path.join(targetDir, file));
+}
+fs.rmSync(stagingDir, { recursive: true, force: true });
 
 // The README describes what each render shows, which only someone who built
 // the prop can say. A default is written when there is none, so a new asset
@@ -162,7 +206,7 @@ if (!fs.existsSync(readme)) {
       "The verification renders for this prop, produced by",
       "",
       "```",
-      `node scripts/capture_prop_renders.mjs ${assetId}`,
+      `node scripts/capture_prop_renders.mjs ${assetId} --publish`,
       "```",
       "",
       ...labels,

@@ -124,7 +124,12 @@ export function decodePng(buffer) {
         interlace: data[12],
       };
     } else if (type === "PLTE") palette = Buffer.from(data);
-    else if (type === "IDAT") idat.push(Buffer.from(data));
+    else if (type === "tRNS") {
+      // A tRNS chunk makes one colour transparent. Decoding it as opaque
+      // would be a lie about the picture, so it is refused rather than
+      // quietly ignored.
+      throw new Error("decodePng: a PNG with a tRNS transparency chunk is not supported");
+    } else if (type === "IDAT") idat.push(Buffer.from(data));
     else if (type === "IEND") break;
   }
   if (!header) throw new Error("decodePng: the PNG has no header");
@@ -260,11 +265,28 @@ function contributions(srcSize, dstSize) {
 /**
  * Resize RGBA pixels with a separable Lanczos-3 resample.
  *
- * The two passes keep the cost at O(pixels) rather than O(pixels * kernel),
- * and the intermediate is kept in floating point: an 8-bit intermediate would
- * round twice and the second rounding is the one that shows.
+ * The two passes keep the cost at O(pixels * kernel support) instead of
+ * O(pixels * kernel squared), and the intermediate is kept in floating point:
+ * an 8-bit intermediate would round twice and the second rounding is the one
+ * that shows.
+ *
+ * A transparent pixel still carries a colour, and averaging that colour into
+ * its visible neighbours leaves a fringe at every transparent edge. The alpha
+ * is folded into the colour before the resample and taken back out after it.
  */
 export function resizeRgba(source, srcWidth, srcHeight, dstWidth, dstHeight) {
+  const pixels = srcWidth * srcHeight;
+
+  // The premultiplied copy is what the resample reads.
+  const input = new Float32Array(pixels * 4);
+  for (let i = 0; i < pixels; i++) {
+    const alpha = source[i * 4 + 3] / 255;
+    input[i * 4] = source[i * 4] * alpha;
+    input[i * 4 + 1] = source[i * 4 + 1] * alpha;
+    input[i * 4 + 2] = source[i * 4 + 2] * alpha;
+    input[i * 4 + 3] = source[i * 4 + 3];
+  }
+
   const horizontal = contributions(srcWidth, dstWidth);
   const vertical = contributions(srcHeight, dstHeight);
 
@@ -279,10 +301,10 @@ export function resizeRgba(source, srcWidth, srcHeight, dstWidth, dstHeight) {
       for (let k = 0; k < indices.length; k++) {
         const weight = weights[k];
         const o = (y * srcWidth + indices[k]) * 4;
-        r += weight * source[o];
-        g += weight * source[o + 1];
-        b += weight * source[o + 2];
-        a += weight * source[o + 3];
+        r += weight * input[o];
+        g += weight * input[o + 1];
+        b += weight * input[o + 2];
+        a += weight * input[o + 3];
       }
       const o = (y * dstWidth + x) * 4;
       intermediate[o] = r;
@@ -292,7 +314,7 @@ export function resizeRgba(source, srcWidth, srcHeight, dstWidth, dstHeight) {
     }
   }
 
-  const out = new Uint8ClampedArray(dstWidth * dstHeight * 4);
+  const resampled = new Float32Array(dstWidth * dstHeight * 4);
   for (let y = 0; y < dstHeight; y++) {
     const { indices, weights } = vertical[y];
     for (let x = 0; x < dstWidth; x++) {
@@ -309,11 +331,29 @@ export function resizeRgba(source, srcWidth, srcHeight, dstWidth, dstHeight) {
         a += weight * intermediate[o + 3];
       }
       const o = (y * dstWidth + x) * 4;
-      out[o] = r;
-      out[o + 1] = g;
-      out[o + 2] = b;
-      out[o + 3] = a;
+      resampled[o] = r;
+      resampled[o + 1] = g;
+      resampled[o + 2] = b;
+      resampled[o + 3] = a;
     }
+  }
+
+  // The alpha comes back out of the colour, and the pixels that ended up
+  // fully transparent take no colour with them.
+  const out = new Uint8ClampedArray(dstWidth * dstHeight * 4);
+  for (let i = 0; i < dstWidth * dstHeight; i++) {
+    const alpha = resampled[i * 4 + 3];
+    if (alpha <= 0) {
+      out[i * 4] = 0;
+      out[i * 4 + 1] = 0;
+      out[i * 4 + 2] = 0;
+      out[i * 4 + 3] = 0;
+      continue;
+    }
+    out[i * 4] = (resampled[i * 4] * 255) / alpha;
+    out[i * 4 + 1] = (resampled[i * 4 + 1] * 255) / alpha;
+    out[i * 4 + 2] = (resampled[i * 4 + 2] * 255) / alpha;
+    out[i * 4 + 3] = alpha;
   }
   return out;
 }
@@ -328,13 +368,25 @@ export function resizeRgba(source, srcWidth, srcHeight, dstWidth, dstHeight) {
 export function resizePng(buffer, width, height) {
   const image = decodePng(buffer);
   const pixels = resizeRgba(image.data, image.width, image.height, width, height);
-  const rgb = new Uint8Array(width * height * 3);
-  let alpha = 255;
+
+  // Whether the image kept its own transparency decides the format, and the
+  // two encodings need their own pixel buffer: RGB is three bytes a pixel
+  // and RGBA is four.
+  let opaque = true;
   for (let i = 0; i < width * height; i++) {
-    rgb[i * 3] = pixels[i * 4];
-    rgb[i * 3 + 1] = pixels[i * 4 + 1];
-    rgb[i * 3 + 2] = pixels[i * 4 + 2];
-    if (pixels[i * 4 + 3] !== 255) alpha = 0;
+    if (pixels[i * 4 + 3] !== 255) {
+      opaque = false;
+      break;
+    }
   }
-  return encodePng(width, height, rgb, alpha === 255 ? 3 : 4);
+  if (opaque) {
+    const rgb = new Uint8Array(width * height * 3);
+    for (let i = 0; i < width * height; i++) {
+      rgb[i * 3] = pixels[i * 4];
+      rgb[i * 3 + 1] = pixels[i * 4 + 1];
+      rgb[i * 3 + 2] = pixels[i * 4 + 2];
+    }
+    return encodePng(width, height, rgb, 3);
+  }
+  return encodePng(width, height, pixels, 4);
 }
