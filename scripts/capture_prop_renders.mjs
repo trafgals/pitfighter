@@ -2,6 +2,7 @@
 // Capture verification renders of a 3D prop and check it against its spec.
 //
 //   node scripts/capture_prop_renders.mjs <asset_id>
+//   node scripts/capture_prop_renders.mjs <asset_id> --publish
 //
 // The asset is looked up in data/asset_manifest.json, rendered from three
 // fixed angles in headless Chrome, and measured against the budgets the
@@ -10,10 +11,14 @@
 // or a grip-normalized prop's handle. The renders and the report are written
 // to test-output/props/<asset_id>/.
 //
+// With --publish the renders are then put into the repository at the size a
+// reviewer opens them at, which is the whole publish step: docs/props/ is
+// never written by hand.
+//
 // This is the gate a human reviewer looks at before the prop is allowed into
 // the game, so it fails loudly: a missing budget check, an out-of-spec
 // dimension or a mesh that will not load all end in a non-zero exit.
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -28,9 +33,12 @@ const HEIGHT = 1100;
 
 const assetId = process.argv[2];
 if (!assetId) {
-  console.error("usage: node scripts/capture_prop_renders.mjs <asset_id>");
+  console.error("usage: node scripts/capture_prop_renders.mjs <asset_id> [--publish]");
   process.exit(2);
 }
+
+// Whether the run also publishes the renders into the repository.
+const publish = process.argv.includes("--publish");
 
 const manifestPath = path.join(ROOT, "data/asset_manifest.json");
 const manifest = fs.existsSync(manifestPath) ? JSON.parse(fs.readFileSync(manifestPath, "utf8")) : { assets: [] };
@@ -449,7 +457,25 @@ async function main() {
     console.error("FAILED:");
     for (const item of failed) console.error(`  - ${item.message}${item.detail ? ` (${item.detail})` : ""}`);
   }
-  teardown(failed.length ? 1 : 0);
+
+  // The publish step puts the review renders into the repository, resized to
+  // the size they are committed at. It runs only on a green capture: a
+  // rejected asset must not end up in front of a reviewer as if it had
+  // passed, and a failed capture's images look perfectly fine.
+  //
+  // PROP_PUBLISH_OUT sends the published renders somewhere else, which is
+  // how the step is exercised without writing to docs/props/.
+  let published = true;
+  if (publish && !failed.length) {
+    const out = process.env.PROP_PUBLISH_OUT ? ["--out", process.env.PROP_PUBLISH_OUT] : [];
+    const result = spawnSync(process.execPath, [path.join(ROOT, "scripts/publish_prop_renders.mjs"), assetId, ...out], {
+      cwd: ROOT,
+      stdio: "inherit",
+    });
+    published = result.status === 0;
+    if (!published) console.error("the publish step failed");
+  }
+  teardown(failed.length || !published ? 1 : 0);
 }
 
 main().catch((error) => {
