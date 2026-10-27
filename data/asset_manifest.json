@@ -125,11 +125,19 @@
       "poly_budget": 30000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 14,
-        "height": 34,
-        "depth": 12
+        "width": 14.0,
+        "height": 52.0,
+        "depth": 51.0
       },
       "status": "gate:2-review-turnaround",
+      "pivot": {
+        "convention": "grip_normalized",
+        "origin": "the handle grip: the origin sits at the centre of the cordovan leather-wrapped grip handle, on the grip's axis",
+        "forward": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "note": "The grip's tip sits 8 cm behind the origin and the last's square toe anvil 43 cm in front of it, so the prop spans 51 cm along Z. The cast last itself runs 34 cm from the heel socket to the toe and is 14 cm wide, and the brass sizing plate stands 52 cm above the sole, which is the prop's lowest point. Measured off the approved alpha cutout and turnaround sheet; the last's 34 cm length and 14 cm width are the figures in the issue's pivot spec."
+      },
       "reference_concept": "public/tex/characters/tabitha_pegg.png",
       "alpha_cutout": "public/tex/props/flux3_pegg_shoelast_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_pegg_shoelast_turnaround.png",
