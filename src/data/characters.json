@@ -419,6 +419,15 @@
       "bleeds": "As its own craft.",
       "tip": "any",
       "note": "The limbs are rolled from the other crafts at the start of each bout. The game already rolls a limb's traits per match (src/sim/limbs.ts); this is the same idea, made visible."
+    },
+    {
+      "id": "bamboo-samovar",
+      "name": "Bamboo and Samovar",
+      "look": "Lacquered amber bamboo canes bound in engraved brass hoops, miniature pressurized tea boilers, turn-taps at the wrists hissing white jasmine steam.",
+      "hit": "A hollow wooden clack with a bright brass ting and a sharp hiss of steam.",
+      "breaks": "Bamboo splinters along the grain and boiling water sprays from the samovar valves.",
+      "bleeds": "Amber fermented tea and steam mix with the blood.",
+      "tip": "fist"
     }
   ],
   "vocabulary": {
@@ -6602,15 +6611,15 @@
       }
     },
     {
-      "id": "professor-thrip",
-      "name": "Professor Emmeline Thrip",
+      "id": "percival-crump",
+      "name": "Percival \"Oolong\" Crump",
       "style": "Kung Fu",
-      "blurb": "An entomologist who drank her own mantis tincture. Do hold still; I've never seen a specimen quite like you.",
-      "body": "#d8c0a4",
-      "accent": "#2e4a2a",
-      "family": "kungfu",
-      "special": "spSpin",
-      "specialName": "THE WHIRLING MANTIS",
+      "blurb": "An eccentric East India tea merchant whose limbs brew boiling jasmine tea while he sways inebriated through combat.",
+      "body": "#d2a679",
+      "accent": "#5c2a38",
+      "family": "technique",
+      "special": "spTeaWhirl",
+      "specialName": "DRUNKEN DRAGON'S BREW",
       "stats": {
         "speed": 1.25,
         "startup": -4,
@@ -6648,8 +6657,8 @@
         "dist": 3,
         "dur": 34
       },
-      "short": "THRIP",
-      "title": "The Mantis",
+      "short": "CRUMP",
+      "title": "The Drunken Tea-Master",
       "lineage": [
         "Kung Fu",
         "Speed",
@@ -6665,43 +6674,45 @@
         "difficulty": 4
       },
       "profile": {
-        "age": 38,
-        "from": "the Old Sorrow Natural History Society, Museum Row",
-        "trade": "Entomologist, Fellow of the Society",
-        "height": "1.52 m",
-        "bio": "Professor Emmeline Thrip spent twenty years studying the orchid mantis in the Society's glasshouses, and learned from it the oldest fighting form she knows: stillness, then the strike. The Society would not let a woman lecture, so she distilled a tincture from the mantis to prove a point about inheritance and drank it in front of them. Her forearms split and grew into green chitin raptorial claws, her eyes are going compound behind her spectacles, and wings are beginning under her jacket. She cannot stop it. She fights in the Sump for specimens, which the Society will not give her, and because she wants to see the change through.",
-        "personality": "Brilliant, shy, curious, completely unsentimental. She regards everything in the Sump, herself included, as a fascinating specimen.",
-        "manners": "Apologetic, academic: 'Do hold still,' 'I beg your pardon, I'm only looking,' and the Latin names of what she is breaking. Thanks her opponents for their contribution to science.",
-        "violence": "Insect-quick and precise: she pins limbs with entomology pins and snips with the claws. She has a horrible fondness for heads.",
-        "otherSelf": "The Metamorphosis: the full dose. The wings unfold, the eyes go green and faceted, her head tilts like the insect's, and she stops speaking human words.",
+        "age": 50,
+        "from": "Crump & Sons Tea Importers, East India Wharves",
+        "trade": "Tea Merchant, Distiller, Zui Quan Master",
+        "height": "1.68 m",
+        "bio": "Percival Crump spent thirty years along the Pearl River tea factories before a dock crane collapsed his arms. Rather than accept wooden pegs, he commissioned lacquered bamboo prosthetics housing miniature brass samovar boilers that brew scalding fermented tea. In combat, he appears hopelessly tipsy, swaying with daintily balanced porcelain teacups, only to unleash devastating Drunken Kung Fu with clouds of scalding jasmine steam.",
+        "personality": "Genial, chuckling, slyly observant, deeply cultured. Feigns befuddlement while measuring every centimeter of distance.",
+        "manners": "Apologizes profusely for spilling scalding tea on opponents; insists on offering a fresh cup before snapping a collarbone.",
+        "violence": "Fluid, unpredictable, swaying strikes with bamboo elbows and palm heel thrusts accompanied by hissing steam vents.",
+        "otherSelf": "Over-Steeped: he downs a flask of 100-proof fermented pu-erh rum; the samovar vents shriek like teakettles, and his swaying becomes lightning-fast.",
         "rivals": [
           {
-            "id": "matron-kilnworth",
-            "why": "The Matron calls her a quack and a poisoner and had her barred from the Infirmary."
+            "id": "bosun-rook",
+            "why": "Rook's cutter once impounded Crump's smuggled consignment of high-mountain oolong."
           }
         ],
-        "partner": {
-          "id": "mortimer-crape",
-          "why": "He lets her study the bodies before he buries them."
-        },
+        "partner": [
+          {
+            "id": "hezekiah-smelt",
+            "why": "Smelt built the brass samovar boilers inside Crump's bamboo arms."
+          }
+        ],
         "quotes": {
-          "intro": "Do hold still. I've never seen a specimen quite like you.",
-          "appeal": "Ladies and gentlemen, observe: the strike is faster than the eye.",
-          "victory": "Fascinating. I'll need the head.",
-          "defeat": "Note... the time of... emergence..."
+          "intro": "One lump or two, my dear fellow? Do mind the scald.",
+          "appeal": "Behold, good people: the gentle art of the steeped leaf!",
+          "victory": "A delightful brew! Now, let us find a rag for that blood.",
+          "defeat": "The pot... has gone... cold..."
         }
       },
       "limbs": {
-        "craft": "mantis-chitin",
-        "arms": "Both forearms are raptorial claws: lacquer-green chitin with rows of serrated spines along the inside, a hooked tip folding back against the forearm. Her hands are still there, small and human, at the hook.",
-        "legs": "Her own, but thin and jointed oddly at the ankle, with green chitin spreading up from the feet.",
-        "tip": "claw",
+        "craft": "bamboo-samovar",
+        "arms": "Lacquered amber bamboo canes bound in engraved brass hoops with miniature pressurized tea-samovar boilers and turn-taps at the wrists.",
+        "legs": "Turned bamboo rods with brass tip ferrules and kung-fu cloth slippers.",
+        "tip": "fist",
         "lean": {
-          "mass": 0.85,
-          "length": 1.1,
-          "swing": 1.2
+          "mass": 0.95,
+          "length": 1.0,
+          "swing": 1.15
         },
-        "wear": "Chitin cracks and leaks green ichor; a broken spine snaps off in the wound. She regrows spines over the match."
+        "wear": "Bamboo flexes rather than breaks; when over-stressed, steam vents hiss and spray boiling tea."
       },
       "moves": {
         "high": [
