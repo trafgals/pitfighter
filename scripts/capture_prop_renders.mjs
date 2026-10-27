@@ -5,9 +5,10 @@
 //
 // The asset is looked up in data/asset_manifest.json, rendered from three
 // fixed angles in headless Chrome, and measured against the budgets the
-// manifest records: triangle count, file size, dimensions and the
-// head-socket frame. The renders and the report are written to
-// test-output/props/<asset_id>/.
+// manifest records: triangle count, file size, dimensions and the frame the
+// manifest's pivot convention describes - a head-socket prop's base opening,
+// or a grip-normalized prop's handle. The renders and the report are written
+// to test-output/props/<asset_id>/.
 //
 // This is the gate a human reviewer looks at before the prop is allowed into
 // the game, so it fails loudly: a missing budget check, an out-of-spec
@@ -56,8 +57,20 @@ const validation = entry?.validation ?? {};
 // defaults, so a missing badge there is still a failure and not a check that
 // quietly goes away.
 const hasValidation = !!entry?.validation;
-const rimMeshName = validation.rim_mesh ?? "Crown_Opening_Rim";
-const frontMeshName = validation.front_mesh ?? (hasValidation ? null : "Brunswick_Star_Badge_Plate");
+// A head-socket prop is placed by its base opening: the rim lies on the
+// origin's plane and the hat's axis runs up through it. A grip-normalized
+// prop is placed by its handle instead - there is no rim to measure, and
+// asking one of those props for a crown opening is a check no build of it
+// could ever pass. The manifest's pivot convention is what tells the two
+// apart, and a head-socket prop keeps the helmet's defaults either way.
+const pivotConvention = entry?.pivot?.convention ?? "head_socket_normalized";
+const isHeadSocket = pivotConvention === "head_socket_normalized";
+const rimMeshName = validation.rim_mesh ?? (isHeadSocket ? "Crown_Opening_Rim" : null);
+const frontMeshName = validation.front_mesh ?? (hasValidation || !isHeadSocket ? null : "Brunswick_Star_Badge_Plate");
+// A prop that is placed by its handle says what sits at the origin and what
+// sits in front of it, so the frame can be checked instead of trusted.
+const originMeshName = validation.origin_mesh ?? null;
+const forwardMeshName = validation.forward_mesh ?? null;
 const axisMeshName = validation.axis_mesh ?? null;
 const viewFit = validation.view_fit ?? 0.17;
 const closeupFit = validation.closeup_fit ?? 0.048;
@@ -198,21 +211,26 @@ async function main() {
   );
 
   // The base opening: the crown's head-entry rim must sit on the origin's
-  // plane, and the asset's axis must be centred on X.
-  const rim = report.meshes.find((mesh) => mesh.name === rimMeshName);
-  if (rim) {
-    check(
-      Math.abs(rim.bbox.max[1]) <= 0.002 && Math.abs(rim.bbox.min[1]) <= 0.002,
-      "the base opening sits on the origin's plane (y = 0)",
-      `rim y ${cm(rim.bbox.min[1])}..${cm(rim.bbox.max[1])} cm`,
-    );
-    check(
-      Math.abs(rim.bbox.centre[0]) <= 0.002,
-      "the asset's axis is centred on X",
-      `rim centre x ${cm(rim.bbox.centre[0])} cm`,
-    );
+  // plane, and the asset's axis must be centred on X. A prop that is placed
+  // by its handle has no base opening, so there is nothing to measure there.
+  if (rimMeshName) {
+    const rim = report.meshes.find((mesh) => mesh.name === rimMeshName);
+    if (rim) {
+      check(
+        Math.abs(rim.bbox.max[1]) <= 0.002 && Math.abs(rim.bbox.min[1]) <= 0.002,
+        "the base opening sits on the origin's plane (y = 0)",
+        `rim y ${cm(rim.bbox.min[1])}..${cm(rim.bbox.max[1])} cm`,
+      );
+      check(
+        Math.abs(rim.bbox.centre[0]) <= 0.002,
+        "the asset's axis is centred on X",
+        `rim centre x ${cm(rim.bbox.centre[0])} cm`,
+      );
+    } else {
+      check(false, "the model has a crown opening rim to measure", `${rimMeshName} not found`);
+    }
   } else {
-    check(false, "the model has a crown opening rim to measure", `${rimMeshName} not found`);
+    console.log("  (no base opening declared for this asset: the y = 0 rim check does not apply)");
   }
 
   // +Z is forward: a badge has to be on the front face. Not every prop has
@@ -260,6 +278,39 @@ async function main() {
       );
     } else {
       check(false, "the model has the axis mesh to check", `${axisMeshName} not found`);
+    }
+  }
+
+  // The origin: a prop that is placed by its handle has to have that handle
+  // where the socket expects it - centred on the origin, not wherever the
+  // builder thought the handle belonged.
+  if (originMeshName) {
+    const origin = report.meshes.find((mesh) => mesh.name === originMeshName);
+    if (origin) {
+      check(
+        Math.abs(origin.bbox.centre[0]) <= 0.003 &&
+        Math.abs(origin.bbox.centre[1]) <= 0.003 &&
+        Math.abs(origin.bbox.centre[2]) <= 0.003,
+        "the origin feature is centred on the origin",
+        `centre ${origin.bbox.centre.map(cm).join(", ")} cm`,
+      );
+    } else {
+      check(false, "the model has the origin feature to check", `${originMeshName} not found`);
+    }
+  }
+
+  // The forward direction: the feature the pivot names as forward has to sit
+  // in front of the origin, on +Z.
+  if (forwardMeshName) {
+    const forward = report.meshes.find((mesh) => mesh.name === forwardMeshName);
+    if (forward) {
+      check(
+        forward.bbox.centre[2] > 0.02,
+        "the forward feature is on the front face (+Z)",
+        `centre z ${cm(forward.bbox.centre[2])} cm`,
+      );
+    } else {
+      check(false, "the model has the forward feature to check", `${forwardMeshName} not found`);
     }
   }
 
