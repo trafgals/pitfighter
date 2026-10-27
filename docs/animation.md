@@ -188,12 +188,12 @@ The test fails if contact is off the hit frame, if the speed peak is more than a
 | Samurai Sword | brawler | kick2 | 22 | 53 | 22 | 0 | 22 | 0 |
 | Samurai Sword | brawler | sweep | 28 | 62 | 28 | 0 | 28 | 0 |
 | Samurai Sword | brawler | spBlade | 16 | 49 | 16 | 0 | 15 | -1 |
-| Amateur | boxing | jab1 | 14 | 45 | 14 | 0 | 13 | -1 |
-| Amateur | boxing | jab2 | 11 | 38 | 11 | 0 | 10 | -1 |
-| Amateur | boxing | jab3 | 13 | 40 | 13 | 0 | 12 | -1 |
-| Amateur | boxing | punchFin | 19 | 49 | 19 | 0 | 19 | 0 |
-| Amateur | boxing | kick1 | 20 | 50 | 20 | 0 | 19 | -1 |
-| Amateur | boxing | kick2 | 22 | 53 | 22 | 0 | 22 | 0 |
-| Amateur | boxing | sweep | 28 | 62 | 28 | 0 | 28 | 0 |
+| Amateur | boxing | jab1 | 13 | 44 | 13 | 0 | 12 | -1 |
+| Amateur | boxing | jab2 | 10 | 37 | 10 | 0 | 9 | -1 |
+| Amateur | boxing | jab3 | 12 | 39 | 12 | 0 | 11 | -1 |
+| Amateur | boxing | punchFin | 18 | 48 | 18 | 0 | 18 | 0 |
+| Amateur | boxing | kick1 | 19 | 49 | 19 | 0 | 18 | -1 |
+| Amateur | boxing | kick2 | 21 | 52 | 21 | 0 | 21 | 0 |
+| Amateur | boxing | sweep | 27 | 61 | 27 | 0 | 27 | 0 |
 
 <!-- end of timing table -->

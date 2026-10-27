@@ -195,6 +195,8 @@
     <div class="subtitle" id="model-desc">Production PBR Helmet (Clean Geometry + 2048² UV Texture Map)</div>
     <div class="btn-group">
       <button id="btn-clean" class="active" onclick="switchModel('clean')">★ Production PBR (Clean Topology)</button>
+      <button id="btn-minimax" class="inactive" onclick="switchModel('minimax')">MiniMax (Extruded 3D Badge)</button>
+      <button id="btn-deepseek" class="inactive" onclick="switchModel('deepseek')">DeepSeek 1.75bpw (Strata)</button>
       <button id="btn-ultra" class="inactive" onclick="switchModel('ultra')">UltraShape 1.0 (Voxel Block)</button>
       <button id="btn-trellis" class="inactive" onclick="switchModel('trellis')">Trellis 2 (Hollow/Slab Glitch)</button>
       <button id="btn-multi" class="inactive" onclick="switchModel('multi')">Multi-View (Ray Collision Box)</button>
@@ -220,11 +222,11 @@
   </div>
 
   <div class="metrics-panel" id="metrics-panel">
-    <div>Triangles: <span id="m-tris">6,016</span></div>
-    <div>File Size: <span id="m-size">420 KB</span></div>
+    <div>Triangles: <span id="m-tris">4,992</span></div>
+    <div>File Size: <span id="m-size">407 KB</span></div>
     <div>Topology: <span id="m-solid" style="color: #48bb78;">Clean Quad-based Shell</span></div>
     <div>Texture: <span id="m-vol">2048×2048 PBR Albedo Map</span></div>
-    <div>Badge & Felt: <span id="m-back" style="color: #48bb78;">Right-Side Up Star & Wool</span></div>
+    <div>Badge & Felt: <span id="m-back" style="color: #48bb78;">Sharp Brunwick Star & Wool</span></div>
   </div>
 
   <div class="hint-panel">
@@ -233,7 +235,7 @@
 
   <model-viewer 
     id="viewer"
-    src="./models/props/winch_custodian_helmet_clean_pbr.glb?v=2" 
+    src="./models/props/winch_custodian_helmet_clean_pbr.glb" 
     alt="Custodian Helmet 3D Model" 
     auto-rotate 
     camera-controls 
@@ -250,14 +252,36 @@
 
     const models = {
       clean: {
-        src: './models/props/winch_custodian_helmet_clean_pbr.glb?v=2',
-        desc: 'Production PBR Custodian Helmet (UV-Unwrapped, 2048² Texture, Right-Side Up Brunswick Star)',
-        tris: '6,016',
-        size: '420 KB',
+        src: './models/props/winch_custodian_helmet_clean_pbr.glb',
+        desc: 'Production PBR Custodian Helmet (UV-Unwrapped, 2048² Texture, Real Brunswick Star)',
+        tris: '4,992',
+        size: '407 KB',
         solid: 'Clean Quad-based Shell',
         solidColor: '#48bb78',
         vol: '2048×2048 PBR Albedo Map',
-        back: 'Right-Side Up Star & Wool',
+        back: 'Sharp Brunswick Star & Wool',
+        backColor: '#48bb78'
+      },
+      minimax: {
+        src: './models/props/Constable_Obadiah_Winch_Custodian_Helmet.glb',
+        desc: 'MiniMax Procedural Three.js (Extruded Brunswick Badge & Laurel Wreath)',
+        tris: '48,210',
+        size: '1.98 MB',
+        solid: 'Solid Tapered Crown + Welt',
+        solidColor: '#48bb78',
+        vol: 'Procedural PBR Materials',
+        back: 'Detailed 3D Faceted Badge',
+        backColor: '#48bb78'
+      },
+      deepseek: {
+        src: './models/props/Constable_Winch_Helmet_DeepSeek.glb',
+        desc: 'Local DeepSeek-V4.1-Flash (1.75bpw Strata Procedural Parametric Model)',
+        tris: '12,480',
+        size: '358 KB',
+        solid: 'Solid Lathe Shell',
+        solidColor: '#48bb78',
+        vol: 'Standard PBR Metallic/Roughness',
+        back: 'Faceted Star Rays + Rosettes',
         backColor: '#48bb78'
       },
       ultra: {

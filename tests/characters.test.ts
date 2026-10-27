@@ -32,9 +32,9 @@ const ROSTER: [id: string, style: string][] = [
   ["lady-bulwark", "Boxing"],
   ["percival-crump", "Kung Fu"],
   ["tabitha-pegg", "Tae Kwon Do"],
-  ["mortimer-crape", "Judo Based"],
-  ["sir-peregrine", "Samurai Sword"],
-  ["cuthbert-inkle", "Amateur"],
+  ["martha-crape", "Judo Based"],
+  ["lady-eleanor", "Samurai Sword"],
+  ["tilly-tongs", "Amateur"],
 ];
 
 // The six special shapes keep the game's frame data; the names are the theme's.
@@ -232,7 +232,7 @@ describe("the character design", () => {
     const before = lookOf(10);
     expect(lookOf(10, STYLES[10])).toEqual(before);
     expect(lookOf(10, { style: "nonsense", punch: 99, torso: 99 })).toEqual(before);
-    expect(lookOf(10).def).toBe(CHARACTER_BY_ID["sir-peregrine"].look.def);
+    expect(lookOf(10).def).toBe(CHARACTER_BY_ID["lady-eleanor"].look.def);
   });
 
   it("hands out a copy of the face, so a caller cannot change the design", () => {

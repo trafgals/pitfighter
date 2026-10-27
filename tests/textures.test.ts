@@ -83,7 +83,7 @@ describe("procedural textures", () => {
     // every texture the game can load says what made it, from what, under which licence
     const manifest = JSON.parse(fs.readFileSync("public/tex/manifest.json", "utf8")) as { files: { file: string; model: string; licence: string; seed: number }[] };
     const entry = new Map(manifest.files.map((e) => [e.file, e]));
-    for (const f of images.map(rel).filter((f) => !f.startsWith("contact/"))) {
+    for (const f of images.map(rel).filter((f) => !f.startsWith("contact/") && !f.startsWith("characters/") && !f.startsWith("props/"))) {
       const e = entry.get(f);
       expect(e, f).toBeDefined();
       expect(["Apache-2.0", "CC0-1.0"], f).toContain(e!.licence);

@@ -379,14 +379,21 @@
       }
     },
     {
-      "id": "pawnshop-patchwork",
-      "name": "Pawnshop Patchwork",
-      "look": "Whatever was in the pawnbroker's window: a mismatched set from the other eleven crafts, each limb with a paper pawn ticket tied on with string, numbered.",
-      "hit": "Each limb sounds like its own craft, so every hit sounds different.",
-      "breaks": "As its own craft; the pawn ticket flutters off.",
-      "bleeds": "As its own craft.",
-      "tip": "any",
-      "note": "The limbs are rolled from the other crafts at the start of each bout. The game already rolls a limb's traits per match (src/sim/limbs.ts); this is the same idea, made visible."
+      "id": "cinder-iron",
+      "name": "Cinder Iron and Asbestos",
+      "look": "Scorched asbestos lagging wrapped in copper wire, heavy boiler-tongs forged from pitted cast iron, glowing cherry-red coals pulsing in the forearm vents.",
+      "hit": "A harsh metallic clang like a shovel striking boiler plate, over a dry sizzle and a spray of orange cinders.",
+      "breaks": "The copper binding snaps; the asbestos frays and spills smoking anthracite dust across the floor.",
+      "bleeds": "Iron does not bleed; it spits sparks and trails smoke as it burns into flesh.",
+      "tip": "claw",
+      "note": "The limbs are rolled from the other crafts at the start of each bout. The game already rolls a limb's traits per match (src/sim/limbs.ts); this is the same idea, made visible.",
+      "cue": {
+        "id": "hit-cinder-skin",
+        "category": "impact",
+        "note": "a glowing furnace tongs striking flesh",
+        "prompt": "Heavy cast-iron furnace tongs clamp into meat: a dull iron clang with a sharp sizzle of burning flesh and a shower of sparks. Close microphone, dry room, one single impact.",
+        "seed": 4412
+      }
     },
     {
       "id": "bamboo-samovar",
@@ -1996,8 +2003,8 @@
           }
         ],
         "partner": {
-          "id": "mortimer-crape",
-          "why": "Smelt casts the iron coffins; Crape fills them. A sound arrangement."
+          "id": "martha-crape",
+          "why": "Smelt casts the iron coffins; Mistress Crape lines and fills them. A sound arrangement."
         },
         "quotes": {
           "intro": "My dear sir. A pleasure. Do let me take your hand.",
@@ -2521,12 +2528,12 @@
           "voice": "no words, just a furnace breathing"
         },
         "duo": {
-          "partner": "mortimer-crape",
+          "partner": "martha-crape",
           "name": "Cast and Coffined",
           "archetype": "cinematic",
           "duration": 300,
           "dmg": 30,
-          "anim": "Crape measures the victim; Smelt folds them to the measurements; Crape nails the lid."
+          "anim": "Martha measures the victim; Smelt folds them to the measurements; Martha nails the lid."
         },
         "weapons": {
           "affinity": [
@@ -2758,8 +2765,8 @@
           }
         ],
         "partner": {
-          "id": "cuthbert-inkle",
-          "why": "Her lodger. She feeds him and pawns his things to pay his rent."
+          "id": "tilly-tongs",
+          "why": "The furnace girl down in the deep flues; Nell clears the clinker sumps for her and keeps her from getting drowned in hot slag."
         },
         "quotes": {
           "intro": "For what we are about to receive, may the Lord make us truly thankful.",
@@ -3299,12 +3306,12 @@
           "voice": "she stops saying 'bless you'"
         },
         "duo": {
-          "partner": "cuthbert-inkle",
-          "name": "Rent Day",
+          "partner": "tilly-tongs",
+          "name": "Slag and Sluice",
           "archetype": "cinematic",
           "duration": 270,
           "dmg": 26,
-          "anim": "Inkle reads the arrears from a ledger while Nell beats them out of the victim's pockets, one blow per shilling."
+          "anim": "Tilly clamps the victim in her red-hot furnace tongs; Nell floods the pit trench and douses them in scalding river muck until the steam stops hissing."
         },
         "weapons": {
           "affinity": [
@@ -4311,8 +4318,8 @@
             "why": "She called his act vulgar in the papers. He has her cutting framed in his dressing room."
           },
           {
-            "id": "mortimer-crape",
-            "why": "The undertaker had already bought Old Ursula's body. Mule had the arms off her before Crape's cart arrived."
+            "id": "martha-crape",
+            "why": "The undertaker had already bought Old Ursula's body. Mule had the arms off her before Crape's mourning carriage arrived."
           }
         ],
         "partner": {
@@ -5871,8 +5878,8 @@
           }
         ],
         "partner": {
-          "id": "sir-peregrine",
-          "why": "Her intended. They fight beautifully together and loathe each other."
+          "id": "lady-eleanor",
+          "why": "Her betrothed. They fight with terrifying elegance together and loathe each other from behind their lace."
         },
         "quotes": {
           "intro": "Lady Hester Bulwark. Do forgive me in advance.",
@@ -6443,12 +6450,12 @@
           "voice": "her apologies stop; she laughs her father's laugh"
         },
         "duo": {
-          "partner": "sir-peregrine",
+          "partner": "lady-eleanor",
           "name": "The Engagement",
           "archetype": "cinematic",
           "duration": 300,
           "dmg": 30,
-          "anim": "Sir Peregrine holds the victim in a waltz and apologises; Hester fires rams into their back on the beat; they bow to each other over the body without touching."
+          "anim": "Lady Eleanor holds the victim in a waltz and apologises; Hester fires rams into their back on the beat; they bow to each other over the body without touching."
         },
         "weapons": {
           "affinity": [
@@ -8213,10 +8220,10 @@
       }
     },
     {
-      "id": "mortimer-crape",
-      "name": "Mr. Mortimer Crape",
+      "id": "martha-crape",
+      "name": "Mistress Martha Crape",
       "style": "Judo Based",
-      "blurb": "He measures you for your coffin before the bell. If you do not fit, he will make you fit.",
+      "blurb": "She measures you for your pine box before the bell. If you do not fit, her jet joints will fold you until you do.",
       "body": "#e0d6cc",
       "accent": "#141214",
       "family": "grappler",
@@ -8234,7 +8241,7 @@
         "grabReach": 1.15
       },
       "kit": {
-        "size": 1.1,
+        "size": 1.05,
         "horns": "none",
         "tail": "none",
         "gear": [
@@ -8246,7 +8253,7 @@
         "def": 0.7,
         "scar": 0,
         "paint": 3,
-        "wrinkles": true,
+        "wrinkles": false,
         "stubble": false,
         "veins": false
       },
@@ -8259,7 +8266,7 @@
         "dur": 52
       },
       "short": "CRAPE",
-      "title": "Undertaker & Joiner",
+      "title": "The Mourning Joiner",
       "lineage": [
         "Judo Based",
         "Submission"
@@ -8274,24 +8281,24 @@
         "difficulty": 4
       },
       "profile": {
-        "age": "unknown; he has looked sixty for forty years",
+        "age": 38,
         "from": "Crape & Daughter, Funeral Furnishers, Lychgate Lane",
         "trade": "Undertaker, coffin-maker, mute",
-        "height": "1.95 m",
-        "bio": "Crape & Daughter have buried Old Sorrow's dead for four generations. The present Mr. Crape lost the use of his arms and legs to a wasting illness in his youth, and his daughter, who was the joiner of the firm, made him new ones from the stock: mourning jet over whalebone stays, laced like a widow's corset, jointed so they bend any way a body needs to be bent. His daughter has since died, and is on display in the shop window, very nicely done. He takes every opponent's measurements before the bell and has a coffin built to them. If they do not fit it at the end of the bout, he makes them fit. He fights in the Sump because it is very good for business.",
+        "height": "1.82 m",
+        "bio": "Crape & Daughter have buried Old Sorrow's dead for four generations. Mistress Martha Crape was the joiner who carved the firm's finest caskets. When wasting fever claimed her limbs, she crafted her own replacements from stock: faceted black mourning jet fitted over flexible cream whalebone stays, laced like a widow's corset with 360-degree rotating mortuary joints. Her father Mortimer now rests beneath the flagstones, but the firm endures. She measures every opponent with brass mortuary calipers before the bell and has a box ready. If they do not fit it at the end of the bout, she gently folds their limbs until they do. She fights in the Sump because bereavement in Old Sorrow is a booming trade.",
         "personality": "Solemn, gentle, soft-spoken, unhurried. He is comforting. He is the last face many people see and he takes that seriously.",
-        "manners": "Condolences: 'My deepest sympathies,' 'We'll have you looking your best.' Removes his hat. Takes measurements with a tape. Never touches anyone roughly, even while folding them in half.",
-        "violence": "Submissions and dislocations: he folds people. Arms behind backs, knees past ears, spines into boxes. Judo throws into the floor followed by a lock that finishes it.",
-        "otherSelf": "The Last Measure: a draught of embalming fluid. His face goes grey, his lacing tightens, and his holds cannot be broken.",
+        "manners": "Condolences: 'My deepest sympathies,' 'Rest easy now; we'll have you looking your best.' Adjusts her black veil. Takes measurements with brass calipers. Never touches anyone roughly, even while folding them in half.",
+        "violence": "Submissions and dislocations: she folds people into boxes. Arms tucked behind ribs, knees folded past ears, spines curved to neat right angles. Judo throws into the muck followed by a lock that snaps cleanly.",
+        "otherSelf": "The Last Measure: a draught of embalming fluid. Her skin goes grey, the silk corset lacing tightens with a shudder, and her holds cannot be broken.",
         "rivals": [
           {
             "id": "bartholomew-mule",
-            "why": "Crape had bought Old Ursula's body, and Mule took the arms off her before the cart arrived."
+            "why": "Crape & Daughter had contracted for Old Ursula's burial; Mule stripped the mechanical limbs before the mourning carriage could arrive."
           }
         ],
         "partner": {
           "id": "hezekiah-smelt",
-          "why": "Smelt casts the iron coffins. Crape fills them."
+          "why": "Smelt casts the iron coffins. Martha lines and fills them."
         },
         "quotes": {
           "intro": "My deepest sympathies. If I might just take your measurements.",
@@ -8834,7 +8841,7 @@
           "archetype": "cinematic",
           "duration": 300,
           "dmg": 30,
-          "anim": "Crape measures the victim; Smelt folds them to the measurements; Crape nails the lid."
+          "anim": "Martha measures the victim; Smelt folds them to the measurements; Martha nails the lid."
         },
         "weapons": {
           "affinity": [
@@ -8852,7 +8859,7 @@
         }
       },
       "art": {
-        "silhouette": "A very tall, very thin man in black with a tall top hat trailing long crape streamers, his black jet arms hanging too long.",
+        "silhouette": "A tall, slender undertaker in a trailing black bombazine mourning gown and a tall top hat trailing long crape weepers over a white painted face, carrying brass mortuary calipers.",
         "build": "Gaunt, stooped, unnaturally long in the limbs.",
         "palette": {
           "primary": {
@@ -8904,7 +8911,7 @@
       },
       "sound": {
         "voice": {
-          "casting": "a soft, deep, sonorous bass, ageless",
+          "casting": "a quiet, melodic, eerie Victorian contralto; polite, soothing, and somber",
           "accent": "a hushed funeral-parlour pronunciation",
           "texture": "whispered, intimate, sympathetic; never loud"
         },
@@ -8976,11 +8983,11 @@
           "colour": "grey ivory"
         },
         "cloth": {
-          "idea": "black wool frock coat and silk waistcoat, black crape mourning band, rain-dark",
+          "idea": "black bombazine mourning gown, high collar and silk buttons, black crape veil, rain-dark",
           "colour": "deep black"
         },
         "face": {
-          "idea": "a long pale kind mournful face painted with a faint white skull mask, sunken eyes, long white hair",
+          "idea": "a pale solemn mournful face behind a sheer black mourning veil, painted with a faint white skull mask, dark sunken eyes",
           "colour": "grey ivory with white paint"
         },
         "limb": {
@@ -8990,10 +8997,10 @@
       }
     },
     {
-      "id": "sir-peregrine",
-      "name": "Sir Peregrine Ashby-Lisle, Bt.",
+      "id": "lady-eleanor",
+      "name": "Lady Eleanor Ashby-Lisle",
       "style": "Samurai Sword",
-      "blurb": "Forty-one duels, silver arms, a swordstick and impeccable manners. He is so terribly sorry.",
+      "blurb": "Forty-one duels, obsidian glass and weeping silver arms, an ebony swordstick and aristocratic grief. She is so terribly sorry.",
       "body": "#f2dcc8",
       "accent": "#2a2a34",
       "family": "brawler",
@@ -9011,7 +9018,7 @@
         "grabReach": 1
       },
       "kit": {
-        "size": 1,
+        "size": 1.0,
         "horns": "none",
         "tail": "none",
         "gear": [
@@ -9021,7 +9028,7 @@
       },
       "look": {
         "def": 0.85,
-        "scar": 2,
+        "scar": 1,
         "paint": 0,
         "wrinkles": false,
         "stubble": false,
@@ -9036,8 +9043,8 @@
         "dist": 4,
         "dur": 52
       },
-      "short": "SIR PEREGRINE",
-      "title": "The Most Courteous Man in Old Sorrow",
+      "short": "LADY ELEANOR",
+      "title": "The Weeping Duelist",
       "lineage": [
         "Samurai Sword",
         "Gun"
@@ -9052,24 +9059,24 @@
         "difficulty": 5
       },
       "profile": {
-        "age": 34,
+        "age": 31,
         "from": "Lisle House, Regent's Terrace, the Heights",
-        "trade": "Baronet, duellist, patron of the arts",
-        "height": "1.83 m",
-        "bio": "Sir Peregrine Ashby-Lisle has fought forty-one duels and apologised before, during and after every one. He lost his right arm in the ninth and his left in the twenty-sixth, and the family silversmiths made him new ones: ebony sheathed in hallmarked silver filigree, with the Ashby-Lisle crest at each shoulder. He carries a swordstick and, for emergencies, a little pepperbox pistol, and he is the finest blade in Old Sorrow. He sends flowers and a handwritten card of condolence to every widow he makes, and he has made a great many. He fights in the Sump because a gentleman must have an occupation, because he is very deeply in debt, and because he is engaged to Lady Hester Bulwark, who intends to kill him, and he would like to be in practice.",
-        "personality": "Charming, gentle, considerate, utterly and serenely monstrous. He is incapable of rudeness and incapable of mercy, and sees no contradiction.",
-        "manners": "The most courteous man in the city. Bows, removes his hat, asks permission ('Might I trouble you for your spine?'), apologises with every cut, thanks his opponents warmly, and never once raises his voice. He tips the Sump's attendants. He remembers everyone's name. He writes the condolence card during the bout.",
-        "violence": "Horrific. He flays, he carves, he disembowels with the swordstick in long, neat, unhurried strokes, and he carves his monogram into his opponents as a courtesy, so the family knows who to write to.",
-        "otherSelf": "The Other Sir Peregrine: a drop of the family tonic in his tea. He is still perfectly polite, but now the apologies are screamed, the silver tarnishes black, and he laughs.",
+        "trade": "Baronetess, duellist, patron of the arts",
+        "height": "1.78 m",
+        "bio": "Lady Eleanor Ashby-Lisle has fought forty-one duels and wept sincere tears of grief before, during, and after every one. When both her arms were severed in family honour-debts on the frozen Regent's Canal, the Lisle silversmiths cast her replacements in sculpted obsidian glass and antique silver filigree, with stylized silver tears streaming down each forearm. She carries a hollowed ebony swordstick fitted with a Damascus steel blade and an emergency pepperbox pistol. She sends white lilies and a mourning letter of condolence to every household she widens. She fights in the Sump because high-society debts are merciless, and because her betrothal to Lady Hester Bulwark is an armed truce neither expects to survive.",
+        "personality": "Aristocratic, mournful, impeccably courteous, utterly and serenely lethal. She weeps genuine tears for the cruelty of the world while carving her monogram into her foes.",
+        "manners": "The most courteous duelist in Old Sorrow. Curtsies, adjusts her veil, asks permission ('Might I trouble you for your spine?'), apologises with every cut, and writes a card of condolence while her opponent bleeds.",
+        "violence": "Deft, aristocratic fencing butchery. She flays and carves with the swordstick in long, elegant, waltzing strokes, concluding with a precise puncture of the liver.",
+        "otherSelf": "The Other Eleanor: under the Tincture, aristocratic restraint drops entirely. She stops weeping and carves with cold, terrifying speed, smiling as she cuts.",
         "rivals": [
           {
-            "id": "cuthbert-inkle",
-            "why": "Inkle is the junior clerk at the firm that holds the Ashby-Lisle debts, and keeps serving him notice. Sir Peregrine is very fond of him and intends to kill him gently."
+            "id": "tilly-tongs",
+            "why": "Tilly melted down the Lisle estate's silver carriage fittings in the Sump furnaces; Eleanor considers the slag an aesthetic affront to her ancestral coat of arms."
           }
         ],
         "partner": {
           "id": "lady-bulwark",
-          "why": "His intended. They waltz beautifully, and he admires her very much."
+          "why": "Her betrothed in an aristocratic alliance of iron and silver; they waltz together with cold, deadly precision."
         },
         "quotes": {
           "intro": "Sir Peregrine Ashby-Lisle. I am so terribly sorry about all this.",
@@ -9630,7 +9637,7 @@
           "archetype": "cinematic",
           "duration": 300,
           "dmg": 30,
-          "anim": "He holds the victim in a waltz and apologises; Hester fires rams into their back on the beat; they bow to each other over the body without touching."
+          "anim": "Lady Eleanor holds the victim in a waltz and apologises; Hester fires rams into their back on the beat; they bow to each other over the body without touching."
         },
         "weapons": {
           "affinity": [
@@ -9647,7 +9654,7 @@
         }
       },
       "art": {
-        "silhouette": "A tall, slim, beautifully dressed gentleman in a morning coat and a grey silk top hat, a monocle, a swordstick held like a cane, silver arms gleaming at the cuffs.",
+        "silhouette": "A slender aristocratic duelist in a black silk mourning gown with fencing cutaway and a grey silk top hat, carrying an ebony swordstick and weeping silver arms.",
         "build": "Tall, slim, elegant, a fencer's balance.",
         "palette": {
           "primary": {
@@ -9699,17 +9706,17 @@
       },
       "sound": {
         "voice": {
-          "casting": "a gentle, warm, beautifully modulated light baritone in his thirties",
-          "accent": "the highest received pronunciation, unhurried, every consonant finished",
-          "texture": "intimate, apologetic, charming; the screams under the Tincture are the same lines at full voice"
+          "casting": "an aristocratic, refined, melancholy soprano in her early thirties",
+          "accent": "the highest received pronunciation, unhurried, crisp, and tragic",
+          "texture": "intimate, grieving, apologetic, charming; genuinely mournful with every cut"
         },
         "lines": {
           "intro": [
-            "Sir Peregrine Ashby-Lisle. I am so terribly sorry about all this.",
+            "Lady Eleanor Ashby-Lisle. I am so terribly sorry about all this.",
             "Might I trouble you for your spine?"
           ],
           "appeal": [
-            "Forgive the mess. Might I trouble you for a towel?",
+            "Forgive the mess. Might I trouble you for a handkerchief?",
             "Ladies and gentlemen, I am mortified."
           ],
           "hit": [
@@ -9725,8 +9732,8 @@
           "special": "A thousand pardons!",
           "tincture": "I'M SO TERRIBLY SORRY!",
           "victory": [
-            "Thank you. Thank you so much. I'll write to your mother.",
-            "Do give my regards to the family."
+            "Thank you. Thank you so much. I shall write to your mother tonight.",
+            "Do give my deepest regards to the family."
           ],
           "defeat": "How... very... rude..."
         },
@@ -9750,14 +9757,14 @@
         },
         "cues": [
           {
-            "id": "peregrine-draw",
+            "id": "eleanor-draw",
             "category": "foley",
             "note": "the swordstick's blade drawn",
             "prompt": "A thin steel blade is drawn quickly from a wooden cane: a sharp metallic hiss and a bright ring. Close microphone, dry room, one single draw.",
             "seed": 4700
           },
           {
-            "id": "peregrine-pistol",
+            "id": "eleanor-pistol",
             "category": "impact",
             "note": "the pepperbox pistol shot",
             "prompt": "A small old pistol is fired once: a sharp crack with a puff of black powder, in a stone yard in the rain. One single shot.",
@@ -9768,127 +9775,130 @@
       "texture": {
         "seed": 5111,
         "skin": {
-          "idea": "fair, smooth, well-kept skin, a fine duelling scar on the right cheek",
-          "colour": "fair"
+          "idea": "fair, smooth, porcelain skin with a fine fencing scar along the jawline",
+          "colour": "porcelain"
         },
         "cloth": {
-          "idea": "charcoal wool morning coat with a silk lapel, dove-grey silk waistcoat, grey striped trousers, white spats",
-          "colour": "charcoal and dove grey"
+          "idea": "black silk mourning gown with fencing cutaways, silver mourning brooches, lace veil, spats",
+          "colour": "charcoal and midnight black"
         },
         "face": {
-          "idea": "a handsome fine-featured smiling face, blue eyes, a small blond moustache, a duelling scar on the right cheek",
-          "colour": "fair with blond hair"
+          "idea": "a striking aristocratic mournful face, weeping grey eyes, dark hair pinned beneath velvet top hat, fencing scar",
+          "colour": "fair with dark hair"
         },
         "limb": {
-          "idea": "polished black ebony under a fine hallmarked silver filigree of leaves and a family crest, sharpened silver nails",
-          "colour": "mirror silver over black"
+          "idea": "sculpted black obsidian glass sheathed in hallmarked silver vine filigree with stylized weeping silver tears",
+          "colour": "mirror silver over obsidian"
         }
       }
     },
     {
-      "id": "cuthbert-inkle",
-      "name": "Mr. Cuthbert Inkle",
+      "id": "tilly-tongs",
+      "name": "Tilly \"Furnace-Tongs\"",
       "style": "Amateur",
-      "blurb": "He pawned his own arms and legs and fights in borrowed ones. Terribly sorry, he's never done this before.",
-      "body": "#ddb894",
-      "accent": "#3a3428",
+      "blurb": "Scorched boiler-tongs, glowing clinker arms, rolled dungarees, and a violent disrespect for her betters.",
+      "body": "#d8b898",
+      "accent": "#c2441c",
       "family": "boxing",
       "special": "spCharge",
-      "specialName": "THE OVERDRAFT",
+      "specialName": "FULL DRAUGHT",
       "stats": {
-        "speed": 1,
-        "startup": 2,
-        "punch": 0.85,
-        "kick": 0.85,
-        "grab": 0.85,
-        "reach": 1,
+        "speed": 1.05,
+        "startup": 1,
+        "punch": 1.15,
+        "kick": 0.95,
+        "grab": 1.0,
+        "reach": 1.0,
         "string": 2,
-        "torso": 0.9,
-        "grabReach": 1
+        "torso": 1.0,
+        "grabReach": 1.05
       },
       "kit": {
-        "size": 0.93,
+        "size": 0.98,
         "horns": "none",
         "tail": "none",
         "gear": [
-          "bowler",
-          "lanyard"
+          "headband",
+          "goggles"
         ]
       },
       "look": {
-        "def": 0.7,
-        "scar": 0,
-        "paint": 0,
+        "def": 0.75,
+        "scar": 2,
+        "paint": 1,
         "wrinkles": false,
-        "stubble": true,
-        "veins": false
+        "stubble": false,
+        "veins": true
       },
       "airGrab": {
-        "name": "THE PANICKED EMBRACE",
+        "name": "THE CLINKER DROP",
         "end": "down",
-        "dmg": 9,
+        "dmg": 14,
         "slam": 30,
-        "lift": 0.3,
+        "lift": 0.6,
         "dur": 52
       },
-      "short": "INKLE",
-      "title": "The Articled Clerk",
+      "short": "TILLY",
+      "title": "The Sump Furnace Stoker",
       "lineage": [
-        "Amateur"
+        "Amateur",
+        "Wrestling"
       ],
       "ratings": {
-        "power": 2,
+        "power": 4,
         "speed": 3,
         "reach": 3,
-        "grapple": 2,
-        "defence": 2,
-        "technique": 1,
+        "grapple": 3,
+        "defence": 3,
+        "technique": 2,
         "difficulty": 2
       },
       "profile": {
-        "age": 24,
-        "from": "a back room at Nell Sluice's, Lament Court",
-        "trade": "Articled clerk at Pinchbeck & Gall, Solicitors",
-        "height": "1.72 m",
-        "bio": "Cuthbert Inkle copies deeds at Pinchbeck & Gall for seven shillings a week. To keep his widowed mother out of the Marshalsea he pawned his own arms and legs one at a time at Uncle Gideon's on Crutch Street, and then, being unable to work without arms, rented them back by the week. He cannot afford his own. On bout nights he borrows whatever is in Uncle Gideon's window that evening, each limb with its pawn ticket still tied on: a porcelain arm, a glass leg, a bear's paw, whatever has come in. He has never been in a fight and does not know how. Once he starts, he cannot stop, and he is horrified by himself every time.",
-        "personality": "Timid, earnest, kind, desperate. A small man in a very big trouble, who turns out to be capable of absolutely anything.",
-        "manners": "Abject. Apologises to his opponent, the Gallery, the referee and the furniture. Calls everyone 'sir', including the ladies, and then apologises for that. Tries to shake hands at the wrong moments.",
-        "violence": "Panic-violence: wild, flailing, unskilled, and it does not stop once it starts. He stabs with the steel nib of his pen. The borrowed limbs do things he did not ask them to.",
-        "otherSelf": "In Arrears: a swig of gin for courage. Every limb he has on is swapped at random for another from the pawnshop, and something in his face goes very still.",
+        "age": 22,
+        "from": "Bessemer Basin, The Deep Flues, Old Sorrow Sump",
+        "trade": "Boiler Stoker, Clinker-Smith, Scrapper",
+        "height": "1.70 m",
+        "bio": "Tilly spent seven years shoveling Welsh anthracite into the municipal pumping station boilers until a catastrophic steam blowout took both her arms and left knee. Rather than plead for workhouse charity, she forged her own limbs from the salvage pile: scorched asbestos wraps, braided copper steam lines, and massive cast-iron clinker-tongs that glow cherry-red at the grip. She has no formal ring training whatsoever; her style is pure dockside gouging, headbutts, shovel swings, and clinches where she clamps her glowing tongs onto tender joints until iron sizzles on meat. She fights in the Sump to keep the coal hoppers fed and to crack the skulls of the Heights gentry who treat the workers like fuel.",
+        "personality": "Brash, defiant, filthy-mouthed, and fierce. She laughs in the face of death and regards anyone in a cravat with instant disgust.",
+        "manners": "Spits soot on the floorboards, wipes her brow with a greasy bandanna, mocks highfalutin stances, and taunts opponents: 'Got a bit of clinker in your craw, darling?'",
+        "violence": "Chaotic and savage furnace brawling: iron-tongs clamping and twisting, burning forearm smashes, ear-claps, knee-tramples, and wild haymakers that whistle with escaping boiler steam.",
+        "otherSelf": "Full Draught: she kicks open her bypass valve; her tongs burn white-hot and her haymakers trail embers and cinders across the pit.",
         "rivals": [
           {
-            "id": "sir-peregrine",
-            "why": "He has served Sir Peregrine notice of debt nine times. Sir Peregrine always thanks him beautifully and has promised to kill him gently."
+            "id": "lady-eleanor",
+            "why": "Eleanor's silver-and-obsidian arms represent everything Tilly despises about the Heights; Tilly has promised to melt Eleanor down into pig iron."
+          },
+          {
+            "id": "hezekiah-smelt",
+            "why": "Smelt sold cracked furnace plates to Tilly's boiler gang, claiming they were naval grade; the blowout that took her limbs was from his foundry."
           }
         ],
         "partner": {
           "id": "nell-sluice",
-          "why": "His landlady. She feeds him, prays for him, and pawns his things for the rent."
+          "why": "Nell runs the drainage pumps when the boiler pipes burst; they've dragged each other out of scalding mud a dozen times."
         },
-        "quotes": {
-          "intro": "Terribly sorry, sir, I've never done this before.",
-          "appeal": "Was... was that all right? Sorry. Sorry.",
-          "victory": "Oh no. Oh, no. I'm so sorry. Is he... sorry.",
-          "defeat": "Sorry, Mother..."
-        }
+        "quotes": [
+          "Shovel it in or get shoveled, darling.",
+          "Mind the tongs. They're still fresh from the fire."
+        ]
       },
       "limbs": {
-        "craft": "pawnshop-patchwork",
-        "arms": "Whatever came in: rolled each bout from the other eleven crafts, a pawn ticket tied to each wrist with string.",
-        "legs": "The same, a ticket at each ankle; the legs need not match each other or the arms.",
-        "tip": "any",
+        "craft": "cinder-iron",
+        "arms": "Scorched asbestos lagging wrapped with copper steam tubes and massive cast-iron furnace tongs glowing cherry-red.",
+        "legs": "Sheet-iron shins bolted to heavy dockworker boots with slag-calked soles.",
+        "tip": "claw",
         "lean": {
-          "mass": 1,
+          "mass": 1.15,
           "length": 1,
-          "swing": 1
+          "swing": 1.2
         },
-        "wear": "Each limb wears and breaks like its own craft. When one comes off, Uncle Gideon's man shouts the ticket number from the Gallery."
+        "wear": "The iron tongs pit and slag over prolonged bouts; when damaged, steam leaks from ruptured copper tubes with an angry hiss."
       },
       "moves": {
         "high": [
           {
-            "id": "sorry",
-            "name": "Sorry",
+            "id": "cinder-jab",
+            "name": "Cinder Jab",
             "input": "○",
             "archetype": "jab",
             "limb": "lead arm",
@@ -9897,14 +9907,14 @@
             "active": 3,
             "recovery": 32,
             "dmg": 4,
-            "anim": "A flinching, eyes-shut jab.",
+            "anim": "Snaps a quick left forearm strike, scattering orange sparks from the tongs.",
             "sfx": "the limb's own craft, a little yelp",
             "vfx": "a spray",
             "sim": "jab1"
           },
           {
-            "id": "so-sorry",
-            "name": "So Sorry",
+            "id": "iron-clamp",
+            "name": "Iron Clamp",
             "input": "○ ○",
             "archetype": "straight",
             "limb": "rear arm",
@@ -9913,14 +9923,14 @@
             "active": 3,
             "recovery": 32,
             "dmg": 5,
-            "anim": "A wild round-arm swing that lands by accident.",
+            "anim": "Drives her right tongs forward in a blunt thrust toward the throat.",
             "sfx": "a whoosh, a thud, 'sorry!'",
             "vfx": "a spray",
             "sim": "jab2"
           },
           {
-            "id": "terribly-terribly",
-            "name": "Terribly, Terribly Sorry",
+            "id": "boiler-cross",
+            "name": "Boiler Cross",
             "input": "○ ○ ○",
             "archetype": "finisher",
             "limb": "both arms",
@@ -9930,7 +9940,7 @@
             "recovery": 30,
             "dmg": 8,
             "launch": true,
-            "anim": "Shuts his eyes and swings both arms up together, lifting them by accident.",
+            "anim": "Steps in with full shoulder torque, smashing a heavy cast-iron cross into their cheek.",
             "sfx": "two craft hits, a squeak",
             "vfx": "blood up",
             "sim": "punchFin"
@@ -9938,8 +9948,8 @@
         ],
         "low": [
           {
-            "id": "toe-poke",
-            "name": "A Toe-Poke",
+            "id": "stoker-boot",
+            "name": "Stoker's Boot",
             "input": "← ○",
             "archetype": "snap",
             "limb": "leg",
@@ -9948,14 +9958,14 @@
             "active": 3,
             "recovery": 32,
             "dmg": 4,
-            "anim": "A schoolboy toe-poke to the shin.",
+            "anim": "A heavy steel-toed dock boot kick to the kneecap.",
             "sfx": "a tap, an 'ow'",
             "vfx": "a fleck",
             "sim": "kick1"
           },
           {
-            "id": "trip",
-            "name": "A Trip",
+            "id": "cinder-stamp",
+            "name": "Cinder Stamp",
             "input": "← ○ ○",
             "archetype": "chain",
             "limb": "leg",
@@ -9964,14 +9974,14 @@
             "active": 3,
             "recovery": 34,
             "dmg": 5,
-            "anim": "Trips over his own foot into their knee.",
+            "anim": "Drives her iron heel into the top of their foot with a shower of grit.",
             "sfx": "a stumble, a crack",
             "vfx": "a spray",
             "sim": "kick2"
           },
           {
-            "id": "collapse",
-            "name": "The Collapse",
+            "id": "slag-sweep",
+            "name": "Slag Sweep",
             "input": "← ○ ○ ○",
             "archetype": "reap",
             "limb": "both legs",
@@ -9981,7 +9991,7 @@
             "recovery": 44,
             "dmg": 7,
             "knockdown": true,
-            "anim": "Falls over completely and takes them down with him.",
+            "anim": "Drops low and sweeps both shins with her sheet-iron legs.",
             "sfx": "a tumble, a double splash",
             "vfx": "a wave",
             "sim": "sweep"
@@ -10007,8 +10017,8 @@
         ],
         "regional": [
           {
-            "id": "ink-in-the-eye",
-            "name": "Ink in the Eye",
+            "id": "tongs-crack",
+            "name": "Tongs to the Temple",
             "input": "R1 + ↑ ○",
             "archetype": "single",
             "limb": "lead arm",
@@ -10018,13 +10028,13 @@
             "recovery": 44,
             "dmg": 4,
             "target": "head",
-            "anim": "Flicks his inkpot at their face.",
+            "anim": "Claps both tongs around their ears with a ringing iron crack.",
             "sfx": "a splash, a cry",
             "vfx": "ink and blood in the eyes"
           },
           {
-            "id": "ledger",
-            "name": "The Ledger",
+            "id": "furnace-elbow",
+            "name": "Furnace Elbow",
             "input": "R1 + ○",
             "archetype": "single",
             "limb": "rear arm",
@@ -10034,13 +10044,13 @@
             "recovery": 44,
             "dmg": 5,
             "target": "body",
-            "anim": "Hits them in the stomach with a heavy ledger.",
+            "anim": "A brutal, soot-heavy downward elbow straight into the solar plexus.",
             "sfx": "a book thud",
             "vfx": "they double over"
           },
           {
-            "id": "kick-the-shin",
-            "name": "Kick the Shin",
+            "id": "flue-stomp",
+            "name": "Flue Stomp",
             "input": "R1 + ↓ ○",
             "archetype": "stamp",
             "limb": "leg",
@@ -10050,15 +10060,15 @@
             "recovery": 44,
             "dmg": 4,
             "target": "legs",
-            "anim": "A nervous little kick to the shin.",
+            "anim": "Stomps down on their lead thigh with all her weight.",
             "sfx": "a tap",
             "vfx": "a fleck"
           }
         ],
         "dash": [
           {
-            "id": "late-for-work",
-            "name": "Late for Work",
+            "id": "stoker-rush",
+            "name": "Stoker's Rush",
             "input": "✕ then ○",
             "archetype": "rush",
             "limb": "body",
@@ -10068,7 +10078,7 @@
             "recovery": 30,
             "dmg": 7,
             "knockdown": true,
-            "anim": "Runs at them holding his hat on and bumps into them.",
+            "anim": "Charges with lowered head and both tongs raised, barreling straight into their chest.",
             "sfx": "running steps, a bump, 'sorry!'",
             "vfx": "a splash",
             "sim": "dashStrike"
@@ -10076,8 +10086,8 @@
         ],
         "dive": [
           {
-            "id": "hurdle",
-            "name": "The Hurdle",
+            "id": "cinder-drop",
+            "name": "Cinder Drop",
             "input": "run, then ○",
             "archetype": "dive",
             "limb": "body",
@@ -10087,13 +10097,13 @@
             "recovery": 62,
             "dmg": 8,
             "knockdown": true,
-            "anim": "Tries to jump over a puddle and lands on them.",
+            "anim": "Leaps with both knees bent, dropping like a sack of coal onto their sternum.",
             "sfx": "a yelp, a crash",
             "vfx": "a big splash"
           },
           {
-            "id": "flail",
-            "name": "The Flail",
+            "id": "flying-clinker",
+            "name": "Flying Clinker",
             "input": "run, ○, then ○",
             "archetype": "diveChain",
             "limb": "both arms",
@@ -10102,15 +10112,15 @@
             "active": 6,
             "recovery": 48,
             "dmg": 6,
-            "anim": "Flails at them on the floor with his eyes shut.",
+            "anim": "A wild, airborne crossbody block that crashes into their ribs.",
             "sfx": "a flurry of slaps",
             "vfx": "spray"
           }
         ],
         "down": [
           {
-            "id": "signature",
-            "name": "Sign Here",
+            "id": "sump-trample",
+            "name": "Sump Trample",
             "input": "↓ ○ by a floored body",
             "archetype": "stomp",
             "limb": "leg",
@@ -10119,15 +10129,15 @@
             "active": 3,
             "recovery": 50,
             "dmg": 6,
-            "anim": "Stamps on the hand, then kneels and makes them sign something with it.",
+            "anim": "Tramples a downed opponent with heavy iron-capped dock boots.",
             "sfx": "a crunch, a pen scratching",
             "vfx": "a signature in blood"
           }
         ],
         "headbutt": [
           {
-            "id": "bowler-butt",
-            "name": "The Bowler",
+            "id": "bessemer-headbutt",
+            "name": "Bessemer Headbutt",
             "input": "□ + ○",
             "archetype": "butt",
             "limb": "head",
@@ -10136,7 +10146,7 @@
             "active": 3,
             "recovery": 46,
             "dmg": 5,
-            "anim": "Ducks in fright and butts them with the crown of his bowler.",
+            "anim": "Grabs their collar with one tong and cracks her forehead into their bridge.",
             "sfx": "a hollow bonk, a crunch",
             "vfx": "a nosebleed",
             "sim": "headbutt"
@@ -10144,8 +10154,8 @@
         ],
         "double": [
           {
-            "id": "windmill",
-            "name": "The Windmill",
+            "id": "furnace-pincer",
+            "name": "Furnace Pincer",
             "input": "✕ + ○",
             "archetype": "double",
             "limb": "both arms",
@@ -10155,31 +10165,31 @@
             "recovery": 60,
             "dmg": 7,
             "hits": 2,
-            "anim": "Windmills both arms at once.",
+            "anim": "Traps their arm between both tongs and heaves them across her hip.",
             "sfx": "two craft hits, a squeal",
             "vfx": "spray from both sides"
           }
         ],
         "hold": {
-          "id": "cling",
-          "name": "The Cling",
+          "id": "clinker-clinch",
+          "name": "The Clinker Clinch",
           "input": "△",
           "archetype": "hold",
           "duration": 100,
           "dmg": 0,
-          "anim": "Clings to them like a man in a flood.",
+          "anim": "Wraps both arms around their head in a brutal collar tie and drags them close to the furnace heat.",
           "sfx": "a panicked grab",
           "sim": "GRAB"
         },
         "clinch": [
           {
-            "id": "biting-nails",
-            "name": "Nervous Biting",
+            "id": "slag-hook",
+            "name": "Slag Hook",
             "input": "in the hold, ○",
             "archetype": "clinch",
             "duration": 64,
             "dmg": 4,
-            "anim": "Bites the nearest thing, which is an ear.",
+            "anim": "Hooks her right tongs under their armpit and drives a knee into their ribs.",
             "sfx": "a bite, a horrified 'sorry'",
             "vfx": "a torn ear",
             "sim": "HOLD"
@@ -10198,139 +10208,139 @@
         ],
         "throws": [
           {
-            "id": "shove",
-            "name": "A Shove",
+            "id": "furnace-pitch",
+            "name": "Furnace Pitch",
             "input": "in the hold, △",
             "archetype": "throw",
             "duration": 134,
             "dmg": 10,
-            "anim": "Pushes them away as hard as he can and they fall over.",
+            "anim": "Heaves them by belt and collar as if shoveling coal into an open furnace door.",
             "sfx": "a shove, a splash",
             "vfx": "a splash",
             "sim": "THROW"
           },
           {
-            "id": "tumble",
-            "name": "A Tumble",
+            "id": "tongs-slam",
+            "name": "Tongs Slam",
             "input": "in the hold, ← △",
             "archetype": "throw",
             "duration": 138,
             "dmg": 10,
-            "anim": "Trips backwards and pulls them over on top of him, then crawls out.",
+            "anim": "Clamps their jaw in the tongs and whips them straight into the water.",
             "sfx": "a fall, a groan",
             "vfx": "a splash"
           },
           {
-            "id": "notarised",
-            "name": "Notarised",
+            "id": "clinker-breaker",
+            "name": "Clinker Breaker",
             "input": "in the hold, ↓ △",
             "archetype": "throw",
             "duration": 155,
             "dmg": 13,
-            "anim": "Pushes them down and stamps his company seal onto their forehead, hard, four times.",
+            "anim": "Hoists them onto one shoulder and drops to both knees, breaking their back over her iron knee.",
             "sfx": "four heavy stamps",
             "vfx": "a red seal"
           },
           {
-            "id": "filed",
-            "name": "Filed Away",
+            "id": "pit-heave",
+            "name": "Pit Heave",
             "input": "in the hold, → △",
             "archetype": "throw",
             "duration": 134,
             "dmg": 10,
             "end": "throw",
-            "anim": "Spins round with them by accident and lets go.",
+            "anim": "Grabs one ankle and one wrist, spins once, and hurls them into the timber walls.",
             "sfx": "a spin, a yelp, a splash",
             "vfx": "a slide"
           }
         ],
         "back": {
-          "id": "paper-cut",
-          "name": "A Paper Cut",
+          "id": "stoker-suplex",
+          "name": "Stoker Suplex",
           "input": "△ from behind",
           "archetype": "longThrow",
           "duration": 190,
           "dmg": 15,
-          "anim": "Grabs them from behind and, not knowing what else to do, draws a sheet of foolscap across the throat. It works.",
+          "anim": "Grabs from behind waist and arches back, planting their crown into the mud.",
           "sfx": "a crisp paper slice, a gurgle",
           "vfx": "a thin line that opens wide"
         },
         "wall": {
-          "id": "in-arrears",
-          "name": "Payment Overdue",
+          "id": "boiler-pin",
+          "name": "Boiler Pin",
           "input": "△ with their back to a wall",
           "archetype": "longThrow",
           "duration": 200,
           "dmg": 16,
-          "anim": "Pins them to the wall and punches them over and over, counting the shillings he owes.",
+          "anim": "Pins them flat against the wall timbers and drives forearm after forearm into their throat.",
           "sfx": "a count of punches, a sob",
           "vfx": "a red patch"
         },
         "grappleDash": {
-          "id": "rushing-to-court",
-          "name": "Rushing to Court",
+          "id": "dockside-spear",
+          "name": "Dockside Spear",
           "input": "✕ then △",
           "archetype": "hold",
           "duration": 100,
           "dmg": 5,
-          "anim": "Runs and grabs them round the middle.",
+          "anim": "Dives low, tackling their legs and driving them skidding across the Sump.",
           "sfx": "a run, a grab"
         },
         "diveGrab": {
-          "id": "trip-and-tackle",
-          "name": "Trip and Tackle",
+          "id": "furnace-dive",
+          "name": "Furnace Dive",
           "input": "run, then △",
           "archetype": "longThrow",
           "duration": 188,
           "dmg": 13,
-          "anim": "Trips running and tackles them by mistake.",
+          "anim": "Catches them mid-air, clamps her tongs around their neck, and rides them to the floor.",
           "sfx": "a trip, a tackle, a splash"
         },
         "ground": {
-          "id": "final-demand",
-          "name": "The Final Demand",
+          "id": "iron-press",
+          "name": "Iron Press",
           "input": "△ by a floored body",
           "archetype": "longThrow",
           "duration": 200,
           "dmg": 15,
-          "anim": "Sits on them and reads the final demand aloud, punching once on every figure.",
+          "anim": "Kneels on their chest and presses her red-hot tongs against their forearms.",
           "sfx": "a reading voice, punches on the numbers",
           "vfx": "a pulped face"
         },
         "deflects": [
           {
-            "id": "flinch",
-            "name": "Flinch",
+            "id": "iron-ward",
+            "name": "Iron Ward",
             "input": "□ as a high strike lands",
             "archetype": "deflect",
             "duration": 44,
             "dmg": 6,
-            "anim": "Flinches so hard that his borrowed elbow comes up into their face.",
+            "anim": "Snaps her tongs up to parry a high strike, sending sparks flying.",
             "sfx": "a squeak, a crack",
             "sim": "REVERSAL"
           },
           {
-            "id": "hop",
-            "name": "Hop",
+            "id": "boot-check",
+            "name": "Boot Check",
             "input": "↓ □ as a low strike lands",
             "archetype": "deflect",
             "duration": 46,
             "dmg": 6,
-            "anim": "Hops out of the way and lands on the foot.",
+            "anim": "Catches a low kick on the iron heel of her dock boot.",
             "sfx": "a hop, a crunch"
           }
         ],
         "special": {
-          "name": "THE OVERDRAFT",
+          "name": "FULL DRAUGHT",
           "sim": "spCharge",
-          "anim": "Puts his head down, shuts his eyes, holds his bowler on, and runs as fast as he can, screaming an apology.",
-          "sfx": "running, a long rising 'sorrryyyyy', a crash",
-          "vfx": "a spray of ink and blood"
+          "anim": "Kicks open her bypass dampers; smoke roars from her flue pipes and she charges headlong, bowling the opponent over in a spray of sparks.",
+          "sfx": "a furnace blast, roaring fire, an iron crunch",
+          "vfx": "cinders, black smoke, and sparks"
         },
         "arts": [
           {
-            "id": "windfall",
-            "name": "A Windfall",
+            "id": "clinker-shovel",
+            "name": "Clinker Shovel",
             "input": "R2 + ↑",
             "archetype": "art",
             "limb": "both arms",
@@ -10340,13 +10350,13 @@
             "recovery": 60,
             "dmg": 15,
             "launch": true,
-            "anim": "Throws a handful of coins in their face and uppercuts them while they look.",
-            "sfx": "coins, a crack",
-            "vfx": "coins and blood up"
+            "anim": "Swings a heavy stoker scoop in a rising arc, launching them skyward in a spray of hot soot.",
+            "sfx": "shovel ring, roaring fire, a crack",
+            "vfx": "glowing cinders and blood up"
           },
           {
-            "id": "bankruptcy",
-            "name": "Bankruptcy",
+            "id": "slag-mill",
+            "name": "Slag Mill",
             "input": "R2 + →",
             "archetype": "art",
             "limb": "both arms",
@@ -10356,24 +10366,24 @@
             "recovery": 46,
             "dmg": 14,
             "hits": 10,
-            "anim": "Snaps completely and windmills forward with everything he has, crying.",
-            "sfx": "a sob, ten wild hits",
-            "vfx": "a red mist"
+            "anim": "Blares with fury and windmills forward with her glowing iron tongs in a relentless barrage of scorching strikes.",
+            "sfx": "furnace roar, ten iron impacts, sizzle",
+            "vfx": "sparks and a red mist"
           },
           {
-            "id": "pawned",
-            "name": "Pawned",
+            "id": "tongs-brand",
+            "name": "The Bessemer Brand",
             "input": "R2 + ↓",
             "archetype": "cinematic",
             "duration": 270,
             "dmg": 24,
-            "anim": "Uncle Gideon's man runs into the Sump with a ticket; Inkle takes their arm off and hands it over in exchange for a new one of his own.",
-            "sfx": "a running man, a tear, a ticket stamped",
-            "vfx": "an arm goes, an arm comes"
+            "anim": "Pins the victim to the pit timbers, clamps her glowing red tongs across their collarbone, and pulls them up smoking.",
+            "sfx": "iron clamp, screaming, a heavy sizzle",
+            "vfx": "charred meat, smoke, hot orange embers"
           },
           {
-            "id": "fall-on-sword",
-            "name": "Mortified",
+            "id": "blowdown",
+            "name": "Boiler Blowdown",
             "input": "R2 + ←",
             "archetype": "art",
             "limb": "body",
@@ -10383,50 +10393,48 @@
             "recovery": 50,
             "dmg": 13,
             "knockdown": true,
-            "anim": "Throws himself to the floor in shame so hard that everyone round him falls over too.",
-            "sfx": "a wail, a splash, falling bodies",
-            "vfx": "a ring of water"
+            "anim": "Slams her boots into the muck and vents superheated boiler steam in a concussive shockwave that floors everyone around her.",
+            "sfx": "steam blast, a deafening hiss, falling bodies",
+            "vfx": "a white steam burst and a ring wave of water"
           }
         ],
         "status": {
-          "name": "IN ARREARS",
+          "name": "FULL DRAUGHT",
           "drink": 60,
           "lasts": 600,
-          "anim": "Takes a swig of gin from a flat bottle and coughs. Every limb he wears flickers and is replaced by another from Uncle Gideon's window.",
+          "anim": "Cracks open her bypass petcock and downs a draught of raw kerosene; flames flare behind her goggles and her tongs burn white-hot.",
           "effects": {
-            "punch": 1.2,
-            "kick": 1.2,
-            "note": "all four limbs re-roll to new crafts; he stops apologising and stops flinching; when it ends the limbs go back"
+            "punch": 1.25,
+            "kick": 1.15,
+            "note": "her tongs burn white-hot, adding burning damage to all strikes; her attacks cannot be deflected"
           },
-          "look": "his face still and pale, the pawn tickets fluttering, new limbs every time",
-          "voice": "silent, then a whisper: 'Paid in full'"
+          "look": "white-hot tongs, sparks streaming from her sleeve vents, coal dust smoking off her shoulders",
+          "voice": "a wild, fierce roar: 'Burn, you bastards!'"
         },
         "duo": {
           "partner": "nell-sluice",
-          "name": "Rent Day",
+          "name": "Slag and Sluice",
           "archetype": "cinematic",
           "duration": 270,
           "dmg": 26,
-          "anim": "Inkle reads the arrears from a ledger while Nell beats them out of the victim's pockets, one blow per shilling."
+          "anim": "Tilly clamps the victim in her red-hot furnace tongs; Nell floods the pit trench and douses them in scalding river muck until the steam stops hissing."
         },
         "weapons": {
           "affinity": [
-            "blade",
             "blunt",
-            "polearm",
             "fist"
           ],
-          "signature": "spare-arm",
-          "style": "Uses anything he is given, badly, and is dangerous with all of it. He gets the most out of the Gallery's gifts: every spare limb thrown in is his size, and he fits it at once."
+          "signature": "nail-bat",
+          "style": "Swings heavy improvised bludgeons with brute, double-handed force, using them to batter through guards and crush knees."
         },
         "appeal": {
-          "anim": "Raises his bowler, then looks up at the Gallery hopefully, then down, embarrassed.",
-          "line": "Was... was that all right?",
-          "gift": "spare arms and legs; the Gallery is fond of him"
+          "anim": "Spits a glob of black coal dust into the pit water, barks a mocking laugh at the Gallery, and snaps her iron tongs twice in salute.",
+          "line": "Got a bit of clinker in your craw, darling?",
+          "gift": "studded cricket bats, coal shovels, and bottles of kerosene"
         }
       },
       "art": {
-        "silhouette": "A thin young clerk in a tight bowler and a too-short coat, with four limbs that do not match, each with a paper ticket fluttering on a string.",
+        "silhouette": "A tough young female stoker in rolled dungarees, red bandanna over soot-streaked hair, with scorched asbestos-wrapped arms and glowing cherry-red furnace tongs.",
         "build": "Slight, narrow-shouldered, stooped from the copying desk.",
         "palette": {
           "primary": {
@@ -10478,68 +10486,68 @@
       },
       "sound": {
         "voice": {
-          "casting": "a thin, nervous, high tenor in his twenties",
-          "accent": "a lower-middle-class clerk trying to sound educated",
-          "texture": "stammering, apologetic, breathless; very still and quiet under the Tincture"
+          "casting": "a fierce, husky, young cockney woman in her early twenties",
+          "accent": "unapologetic dockside and foundry East End slang",
+          "texture": "scrappy, energetic, combative, laced with mocking laughter"
         },
         "lines": {
           "intro": [
-            "Terribly sorry, sir, I've never done this before.",
-            "Is this the right... sorry."
+            "Mind the tongs, sweetheart. They're still fresh from the fire.",
+            "You looking to get stoked or slagged?"
           ],
           "appeal": [
-            "Was... was that all right? Sorry. Sorry.",
-            "I'm awfully sorry about all this."
+            "Got a bit of clinker in your craw, darling?",
+            "Call that a swing? My nan shovels harder than that!"
           ],
           "hit": [
-            "Sorry!",
-            "Oh! Sorry!",
-            "I didn't mean—"
+            "Take it!",
+            "Have some iron!",
+            "Burn!"
           ],
           "hurt": [
-            "Ow! Sorry.",
-            "My fault, my fault."
+            "Tch! Barely warm.",
+            "That all you got?"
           ],
-          "special": "Sorrryyyyy!",
-          "tincture": "Paid in full.",
+          "special": "FULL DRAUGHT!",
+          "tincture": "BURN, YOU BASTARDS!",
           "victory": [
-            "Oh no. Oh, no. I'm so sorry. Is he... sorry.",
-            "I'll pay for that."
+            "Dump 'em in the slag cart.",
+            "Next in line for the boiler!"
           ],
-          "defeat": "Sorry, Mother..."
+          "defeat": "Coals... going... black..."
         },
-        "efforts": "squeaks, yelps and panicked breaths",
-        "footsteps": "a different footstep for each foot, from whatever legs he has on",
-        "foley": "paper tickets fluttering on string, a ledger's pages, coins in his pocket, a pen scratching",
+        "efforts": "sharp exhalations, raspy growls, and barking laughs",
+        "footsteps": "heavy clumping dock boots with iron calks on the wet timbers",
+        "foley": "creaking scorched asbestos, iron tongs snapping shut, escaping steam hiss, coal dust crunching",
         "impact": {
-          "craft": "pawnshop-patchwork",
-          "nuance": "each hit sounds like the limb that threw it, with a little yelp"
+          "craft": "cinder-iron",
+          "nuance": "every strike rings like a heavy hammer on an anvil with a sharp sizzle of heat"
         },
         "music": {
-          "title": "Seven Shillings a Week",
-          "brief": "A nervous, plinking tune on an out-of-tune upright piano and a clarinet, getting faster and more frantic, with the scratch of a pen and a ticking office clock.",
-          "tempo": 126,
+          "title": "The Deep Flues",
+          "brief": "A driving industrial stomp with pounding iron anvils, chuffing boiler pistons, roaring fire flues, and an aggressive, syncopated street fiddle.",
+          "tempo": 132,
           "instruments": [
-            "upright piano",
-            "clarinet",
-            "pen scratch",
-            "office clock",
-            "pizzicato bass"
+            "pounding anvil",
+            "boiler pistons",
+            "furnace roar",
+            "street fiddle",
+            "heavy bass drum"
           ]
         },
         "cues": [
           {
-            "id": "inkle-ticket",
+            "id": "tilly-tongs",
             "category": "foley",
-            "note": "the pawn tickets on his limbs",
-            "prompt": "Several small paper tags on strings flutter and flap in the wind. Close microphone, dry room, a few seconds.",
+            "note": "her furnace tongs snapping shut",
+            "prompt": "Heavy cast-iron furnace tongs snap shut with a ringing metallic clank and a hiss of heat. Close microphone, dry room.",
             "seed": 4710
           },
           {
-            "id": "inkle-sorry",
+            "id": "tilly-taunt",
             "category": "voice",
-            "note": "his panicked apology",
-            "prompt": "A young man says 'sorry, sorry, sorry' in a panicked, breathless stammer, in a stone room. A few seconds.",
+            "note": "her mocking dockside taunt",
+            "prompt": "A fierce young working-class London woman barks a laugh and shouts 'Got a bit of clinker in your craw, darling?' in a stone room.",
             "seed": 4711
           }
         ]
@@ -10547,20 +10555,20 @@
       "texture": {
         "seed": 5112,
         "skin": {
-          "idea": "pale freckled skin, ink-stained fingertips, the faint start of a moustache",
-          "colour": "pale tan"
+          "idea": "sweat-slick soot-streaked tan skin with coal dust in the pores, minor forge burns on the neck",
+          "colour": "sooty tan"
         },
         "cloth": {
-          "idea": "shiny threadbare brown wool frock coat, a frayed shirt with paper cuffs, a cheap celluloid collar",
-          "colour": "threadbare brown"
+          "idea": "sleeveless faded canvas dungarees over a grease-stained henley, red bandanna tied tight, heavy leather belt",
+          "colour": "coal soot and faded indigo"
         },
         "face": {
-          "idea": "a thin pale anxious freckled face, round wire spectacles, a weak chin",
-          "colour": "pale tan"
+          "idea": "a fierce sharp-chinned young woman with sharp hazel eyes, smudges of black coal across cheekbones, sweat-curled fringe",
+          "colour": "sooty tan with brown hair"
         },
         "limb": {
-          "idea": "a mismatched pawnbroker's fitting: leather straps and buckles at the joint, a brown paper pawn ticket on a string; the limb itself rolled from the other crafts",
-          "colour": "leather brown and ticket buff"
+          "idea": "scorched asbestos lagging bound in copper wire, heavy boiler-tongs forged from pitted cast iron glowing red at the tips",
+          "colour": "cast-iron black and glowing red"
         }
       }
     }

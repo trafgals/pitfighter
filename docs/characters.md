@@ -130,8 +130,8 @@ Five rules:
   "characters": [
     {
       // what the game reads today
-      "id": "sir-peregrine",       // the slug: the key for public/tex and public/sfx
-      "name": "Sir Peregrine Ashby-Lisle, Bt.",
+      "id": "lady-eleanor",        // the slug: the key for public/tex and public/sfx
+      "name": "Lady Eleanor Ashby-Lisle",
       "style": "Samurai Sword",    // the Urban Reign style label
       "blurb": "...", "body": "#...", "accent": "#...",
       "family": "brawler",         // the animation family it fights in

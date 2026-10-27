@@ -149,9 +149,9 @@ the loudest thing about the fighter. The crafts are described in full in
 | lady-bulwark | Lady Hester Bulwark (Boxing) | #f0d2bc / #3c4a2e | fair smooth skin, a flush at the cheeks, rain on it, a faint split lip | mirror-polished blued steel rams with engraved brass end caps, red rubber hoses, white-faced gauges | a fine-boned cool aristocratic face, grey-green eyes, a straight nose, chestnut hair pinned up |
 | percival-crump | Percival "Oolong" Crump (Kung Fu) | #d2a679 / #5c2a38 | ruddy weathered skin flushed with drink, with broken red veins and beads of steam-sweat | amber lacquered bamboo cane in engraved brass hoops with small riveted brass boilers, beaded with steam | a round ruddy cheerful face with heavy-lidded twinkling eyes and broken veins across the nose and cheeks |
 | tabitha-pegg | Mistress Tabitha Pegg (Tae Kwon Do) | #e2c2a6 / #c8963e | weathered pale East End complexion, strong jaw, smudged with black cobbler wax | black cast pig-iron shoe lasts with engraved brass imperial rules and steel leaf-springs, the welts serrated | a severe sharp-jawed fair face with acute hazel eyes and light freckles, a pencil behind the ear |
-| mortimer-crape | Mr. Mortimer Crape (Judo Based) | #e0d6cc / #141214 | deathly pale papery skin, cold and grey under the eyes | faceted polished black jet plates over cream whalebone stays, laced with black silk ribbon in a cross pattern | a long pale kind mournful face painted with a faint white skull mask, sunken eyes, long white hair |
-| sir-peregrine | Sir Peregrine Ashby-Lisle, Bt. (Samurai Sword) | #f2dcc8 / #2a2a34 | fair, smooth, well-kept skin, a fine duelling scar on the right cheek | polished black ebony under a fine hallmarked silver filigree of leaves and a family crest, sharpened silver nails | a handsome fine-featured smiling face, blue eyes, a small blond moustache, a duelling scar on the right cheek |
-| cuthbert-inkle | Mr. Cuthbert Inkle (Amateur) | #ddb894 / #3a3428 | pale freckled skin, ink-stained fingertips, the faint start of a moustache | a mismatched pawnbroker's fitting: leather straps and buckles at the joint, a brown paper pawn ticket on a string; the limb itself rolled from the other crafts | a thin pale anxious freckled face, round wire spectacles, a weak chin |
+| martha-crape | Mistress Martha Crape (Judo Based) | #e0d6cc / #141214 | deathly pale papery skin, cold and grey under the eyes | faceted polished black jet plates over cream whalebone stays, laced with black silk ribbon in a cross pattern | a pale solemn mournful face behind a sheer black mourning veil, painted with a faint white skull mask, dark sunken eyes |
+| lady-eleanor | Lady Eleanor Ashby-Lisle (Samurai Sword) | #f2dcc8 / #2a2a34 | fair, smooth, porcelain skin with a fine fencing scar along the jawline | sculpted black obsidian glass sheathed in hallmarked silver vine filigree with stylized weeping silver tears | a striking aristocratic mournful face, weeping grey eyes, dark hair pinned beneath velvet top hat, fencing scar |
+| tilly-tongs | Tilly "Furnace-Tongs" (Amateur) | #d8b898 / #c2441c | sweat-slick soot-streaked tan skin with coal dust in the pores, minor forge burns on the neck | scorched asbestos lagging bound in copper wire, heavy boiler-tongs forged from pitted cast iron glowing red at the tips | a fierce sharp-chinned young woman with sharp hazel eyes, smudges of black coal across cheekbones, sweat-curled fringe |
 
 Cloth, keyed to the accent colour:
 
@@ -164,9 +164,9 @@ Cloth, keyed to the accent colour:
 - **lady-bulwark:** white silk blouse, hunting-green wool riding skirt, laced brown leather corset belt
 - **percival-crump:** a quilted oxblood silk waistcoat with a long black sash, a collarless cream shirt, loose canvas trousers
 - **tabitha-pegg:** heavy oiled cowhide apron with brass eyelets, dark wool work dress, rolled linen sleeves
-- **mortimer-crape:** black wool frock coat and silk waistcoat, black crape mourning band, rain-dark
-- **sir-peregrine:** charcoal wool morning coat with a silk lapel, dove-grey silk waistcoat, grey striped trousers, white spats
-- **cuthbert-inkle:** shiny threadbare brown wool frock coat, a frayed shirt with paper cuffs, a cheap celluloid collar
+- **martha-crape:** black bombazine mourning gown, high collar and silk buttons, black crape veil, rain-dark
+- **lady-eleanor:** black silk mourning gown with fencing cutaways, silver mourning brooches, lace veil, spats
+- **tilly-tongs:** sleeveless faded canvas dungarees over a grease-stained henley, red bandanna tied tight, heavy leather belt
 
 The source of truth for every idea, colour and seed is `public/tex/spec.json`,
 which mirrors the `texture` block of each fighter in
@@ -186,9 +186,9 @@ of the negative for those faces, or the moustache will not come. Where a face
 idea names the hair on the head, it only says what colour it is: the face
 still stops at the brow.
 
-`cuthbert-inkle` fights in borrowed limbs: his limb surface is the pawnbroker's
-fitting (straps, buckles, a pawn ticket), and the limb itself is drawn in the
-other crafts.
+`tilly-tongs` fights in salvaged furnace prosthetics: her limb surface is
+scorched asbestos lagging bound in copper wire and heavy cast-iron boiler tongs
+that glow red from furnace coals inside.
 
 Lock a seed per fighter so the skin, cloth, limb and face can be regenerated
 consistently.
