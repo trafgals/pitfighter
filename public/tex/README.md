@@ -33,7 +33,17 @@ stages/hell-toilet/basalt_glow.webp  1024x1024 greyscale, white where the lava c
 workflows/<name>.json        the ComfyUI graphs that produced the set, API format
 contact/<slug>.png           2x2 tiling preview plus the face, for review
 contact/<stage>.png          2x2 tiling preview of a stage's surfaces
+props/<asset>*.png           the 3D stage's approved references: the alpha cutout
+                            and the four-view turnaround sheet
+characters/<slug>.jpg        the character's concept art, for the 3D stage
 ```
+
+`props/` and `characters/` are not part of the generated material set. They
+are the references the 3D stage works from - the alpha cutout and the
+four-view turnaround that a human reviewer approved, and the character art
+they were drawn for - and they carry no entry in `manifest.json`, because
+that manifest records how a tile is reproduced and these are not tiles. The
+asset they belong to is recorded in `data/asset_manifest.json`.
 
 `<surface>` is the id of the procedural recipe it replaces: `basalt`, `dirt`,
 `concrete`, `roof`, `planks`, `stone`.

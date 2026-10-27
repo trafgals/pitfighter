@@ -10,16 +10,37 @@
       "category": "headgear",
       "slot": "head_socket",
       "poly_budget": 35000,
+      "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
         "width": 22,
         "height": 32,
         "depth": 26
       },
-      "status": "stage:minimax-code-3d",
+      "status": "asset:complete",
+      "pivot": {
+        "convention": "head_socket_normalized",
+        "origin": "the base opening: the crown's head-entry rim lies on the y=0 plane, centred on the helmet's axis",
+        "forward": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "note": "The brim hangs 4.5 cm below the origin, the way a custodian helmet's brim does; the asset's lowest point is the brim's rolled lip and the total height is 32 cm."
+      },
       "reference_concept": "public/tex/characters/obadiah_winch.jpg",
       "alpha_cutout": "public/tex/props/flux3_winch_custodian_prop_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_custodian_helmet_turnaround.png",
-      "glb_output": "public/models/props/Constable_Obadiah_Winch_Custodian_Helmet.glb"
+      "turntable": "public/tex/props/h3_custodian_helmet_turntable.webp",
+      "glb_output": "public/models/props/prop_winch_custodian_helmet.glb",
+      "measured": {
+        "triangles": 22848,
+        "bytes": 1414112,
+        "bbox_min_cm": [-11.0, -4.5, -12.5],
+        "bbox_max_cm": [11.0, 27.5, 13.5],
+        "meshes": 17,
+        "materials": 7,
+        "embedded_images": 7
+      },
+      "build": "node scripts/build_prop_winch_custodian_helmet.mjs",
+      "validate": "node scripts/capture_prop_renders.mjs prop_winch_custodian_helmet"
     },
     {
       "id": "prop_smelt_stovepipe",
@@ -28,15 +49,17 @@
       "category": "headgear",
       "slot": "head_socket",
       "poly_budget": 35000,
+      "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
         "width": 30,
         "height": 45,
         "depth": 30
       },
-      "status": "gate:2-review-turnaround",
+      "status": "stage:minimax-code-3d",
       "reference_concept": "public/tex/characters/hezekiah_smelt.jpg",
       "alpha_cutout": "public/tex/props/flux3_smelt_stovepipe_elongated_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_smelt_stovepipe_turnaround.png",
+      "turntable": "public/tex/props/h3_smelt_stovepipe_turntable.webp",
       "glb_output": "public/models/props/smelt_stovepipe_hat.glb"
     },
     {
@@ -46,15 +69,17 @@
       "category": "weapon",
       "slot": "weapon_socket",
       "poly_budget": 30000,
+      "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
         "width": 14,
         "height": 34,
         "depth": 12
       },
-      "status": "stage:flux-alpha",
+      "status": "gate:2-review-turnaround",
       "reference_concept": "public/tex/characters/tabitha_pegg.png",
       "alpha_cutout": "public/tex/props/flux3_pegg_shoelast_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_pegg_shoelast_turnaround.png",
+      "turntable": "public/tex/props/h3_pegg_shoelast_turntable.webp",
       "glb_output": "public/models/props/pegg_cast_iron_last.glb"
     }
   ]
