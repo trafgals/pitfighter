@@ -16,7 +16,7 @@
         "depth": 26
       },
       "status": "stage:minimax-code-3d",
-      "reference_concept": "public/tex/characters/obadiah_winch_concept.png",
+      "reference_concept": "public/tex/characters/obadiah_winch.jpg",
       "alpha_cutout": "public/tex/props/flux3_winch_custodian_prop_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_custodian_helmet_turnaround.png",
       "glb_output": "public/models/props/Constable_Obadiah_Winch_Custodian_Helmet.glb"
@@ -34,10 +34,28 @@
         "depth": 30
       },
       "status": "gate:1-review-alpha",
-      "reference_concept": "public/tex/props/flux3_hezekiah_smelt_00001_.png",
-      "alpha_cutout": "public/tex/props/flux3_smelt_stovepipe_alpha.png",
+      "reference_concept": "public/tex/characters/hezekiah_smelt.jpg",
+      "alpha_cutout": "public/tex/props/flux3_smelt_stovepipe_approved_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_smelt_stovepipe_turnaround.png",
       "glb_output": "public/models/props/smelt_stovepipe_hat.glb"
+    },
+    {
+      "id": "prop_columbine_tiara",
+      "name": "Hippodrome Gaslight Ballerina Tiara",
+      "character": "Columbine Vesper",
+      "category": "headgear",
+      "slot": "head_socket",
+      "poly_budget": 30000,
+      "scale_dimensions_cm": {
+        "width": 18,
+        "height": 22,
+        "depth": 16
+      },
+      "status": "gate:1-review-alpha",
+      "reference_concept": "public/tex/characters/columbine_vesper.png",
+      "alpha_cutout": "public/tex/props/flux3_columbine_tiara_alpha.png",
+      "turnaround_sheet": "public/tex/props/h3_columbine_tiara_turnaround.png",
+      "glb_output": "public/models/props/columbine_ballerina_tiara.glb"
     }
   ]
 }
