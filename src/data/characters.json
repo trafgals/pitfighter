@@ -197,7 +197,7 @@
       "rules": [
         "Every hit that lands bleeds. A jab leaves a spray of droplets; a finisher throws an arc; a special or a throw opens an artery that pumps in time with the heartbeat for a few seconds.",
         "Blood mixes with the rain: it hits hard and red, then thins to pink in the puddles and runs to the nearest drain grate. The Sump floor gets redder through the match and the drains glug.",
-        "Every craft bleeds its own fluid with the blood: brass weeps clock oil, steel sprays scalding hydraulic water, lead gushes rainwater, porcelain sheds shards, oak spits splinters and tar, glass leaks burning gas, chitin leaks green ichor, iron drops glowing coals, whalebone springs its stays, silver never bleeds at all, the bear graft bleeds more than anything, and the pawned limbs bleed whatever they were made of.",
+        "Every craft bleeds its own fluid with the blood: brass weeps clock oil, steel sprays scalding hydraulic water, lead gushes rainwater, porcelain sheds shards, oak spits splinters and tar, the lasts shed iron filings and wax, bamboo sprays boiling tea, iron drops glowing coals, whalebone springs its stays, silver never bleeds at all, the bear graft bleeds more than anything, and the pawned limbs bleed whatever they were made of.",
         "Blood clings to clothes and skin and stays for the whole match. White gloves, cuffs and collars are the fighters' tell.",
         "A KO is never just a fall: something comes off, opens or caves in, chosen by the finishing move and the winner's craft."
       ]
@@ -315,38 +315,6 @@
       }
     },
     {
-      "id": "aether-glass",
-      "name": "Aether Glass",
-      "look": "Blown-glass tubes and bulbs in brass ferrules, filled with a glowing coloured gas that brightens with every move, like a lit sign in the rain.",
-      "hit": "A bright glass clink over a low electric buzz, with a soft whump of gas.",
-      "breaks": "Shatters and spits burning gas; it refills from a reservoir in the hip a second later.",
-      "bleeds": "Burning gas and glass with the blood; wounds glow for a moment.",
-      "tip": "spike",
-      "cue": {
-        "id": "hit-glass-skin",
-        "category": "impact",
-        "note": "a glowing glass shin kicking into a body",
-        "prompt": "A glass shin full of glowing gas kicks into a body: a bright glass clink over a low electric buzz and a soft whump of gas. Close microphone, dry room, one single impact.",
-        "seed": 4406
-      }
-    },
-    {
-      "id": "mantis-chitin",
-      "name": "Mantis Chitin",
-      "look": "Grown, not made: lacquer-green chitin plates with serrated raptorial spines, wet pale membrane at the joints, the edges translucent.",
-      "hit": "A dry insect click followed by a wet crunch.",
-      "breaks": "Cracks and leaks green ichor; the spines snap off in the wound.",
-      "bleeds": "Green ichor mixes with the blood into a sickly brown.",
-      "tip": "claw",
-      "cue": {
-        "id": "hit-chitin-skin",
-        "category": "impact",
-        "note": "a chitin claw striking flesh",
-        "prompt": "A hard insect claw strikes flesh: a dry sharp click followed at once by a short wet crunch. Close microphone, dry room, one single impact.",
-        "seed": 4407
-      }
-    },
-    {
       "id": "foundry-iron",
       "name": "Foundry Iron",
       "look": "Black sand-cast iron with rough seams, rivets the size of thumbs, and grated vents that glow orange from the coals inside.",
@@ -411,14 +379,53 @@
       }
     },
     {
-      "id": "pawnshop-patchwork",
-      "name": "Pawnshop Patchwork",
-      "look": "Whatever was in the pawnbroker's window: a mismatched set from the other eleven crafts, each limb with a paper pawn ticket tied on with string, numbered.",
-      "hit": "Each limb sounds like its own craft, so every hit sounds different.",
-      "breaks": "As its own craft; the pawn ticket flutters off.",
-      "bleeds": "As its own craft.",
-      "tip": "any",
-      "note": "The limbs are rolled from the other crafts at the start of each bout. The game already rolls a limb's traits per match (src/sim/limbs.ts); this is the same idea, made visible."
+      "id": "cinder-iron",
+      "name": "Cinder Iron and Asbestos",
+      "look": "Scorched asbestos lagging wrapped in copper wire, heavy boiler-tongs forged from pitted cast iron, glowing cherry-red coals pulsing in the forearm vents.",
+      "hit": "A harsh metallic clang like a shovel striking boiler plate, over a dry sizzle and a spray of orange cinders.",
+      "breaks": "The copper binding snaps; the asbestos frays and spills smoking anthracite dust across the floor.",
+      "bleeds": "Iron does not bleed; it spits sparks and trails smoke as it burns into flesh.",
+      "tip": "claw",
+      "note": "The limbs are rolled from the other crafts at the start of each bout. The game already rolls a limb's traits per match (src/sim/limbs.ts); this is the same idea, made visible.",
+      "cue": {
+        "id": "hit-cinder-skin",
+        "category": "impact",
+        "note": "a glowing furnace tongs striking flesh",
+        "prompt": "Heavy cast-iron furnace tongs clamp into meat: a dull iron clang with a sharp sizzle of burning flesh and a shower of sparks. Close microphone, dry room, one single impact.",
+        "seed": 4412
+      }
+    },
+    {
+      "id": "bamboo-samovar",
+      "name": "Bamboo and Samovar",
+      "look": "Lacquered amber bamboo canes bound in engraved brass hoops, miniature pressurized tea boilers, turn-taps at the wrists hissing white jasmine steam.",
+      "hit": "A hollow wooden clack with a bright brass ting and a sharp hiss of steam.",
+      "breaks": "Bamboo splinters along the grain and boiling water sprays from the samovar valves.",
+      "bleeds": "Amber fermented tea and steam mix with the blood.",
+      "tip": "fist",
+      "cue": {
+        "id": "hit-bamboo-skin",
+        "category": "impact",
+        "note": "a bamboo arm striking flesh",
+        "prompt": "A hollow bamboo cane strikes flesh: a woody clack with a bright brass ting and a short hiss of steam. Close microphone, dry room, one single impact.",
+        "seed": 4407
+      }
+    },
+    {
+      "id": "cast-iron-lasts",
+      "name": "Cast-Iron Lasts",
+      "look": "Black cast pig-iron shoemaker's lasts with engraved brass rules along the shins, steel leaf-springs and ratchets behind the calves, and triple-soled steel-welted boots.",
+      "hit": "A dull, ringing iron clang with a spring's twang.",
+      "breaks": "Chips and throws sparks; a spring snaps loose and whips round.",
+      "bleeds": "Iron filings and black cobbler's wax with the blood.",
+      "tip": "hoof",
+      "cue": {
+        "id": "hit-last-skin",
+        "category": "impact",
+        "note": "an iron last kicking into a body",
+        "prompt": "A heavy cast-iron boot kicks into a body: a dull ringing iron clang with a short twang of a steel spring. Close microphone, dry room, one single impact.",
+        "seed": 4406
+      }
     }
   ],
   "vocabulary": {
@@ -1996,8 +2003,8 @@
           }
         ],
         "partner": {
-          "id": "mortimer-crape",
-          "why": "Smelt casts the iron coffins; Crape fills them. A sound arrangement."
+          "id": "martha-crape",
+          "why": "Smelt casts the iron coffins; Mistress Crape lines and fills them. A sound arrangement."
         },
         "quotes": {
           "intro": "My dear sir. A pleasure. Do let me take your hand.",
@@ -2521,12 +2528,12 @@
           "voice": "no words, just a furnace breathing"
         },
         "duo": {
-          "partner": "mortimer-crape",
+          "partner": "martha-crape",
           "name": "Cast and Coffined",
           "archetype": "cinematic",
           "duration": 300,
           "dmg": 30,
-          "anim": "Crape measures the victim; Smelt folds them to the measurements; Crape nails the lid."
+          "anim": "Martha measures the victim; Smelt folds them to the measurements; Martha nails the lid."
         },
         "weapons": {
           "affinity": [
@@ -2758,8 +2765,8 @@
           }
         ],
         "partner": {
-          "id": "cuthbert-inkle",
-          "why": "Her lodger. She feeds him and pawns his things to pay his rent."
+          "id": "tilly-tongs",
+          "why": "The furnace girl down in the deep flues; Nell clears the clinker sumps for her and keeps her from getting drowned in hot slag."
         },
         "quotes": {
           "intro": "For what we are about to receive, may the Lord make us truly thankful.",
@@ -3299,12 +3306,12 @@
           "voice": "she stops saying 'bless you'"
         },
         "duo": {
-          "partner": "cuthbert-inkle",
-          "name": "Rent Day",
+          "partner": "tilly-tongs",
+          "name": "Slag and Sluice",
           "archetype": "cinematic",
           "duration": 270,
           "dmg": 26,
-          "anim": "Inkle reads the arrears from a ledger while Nell beats them out of the victim's pockets, one blow per shilling."
+          "anim": "Tilly clamps the victim in her red-hot furnace tongs; Nell floods the pit trench and douses them in scalding river muck until the steam stops hissing."
         },
         "weapons": {
           "affinity": [
@@ -3531,8 +3538,8 @@
         "otherSelf": "Lights Out on the Ward: the night-nurse's draught. The gold in her cracks glows white-hot and the porcelain sings, and she stops naming the bones.",
         "rivals": [
           {
-            "id": "professor-thrip",
-            "why": "A quack, an apothecary's daughter selling poisons as cures, and the draught she drank is exactly what the Matron warned her about."
+            "id": "percival-crump",
+            "why": "A drunk who calls his rum medicinal. She treated his scalds once, and he poured her a cup of it."
           }
         ],
         "partner": {
@@ -4311,13 +4318,13 @@
             "why": "She called his act vulgar in the papers. He has her cutting framed in his dressing room."
           },
           {
-            "id": "mortimer-crape",
-            "why": "The undertaker had already bought Old Ursula's body. Mule had the arms off her before Crape's cart arrived."
+            "id": "martha-crape",
+            "why": "The undertaker had already bought Old Ursula's body. Mule had the arms off her before Crape's mourning carriage arrived."
           }
         ],
         "partner": {
-          "id": "columbine-vesper",
-          "why": "They share a bill at the Alhambra. He catches her when she leaps."
+          "id": "tabitha-pegg",
+          "why": "Mule brings in heavy scrap iron lasts and railway boots; Tabitha welds them into indestructible weapons and braces for him."
         },
         "quotes": {
           "intro": "Ladies and gentlemen, children of all ages! Your attention, please, for the Great Bartholomew Mule!",
@@ -4856,12 +4863,12 @@
           "voice": "only roars and growls"
         },
         "duo": {
-          "partner": "columbine-vesper",
-          "name": "The Finale",
+          "partner": "tabitha-pegg",
+          "name": "The Last Fitting",
           "archetype": "cinematic",
           "duration": 290,
           "dmg": 28,
-          "anim": "He throws Columbine into the air, she lands on the victim's shoulders, scissors their neck and he catches them both in a bear hug, crushing the victim between them."
+          "anim": "Mule lifts the victim by the lapels; Tabitha leaps, using Mule's shoulder as a fulcrum to deliver a calibrated dual-heel drop into the chest, driving them into the floor."
         },
         "weapons": {
           "affinity": [
@@ -5866,13 +5873,13 @@
             "why": "She called his act vulgar in the Morning Lamp. He has been trying to hug her ever since."
           },
           {
-            "id": "columbine-vesper",
-            "why": "The Bulwark gas company lit the Hippodrome footlights that took Columbine's legs. Hester has never apologised, which for her is unheard of."
+            "id": "tabitha-pegg",
+            "why": "The Bulwark gas company attempted to seize Pegg's Spitalfields workshop for a coal storage depot; Tabitha drove Hester's bailiffs into the street with a flurry of iron shoe lasts."
           }
         ],
         "partner": {
-          "id": "sir-peregrine",
-          "why": "Her intended. They fight beautifully together and loathe each other."
+          "id": "lady-eleanor",
+          "why": "Her betrothed. They fight with terrifying elegance together and loathe each other from behind their lace."
         },
         "quotes": {
           "intro": "Lady Hester Bulwark. Do forgive me in advance.",
@@ -6443,12 +6450,12 @@
           "voice": "her apologies stop; she laughs her father's laugh"
         },
         "duo": {
-          "partner": "sir-peregrine",
+          "partner": "lady-eleanor",
           "name": "The Engagement",
           "archetype": "cinematic",
           "duration": 300,
           "dmg": 30,
-          "anim": "Sir Peregrine holds the victim in a waltz and apologises; Hester fires rams into their back on the beat; they bow to each other over the body without touching."
+          "anim": "Lady Eleanor holds the victim in a waltz and apologises; Hester fires rams into their back on the beat; they bow to each other over the body without touching."
         },
         "weapons": {
           "affinity": [
@@ -6602,15 +6609,15 @@
       }
     },
     {
-      "id": "professor-thrip",
-      "name": "Professor Emmeline Thrip",
+      "id": "percival-crump",
+      "name": "Percival \"Oolong\" Crump",
       "style": "Kung Fu",
-      "blurb": "An entomologist who drank her own mantis tincture. Do hold still; I've never seen a specimen quite like you.",
-      "body": "#d8c0a4",
-      "accent": "#2e4a2a",
+      "blurb": "An eccentric East India tea merchant whose limbs brew boiling jasmine tea while he sways inebriated through combat.",
+      "body": "#d2a679",
+      "accent": "#5c2a38",
       "family": "kungfu",
       "special": "spSpin",
-      "specialName": "THE WHIRLING MANTIS",
+      "specialName": "THE SPILLED SAMOVAR",
       "stats": {
         "speed": 1.25,
         "startup": -4,
@@ -6627,20 +6634,20 @@
         "horns": "none",
         "tail": "none",
         "gear": [
-          "goggles",
-          "wings"
+          "obi",
+          "moustache"
         ]
       },
       "look": {
         "def": 0.85,
-        "scar": 0,
-        "paint": 2,
-        "wrinkles": false,
+        "scar": 1,
+        "paint": 0,
+        "wrinkles": true,
         "stubble": false,
         "veins": true
       },
       "airGrab": {
-        "name": "THE SPECIMEN PIN",
+        "name": "ONE LUMP OR TWO",
         "end": "throw",
         "dmg": 10,
         "slam": 16,
@@ -6648,8 +6655,8 @@
         "dist": 3,
         "dur": 34
       },
-      "short": "THRIP",
-      "title": "The Mantis",
+      "short": "CRUMP",
+      "title": "The Drunken Tea-Master",
       "lineage": [
         "Kung Fu",
         "Speed",
@@ -6665,49 +6672,49 @@
         "difficulty": 4
       },
       "profile": {
-        "age": 38,
-        "from": "the Old Sorrow Natural History Society, Museum Row",
-        "trade": "Entomologist, Fellow of the Society",
-        "height": "1.52 m",
-        "bio": "Professor Emmeline Thrip spent twenty years studying the orchid mantis in the Society's glasshouses, and learned from it the oldest fighting form she knows: stillness, then the strike. The Society would not let a woman lecture, so she distilled a tincture from the mantis to prove a point about inheritance and drank it in front of them. Her forearms split and grew into green chitin raptorial claws, her eyes are going compound behind her spectacles, and wings are beginning under her jacket. She cannot stop it. She fights in the Sump for specimens, which the Society will not give her, and because she wants to see the change through.",
-        "personality": "Brilliant, shy, curious, completely unsentimental. She regards everything in the Sump, herself included, as a fascinating specimen.",
-        "manners": "Apologetic, academic: 'Do hold still,' 'I beg your pardon, I'm only looking,' and the Latin names of what she is breaking. Thanks her opponents for their contribution to science.",
-        "violence": "Insect-quick and precise: she pins limbs with entomology pins and snips with the claws. She has a horrible fondness for heads.",
-        "otherSelf": "The Metamorphosis: the full dose. The wings unfold, the eyes go green and faceted, her head tilts like the insect's, and she stops speaking human words.",
+        "age": 50,
+        "from": "Crump & Sons Tea Importers, East India Wharves",
+        "trade": "Tea Merchant, Distiller, Zui Quan Master",
+        "height": "1.68 m",
+        "bio": "Percival Crump spent thirty years along the Pearl River tea factories before a dock crane collapsed his arms. Rather than accept wooden pegs, he commissioned lacquered bamboo prosthetics housing miniature brass samovar boilers that brew scalding fermented tea. In combat, he appears hopelessly tipsy, swaying with daintily balanced porcelain teacups, only to unleash devastating Drunken Kung Fu with clouds of scalding jasmine steam.",
+        "personality": "Genial, chuckling, slyly observant, deeply cultured. Feigns befuddlement while measuring every centimeter of distance.",
+        "manners": "Apologizes profusely for spilling scalding tea on opponents; insists on offering a fresh cup before snapping a collarbone.",
+        "violence": "Fluid, unpredictable, swaying strikes with bamboo elbows and palm heel thrusts accompanied by hissing steam vents.",
+        "otherSelf": "Over-Steeped: he downs a flask of 100-proof fermented pu-erh rum; the samovar vents shriek like teakettles, and his swaying becomes lightning-fast.",
         "rivals": [
           {
-            "id": "matron-kilnworth",
-            "why": "The Matron calls her a quack and a poisoner and had her barred from the Infirmary."
+            "id": "bosun-rook",
+            "why": "Rook's cutter once impounded Crump's smuggled consignment of high-mountain oolong."
           }
         ],
         "partner": {
-          "id": "mortimer-crape",
-          "why": "He lets her study the bodies before he buries them."
+          "id": "hezekiah-smelt",
+          "why": "Smelt built the brass samovar boilers inside Crump's bamboo arms, and is paid in tea."
         },
         "quotes": {
-          "intro": "Do hold still. I've never seen a specimen quite like you.",
-          "appeal": "Ladies and gentlemen, observe: the strike is faster than the eye.",
-          "victory": "Fascinating. I'll need the head.",
-          "defeat": "Note... the time of... emergence..."
+          "intro": "One lump or two, my dear fellow? Do mind the scald.",
+          "appeal": "Behold, good people: the gentle art of the steeped leaf!",
+          "victory": "A delightful brew! Now, let us find a rag for that blood.",
+          "defeat": "The pot... has gone... cold..."
         }
       },
       "limbs": {
-        "craft": "mantis-chitin",
-        "arms": "Both forearms are raptorial claws: lacquer-green chitin with rows of serrated spines along the inside, a hooked tip folding back against the forearm. Her hands are still there, small and human, at the hook.",
-        "legs": "Her own, but thin and jointed oddly at the ankle, with green chitin spreading up from the feet.",
-        "tip": "claw",
+        "craft": "bamboo-samovar",
+        "arms": "Lacquered amber bamboo canes bound in engraved brass hoops with miniature pressurized tea-samovar boilers and turn-taps at the wrists.",
+        "legs": "Turned bamboo rods with brass tip ferrules and kung-fu cloth slippers.",
+        "tip": "fist",
         "lean": {
-          "mass": 0.85,
-          "length": 1.1,
-          "swing": 1.2
+          "mass": 0.95,
+          "length": 1.0,
+          "swing": 1.15
         },
-        "wear": "Chitin cracks and leaks green ichor; a broken spine snaps off in the wound. She regrows spines over the match."
+        "wear": "Bamboo flexes rather than breaks; when over-stressed, steam vents hiss and spray boiling tea."
       },
       "moves": {
         "high": [
           {
-            "id": "observation",
-            "name": "Observation",
+            "id": "first-pour",
+            "name": "The First Pour",
             "input": "○",
             "archetype": "jab",
             "limb": "lead arm",
@@ -6716,14 +6723,14 @@
             "active": 2,
             "recovery": 30,
             "dmg": 3,
-            "anim": "A flicking claw strike from stillness to the face.",
-            "sfx": "a dry click",
-            "vfx": "a small spray",
+            "anim": "A loose lead-hand palm to the face, thrown as he stumbles forward as if reaching for the teapot.",
+            "sfx": "a hollow bamboo clack, a slosh",
+            "vfx": "a spray of blood and tea",
             "sim": "jab1"
           },
           {
-            "id": "hypothesis",
-            "name": "Hypothesis",
+            "id": "second-cup",
+            "name": "The Second Cup",
             "input": "○ ○",
             "archetype": "straight",
             "limb": "rear arm",
@@ -6732,14 +6739,14 @@
             "active": 2,
             "recovery": 30,
             "dmg": 4,
-            "anim": "The other claw hooks across.",
-            "sfx": "a click, a slice",
-            "vfx": "a long cut",
+            "anim": "The rear hand swings across in a cupped fist, the wrist cocked like a cup raised to the lips.",
+            "sfx": "a clack and a ting of brass",
+            "vfx": "a split lip",
             "sim": "jab2"
           },
           {
-            "id": "experiment",
-            "name": "Experiment",
+            "id": "the-refill",
+            "name": "The Refill",
             "input": "○ ○ ○",
             "archetype": "straight",
             "limb": "lead arm",
@@ -6748,14 +6755,14 @@
             "active": 2,
             "recovery": 30,
             "dmg": 4,
-            "anim": "A double snap of the lead claw, high and low.",
-            "sfx": "click-click",
-            "vfx": "two cuts",
+            "anim": "The lead hand snaps out twice, high then low, and the wrist tap spits boiling tea on each.",
+            "sfx": "two clacks and a hiss of steam",
+            "vfx": "a scald and a spatter",
             "sim": "jab3"
           },
           {
-            "id": "conclusion",
-            "name": "Conclusion",
+            "id": "bottoms-up",
+            "name": "Bottoms Up",
             "input": "○ ○ ○ ○",
             "archetype": "finisher",
             "limb": "both arms",
@@ -6765,16 +6772,16 @@
             "recovery": 30,
             "dmg": 8,
             "launch": true,
-            "anim": "Both claws hook under the jaw and flick upward, throwing them into the air.",
-            "sfx": "a wet crunch, a hiss of wings",
-            "vfx": "blood and green ichor upward",
+            "anim": "Both palms drive up under the jaw as he tips back like a man draining a flask, and the body goes up with them.",
+            "sfx": "a crunch, a gurgle of boiling water",
+            "vfx": "blood and steam upward",
             "sim": "punchFin"
           }
         ],
         "low": [
           {
-            "id": "tarsus",
-            "name": "Tarsus",
+            "id": "the-stumble",
+            "name": "The Stumble",
             "input": "← ○",
             "archetype": "snap",
             "limb": "leg",
@@ -6783,14 +6790,14 @@
             "active": 3,
             "recovery": 32,
             "dmg": 4,
-            "anim": "A quick low insect kick to the ankle.",
-            "sfx": "a dry tap",
+            "anim": "Trips forward over nothing and stamps the bamboo foot onto the ankle.",
+            "sfx": "a wooden tap, a crack",
             "vfx": "a spray",
             "sim": "kick1"
           },
           {
-            "id": "femur",
-            "name": "Femur",
+            "id": "the-totter",
+            "name": "The Totter",
             "input": "← ○ ○",
             "archetype": "chain",
             "limb": "leg",
@@ -6799,14 +6806,14 @@
             "active": 3,
             "recovery": 34,
             "dmg": 5,
-            "anim": "A sharp kick to the thigh, folding at the odd ankle.",
-            "sfx": "a crack",
+            "anim": "Totters sideways and knocks the bamboo knee into the thigh on the way past.",
+            "sfx": "a hollow knock",
             "vfx": "a spray",
             "sim": "kick2"
           },
           {
-            "id": "moult",
-            "name": "Moult",
+            "id": "falling-down-drunk",
+            "name": "Falling Down Drunk",
             "input": "← ○ ○ ○",
             "archetype": "reap",
             "limb": "leg",
@@ -6816,16 +6823,16 @@
             "recovery": 40,
             "dmg": 7,
             "knockdown": true,
-            "anim": "Drops flat to the floor and scythes with a claw along the ground at the ankles.",
-            "sfx": "a click, a slice, a fall",
+            "anim": "Falls flat on his back and scythes both bamboo legs through the ankles as he goes, then lies there a moment, chuckling.",
+            "sfx": "a fall, two clacks, a body down",
             "vfx": "blood at the ankles",
             "sim": "sweep"
           }
         ],
         "branches": [
           {
-            "id": "praying-hook",
-            "name": "The Praying Hook",
+            "id": "the-tea-cosy",
+            "name": "The Tea Cosy",
             "input": "○ ○ △",
             "archetype": "kickEnd",
             "limb": "both arms",
@@ -6835,13 +6842,13 @@
             "recovery": 42,
             "dmg": 8,
             "knockdown": true,
-            "anim": "Off Hypothesis, both claws hook behind the neck and pull the face down into her rising knee.",
-            "sfx": "a click, a knee crunch",
+            "anim": "Off the Second Cup, both hands cradle the head like a warm pot and bring it down onto his rising knee.",
+            "sfx": "a slosh, a knee crunch",
             "vfx": "blood from the nose"
           },
           {
-            "id": "flash-strike",
-            "name": "Flash Strike",
+            "id": "the-hiccup",
+            "name": "The Hiccup",
             "input": "○ ○ ○ ← ○",
             "archetype": "snap",
             "limb": "leg",
@@ -6851,15 +6858,15 @@
             "recovery": 38,
             "dmg": 7,
             "knockdown": true,
-            "anim": "Off Experiment, a sudden high kick to the temple from the same stance.",
-            "sfx": "a snap, a crack",
+            "anim": "Off the Refill, a hiccup jolts him upright and a high kick to the temple comes out of it.",
+            "sfx": "a hiccup, a snap",
             "vfx": "a spray from the temple"
           }
         ],
         "regional": [
           {
-            "id": "compound-eye",
-            "name": "Compound Eye",
+            "id": "a-drop-in-the-eye",
+            "name": "A Drop in the Eye",
             "input": "R1 + ↑ ○",
             "archetype": "single",
             "limb": "lead arm",
@@ -6869,13 +6876,13 @@
             "recovery": 40,
             "dmg": 5,
             "target": "head",
-            "anim": "A claw tip flicked into an eye.",
-            "sfx": "a click, a scream",
-            "vfx": "the eye bursts"
+            "anim": "Flicks the wrist tap open an inch from an eye. The tea is boiling.",
+            "sfx": "a hiss, a scream",
+            "vfx": "the eye scalds white"
           },
           {
-            "id": "thorax",
-            "name": "Thorax",
+            "id": "the-strainer",
+            "name": "The Strainer",
             "input": "R1 + ○",
             "archetype": "single",
             "limb": "rear arm",
@@ -6885,13 +6892,13 @@
             "recovery": 40,
             "dmg": 5,
             "target": "body",
-            "anim": "A short stabbing claw under the ribs.",
+            "anim": "A short bamboo finger-strike under the ribs, twisted like a tea strainer in the pot.",
             "sfx": "a crunch",
-            "vfx": "blood and ichor"
+            "vfx": "blood from the side"
           },
           {
-            "id": "hamstrung",
-            "name": "Hamstrung",
+            "id": "steeped",
+            "name": "Steeped",
             "input": "R1 + ↓ ○",
             "archetype": "stamp",
             "limb": "lead arm",
@@ -6901,15 +6908,15 @@
             "recovery": 40,
             "dmg": 5,
             "target": "legs",
-            "anim": "Slashes the back of the knee with a spine.",
-            "sfx": "a slice",
-            "vfx": "the leg gives"
+            "anim": "Pours a jet of boiling tea down the back of the knee, then chops it.",
+            "sfx": "a hiss, a chop",
+            "vfx": "the leg gives, steaming"
           }
         ],
         "dash": [
           {
-            "id": "darting",
-            "name": "Darting",
+            "id": "last-orders",
+            "name": "Last Orders",
             "input": "✕ then ○",
             "archetype": "rush",
             "limb": "lead arm",
@@ -6919,16 +6926,16 @@
             "recovery": 28,
             "dmg": 7,
             "knockdown": true,
-            "anim": "Vanishes forward in a blur and stabs with both claws on arrival.",
-            "sfx": "a buzz of wings, a click",
-            "vfx": "two holes",
+            "anim": "Lurches across the pit like a man late for the bar and arrives lead hand first, both feet nowhere.",
+            "sfx": "staggering slippers, a clack",
+            "vfx": "a burst mouth",
             "sim": "dashStrike"
           }
         ],
         "dive": [
           {
-            "id": "pounce",
-            "name": "The Pounce",
+            "id": "the-pratfall",
+            "name": "The Pratfall",
             "input": "run, then ○",
             "archetype": "dive",
             "limb": "both arms",
@@ -6938,13 +6945,13 @@
             "recovery": 56,
             "dmg": 8,
             "knockdown": true,
-            "anim": "A long insect leap, claws first.",
-            "sfx": "a whirr of wings, a crunch",
+            "anim": "Trips at full run and falls on them headlong, palms first, all of him.",
+            "sfx": "a stumble, a crunch",
             "vfx": "a spray"
           },
           {
-            "id": "feeding",
-            "name": "Feeding",
+            "id": "the-nightcap",
+            "name": "The Nightcap",
             "input": "run, ○, then ○",
             "archetype": "diveChain",
             "limb": "head",
@@ -6953,15 +6960,15 @@
             "active": 4,
             "recovery": 46,
             "dmg": 6,
-            "anim": "Lands on them and bites the neck, like the insect does.",
-            "sfx": "a wet bite",
-            "vfx": "a gush from the neck"
+            "anim": "Sits up on their chest, butts them in the face, and begs their pardon.",
+            "sfx": "a wet thud, 'beg pardon'",
+            "vfx": "a burst nose"
           }
         ],
         "down": [
           {
-            "id": "pinning",
-            "name": "Pinning the Specimen",
+            "id": "milk-and-sugar",
+            "name": "Milk and Sugar",
             "input": "↓ ○ by a floored body",
             "archetype": "stomp",
             "limb": "lead arm",
@@ -6970,15 +6977,15 @@
             "active": 3,
             "recovery": 50,
             "dmg": 7,
-            "anim": "Drives a long entomologist's pin through a hand into the floor.",
-            "sfx": "a pin through a hand, a scream",
-            "vfx": "a pinned hand"
+            "anim": "Stands over the body and pours a full boiling cup from the wrist tap onto the face, slowly, as one should.",
+            "sfx": "a long hiss, a scream",
+            "vfx": "the face blisters"
           }
         ],
         "headbutt": [
           {
-            "id": "antennae",
-            "name": "Antennae",
+            "id": "the-tipple",
+            "name": "The Tipple",
             "input": "□ + ○",
             "archetype": "butt",
             "limb": "head",
@@ -6987,16 +6994,16 @@
             "active": 3,
             "recovery": 44,
             "dmg": 5,
-            "anim": "A quick tilting headbutt with her goggles.",
-            "sfx": "brass goggles on a nose",
+            "anim": "Rocks back as if to drink, then rocks forward with the forehead.",
+            "sfx": "a forehead on a nose, a hiccup",
             "vfx": "a nosebleed",
             "sim": "headbutt"
           }
         ],
         "double": [
           {
-            "id": "raptorial-snap",
-            "name": "Raptorial Snap",
+            "id": "both-handles",
+            "name": "Both Handles",
             "input": "✕ + ○",
             "archetype": "double",
             "limb": "both arms",
@@ -7006,182 +7013,182 @@
             "recovery": 52,
             "dmg": 8,
             "hits": 2,
-            "anim": "Both claws snap shut on the body together like a trap.",
-            "sfx": "a double click, a crunch",
-            "vfx": "two rows of holes"
+            "anim": "Both palms strike the body together, like lifting a heavy urn by its two handles.",
+            "sfx": "a double clack, a crunch",
+            "vfx": "two bruises splitting"
           }
         ],
         "hold": {
-          "id": "the-catch",
-          "name": "The Catch",
+          "id": "an-old-friend",
+          "name": "An Old Friend",
           "input": "△",
           "archetype": "hold",
           "duration": 98,
           "dmg": 0,
-          "anim": "Folds both claws round them in the mantis catch.",
-          "sfx": "a dry click, a struggle",
+          "anim": "Throws a drunken arm round their neck like an old friend at closing time.",
+          "sfx": "a slosh, a struggle",
           "sim": "GRAB"
         },
         "clinch": [
           {
-            "id": "nibble",
-            "name": "A Nibble",
+            "id": "a-sip",
+            "name": "A Sip",
             "input": "in the hold, ○",
             "archetype": "clinch",
             "duration": 63,
             "dmg": 5,
-            "anim": "Bites at the face.",
-            "sfx": "a crunch",
-            "vfx": "a chunk of cheek",
+            "anim": "Holds them close, sips from his wrist tap, and spits the boiling mouthful into their face.",
+            "sfx": "a slurp, a spit, a scream",
+            "vfx": "a scalded face",
             "sim": "HOLD"
           },
           {
-            "id": "spines",
-            "name": "The Spines",
+            "id": "steeping",
+            "name": "Steeping",
             "input": "in the hold, ○ ○",
             "archetype": "clinch",
             "duration": 70,
             "dmg": 5,
-            "anim": "Draws the serrated spines across the arms she is holding.",
-            "sfx": "a long rasp",
-            "vfx": "the arms run red"
+            "anim": "Opens both wrist taps against the neck he is holding and lets them run.",
+            "sfx": "a long hiss",
+            "vfx": "the skin goes red and lifts"
           }
         ],
         "throws": [
           {
-            "id": "dissection",
-            "name": "Dissection",
+            "id": "the-pour",
+            "name": "The Pour",
             "input": "in the hold, △",
             "archetype": "throw",
             "duration": 136,
             "dmg": 12,
-            "anim": "Turns them over and slits them along the breastbone as they fall.",
-            "sfx": "a slice, a fall",
-            "vfx": "a long red line",
+            "anim": "Tips them over his hip like a teapot and pours them out onto their head.",
+            "sfx": "a slosh, a fall",
+            "vfx": "a red splash",
             "sim": "THROW"
           },
           {
-            "id": "specimen-jar",
-            "name": "Into the Jar",
+            "id": "the-sway",
+            "name": "The Sway",
             "input": "in the hold, ← △",
             "archetype": "throw",
             "duration": 140,
             "dmg": 12,
-            "anim": "Rolls back and flips them over her head with her feet.",
-            "sfx": "a whirr, a slam",
+            "anim": "Rolls back drunk with them on top of him and kicks them over his head with both bamboo feet.",
+            "sfx": "a creak, a whirl, a slam",
             "vfx": "a splash"
           },
           {
-            "id": "pinned-and-labelled",
-            "name": "Pinned and Labelled",
+            "id": "the-tasting",
+            "name": "The Tasting",
             "input": "in the hold, ↓ △",
             "archetype": "throw",
             "duration": 160,
             "dmg": 14,
-            "anim": "Pushes them face down and pins all four limbs to the floor with long pins, then writes a label.",
-            "sfx": "four pins, writing",
-            "vfx": "a spread-eagled specimen"
+            "anim": "Forces them face down, kneels on the back, and pours tea into an ear until it boils out of the other.",
+            "sfx": "a hiss, a gurgle, a scream",
+            "vfx": "steam from both ears"
           },
           {
-            "id": "flight",
-            "name": "Flight",
+            "id": "the-tea-clipper",
+            "name": "The Tea Clipper",
             "input": "in the hold, → △",
             "archetype": "throw",
             "duration": 136,
             "dmg": 12,
             "end": "throw",
-            "anim": "Buzzes into the air holding them and drops them on.",
-            "sfx": "wings, a long splash",
+            "anim": "Swings them round and round like a clipper rounding the Cape and lets them go.",
+            "sfx": "a whirl, a long splash",
             "vfx": "a red splash"
           }
         ],
         "back": {
-          "id": "decapitation",
-          "name": "The Female's Prerogative",
+          "id": "in-one-ear",
+          "name": "In One Ear",
           "input": "△ from behind",
           "archetype": "longThrow",
           "duration": 200,
           "dmg": 18,
-          "anim": "Climbs onto their back, folds the claws round their neck, and begins, as the female mantis does, with the head. The Gallery sees enough.",
-          "sfx": "a crunch, chewing, a gasp from the Gallery",
-          "vfx": "a fountain from the neck"
+          "anim": "From behind, puts both wrist taps to the ears and opens them full until the boilers whistle. He hums along. The Gallery sees enough.",
+          "sfx": "two jets of steam, a rising whistle, humming, a gasp from the Gallery",
+          "vfx": "steam and blood from the ears and nose"
         },
         "wall": {
-          "id": "display-case",
-          "name": "The Display Case",
+          "id": "the-tea-chest",
+          "name": "The Tea Chest",
           "input": "△ with their back to a wall",
           "archetype": "longThrow",
           "duration": 200,
           "dmg": 16,
-          "anim": "Pins them to the wall through both shoulders with claws, and studies them closely.",
-          "sfx": "two crunches, a magnifying glass, 'fascinating'",
-          "vfx": "two holes in the wall"
+          "anim": "Pins them to the wall with a forearm and packs the palm into the chest again and again, like leaves into a chest.",
+          "sfx": "palm on chest, ribs going, 'a snug fit'",
+          "vfx": "blood from the mouth"
         },
         "grappleDash": {
-          "id": "netted",
-          "name": "Netted",
+          "id": "an-old-acquaintance",
+          "name": "An Old Acquaintance",
           "input": "✕ then △",
           "archetype": "hold",
           "duration": 100,
           "dmg": 6,
-          "anim": "Darts in and snaps the claws round them.",
-          "sfx": "a buzz, a click"
+          "anim": "Staggers in and embraces them as if they had last met in Canton.",
+          "sfx": "staggering slippers, a slosh"
         },
         "diveGrab": {
-          "id": "swarm",
-          "name": "The Swarm",
+          "id": "the-toppled-urn",
+          "name": "The Toppled Urn",
           "input": "run, then △",
           "archetype": "longThrow",
           "duration": 188,
           "dmg": 15,
-          "anim": "Leaps onto their back in a flutter of wings and rides them down claws first.",
-          "sfx": "wings, a crunch"
+          "anim": "Falls on them from a run like a toppled tea urn and rides them down, every tap open.",
+          "sfx": "a crash, a hiss"
         },
         "ground": {
-          "id": "field-notes",
-          "name": "Field Notes",
+          "id": "reading-the-leaves",
+          "name": "Reading the Leaves",
           "input": "△ by a floored body",
           "archetype": "longThrow",
           "duration": 195,
           "dmg": 14,
-          "anim": "Crouches over them like an insect and takes a sample with the hooked claw.",
-          "sfx": "a scrape, a little scream, writing",
-          "vfx": "a scoop of flesh"
+          "anim": "Kneels by the body, opens the belly with a finger-strike and studies what is inside like leaves in a cup. He reads them their fortune.",
+          "sfx": "a wet tear, a murmured fortune",
+          "vfx": "a spill of entrails"
         },
         "deflects": [
           {
-            "id": "stillness",
-            "name": "Stillness",
+            "id": "a-spill",
+            "name": "A Spill",
             "input": "□ as a high strike lands",
             "archetype": "deflect",
             "duration": 32,
             "dmg": 8,
-            "anim": "The claw is suddenly holding the fist, and then the fist is not attached.",
-            "sfx": "a click, a crunch",
+            "anim": "Lurches aside so the fist misses, catches the wrist, and wrenches the arm round until the elbow goes.",
+            "sfx": "a clack, an elbow crack",
             "sim": "REVERSAL"
           },
           {
-            "id": "mimicry",
-            "name": "Mimicry",
+            "id": "the-wobble",
+            "name": "The Wobble",
             "input": "↓ □ as a low strike lands",
             "archetype": "deflect",
             "duration": 34,
             "dmg": 8,
-            "anim": "Steps onto the kicking leg like a stick insect and strikes down from it.",
-            "sfx": "a tap, a slice"
+            "anim": "Wobbles up on one leg over the kick and stamps it into the floor.",
+            "sfx": "a tap, a crack"
           }
         ],
         "special": {
-          "name": "THE WHIRLING MANTIS",
+          "name": "THE SPILLED SAMOVAR",
           "sim": "spSpin",
-          "anim": "Spins on one foot with both claws extended, wings half open, a green blur cutting everything round her.",
-          "sfx": "a buzzing whirr and a rapid series of clicks and slices",
-          "vfx": "a ring of blood and ichor"
+          "anim": "Spins on one heel with both arms out and every tap open, a whirling cloud of boiling tea scalding everything round him.",
+          "sfx": "a shrieking kettle whistle and a ring of clacks",
+          "vfx": "a ring of steam and blood"
         },
         "arts": [
           {
-            "id": "emergence",
-            "name": "Emergence",
+            "id": "coming-to-the-boil",
+            "name": "Coming to the Boil",
             "input": "R2 + ↑",
             "archetype": "art",
             "limb": "both arms",
@@ -7191,13 +7198,13 @@
             "recovery": 56,
             "dmg": 17,
             "launch": true,
-            "anim": "Unfolds her wings and rises straight up through them, both claws first.",
-            "sfx": "a wing burst, a crunch",
-            "vfx": "a spiral of blood"
+            "anim": "Crouches with the boilers rattling, then shoots straight up through them palms first in a blast of steam.",
+            "sfx": "a rising whistle, a crunch",
+            "vfx": "a spiral of steam and blood"
           },
           {
-            "id": "thousand-cuts",
-            "name": "Ten Thousand Specimens",
+            "id": "high-tea",
+            "name": "High Tea",
             "input": "R2 + →",
             "archetype": "art",
             "limb": "both arms",
@@ -7207,24 +7214,24 @@
             "recovery": 40,
             "dmg": 16,
             "hits": 12,
-            "anim": "Advances in tiny steps striking twelve times a second.",
-            "sfx": "a blur of clicks",
-            "vfx": "a red mist"
+            "anim": "Totters forward slapping twelve times a second, each palm a little hotter than the last.",
+            "sfx": "a blur of clacks and hisses",
+            "vfx": "a red, steaming mist"
           },
           {
-            "id": "the-nuptial",
-            "name": "The Nuptial Flight",
+            "id": "the-tea-ceremony",
+            "name": "The Tea Ceremony",
             "input": "R2 + ↓",
             "archetype": "cinematic",
             "duration": 290,
             "dmg": 28,
-            "anim": "Embraces them tenderly, flies them up into the dark of the arches, and drops what is left.",
-            "sfx": "wings, a scream fading upward, a long silence, a splash",
-            "vfx": "rain mixed with blood falls from above"
+            "anim": "Kneels them down, bows, and serves them the boilers' whole contents down the throat, then pours one for himself and drinks to their health.",
+            "sfx": "a bow, a gurgle, a scream that stops, a cup set down",
+            "vfx": "steam from the mouth"
           },
           {
-            "id": "stridulate",
-            "name": "Stridulation",
+            "id": "the-kettles-shriek",
+            "name": "The Kettle's Shriek",
             "input": "R2 + ←",
             "archetype": "art",
             "limb": "both arms",
@@ -7234,159 +7241,160 @@
             "recovery": 46,
             "dmg": 13,
             "knockdown": true,
-            "anim": "Rasps the claws together into a shriek that stuns everyone near, then strikes them all.",
-            "sfx": "a shrill insect rasp, then clicks",
+            "anim": "Opens every valve at once into a shriek that stuns everyone near, then palms them all down.",
+            "sfx": "a deafening kettle shriek, then clacks",
             "vfx": "blood from the ears all round"
           }
         ],
         "status": {
-          "name": "THE METAMORPHOSIS",
+          "name": "OVER-STEEPED",
           "drink": 70,
           "lasts": 600,
-          "anim": "Takes a green vial from her bag, drinks it, and the wings tear out of her jacket.",
+          "anim": "Uncorks a flask of black fermented pu-erh rum and drains it, and every vent on the boilers shrieks.",
           "effects": {
             "speed": 1.2,
             "startup": -2,
-            "note": "she can hover over a sweep; her air grab reaches twice as high; every strike heals her by a quarter of its damage"
+            "note": "he sways clear over a sweep; his air grab reaches twice as high; every strike heals him by a quarter of its damage"
           },
-          "look": "full wings, compound green eyes, her head tilting, ichor-wet",
-          "voice": "insect clicks and a soft rasp in place of words"
+          "look": "flushed scarlet, eyes glazed, steam pouring from every joint",
+          "voice": "a hiccuping, slurred baritone that breaks into song"
         },
         "duo": {
-          "partner": "mortimer-crape",
-          "name": "Post Mortem",
+          "partner": "hezekiah-smelt",
+          "name": "The Copper Kettle",
           "archetype": "cinematic",
           "duration": 280,
           "dmg": 27,
-          "anim": "Crape folds the victim onto a slab; Thrip dissects them while he holds the lamp and offers condolences."
+          "anim": "Smelt holds the victim over his furnace mouth like a kettle on the hob; Crump pours them a cup of what comes out, and thanks Smelt for the use of the stove."
         },
         "weapons": {
           "affinity": [
-            "blade"
+            "tonic",
+            "blunt"
           ],
-          "signature": "hatpin",
-          "style": "Holds a blade in a claw like a spine of her own. Prefers thin blades, above all a lady's hatpin. Drops clubs at once."
+          "signature": "tonic",
+          "style": "Drinks any bottle the Gallery throws, and fights better for it. Swings a club like a walking stick he has forgotten the use of. Hands blades back politely."
         },
         "appeal": {
-          "anim": "Pushes her goggles up, holds up a jar with something in it, and bows like a lecturer.",
-          "line": "Observe: the strike is faster than the eye.",
-          "gift": "swordsticks and bottles of tincture"
+          "anim": "Bows unsteadily to each tier, raises a cup to them, and drinks it off.",
+          "line": "Behold, good people: the gentle art of the steeped leaf!",
+          "gift": "bottles of tincture, and the odd nail bat"
         }
       },
       "art": {
-        "silhouette": "A tiny, hunched woman in a tweed jacket and brass loupes, with long folded green claws held up in the mantis stance and little wings starting between her shoulders.",
-        "build": "Small and thin, round-shouldered, long-limbed for her size.",
+        "silhouette": "A round-bellied, swaying gentleman in a sash-tied quilted waistcoat and a walrus moustache, with amber bamboo arms swelling into brass boilers at the forearms, steam trailing from the wrists.",
+        "build": "Middle-aged and soft-looking, barrel-chested and paunchy, loose in every joint.",
         "palette": {
           "primary": {
-            "hex": "#2e4a2a",
-            "name": "glasshouse green"
+            "hex": "#5c2a38",
+            "name": "oxblood plum"
           },
           "secondary": {
-            "hex": "#d8c0a4",
-            "name": "pale skin"
+            "hex": "#d2a679",
+            "name": "ruddy skin"
           },
           "metal": {
-            "hex": "#6aa04a",
-            "name": "lacquer chitin green"
+            "hex": "#b8862e",
+            "name": "samovar brass"
           },
           "light": {
-            "hex": "#d4a840",
-            "name": "brass loupes"
+            "hex": "#e8c070",
+            "name": "lacquered amber bamboo"
           }
         },
-        "costume": "A tweed lecturing jacket with leather elbow patches split for the claws, a high-collared blouse with a cameo of a beetle, a bustled walking skirt, button boots, a satchel of jars, nets and pins, and a pair of brass multi-lensed entomologist's loupes over her spectacles.",
+        "costume": "A quilted oxblood silk waistcoat over a collarless shirt with the sleeves cut away for the bamboo, a long black sash knotted at the hip, loose canvas trousers into cloth slippers, a watch-chain hung with a tea strainer, and a leather flask holster at each hip.",
         "alternates": [
           {
-            "name": "Expedition",
-            "note": "a khaki safari jacket and a pith helmet"
+            "name": "Wharf",
+            "note": "a docker's oilskin over the waistcoat, tea-chest stencils across the back"
           },
           {
-            "name": "Lecture",
-            "note": "black academic robes she was never allowed to wear"
+            "name": "Tasting Room",
+            "note": "a merchant's white linen suit, already stained"
           },
           {
-            "name": "Imago",
-            "note": "chitin spreading over half her face and the jacket gone"
+            "name": "Over-Steeped",
+            "note": "the waistcoat open, scarlet with heat, steam from every seam"
           }
         ],
-        "limbs": "The claws are segmented, lacquer-green fading to translucent at the edges, with two rows of serrated black-tipped spines. Wet pale membrane at the joints. The spines regrow, so they look uneven.",
-        "face": "A narrow, serious face, pale, freckled, large dark eyes behind thick spectacles, with green faceting starting at the corners of the eyes; painted stripes (paint 2) are the chitin coming through.",
-        "hair": "Mousy brown, scraped into a bun, a pencil stuck through it.",
-        "gore": "Cutting and piercing: neat slices, puncture rows, eyes and heads. Her KO often takes something away with her.",
+        "limbs": "Amber lacquered bamboo canes in engraved brass hoops, the forearms swelling into small riveted samovar boilers with pressure gauges and a turn-tap at each wrist. Steam beads on the lacquer; the joints are brass knuckle-pins.",
+        "face": "A round, ruddy, cheerful face flushed with drink, heavy-lidded twinkling eyes, broken veins across the nose and cheeks; the grey walrus moustache is drawn in 3D.",
+        "hair": "Thinning grey, combed back and damp with steam.",
+        "gore": "Scalds and crushing: blistered faces, steaming wounds, burst joints. His KOs are poured rather than thrown.",
         "vfx": [
-          "green ichor mixing with blood",
-          "a shimmer of wings",
-          "pin-heads glinting in the bodies"
+          "jets of white steam from the wrist taps",
+          "amber tea running into the blood",
+          "a haze of steam over the bodies"
         ],
-        "idle": "Stands motionless in the mantis stance; only her head turns, in little jerks.",
-        "intro": "Steps out from behind a glass case, adjusts her loupes, and makes a note.",
-        "victory": "Measures the body with calipers and writes it all down.",
-        "defeat": "Curls up on her side with her claws folded, like a dead insect.",
-        "portrait": "Close-up, loupes flipped down, a claw raised, a beetle on her shoulder, green light from a glasshouse."
+        "idle": "Sways in place as if on a ship's deck, takes a sip from a wrist tap, and hiccups.",
+        "intro": "Wanders in from the Gallery's tea stall with a cup and saucer, sets them down on the pit's edge, and bows.",
+        "victory": "Pours himself a fresh cup over the body and toasts the Gallery.",
+        "defeat": "Sits down heavily, takes one last sip, and tips slowly over onto his side, steaming.",
+        "portrait": "Close-up, a cup raised in a bamboo hand, steam curling off the boiler, eyes twinkling over the moustache, warm lamplight from a tea-room window."
       },
       "sound": {
         "voice": {
-          "casting": "a soft, quick, breathy mezzo in her late thirties",
-          "accent": "educated and precise, a little shy",
-          "texture": "murmuring, fascinated, as if to herself"
+          "casting": "a warm, chuckling, slightly slurred baritone in his fifties",
+          "accent": "genteel old merchant English, softened by thirty years abroad",
+          "texture": "genial, hiccuping, fond of everyone"
         },
         "lines": {
           "intro": [
-            "Do hold still. I've never seen a specimen quite like you.",
-            "Oh! You'll do nicely."
+            "One lump or two, my dear fellow? Do mind the scald.",
+            "Ah, a guest! I'll put the kettle on."
           ],
           "appeal": [
-            "Observe: the strike is faster than the eye.",
-            "A note for the Society, ladies and gentlemen."
+            "Behold, good people: the gentle art of the steeped leaf!",
+            "A toast, ladies and gentlemen, to our guest's health. What remains of it."
           ],
           "hit": [
-            "Fascinating.",
-            "Sternum.",
-            "Oh, I beg your pardon."
+            "Steady.",
+            "Oops-a-daisy.",
+            "Beg pardon, beg pardon."
           ],
           "hurt": [
-            "Ah!",
-            "Interesting."
+            "Oof!",
+            "Spilt it."
           ],
-          "special": "Watch closely.",
-          "tincture": "(insect clicking)",
+          "special": "Mind the pot!",
+          "tincture": "(a long swallow, then a kettle's shriek)",
           "victory": [
-            "Fascinating. I'll need the head.",
-            "Thank you for your contribution to science."
+            "A delightful brew! Now, let us find a rag for that blood.",
+            "Steeped to perfection."
           ],
-          "defeat": "Note... the time of... emergence..."
+          "defeat": "The pot... has gone... cold..."
         },
-        "efforts": "tiny clicks and sharp breaths",
-        "footsteps": "light, quick, irregular taps",
-        "foley": "a soft clicking of chitin at every move, the whirr of wings, jars and pins clinking in her satchel",
+        "efforts": "chuckles, hiccups and puffs",
+        "footsteps": "soft cloth slippers, scuffing and irregular, with a stagger now and then",
+        "foley": "hot water sloshing in the boilers, a hiss of steam at every move, bamboo creaking, a tea strainer jingling on the watch-chain",
         "impact": {
-          "craft": "mantis-chitin",
-          "nuance": "a faint buzz of wings under the hit"
+          "craft": "bamboo-samovar",
+          "nuance": "a slosh of hot tea under the hit"
         },
         "music": {
-          "title": "The Glasshouse",
-          "brief": "A nervous, intricate piece for harpsichord and plucked strings, with insect clicks and buzzing as percussion and a sudden silence before every strike.",
-          "tempo": 144,
+          "title": "The Tea Clipper",
+          "brief": "A lurching waltz for hammered dulcimer, accordion and teacups, swinging off the beat, with a kettle whistle rising before every strike.",
+          "tempo": 132,
           "instruments": [
-            "harpsichord",
-            "pizzicato strings",
-            "insect clicks",
-            "glass harmonica"
+            "hammered dulcimer",
+            "accordion",
+            "teacup percussion",
+            "kettle whistle"
           ]
         },
         "cues": [
           {
-            "id": "thrip-click",
+            "id": "crump-hiss",
             "category": "foley",
-            "note": "her claws flexing",
-            "prompt": "A large insect's hard claw clicks open and shut twice: dry sharp chitin clicks. Close microphone, dry room, one single action.",
+            "note": "his wrist taps venting",
+            "prompt": "A small brass valve opens on a boiling kettle: a sharp hiss of steam that tails off with a little gurgle. Close microphone, dry room, one single release.",
             "seed": 4670
           },
           {
-            "id": "thrip-wings",
+            "id": "crump-slosh",
             "category": "foley",
-            "note": "her wings unfolding",
-            "prompt": "Large thin insect wings unfold and beat once: a dry rustle and a short loud whirr. Close microphone, dry room, one single beat.",
+            "note": "the boilers sloshing as he sways",
+            "prompt": "Hot water sloshes inside a small sealed brass boiler as it is tipped, with a faint metallic knock. Close microphone, dry room, one single tilt.",
             "seed": 4671
           }
         ]
@@ -7394,127 +7402,132 @@
       "texture": {
         "seed": 5108,
         "skin": {
-          "idea": "pale freckled skin with green insect faceting starting at the eyes and the wrists",
-          "colour": "pale with green"
+          "idea": "ruddy weathered skin flushed with drink, with broken red veins and beads of steam-sweat",
+          "colour": "ruddy"
         },
         "cloth": {
-          "idea": "brown tweed jacket with leather elbow patches, a cream blouse, a dark green bustled skirt",
-          "colour": "brown tweed and green"
+          "idea": "a quilted oxblood silk waistcoat with a long black sash, a collarless cream shirt, loose canvas trousers",
+          "colour": "oxblood and black"
         },
         "face": {
-          "idea": "a narrow pale serious freckled face with large dark eyes behind thick spectacles, green faceting at the corners",
-          "colour": "pale with green"
+          "idea": "a round ruddy cheerful face with heavy-lidded twinkling eyes and broken veins across the nose and cheeks",
+          "colour": "ruddy"
         },
         "limb": {
-          "idea": "segmented lacquer-green insect chitin with rows of black-tipped serrated spines and translucent edges",
-          "colour": "lacquer green"
+          "idea": "amber lacquered bamboo cane in engraved brass hoops with small riveted brass boilers, beaded with steam",
+          "colour": "amber and brass"
         }
       }
     },
     {
-      "id": "columbine-vesper",
-      "name": "Columbine Vesper",
+      "id": "tabitha-pegg",
+      "name": "Mistress Tabitha Pegg",
       "style": "Tae Kwon Do",
-      "blurb": "Prima ballerina of the Hippodrome, dancing on legs of glowing glass. Every kick is a curtain call.",
-      "body": "#b88464",
-      "accent": "#5a2a6a",
+      "blurb": "Obsessive East End cordwainer and bootmaker engineered to deliver the mechanically perfect human kick with articulated cast-iron shoe lasts, brass rule gauges, and heavy steel-welted brogues.",
+      "body": "#e2c2a6",
+      "accent": "#c8963e",
       "family": "kicker",
       "special": "spFire",
-      "specialName": "THE FOOTLIGHTS",
+      "specialName": "THE HOT WELT",
       "stats": {
-        "speed": 1.08,
+        "speed": 1.06,
         "startup": -2,
-        "punch": 0.8,
-        "kick": 1.35,
-        "grab": 0.95,
-        "reach": 1.12,
+        "punch": 0.85,
+        "kick": 1.4,
+        "grab": 0.9,
+        "reach": 1.1,
         "string": 2,
         "torso": 0.95,
         "grabReach": 1
       },
       "kit": {
-        "size": 0.94,
+        "size": 0.98,
         "horns": "none",
         "tail": "none",
         "gear": [
-          "topknot"
+          "goggles",
+          "gloves"
         ]
       },
       "look": {
-        "def": 0.95,
-        "scar": 0,
+        "def": 1.0,
+        "scar": 1,
         "paint": 1,
         "wrinkles": false,
         "stubble": false,
-        "veins": false
+        "veins": true
       },
       "airGrab": {
-        "name": "THE GRAND JETÉ",
+        "name": "THE LAST DROP",
         "end": "bounce",
-        "dmg": 14,
-        "slam": 20,
-        "lift": 0.9,
-        "dur": 42
+        "dmg": 15,
+        "slam": 22,
+        "lift": 0.85,
+        "dur": 40
       },
-      "short": "COLUMBINE",
-      "title": "The Gaslight Ballerina",
+      "short": "TABITHA",
+      "title": "The Cobbler's Automaton",
       "lineage": [
         "Tae Kwon Do",
         "Capoeira"
       ],
       "ratings": {
-        "power": 3,
+        "power": 4,
         "speed": 4,
-        "reach": 5,
+        "reach": 4,
         "grapple": 2,
-        "defence": 2,
-        "technique": 4,
+        "defence": 3,
+        "technique": 5,
         "difficulty": 4
       },
       "profile": {
-        "age": 23,
-        "from": "the Hippodrome, Gaiety Lane",
-        "trade": "Prima ballerina",
-        "height": "1.68 m",
-        "bio": "Columbine Vesper was born Mary Ann Pike in a court off Gaiety Lane, and danced her way from the back row of the Hippodrome to its first night in seven years. On her first night as prima the gas footlights exploded and took both her legs to the hip. A glassblower from the lamp works made her new ones from the same lamp glass, filled with the glowing aether-gas that lights the city: they shine through her tights, brighten when she moves and burn when she kicks. She can dance on them better than she ever could. The Hippodrome will not have a cripple, so she dances in the Sump, and the Gallery has never seen anything so beautiful or so many people set on fire.",
-        "personality": "Gracious, radiant, vain, coldly ambitious. She lives for the applause and has no feeling at all about what she does to get it.",
-        "manners": "A curtsey for everything: before the bout, after every knockdown, over every body. 'Merci.' Soft-spoken. Thanks the orchestra.",
-        "violence": "Kicks from impossible angles: high, spinning, inverted, the glass shins smashing into faces and spraying burning gas, then refilling. Capoeira's sway and a ballerina's line.",
-        "otherSelf": "The Limelight: she breathes the pure gas from her own hip valve. Her legs blaze white, she trails fire, and she will not stop dancing.",
+        "age": 31,
+        "from": "Barrow & Sons Cordwainers, Spitalfields",
+        "trade": "Master Cordwainer & Prosthetic Last-Fitter",
+        "height": "1.72 m",
+        "bio": "Tabitha Pegg spent fourteen years hammering box calf and pigskin over iron lasts in the damp cellars of Spitalfields, until an industrial steam-press crushed both her feet during a rush order for the Royal Horse Guards. Rather than beg, Pegg shut herself in her workshop for six months and emerged on legs of her own forging: articulated cast-iron shoemaker lasts, calibrated brass measuring calipers, and heavy triple-soled steel brogues fitted with spring-ratchet clockwork. She treats human combat as an exacting sizing problem—every knee strike, roundhouse, and spinning hook kick measured to the millimeter and driven home with thirty pounds of cold pig-iron.",
+        "personality": "Methodical, acerbic, relentlessly exacting. She views every opponent not as a fighter, but as an ill-fitting boot that needs stretching, paring down, or hammering flat.",
+        "manners": "Takes chalk from behind her ear and marks the opponent's lapel or cheek before kicking it. Measures distances with a brass sliding gauge. 'Stand straight; you're throwing my welt off.'",
+        "violence": "Rapid-fire machine-gun kicks with mathematical precision. High-speed staccato Tae Kwon Do roundhouses, piercing steel-tipped toe jabs, and shattering iron-welt heel drops.",
+        "otherSelf": "Overwound Springs: she clicks a tension ratchet behind her knee; the clockwork springs scream at double speed, unleashing an uncontrollable blizzard of rhythmic kicks.",
         "rivals": [
           {
+            "id": "hezekiah-smelt",
+            "why": "Smelt's chimney-sweep furnace soot ruins her fine top-grain box calf leather and gums up her knee ratchets."
+          },
+          {
             "id": "lady-bulwark",
-            "why": "The Bulwark gas company lit the footlights that exploded. Lady Hester has never apologised."
+            "why": "The Bulwark gas company attempted to seize Pegg's Spitalfields workshop for a coal storage depot; Tabitha drove Hester's bailiffs into the street with a flurry of iron shoe lasts."
           }
         ],
         "partner": {
           "id": "bartholomew-mule",
-          "why": "They share the Alhambra bill. He catches her when she leaps."
+          "why": "Mule brings in heavy scrap iron lasts and railway boots; Tabitha welds them into indestructible weapons and braces for him."
         },
         "quotes": {
-          "intro": "Bonsoir. Shall we dance?",
-          "appeal": "Merci, merci! Encore?",
-          "victory": "And... curtain.",
-          "defeat": "The lights... are going down..."
+          "intro": "Hold still. Let's see what size you take.",
+          "appeal": "Good leather, clean welt, no excuses.",
+          "victory": "Hammered, stitched, and put out to dry.",
+          "defeat": "The mainspring... has snapped..."
         }
       },
       "limbs": {
-        "craft": "aether-glass",
-        "arms": "Her own, slender, in long satin gloves.",
-        "legs": "Both legs from the hip: blown-glass tubes and bulbs in brass ferrules, filled with violet-white aether that brightens on every move, a glass knee like a lamp globe, a pointed glass foot that ends in a brass pointe tip.",
-        "tip": "spike",
+        "craft": "cast-iron-lasts",
+        "arms": "Her own, sinewy and scarred with awl slips, wearing studded leather arm bracers, chalk smudges on the knuckles.",
+        "legs": "Both legs from mid-thigh down: forged cast-iron shoemaker lasts fitted with engraved brass measuring rules, tension leaf-springs behind the calves, and heavy triple-soled steel oxfords with serrated welt rims.",
+        "tip": "hoof",
         "lean": {
-          "mass": 0.95,
-          "length": 1.15,
-          "swing": 1.15
+          "mass": 1.15,
+          "length": 1.05,
+          "swing": 1.1
         },
-        "wear": "Glass shatters on a hard hit and the gas burns out; the leg refills from a reservoir at the hip over a second, dimmer each time. Shards stay in whoever she kicked."
+        "wear": "Sparks fly from the steel welts on hard impact; clockwork springs whine as tension builds; chipped black iron flakes off the lasts during heavy exchanges."
       },
       "moves": {
         "high": [
           {
-            "id": "plie",
-            "name": "Plié",
+            "id": "the-chalk-mark",
+            "name": "The Chalk Mark",
             "input": "○",
             "archetype": "jab",
             "limb": "lead arm",
@@ -7523,14 +7536,14 @@
             "active": 3,
             "recovery": 30,
             "dmg": 3,
-            "anim": "A light gloved backhand flick, a dancer's arm.",
-            "sfx": "satin swish, a slap",
-            "vfx": "a spray",
+            "anim": "A quick backhand off the lead hand that leaves a chalk tick on the cheek, where the kick will go.",
+            "sfx": "a slap, a scratch of chalk",
+            "vfx": "a chalk mark and a split cheek",
             "sim": "jab1"
           },
           {
-            "id": "port-de-bras",
-            "name": "Port de Bras",
+            "id": "the-awl",
+            "name": "The Awl",
             "input": "○ ○",
             "archetype": "straight",
             "limb": "rear arm",
@@ -7539,14 +7552,14 @@
             "active": 3,
             "recovery": 30,
             "dmg": 4,
-            "anim": "A sweeping elbow on the turn.",
-            "sfx": "a swish, a crack",
-            "vfx": "a cut brow",
+            "anim": "A short rear elbow on the turn, driven like an awl through leather.",
+            "sfx": "a crack",
+            "vfx": "a cut over the eye",
             "sim": "jab2"
           },
           {
-            "id": "developpe",
-            "name": "Développé",
+            "id": "the-upper",
+            "name": "The Upper",
             "input": "○ ○ ○",
             "archetype": "finisher",
             "limb": "leg",
@@ -7556,16 +7569,16 @@
             "recovery": 30,
             "dmg": 10,
             "launch": true,
-            "anim": "Unfolds a glass leg straight up through the chin into a standing split.",
-            "sfx": "a glass clink, a bright crack, a buzz",
-            "vfx": "a violet flare, blood up",
+            "anim": "Unfolds an iron last straight up through the chin, the leg locking out on its ratchet.",
+            "sfx": "a ratchet click, an iron clang, a jaw going",
+            "vfx": "blood and teeth up",
             "sim": "punchFin"
           }
         ],
         "low": [
           {
-            "id": "battement",
-            "name": "Battement",
+            "id": "the-toe-cap",
+            "name": "The Toe Cap",
             "input": "← ○",
             "archetype": "snap",
             "limb": "leg",
@@ -7574,14 +7587,14 @@
             "active": 3,
             "recovery": 32,
             "dmg": 6,
-            "anim": "A quick glass beat-kick to the ribs.",
-            "sfx": "a glass clink",
-            "vfx": "a spark of gas",
+            "anim": "A short snap of the steel toe cap into the ribs.",
+            "sfx": "an iron knock",
+            "vfx": "a spray of sparks and blood",
             "sim": "kick1"
           },
           {
-            "id": "rond-de-jambe",
-            "name": "Rond de Jambe",
+            "id": "the-welt",
+            "name": "The Welt",
             "input": "← ○ ○",
             "archetype": "wheel",
             "limb": "leg",
@@ -7590,14 +7603,14 @@
             "active": 4,
             "recovery": 44,
             "dmg": 8,
-            "anim": "A whipping circular kick round to the head.",
-            "sfx": "a whoosh of light, a crack",
-            "vfx": "a trail of violet light",
+            "anim": "A whipping round kick to the head with the serrated welt of the sole.",
+            "sfx": "a whirr, a ringing clang",
+            "vfx": "a torn ear",
             "sim": "kick2"
           },
           {
-            "id": "fouette",
-            "name": "Fouetté",
+            "id": "the-heel-iron",
+            "name": "The Heel Iron",
             "input": "← ○ ○ ○",
             "archetype": "reap",
             "limb": "leg",
@@ -7607,16 +7620,16 @@
             "recovery": 42,
             "dmg": 10,
             "knockdown": true,
-            "anim": "A whipping turn and a glass heel into the face.",
-            "sfx": "a whirl, a glass smash",
-            "vfx": "the shin shatters, burning gas",
+            "anim": "Turns on one last and drives the other heel into the face with the springs let go.",
+            "sfx": "a spring snapping loose, a crunch",
+            "vfx": "a caved cheek",
             "sim": "sweep"
           }
         ],
         "branches": [
           {
-            "id": "au",
-            "name": "Cartwheel",
+            "id": "the-stretcher",
+            "name": "The Stretcher",
             "input": "○ ○ △",
             "archetype": "wheel",
             "limb": "both legs",
@@ -7626,13 +7639,13 @@
             "recovery": 50,
             "dmg": 9,
             "knockdown": true,
-            "anim": "Off Port de Bras, cartwheels over them with both glass legs scything.",
-            "sfx": "a whirl, two glass clinks",
-            "vfx": "two arcs of light"
+            "anim": "Off the Awl, wheels over them on her hands with both lasts scything, like a boot on the stretcher.",
+            "sfx": "a whirl, two clangs",
+            "vfx": "two gashes"
           },
           {
-            "id": "meia-lua",
-            "name": "Half-Moon",
+            "id": "half-sole",
+            "name": "Half Sole",
             "input": "← ○ ○ △",
             "archetype": "reap",
             "limb": "leg",
@@ -7642,15 +7655,15 @@
             "recovery": 44,
             "dmg": 11,
             "knockdown": true,
-            "anim": "Off Rond de Jambe, a low spinning crescent kick from the ginga sway.",
-            "sfx": "a whoosh, a smash",
-            "vfx": "a half-moon of fire"
+            "anim": "Off the Welt, a low spinning crescent of the sole across the shins.",
+            "sfx": "a scrape of iron on bone",
+            "vfx": "blood at the shins"
           }
         ],
         "regional": [
           {
-            "id": "en-pointe",
-            "name": "En Pointe",
+            "id": "the-brass-rule",
+            "name": "The Brass Rule",
             "input": "R1 + ↑ ○",
             "archetype": "stamp",
             "limb": "leg",
@@ -7660,13 +7673,13 @@
             "recovery": 42,
             "dmg": 7,
             "target": "head",
-            "anim": "A straight high kick with the brass pointe tip into the eye.",
-            "sfx": "a clink, a squelch",
-            "vfx": "the eye bursts"
+            "anim": "A straight high kick, the engraved brass rule on the shin into the eye.",
+            "sfx": "a ting, a scream",
+            "vfx": "the eye goes"
           },
           {
-            "id": "arabesque",
-            "name": "Arabesque",
+            "id": "the-back-seam",
+            "name": "The Back Seam",
             "input": "R1 + ○",
             "archetype": "stamp",
             "limb": "leg",
@@ -7676,13 +7689,13 @@
             "recovery": 42,
             "dmg": 7,
             "target": "body",
-            "anim": "A back kick held in arabesque, through the ribs.",
-            "sfx": "a clink, ribs cracking",
-            "vfx": "gas flares"
+            "anim": "A back kick held out straight on the ratchet, through the ribs.",
+            "sfx": "a ratchet click, ribs going",
+            "vfx": "blood from the mouth"
           },
           {
-            "id": "chasse",
-            "name": "Chassé",
+            "id": "the-paring-knife",
+            "name": "The Paring Knife",
             "input": "R1 + ↓ ○",
             "archetype": "stamp",
             "limb": "leg",
@@ -7692,15 +7705,15 @@
             "recovery": 40,
             "dmg": 5,
             "target": "legs",
-            "anim": "A gliding low kick across the knee.",
-            "sfx": "a glide, a crack",
-            "vfx": "a violet spark"
+            "anim": "A gliding low kick, the welt pared across the knee.",
+            "sfx": "a scrape, a crack",
+            "vfx": "the knee opens"
           }
         ],
         "dash": [
           {
-            "id": "grand-allegro",
-            "name": "Grand Allegro",
+            "id": "the-rush-order",
+            "name": "The Rush Order",
             "input": "✕ then ○",
             "archetype": "rush",
             "limb": "leg",
@@ -7710,16 +7723,16 @@
             "recovery": 30,
             "dmg": 9,
             "knockdown": true,
-            "anim": "Three running steps into a leaping split kick.",
-            "sfx": "light steps, a leap, a smash",
-            "vfx": "a burst of glass and light",
+            "anim": "Three clanking running steps into a leaping split kick.",
+            "sfx": "three iron steps, a clang",
+            "vfx": "a burst of sparks and blood",
             "sim": "dashStrike"
           }
         ],
         "dive": [
           {
-            "id": "grand-jete",
-            "name": "Grand Jeté",
+            "id": "the-cobbles",
+            "name": "Down the Cobbles",
             "input": "run, then ○",
             "archetype": "dive",
             "limb": "leg",
@@ -7729,13 +7742,13 @@
             "recovery": 58,
             "dmg": 11,
             "knockdown": true,
-            "anim": "A huge leap in full split, the leading leg crashing down on them.",
-            "sfx": "a rush of air, a glass smash",
-            "vfx": "a comet trail of light"
+            "anim": "A huge leap in full split, the leading last crashing down like a dropped anvil.",
+            "sfx": "a spring release, an iron crash",
+            "vfx": "a crater of blood"
           },
           {
-            "id": "pas-de-chat",
-            "name": "Pas de Chat",
+            "id": "hobnailed",
+            "name": "Hobnailed",
             "input": "run, ○, then ○",
             "archetype": "diveChain",
             "limb": "leg",
@@ -7744,15 +7757,15 @@
             "active": 4,
             "recovery": 48,
             "dmg": 7,
-            "anim": "Lands and stamps a glass foot down on the face.",
-            "sfx": "a clink, a crunch",
-            "vfx": "shards in the face"
+            "anim": "Lands and stamps an iron sole down on the face.",
+            "sfx": "a stamp, a crunch",
+            "vfx": "the face is printed with the sole"
           }
         ],
         "down": [
           {
-            "id": "curtain-down",
-            "name": "Curtain Down",
+            "id": "heeled",
+            "name": "Re-Heeled",
             "input": "↓ ○ by a floored body",
             "archetype": "stomp",
             "limb": "leg",
@@ -7761,15 +7774,15 @@
             "active": 3,
             "recovery": 50,
             "dmg": 8,
-            "anim": "Rises en pointe on their chest and turns a slow pirouette, drilling in.",
-            "sfx": "a grinding glass squeak, a scream",
-            "vfx": "a pointe hole"
+            "anim": "Stands on their chest and grinds the iron heel round, as if fitting it.",
+            "sfx": "a grinding squeal of iron, a scream",
+            "vfx": "a heel-shaped hole"
           }
         ],
         "headbutt": [
           {
-            "id": "reverence-butt",
-            "name": "Révérence",
+            "id": "the-goggles",
+            "name": "The Goggles",
             "input": "□ + ○",
             "archetype": "butt",
             "limb": "head",
@@ -7778,16 +7791,16 @@
             "active": 3,
             "recovery": 44,
             "dmg": 5,
-            "anim": "A deep bow that turns into a headbutt.",
-            "sfx": "a crack",
+            "anim": "Pulls her workshop goggles down and nods the brass rims into the nose.",
+            "sfx": "brass on a nose",
             "vfx": "a nosebleed",
             "sim": "headbutt"
           }
         ],
         "double": [
           {
-            "id": "scissors",
-            "name": "Ciseaux",
+            "id": "the-clicking-press",
+            "name": "The Clicking Press",
             "input": "✕ + ○",
             "archetype": "double",
             "limb": "both legs",
@@ -7797,182 +7810,182 @@
             "recovery": 54,
             "dmg": 10,
             "hits": 2,
-            "anim": "A jumping scissor kick, both glass legs into the head from both sides.",
-            "sfx": "two glass clinks in one",
-            "vfx": "two flares"
+            "anim": "A jumping scissor kick, both lasts into the head from both sides like a leather press closing.",
+            "sfx": "two iron clangs in one",
+            "vfx": "the head is pressed"
           }
         ],
         "hold": {
-          "id": "partnering",
-          "name": "Partnering",
+          "id": "the-fitting",
+          "name": "The Fitting",
           "input": "△",
           "archetype": "hold",
           "duration": 98,
           "dmg": 0,
-          "anim": "Takes their hand as a partner would, the other at their waist.",
-          "sfx": "satin, a soft buzz",
+          "anim": "Takes them by the collar and the belt as if measuring them for boots.",
+          "sfx": "a tape measure snapping out",
           "sim": "GRAB"
         },
         "clinch": [
           {
-            "id": "knee-pas",
-            "name": "Passé",
+            "id": "the-knee-cap",
+            "name": "The Knee Cap",
             "input": "in the hold, ○",
             "archetype": "clinch",
             "duration": 63,
             "dmg": 6,
-            "anim": "A glass knee lifted into the stomach.",
-            "sfx": "a clink, a cough",
-            "vfx": "a violet glow",
+            "anim": "An iron knee lifted into the stomach.",
+            "sfx": "an iron thud",
+            "vfx": "a gasp of blood",
             "sim": "HOLD"
           },
           {
-            "id": "burning-kiss",
-            "name": "A Burning Kiss",
+            "id": "the-tacks",
+            "name": "A Mouthful of Tacks",
             "input": "in the hold, ○ ○",
             "archetype": "clinch",
             "duration": 70,
             "dmg": 5,
-            "anim": "Opens her hip valve and lets a little gas out against their face.",
-            "sfx": "a hiss, a whump, a scream",
-            "vfx": "a burn"
+            "anim": "Spits the tacks she keeps in her mouth into their face, then hammers them in with the heel of her palm.",
+            "sfx": "a spit, three taps, a scream",
+            "vfx": "a face full of tacks"
           }
         ],
         "throws": [
           {
-            "id": "lift-and-drop",
-            "name": "The Lift",
+            "id": "the-last",
+            "name": "Over the Last",
             "input": "in the hold, △",
             "archetype": "throw",
             "duration": 140,
             "dmg": 13,
-            "anim": "Locks her glass legs round their waist and arches back, slamming them down.",
-            "sfx": "a whirl, a slam",
-            "vfx": "a splash of light",
+            "anim": "Locks her iron legs round their waist and arches back, slamming them head first onto the floor.",
+            "sfx": "springs, an iron crash",
+            "vfx": "a red splash",
             "sim": "THROW"
           },
           {
-            "id": "pas-de-deux",
-            "name": "Pas de Deux",
+            "id": "the-turnshoe",
+            "name": "The Turnshoe",
             "input": "in the hold, ← △",
             "archetype": "throw",
             "duration": 140,
             "dmg": 12,
-            "anim": "Turns under their arm and kicks them away behind her.",
-            "sfx": "a twirl, a kick",
-            "vfx": "a streak"
+            "anim": "Turns them inside out under her arm and kicks them away behind her.",
+            "sfx": "a twist, a clang",
+            "vfx": "a splash"
           },
           {
-            "id": "swan-dies",
-            "name": "The Dying Swan",
+            "id": "the-stitch",
+            "name": "Sixteen to the Inch",
             "input": "in the hold, ↓ △",
             "archetype": "throw",
             "duration": 160,
             "dmg": 15,
-            "anim": "Wraps a glass leg round their neck and sinks slowly to the floor in the dying swan, taking them down head first.",
-            "sfx": "a slow descent, a neck crack",
-            "vfx": "a graceful fall and a bad neck"
+            "anim": "Wraps an iron leg round their neck and sinks to the floor, taking them down head first; she counts the stitches aloud.",
+            "sfx": "a creak of springs, a crack, counting",
+            "vfx": "blood from the ears"
           },
           {
-            "id": "pirouette-throw",
-            "name": "Pirouette",
+            "id": "the-lathe",
+            "name": "The Lathe",
             "input": "in the hold, → △",
             "archetype": "throw",
             "duration": 140,
             "dmg": 12,
             "end": "throw",
-            "anim": "Spins them in five pirouettes and lets them fly.",
-            "sfx": "a whirl, a long splash",
-            "vfx": "a spiral"
+            "anim": "Spins them on her heel like a last on a lathe and lets them fly.",
+            "sfx": "a whirr rising, a long splash",
+            "vfx": "a red splash"
           }
         ],
         "back": {
-          "id": "the-swan",
-          "name": "Swan Lake",
+          "id": "bespoke",
+          "name": "Bespoke",
           "input": "△ from behind",
           "archetype": "longThrow",
           "duration": 195,
           "dmg": 17,
-          "anim": "Leaps onto their shoulders from behind, scissors the neck between her glass thighs, and backflips them into the floor.",
-          "sfx": "a leap, a neck crack, a slam",
-          "vfx": "a glowing arc"
+          "anim": "Climbs their back, scissors the neck between her iron thighs, ratchets the springs one click at a time until it goes, then backflips them into the floor.",
+          "sfx": "ratchet clicks, a crack, a gasp from the Gallery",
+          "vfx": "a fountain from the mouth"
         },
         "wall": {
-          "id": "stage-door",
-          "name": "The Stage Door",
+          "id": "the-shop-window",
+          "name": "The Shop Window",
           "input": "△ with their back to a wall",
           "archetype": "longThrow",
           "duration": 195,
           "dmg": 16,
-          "anim": "Pins them to the wall with a glass foot at the throat, holds the pose for the Gallery, then kicks with the other.",
-          "sfx": "a creak of glass, applause, a smash",
-          "vfx": "the glass at the throat glows"
+          "anim": "Pins them to the wall with an iron sole at the throat, holds them up for the Gallery like a boot in a window, then kicks with the other.",
+          "sfx": "a creak of springs, applause, a crunch",
+          "vfx": "the throat crushed"
         },
         "grappleDash": {
-          "id": "leap-of-faith",
-          "name": "Lifted",
+          "id": "the-measure",
+          "name": "Taking the Measure",
           "input": "✕ then △",
           "archetype": "hold",
           "duration": 104,
           "dmg": 7,
           "anim": "Runs and leaps into a grab round the neck with her legs.",
-          "sfx": "a leap, a glass clink"
+          "sfx": "a leap, an iron clank"
         },
         "diveGrab": {
-          "id": "flying-scissors",
-          "name": "Flying Scissors",
+          "id": "the-boot-jack",
+          "name": "The Boot Jack",
           "input": "run, then △",
           "archetype": "longThrow",
           "duration": 190,
           "dmg": 16,
-          "anim": "A flying scissor of glass legs round the neck that takes them down.",
-          "sfx": "a glass clink, a twist, a fall"
+          "anim": "A flying scissor of iron legs round the neck that wrenches them down.",
+          "sfx": "a clank, a twist, a fall"
         },
         "ground": {
-          "id": "tableau",
-          "name": "Tableau",
+          "id": "the-sizing",
+          "name": "The Sizing",
           "input": "△ by a floored body",
           "archetype": "longThrow",
           "duration": 195,
           "dmg": 14,
-          "anim": "Arranges them in a pretty pose and stamps the glass heel into the chest to hold it.",
-          "sfx": "a stamp, a gasp",
-          "vfx": "a graceful corpse"
+          "anim": "Measures the body with her brass gauge, chalks the marks, and stamps the heel through each one.",
+          "sfx": "a gauge sliding, chalk, stamps",
+          "vfx": "chalk and blood"
         },
         "deflects": [
           {
-            "id": "pas-de-cote",
-            "name": "Pas de Côté",
+            "id": "the-gauge",
+            "name": "The Gauge",
             "input": "□ as a high strike lands",
             "archetype": "deflect",
             "duration": 34,
             "dmg": 8,
-            "anim": "Sways out of the punch in the ginga and kicks back from the floor.",
-            "sfx": "a swish, a clink",
+            "anim": "Steps off the punch, measuring it, and kicks back along the line it came.",
+            "sfx": "a click, a clang",
             "sim": "REVERSAL"
           },
           {
-            "id": "entrechat",
-            "name": "Entrechat",
+            "id": "the-ratchet",
+            "name": "The Ratchet",
             "input": "↓ □ as a low strike lands",
             "archetype": "deflect",
             "duration": 36,
             "dmg": 8,
-            "anim": "Jumps the sweep, beating her legs, and lands on the leg.",
-            "sfx": "a little jump, a crunch"
+            "anim": "Springs up over the sweep on both ratchets and lands on the leg.",
+            "sfx": "a double click, an iron landing, a crack"
           }
         ],
         "special": {
-          "name": "THE FOOTLIGHTS",
+          "name": "THE HOT WELT",
           "sim": "spFire",
-          "anim": "Kicks a high battement and opens the valve at her toe: a long jet of burning aether shoots across the Sump like a stage flare.",
-          "sfx": "a hiss, a whoosh of gas lighting, a scream at the far end",
-          "vfx": "a long violet-white flame, burning body"
+          "anim": "Kicks a high straight leg and opens the firebox in her heel: a long jet of burning heel-ball wax sprays across the Sump like a flare.",
+          "sfx": "a ratchet click, a hiss, a roar of flame, a scream at the far end",
+          "vfx": "a long jet of fire and molten wax, burning bodies"
         },
         "arts": [
           {
-            "id": "pirouette-art",
-            "name": "Thirty-Two Fouettés",
+            "id": "the-mainspring",
+            "name": "The Mainspring",
             "input": "R2 + ↑",
             "archetype": "art",
             "limb": "leg",
@@ -7983,13 +7996,13 @@
             "dmg": 18,
             "launch": true,
             "hits": 6,
-            "anim": "Spins on one glass pointe, the other leg whipping out six times, rising, and the last one kicks them up into the arches.",
-            "sfx": "a whirl rising, six glass smashes",
-            "vfx": "a cyclone of violet light and blood"
+            "anim": "Spins on one heel, the other last whipping out six times faster and faster as the spring unwinds, and the last one kicks them up into the arches.",
+            "sfx": "a spring unwinding, six clangs",
+            "vfx": "a cyclone of sparks and blood"
           },
           {
-            "id": "ballet-russe",
-            "name": "Danse Macabre",
+            "id": "the-rush-season",
+            "name": "The Rush Season",
             "input": "R2 + →",
             "archetype": "art",
             "limb": "both legs",
@@ -7999,24 +8012,24 @@
             "recovery": 46,
             "dmg": 17,
             "hits": 5,
-            "anim": "Dances across the Sump in a sequence of leaps, each landing on someone.",
-            "sfx": "music-box notes, five glass smashes",
-            "vfx": "five bursts of light"
+            "anim": "Clanks across the Sump in a run of leaps, each one landing on someone.",
+            "sfx": "iron steps, five crashes",
+            "vfx": "a trail of bodies"
           },
           {
-            "id": "immolation",
-            "name": "The Final Act",
+            "id": "the-firebox",
+            "name": "The Firebox",
             "input": "R2 + ↓",
             "archetype": "cinematic",
             "duration": 280,
             "dmg": 28,
-            "anim": "Embraces them in a lift, opens every valve in her legs and holds them while they burn, then sets them down and curtseys.",
-            "sfx": "a rising roar of gas, screaming, applause",
-            "vfx": "a pillar of violet fire"
+            "anim": "Lifts them in her legs, opens the firebox in each heel, and holds them in the jets while they burn, then sets them down and taps her heel twice.",
+            "sfx": "a roar of flame, screaming, two taps",
+            "vfx": "a pillar of fire"
           },
           {
-            "id": "candle-snuff",
-            "name": "The Spotlight",
+            "id": "the-heel-ball",
+            "name": "The Heel-Ball",
             "input": "R2 + ←",
             "archetype": "art",
             "limb": "both legs",
@@ -8026,189 +8039,191 @@
             "recovery": 50,
             "dmg": 14,
             "knockdown": true,
-            "anim": "A handstand split that sprays burning gas in a ring from both feet.",
-            "sfx": "a whump, a ring of fire",
-            "vfx": "a ring of flame on the water"
+            "anim": "A handstand split that sprays burning heel-ball wax in a ring from both feet.",
+            "sfx": "a hiss, a roar",
+            "vfx": "a ring of burning wax"
           }
         ],
         "status": {
-          "name": "THE LIMELIGHT",
+          "name": "OVERWOUND",
           "drink": 60,
           "lasts": 600,
-          "anim": "Takes a tube from her hip valve and breathes the pure gas. Her legs blaze white.",
+          "anim": "Takes a key from her apron and winds the ratchet behind each knee until the springs scream.",
           "effects": {
             "kick": 1.2,
             "reach": 1.1,
-            "note": "every kick sets the target alight for 2 seconds; her legs do not shatter; she leaves a trail of fire"
+            "note": "every kick throws sparks that set the target alight for 2 seconds; her lasts do not chip; she leaves a trail of sparks"
           },
-          "look": "white-hot glowing legs, fire trailing from her toes, her eyes lit",
-          "voice": "she hums the ballet's music and laughs"
+          "look": "the springs glowing red, sparks pouring from the welts, the goggles down",
+          "voice": "she counts stitches under her breath, faster and faster"
         },
         "duo": {
           "partner": "bartholomew-mule",
-          "name": "The Finale",
+          "name": "The Last Fitting",
           "archetype": "cinematic",
           "duration": 290,
           "dmg": 28,
-          "anim": "Mule throws her into the air; she lands on the victim's shoulders and scissors their neck; Mule hugs them both and crushes the victim between them."
+          "anim": "Mule lifts the victim by the collar; Tabitha leaps, using Mule's shoulder as a fulcrum to deliver a calibrated dual-heel drop directly into the victim's chest, driving them through the floorboards."
         },
         "weapons": {
           "affinity": [
             "polearm"
           ],
           "signature": "lamplighter-pole",
-          "style": "Uses a polearm like a dance partner, spinning round it and kicking off it. With a burning pole, she becomes a fire dancer."
+          "style": "Uses a pole like a long shoe-horn, levering bodies with it and kicking off it. A lit pole goes into her firebox."
         },
         "appeal": {
-          "anim": "A deep révérence to each tier, then catches an imagined bouquet.",
-          "line": "Merci, merci! Encore?",
-          "gift": "lamplighter's poles and spiked umbrellas"
+          "anim": "Slides her goggles up, chalks a tick in the air at each tier, and taps her iron heel twice.",
+          "line": "Good leather, clean welt, no excuses.",
+          "gift": "lamplighter's poles and spare legs"
         }
       },
       "art": {
-        "silhouette": "A slender dancer with her hair in a high bun, a short ragged tutu, and two glowing violet glass legs, always on her toes.",
-        "build": "Slender and long-limbed, a dancer's neck and posture.",
+        "silhouette": "A stern, sharp-featured artisan in a heavy cowhide cordwainer's apron over dark wool, brass workshop goggles on her brow and studded leather gloves, standing on heavy cast-iron shoe lasts with the clockwork springs showing.",
+        "build": "Lean, muscular, upright craftsman posture with broad shoulders and heavy metallic legs.",
         "palette": {
           "primary": {
-            "hex": "#5a2a6a",
-            "name": "theatre violet"
+            "hex": "#2b241e",
+            "name": "oiled cowhide"
           },
           "secondary": {
-            "hex": "#b88464",
-            "name": "warm brown skin"
+            "hex": "#e2c2a6",
+            "name": "fair skin"
           },
           "metal": {
-            "hex": "#d8b048",
-            "name": "brass ferrules"
+            "hex": "#3a3d40",
+            "name": "cast pig-iron"
           },
           "light": {
-            "hex": "#c8a8ff",
-            "name": "aether glow"
+            "hex": "#c8963e",
+            "name": "burnished brass rules"
           }
         },
-        "costume": "A torn white and violet tutu, a laced violet bodice, long white satin gloves to the elbow, a velvet choker with a cameo, black ribbons tied round the glass at the ankles like pointe-shoe ribbons, a single feather in her bun.",
+        "costume": "A heavy oiled leather cobbler's apron with brass eyelets and awl pockets over a high-collared dark wool work dress, rolled linen sleeves, studded leather gloves to the elbow, brass workshop goggles pushed up on the brow, a mouthful of tacks.",
         "alternates": [
           {
-            "name": "Black Swan",
-            "note": "black tutu and feathers, the gas burning red"
+            "name": "Sunday Best",
+            "note": "dark green corduroy apron and polished brass lasts"
           },
           {
-            "name": "Rehearsal",
-            "note": "a grey practice wrap, the glass dimmed"
+            "name": "Foundry Shift",
+            "note": "blackened leather, soot-stained cheeks, red-hot iron welts"
           },
           {
-            "name": "Gaslight",
-            "note": "the legs burning a gas-blue, the tutu sky blue"
+            "name": "Workhouse Grey",
+            "note": "coarse unbleached canvas apron and rusted raw iron lasts"
           }
         ],
-        "limbs": "The legs are long tapering tubes of clear glass with violet-white gas swirling inside, banded by brass ferrules at the hip, knee and ankle; the knee is a glass globe like a lamp; the feet end in brass pointe tips. They light the floor round her and reflect in every puddle.",
-        "face": "A delicate, high-cheekboned face with dark painted eyes (paint 1), a small smile, a beauty spot.",
-        "hair": "Black, in a severe high bun with a feather.",
-        "gore": "Burning and lacerating: glass shards in the face, flash burns, flesh charred where the gas caught. Her KO leaves them alight.",
+        "limbs": "The legs are heavy cast-iron lasts calibrated with engraved brass imperial rules along the shins; tension springs run along the calf into ratchet gears at the ankle; the feet are heavy square-toed brogues with hardened steel welts.",
+        "face": "A severe, handsome, sharp-jawed London face with acute hazel eyes, a pencil tucked behind the left ear, black cobbler's wax smudged under the eyes (paint 1); the goggles are drawn in 3D.",
+        "hair": "Dark chestnut brown, pinned back in a practical braided bun.",
+        "gore": "Shattering concussions: broken cheekbones, teeth knocked loose by steel-welted heels, sparks and hot iron fragments embedded in flesh.",
         "vfx": [
-          "violet light from her legs on the wet floor",
-          "glass shards and burning gas from a smashed shin",
-          "a trail of light on her kicks"
+          "sparks shower from her steel shoe welts on impact",
+          "brass gear particles burst when her tension springs release",
+          "kinetic shockwaves ripple along the ground from heel drops"
         ],
-        "idle": "Sways in a slow ginga, then rises en pointe and holds it.",
-        "intro": "A spotlight finds her; she rises on her toes and curtseys as the legs light up one bulb at a time.",
-        "victory": "A long, deep curtsey, catches a thrown rose, and her legs dim.",
-        "defeat": "The light in her legs goes out bulb by bulb; she sinks into a dying swan.",
-        "portrait": "A full-length pose en pointe in an arabesque, legs glowing violet, rain falling through the light."
+        "idle": "Stands in an upright Tae Kwon Do guard, occasionally tapping her lead iron shoe last against the stone with a clear metallic ring.",
+        "intro": "Pulls a wooden ruler from her apron pocket, measures the distance to the opponent, taps her iron heel to engage the ratchet, and raises her fists.",
+        "victory": "Chalks a tick on the defeated opponent and pushes her goggles up to inspect her work.",
+        "defeat": "A knee ratchet gives way with a sharp metallic snap; she falls to one knee, gripping the broken spring with a furious scowl.",
+        "portrait": "Three-quarter in her Spitalfields workshop, apron tied, goggles glinting on her brow, one iron last resting on a wooden cobbler's bench."
       },
       "sound": {
         "voice": {
-          "casting": "a light, sweet, breathy soprano in her early twenties",
-          "accent": "an affected stage French over a court-of-Gaiety-Lane working-class voice that slips through when she is hurt",
-          "texture": "soft, delighted, faintly bored"
+          "casting": "a sharp, dry, articulate contralto in her early thirties",
+          "accent": "unapologetic East London / Spitalfields artisan cockney, brisk and precise",
+          "texture": "acerbic, dry, confident, entirely unruffled"
         },
         "lines": {
           "intro": [
-            "Bonsoir. Shall we dance?",
-            "The orchestra, if you please."
+            "Hold still. Let's see what size you take.",
+            "Stand straight; you're throwing my welt off.",
+            "I've broken stouter lasts than you."
           ],
           "appeal": [
-            "Merci, merci! Encore?",
-            "Flowers, darlings, flowers!"
+            "Good leather, clean welt, no excuses.",
+            "Anyone else need stretching?",
+            "That's sixteen stitches to the inch!"
           ],
           "hit": [
-            "Et un.",
-            "Et deux.",
-            "Voilà."
+            "Too tight.",
+            "Stretch that.",
+            "Hold still."
           ],
           "hurt": [
-            "Ow! (in her real voice)",
-            "Oh, la."
+            "Hm!",
+            "Mind the welt."
           ],
-          "special": "Lights!",
-          "tincture": "(laughing and humming)",
+          "special": "Mind the heel.",
+          "tincture": "(a key winding, springs screaming)",
           "victory": [
-            "And... curtain.",
-            "Merci, merci."
+            "Hammered, stitched, and put out to dry.",
+            "A poor fit from the start.",
+            "Next time, break them in gently."
           ],
-          "defeat": "The lights... are going down..."
-        },
-        "efforts": "small breathy gasps, like a dancer landing",
-        "footsteps": "sharp glass taps, like a fingernail on a bottle, with a low electric hum",
-        "foley": "the hum of the gas in her legs that rises with speed, glass tinkling, satin rustling, a music box she carries",
-        "impact": {
-          "craft": "aether-glass",
-          "nuance": "a rising buzz on the kicks, a whump of gas on the big ones"
-        },
-        "music": {
-          "title": "The Hippodrome",
-          "brief": "A ballet waltz for a full theatre orchestra, warped and slightly too fast, with a celesta melody, a glass-harmonica countermelody and the hiss of gas footlights.",
-          "tempo": 150,
-          "instruments": [
-            "theatre orchestra",
-            "celesta",
-            "glass harmonica",
-            "harp",
-            "gas hiss"
-          ]
+          "defeat": "The mainspring... has snapped..."
         },
         "cues": [
           {
-            "id": "columbine-hum",
+            "id": "pegg-spring-ratchet",
             "category": "foley",
-            "note": "the gas humming in her glass legs",
-            "prompt": "A glass tube full of glowing gas hums with a low electric buzz that rises and falls. Close microphone, dry room, a few seconds.",
-            "seed": 4680
+            "note": "the sharp click-clack of the tension ratchet in her iron knee",
+            "prompt": "A heavy mechanical ratchet clicks five times rapidly under spring tension, followed by a metallic latch engaging. Close microphone, dry room, one single action.",
+            "seed": 5210
           },
           {
-            "id": "columbine-flare",
+            "id": "pegg-iron-clank",
             "category": "foley",
-            "note": "the jet of burning gas from her special",
-            "prompt": "A jet of gas is released and lit: a sharp hiss, then a whooshing roar of flame that dies away. Outdoors in the rain, one single burst.",
-            "seed": 4681
+            "note": "the dull, resonant clang of the cast-iron shoe last striking stone",
+            "prompt": "A solid cast-iron anvil weight strikes hard cobblestone with a sharp ring and heavy low thump. Close microphone, dry room, one single action.",
+            "seed": 5211
           }
-        ]
+        ],
+        "efforts": "short, sharp breaths through the nose",
+        "footsteps": "heavy iron clanks on stone, with a spring's click on every step",
+        "foley": "springs creaking and ratchets clicking at every move, tacks rattling in her apron pocket, the brass rule ticking against the iron",
+        "impact": {
+          "craft": "cast-iron-lasts",
+          "nuance": "a spring's twang under the hit"
+        },
+        "music": {
+          "title": "Sixteen to the Inch",
+          "brief": "A hard, exact piece for hammered anvil, cello and snare, in the rhythm of a cobbler's hammer, ratchets clicking as a metronome, speeding up at every combo.",
+          "tempo": 152,
+          "instruments": [
+            "anvil",
+            "cello",
+            "snare drum",
+            "ratchet clicks"
+          ]
+        }
       },
       "texture": {
-        "seed": 5109,
+        "seed": 5212,
         "skin": {
-          "idea": "smooth warm brown skin with a dancer's muscle, glistening with rain",
-          "colour": "warm brown"
+          "idea": "weathered pale East End complexion, strong jaw, smudged with black cobbler wax",
+          "colour": "fair with grey-black smudge"
         },
         "cloth": {
-          "idea": "torn white and violet tulle tutu, a laced violet satin bodice, long white satin gloves",
-          "colour": "white and violet"
+          "idea": "heavy oiled cowhide apron with brass eyelets, dark wool work dress, rolled linen sleeves",
+          "colour": "dark brown and charcoal wool"
         },
         "face": {
-          "idea": "a delicate high-cheekboned face with dark painted eyes, a beauty spot, black hair in a high bun",
-          "colour": "warm brown"
+          "idea": "a severe sharp-jawed fair face with acute hazel eyes and light freckles, a pencil behind the ear",
+          "colour": "fair with light freckling"
         },
         "limb": {
-          "idea": "clear blown-glass tubes and a glass globe knee filled with swirling violet-white glowing gas, brass ferrules",
-          "colour": "clear glass with violet glow"
+          "idea": "black cast pig-iron shoe lasts with engraved brass imperial rules and steel leaf-springs, the welts serrated",
+          "colour": "black iron and brass"
         }
       }
     },
     {
-      "id": "mortimer-crape",
-      "name": "Mr. Mortimer Crape",
+      "id": "martha-crape",
+      "name": "Mistress Martha Crape",
       "style": "Judo Based",
-      "blurb": "He measures you for your coffin before the bell. If you do not fit, he will make you fit.",
+      "blurb": "She measures you for your pine box before the bell. If you do not fit, her jet joints will fold you until you do.",
       "body": "#e0d6cc",
       "accent": "#141214",
       "family": "grappler",
@@ -8226,7 +8241,7 @@
         "grabReach": 1.15
       },
       "kit": {
-        "size": 1.1,
+        "size": 1.05,
         "horns": "none",
         "tail": "none",
         "gear": [
@@ -8238,7 +8253,7 @@
         "def": 0.7,
         "scar": 0,
         "paint": 3,
-        "wrinkles": true,
+        "wrinkles": false,
         "stubble": false,
         "veins": false
       },
@@ -8251,7 +8266,7 @@
         "dur": 52
       },
       "short": "CRAPE",
-      "title": "Undertaker & Joiner",
+      "title": "The Mourning Joiner",
       "lineage": [
         "Judo Based",
         "Submission"
@@ -8266,24 +8281,24 @@
         "difficulty": 4
       },
       "profile": {
-        "age": "unknown; he has looked sixty for forty years",
+        "age": 38,
         "from": "Crape & Daughter, Funeral Furnishers, Lychgate Lane",
         "trade": "Undertaker, coffin-maker, mute",
-        "height": "1.95 m",
-        "bio": "Crape & Daughter have buried Old Sorrow's dead for four generations. The present Mr. Crape lost the use of his arms and legs to a wasting illness in his youth, and his daughter, who was the joiner of the firm, made him new ones from the stock: mourning jet over whalebone stays, laced like a widow's corset, jointed so they bend any way a body needs to be bent. His daughter has since died, and is on display in the shop window, very nicely done. He takes every opponent's measurements before the bell and has a coffin built to them. If they do not fit it at the end of the bout, he makes them fit. He fights in the Sump because it is very good for business.",
+        "height": "1.82 m",
+        "bio": "Crape & Daughter have buried Old Sorrow's dead for four generations. Mistress Martha Crape was the joiner who carved the firm's finest caskets. When wasting fever claimed her limbs, she crafted her own replacements from stock: faceted black mourning jet fitted over flexible cream whalebone stays, laced like a widow's corset with 360-degree rotating mortuary joints. Her father Mortimer now rests beneath the flagstones, but the firm endures. She measures every opponent with brass mortuary calipers before the bell and has a box ready. If they do not fit it at the end of the bout, she gently folds their limbs until they do. She fights in the Sump because bereavement in Old Sorrow is a booming trade.",
         "personality": "Solemn, gentle, soft-spoken, unhurried. He is comforting. He is the last face many people see and he takes that seriously.",
-        "manners": "Condolences: 'My deepest sympathies,' 'We'll have you looking your best.' Removes his hat. Takes measurements with a tape. Never touches anyone roughly, even while folding them in half.",
-        "violence": "Submissions and dislocations: he folds people. Arms behind backs, knees past ears, spines into boxes. Judo throws into the floor followed by a lock that finishes it.",
-        "otherSelf": "The Last Measure: a draught of embalming fluid. His face goes grey, his lacing tightens, and his holds cannot be broken.",
+        "manners": "Condolences: 'My deepest sympathies,' 'Rest easy now; we'll have you looking your best.' Adjusts her black veil. Takes measurements with brass calipers. Never touches anyone roughly, even while folding them in half.",
+        "violence": "Submissions and dislocations: she folds people into boxes. Arms tucked behind ribs, knees folded past ears, spines curved to neat right angles. Judo throws into the muck followed by a lock that snaps cleanly.",
+        "otherSelf": "The Last Measure: a draught of embalming fluid. Her skin goes grey, the silk corset lacing tightens with a shudder, and her holds cannot be broken.",
         "rivals": [
           {
             "id": "bartholomew-mule",
-            "why": "Crape had bought Old Ursula's body, and Mule took the arms off her before the cart arrived."
+            "why": "Crape & Daughter had contracted for Old Ursula's burial; Mule stripped the mechanical limbs before the mourning carriage could arrive."
           }
         ],
         "partner": {
           "id": "hezekiah-smelt",
-          "why": "Smelt casts the iron coffins. Crape fills them."
+          "why": "Smelt casts the iron coffins. Martha lines and fills them."
         },
         "quotes": {
           "intro": "My deepest sympathies. If I might just take your measurements.",
@@ -8826,7 +8841,7 @@
           "archetype": "cinematic",
           "duration": 300,
           "dmg": 30,
-          "anim": "Crape measures the victim; Smelt folds them to the measurements; Crape nails the lid."
+          "anim": "Martha measures the victim; Smelt folds them to the measurements; Martha nails the lid."
         },
         "weapons": {
           "affinity": [
@@ -8844,7 +8859,7 @@
         }
       },
       "art": {
-        "silhouette": "A very tall, very thin man in black with a tall top hat trailing long crape streamers, his black jet arms hanging too long.",
+        "silhouette": "A tall, slender undertaker in a trailing black bombazine mourning gown and a tall top hat trailing long crape weepers over a white painted face, carrying brass mortuary calipers.",
         "build": "Gaunt, stooped, unnaturally long in the limbs.",
         "palette": {
           "primary": {
@@ -8896,7 +8911,7 @@
       },
       "sound": {
         "voice": {
-          "casting": "a soft, deep, sonorous bass, ageless",
+          "casting": "a quiet, melodic, eerie Victorian contralto; polite, soothing, and somber",
           "accent": "a hushed funeral-parlour pronunciation",
           "texture": "whispered, intimate, sympathetic; never loud"
         },
@@ -8968,11 +8983,11 @@
           "colour": "grey ivory"
         },
         "cloth": {
-          "idea": "black wool frock coat and silk waistcoat, black crape mourning band, rain-dark",
+          "idea": "black bombazine mourning gown, high collar and silk buttons, black crape veil, rain-dark",
           "colour": "deep black"
         },
         "face": {
-          "idea": "a long pale kind mournful face painted with a faint white skull mask, sunken eyes, long white hair",
+          "idea": "a pale solemn mournful face behind a sheer black mourning veil, painted with a faint white skull mask, dark sunken eyes",
           "colour": "grey ivory with white paint"
         },
         "limb": {
@@ -8982,10 +8997,10 @@
       }
     },
     {
-      "id": "sir-peregrine",
-      "name": "Sir Peregrine Ashby-Lisle, Bt.",
+      "id": "lady-eleanor",
+      "name": "Lady Eleanor Ashby-Lisle",
       "style": "Samurai Sword",
-      "blurb": "Forty-one duels, silver arms, a swordstick and impeccable manners. He is so terribly sorry.",
+      "blurb": "Forty-one duels, obsidian glass and weeping silver arms, an ebony swordstick and aristocratic grief. She is so terribly sorry.",
       "body": "#f2dcc8",
       "accent": "#2a2a34",
       "family": "brawler",
@@ -9003,7 +9018,7 @@
         "grabReach": 1
       },
       "kit": {
-        "size": 1,
+        "size": 1.0,
         "horns": "none",
         "tail": "none",
         "gear": [
@@ -9013,7 +9028,7 @@
       },
       "look": {
         "def": 0.85,
-        "scar": 2,
+        "scar": 1,
         "paint": 0,
         "wrinkles": false,
         "stubble": false,
@@ -9028,8 +9043,8 @@
         "dist": 4,
         "dur": 52
       },
-      "short": "SIR PEREGRINE",
-      "title": "The Most Courteous Man in Old Sorrow",
+      "short": "LADY ELEANOR",
+      "title": "The Weeping Duelist",
       "lineage": [
         "Samurai Sword",
         "Gun"
@@ -9044,24 +9059,24 @@
         "difficulty": 5
       },
       "profile": {
-        "age": 34,
+        "age": 31,
         "from": "Lisle House, Regent's Terrace, the Heights",
-        "trade": "Baronet, duellist, patron of the arts",
-        "height": "1.83 m",
-        "bio": "Sir Peregrine Ashby-Lisle has fought forty-one duels and apologised before, during and after every one. He lost his right arm in the ninth and his left in the twenty-sixth, and the family silversmiths made him new ones: ebony sheathed in hallmarked silver filigree, with the Ashby-Lisle crest at each shoulder. He carries a swordstick and, for emergencies, a little pepperbox pistol, and he is the finest blade in Old Sorrow. He sends flowers and a handwritten card of condolence to every widow he makes, and he has made a great many. He fights in the Sump because a gentleman must have an occupation, because he is very deeply in debt, and because he is engaged to Lady Hester Bulwark, who intends to kill him, and he would like to be in practice.",
-        "personality": "Charming, gentle, considerate, utterly and serenely monstrous. He is incapable of rudeness and incapable of mercy, and sees no contradiction.",
-        "manners": "The most courteous man in the city. Bows, removes his hat, asks permission ('Might I trouble you for your spine?'), apologises with every cut, thanks his opponents warmly, and never once raises his voice. He tips the Sump's attendants. He remembers everyone's name. He writes the condolence card during the bout.",
-        "violence": "Horrific. He flays, he carves, he disembowels with the swordstick in long, neat, unhurried strokes, and he carves his monogram into his opponents as a courtesy, so the family knows who to write to.",
-        "otherSelf": "The Other Sir Peregrine: a drop of the family tonic in his tea. He is still perfectly polite, but now the apologies are screamed, the silver tarnishes black, and he laughs.",
+        "trade": "Baronetess, duellist, patron of the arts",
+        "height": "1.78 m",
+        "bio": "Lady Eleanor Ashby-Lisle has fought forty-one duels and wept sincere tears of grief before, during, and after every one. When both her arms were severed in family honour-debts on the frozen Regent's Canal, the Lisle silversmiths cast her replacements in sculpted obsidian glass and antique silver filigree, with stylized silver tears streaming down each forearm. She carries a hollowed ebony swordstick fitted with a Damascus steel blade and an emergency pepperbox pistol. She sends white lilies and a mourning letter of condolence to every household she widens. She fights in the Sump because high-society debts are merciless, and because her betrothal to Lady Hester Bulwark is an armed truce neither expects to survive.",
+        "personality": "Aristocratic, mournful, impeccably courteous, utterly and serenely lethal. She weeps genuine tears for the cruelty of the world while carving her monogram into her foes.",
+        "manners": "The most courteous duelist in Old Sorrow. Curtsies, adjusts her veil, asks permission ('Might I trouble you for your spine?'), apologises with every cut, and writes a card of condolence while her opponent bleeds.",
+        "violence": "Deft, aristocratic fencing butchery. She flays and carves with the swordstick in long, elegant, waltzing strokes, concluding with a precise puncture of the liver.",
+        "otherSelf": "The Other Eleanor: under the Tincture, aristocratic restraint drops entirely. She stops weeping and carves with cold, terrifying speed, smiling as she cuts.",
         "rivals": [
           {
-            "id": "cuthbert-inkle",
-            "why": "Inkle is the junior clerk at the firm that holds the Ashby-Lisle debts, and keeps serving him notice. Sir Peregrine is very fond of him and intends to kill him gently."
+            "id": "tilly-tongs",
+            "why": "Tilly melted down the Lisle estate's silver carriage fittings in the Sump furnaces; Eleanor considers the slag an aesthetic affront to her ancestral coat of arms."
           }
         ],
         "partner": {
           "id": "lady-bulwark",
-          "why": "His intended. They waltz beautifully, and he admires her very much."
+          "why": "Her betrothed in an aristocratic alliance of iron and silver; they waltz together with cold, deadly precision."
         },
         "quotes": {
           "intro": "Sir Peregrine Ashby-Lisle. I am so terribly sorry about all this.",
@@ -9622,7 +9637,7 @@
           "archetype": "cinematic",
           "duration": 300,
           "dmg": 30,
-          "anim": "He holds the victim in a waltz and apologises; Hester fires rams into their back on the beat; they bow to each other over the body without touching."
+          "anim": "Lady Eleanor holds the victim in a waltz and apologises; Hester fires rams into their back on the beat; they bow to each other over the body without touching."
         },
         "weapons": {
           "affinity": [
@@ -9639,7 +9654,7 @@
         }
       },
       "art": {
-        "silhouette": "A tall, slim, beautifully dressed gentleman in a morning coat and a grey silk top hat, a monocle, a swordstick held like a cane, silver arms gleaming at the cuffs.",
+        "silhouette": "A slender aristocratic duelist in a black silk mourning gown with fencing cutaway and a grey silk top hat, carrying an ebony swordstick and weeping silver arms.",
         "build": "Tall, slim, elegant, a fencer's balance.",
         "palette": {
           "primary": {
@@ -9691,17 +9706,17 @@
       },
       "sound": {
         "voice": {
-          "casting": "a gentle, warm, beautifully modulated light baritone in his thirties",
-          "accent": "the highest received pronunciation, unhurried, every consonant finished",
-          "texture": "intimate, apologetic, charming; the screams under the Tincture are the same lines at full voice"
+          "casting": "an aristocratic, refined, melancholy soprano in her early thirties",
+          "accent": "the highest received pronunciation, unhurried, crisp, and tragic",
+          "texture": "intimate, grieving, apologetic, charming; genuinely mournful with every cut"
         },
         "lines": {
           "intro": [
-            "Sir Peregrine Ashby-Lisle. I am so terribly sorry about all this.",
+            "Lady Eleanor Ashby-Lisle. I am so terribly sorry about all this.",
             "Might I trouble you for your spine?"
           ],
           "appeal": [
-            "Forgive the mess. Might I trouble you for a towel?",
+            "Forgive the mess. Might I trouble you for a handkerchief?",
             "Ladies and gentlemen, I am mortified."
           ],
           "hit": [
@@ -9717,8 +9732,8 @@
           "special": "A thousand pardons!",
           "tincture": "I'M SO TERRIBLY SORRY!",
           "victory": [
-            "Thank you. Thank you so much. I'll write to your mother.",
-            "Do give my regards to the family."
+            "Thank you. Thank you so much. I shall write to your mother tonight.",
+            "Do give my deepest regards to the family."
           ],
           "defeat": "How... very... rude..."
         },
@@ -9742,14 +9757,14 @@
         },
         "cues": [
           {
-            "id": "peregrine-draw",
+            "id": "eleanor-draw",
             "category": "foley",
             "note": "the swordstick's blade drawn",
             "prompt": "A thin steel blade is drawn quickly from a wooden cane: a sharp metallic hiss and a bright ring. Close microphone, dry room, one single draw.",
             "seed": 4700
           },
           {
-            "id": "peregrine-pistol",
+            "id": "eleanor-pistol",
             "category": "impact",
             "note": "the pepperbox pistol shot",
             "prompt": "A small old pistol is fired once: a sharp crack with a puff of black powder, in a stone yard in the rain. One single shot.",
@@ -9760,127 +9775,130 @@
       "texture": {
         "seed": 5111,
         "skin": {
-          "idea": "fair, smooth, well-kept skin, a fine duelling scar on the right cheek",
-          "colour": "fair"
+          "idea": "fair, smooth, porcelain skin with a fine fencing scar along the jawline",
+          "colour": "porcelain"
         },
         "cloth": {
-          "idea": "charcoal wool morning coat with a silk lapel, dove-grey silk waistcoat, grey striped trousers, white spats",
-          "colour": "charcoal and dove grey"
+          "idea": "black silk mourning gown with fencing cutaways, silver mourning brooches, lace veil, spats",
+          "colour": "charcoal and midnight black"
         },
         "face": {
-          "idea": "a handsome fine-featured smiling face, blue eyes, a small blond moustache, a duelling scar on the right cheek",
-          "colour": "fair with blond hair"
+          "idea": "a striking aristocratic mournful face, weeping grey eyes, dark hair pinned beneath velvet top hat, fencing scar",
+          "colour": "fair with dark hair"
         },
         "limb": {
-          "idea": "polished black ebony under a fine hallmarked silver filigree of leaves and a family crest, sharpened silver nails",
-          "colour": "mirror silver over black"
+          "idea": "sculpted black obsidian glass sheathed in hallmarked silver vine filigree with stylized weeping silver tears",
+          "colour": "mirror silver over obsidian"
         }
       }
     },
     {
-      "id": "cuthbert-inkle",
-      "name": "Mr. Cuthbert Inkle",
+      "id": "tilly-tongs",
+      "name": "Tilly \"Furnace-Tongs\"",
       "style": "Amateur",
-      "blurb": "He pawned his own arms and legs and fights in borrowed ones. Terribly sorry, he's never done this before.",
-      "body": "#ddb894",
-      "accent": "#3a3428",
+      "blurb": "Scorched boiler-tongs, glowing clinker arms, rolled dungarees, and a violent disrespect for her betters.",
+      "body": "#d8b898",
+      "accent": "#c2441c",
       "family": "boxing",
       "special": "spCharge",
-      "specialName": "THE OVERDRAFT",
+      "specialName": "FULL DRAUGHT",
       "stats": {
-        "speed": 1,
-        "startup": 2,
-        "punch": 0.85,
-        "kick": 0.85,
-        "grab": 0.85,
-        "reach": 1,
+        "speed": 1.05,
+        "startup": 1,
+        "punch": 1.15,
+        "kick": 0.95,
+        "grab": 1.0,
+        "reach": 1.0,
         "string": 2,
-        "torso": 0.9,
-        "grabReach": 1
+        "torso": 1.0,
+        "grabReach": 1.05
       },
       "kit": {
-        "size": 0.93,
+        "size": 0.98,
         "horns": "none",
         "tail": "none",
         "gear": [
-          "bowler",
-          "lanyard"
+          "headband",
+          "goggles"
         ]
       },
       "look": {
-        "def": 0.7,
-        "scar": 0,
-        "paint": 0,
+        "def": 0.75,
+        "scar": 2,
+        "paint": 1,
         "wrinkles": false,
-        "stubble": true,
-        "veins": false
+        "stubble": false,
+        "veins": true
       },
       "airGrab": {
-        "name": "THE PANICKED EMBRACE",
+        "name": "THE CLINKER DROP",
         "end": "down",
-        "dmg": 9,
+        "dmg": 14,
         "slam": 30,
-        "lift": 0.3,
+        "lift": 0.6,
         "dur": 52
       },
-      "short": "INKLE",
-      "title": "The Articled Clerk",
+      "short": "TILLY",
+      "title": "The Sump Furnace Stoker",
       "lineage": [
-        "Amateur"
+        "Amateur",
+        "Wrestling"
       ],
       "ratings": {
-        "power": 2,
+        "power": 4,
         "speed": 3,
         "reach": 3,
-        "grapple": 2,
-        "defence": 2,
-        "technique": 1,
+        "grapple": 3,
+        "defence": 3,
+        "technique": 2,
         "difficulty": 2
       },
       "profile": {
-        "age": 24,
-        "from": "a back room at Nell Sluice's, Lament Court",
-        "trade": "Articled clerk at Pinchbeck & Gall, Solicitors",
-        "height": "1.72 m",
-        "bio": "Cuthbert Inkle copies deeds at Pinchbeck & Gall for seven shillings a week. To keep his widowed mother out of the Marshalsea he pawned his own arms and legs one at a time at Uncle Gideon's on Crutch Street, and then, being unable to work without arms, rented them back by the week. He cannot afford his own. On bout nights he borrows whatever is in Uncle Gideon's window that evening, each limb with its pawn ticket still tied on: a porcelain arm, a glass leg, a bear's paw, whatever has come in. He has never been in a fight and does not know how. Once he starts, he cannot stop, and he is horrified by himself every time.",
-        "personality": "Timid, earnest, kind, desperate. A small man in a very big trouble, who turns out to be capable of absolutely anything.",
-        "manners": "Abject. Apologises to his opponent, the Gallery, the referee and the furniture. Calls everyone 'sir', including the ladies, and then apologises for that. Tries to shake hands at the wrong moments.",
-        "violence": "Panic-violence: wild, flailing, unskilled, and it does not stop once it starts. He stabs with the steel nib of his pen. The borrowed limbs do things he did not ask them to.",
-        "otherSelf": "In Arrears: a swig of gin for courage. Every limb he has on is swapped at random for another from the pawnshop, and something in his face goes very still.",
+        "age": 22,
+        "from": "Bessemer Basin, The Deep Flues, Old Sorrow Sump",
+        "trade": "Boiler Stoker, Clinker-Smith, Scrapper",
+        "height": "1.70 m",
+        "bio": "Tilly spent seven years shoveling Welsh anthracite into the municipal pumping station boilers until a catastrophic steam blowout took both her arms and left knee. Rather than plead for workhouse charity, she forged her own limbs from the salvage pile: scorched asbestos wraps, braided copper steam lines, and massive cast-iron clinker-tongs that glow cherry-red at the grip. She has no formal ring training whatsoever; her style is pure dockside gouging, headbutts, shovel swings, and clinches where she clamps her glowing tongs onto tender joints until iron sizzles on meat. She fights in the Sump to keep the coal hoppers fed and to crack the skulls of the Heights gentry who treat the workers like fuel.",
+        "personality": "Brash, defiant, filthy-mouthed, and fierce. She laughs in the face of death and regards anyone in a cravat with instant disgust.",
+        "manners": "Spits soot on the floorboards, wipes her brow with a greasy bandanna, mocks highfalutin stances, and taunts opponents: 'Got a bit of clinker in your craw, darling?'",
+        "violence": "Chaotic and savage furnace brawling: iron-tongs clamping and twisting, burning forearm smashes, ear-claps, knee-tramples, and wild haymakers that whistle with escaping boiler steam.",
+        "otherSelf": "Full Draught: she kicks open her bypass valve; her tongs burn white-hot and her haymakers trail embers and cinders across the pit.",
         "rivals": [
           {
-            "id": "sir-peregrine",
-            "why": "He has served Sir Peregrine notice of debt nine times. Sir Peregrine always thanks him beautifully and has promised to kill him gently."
+            "id": "lady-eleanor",
+            "why": "Eleanor's silver-and-obsidian arms represent everything Tilly despises about the Heights; Tilly has promised to melt Eleanor down into pig iron."
+          },
+          {
+            "id": "hezekiah-smelt",
+            "why": "Smelt sold cracked furnace plates to Tilly's boiler gang, claiming they were naval grade; the blowout that took her limbs was from his foundry."
           }
         ],
         "partner": {
           "id": "nell-sluice",
-          "why": "His landlady. She feeds him, prays for him, and pawns his things for the rent."
+          "why": "Nell runs the drainage pumps when the boiler pipes burst; they've dragged each other out of scalding mud a dozen times."
         },
-        "quotes": {
-          "intro": "Terribly sorry, sir, I've never done this before.",
-          "appeal": "Was... was that all right? Sorry. Sorry.",
-          "victory": "Oh no. Oh, no. I'm so sorry. Is he... sorry.",
-          "defeat": "Sorry, Mother..."
-        }
+        "quotes": [
+          "Shovel it in or get shoveled, darling.",
+          "Mind the tongs. They're still fresh from the fire."
+        ]
       },
       "limbs": {
-        "craft": "pawnshop-patchwork",
-        "arms": "Whatever came in: rolled each bout from the other eleven crafts, a pawn ticket tied to each wrist with string.",
-        "legs": "The same, a ticket at each ankle; the legs need not match each other or the arms.",
-        "tip": "any",
+        "craft": "cinder-iron",
+        "arms": "Scorched asbestos lagging wrapped with copper steam tubes and massive cast-iron furnace tongs glowing cherry-red.",
+        "legs": "Sheet-iron shins bolted to heavy dockworker boots with slag-calked soles.",
+        "tip": "claw",
         "lean": {
-          "mass": 1,
+          "mass": 1.15,
           "length": 1,
-          "swing": 1
+          "swing": 1.2
         },
-        "wear": "Each limb wears and breaks like its own craft. When one comes off, Uncle Gideon's man shouts the ticket number from the Gallery."
+        "wear": "The iron tongs pit and slag over prolonged bouts; when damaged, steam leaks from ruptured copper tubes with an angry hiss."
       },
       "moves": {
         "high": [
           {
-            "id": "sorry",
-            "name": "Sorry",
+            "id": "cinder-jab",
+            "name": "Cinder Jab",
             "input": "○",
             "archetype": "jab",
             "limb": "lead arm",
@@ -9889,14 +9907,14 @@
             "active": 3,
             "recovery": 32,
             "dmg": 4,
-            "anim": "A flinching, eyes-shut jab.",
+            "anim": "Snaps a quick left forearm strike, scattering orange sparks from the tongs.",
             "sfx": "the limb's own craft, a little yelp",
             "vfx": "a spray",
             "sim": "jab1"
           },
           {
-            "id": "so-sorry",
-            "name": "So Sorry",
+            "id": "iron-clamp",
+            "name": "Iron Clamp",
             "input": "○ ○",
             "archetype": "straight",
             "limb": "rear arm",
@@ -9905,14 +9923,14 @@
             "active": 3,
             "recovery": 32,
             "dmg": 5,
-            "anim": "A wild round-arm swing that lands by accident.",
+            "anim": "Drives her right tongs forward in a blunt thrust toward the throat.",
             "sfx": "a whoosh, a thud, 'sorry!'",
             "vfx": "a spray",
             "sim": "jab2"
           },
           {
-            "id": "terribly-terribly",
-            "name": "Terribly, Terribly Sorry",
+            "id": "boiler-cross",
+            "name": "Boiler Cross",
             "input": "○ ○ ○",
             "archetype": "finisher",
             "limb": "both arms",
@@ -9922,7 +9940,7 @@
             "recovery": 30,
             "dmg": 8,
             "launch": true,
-            "anim": "Shuts his eyes and swings both arms up together, lifting them by accident.",
+            "anim": "Steps in with full shoulder torque, smashing a heavy cast-iron cross into their cheek.",
             "sfx": "two craft hits, a squeak",
             "vfx": "blood up",
             "sim": "punchFin"
@@ -9930,8 +9948,8 @@
         ],
         "low": [
           {
-            "id": "toe-poke",
-            "name": "A Toe-Poke",
+            "id": "stoker-boot",
+            "name": "Stoker's Boot",
             "input": "← ○",
             "archetype": "snap",
             "limb": "leg",
@@ -9940,14 +9958,14 @@
             "active": 3,
             "recovery": 32,
             "dmg": 4,
-            "anim": "A schoolboy toe-poke to the shin.",
+            "anim": "A heavy steel-toed dock boot kick to the kneecap.",
             "sfx": "a tap, an 'ow'",
             "vfx": "a fleck",
             "sim": "kick1"
           },
           {
-            "id": "trip",
-            "name": "A Trip",
+            "id": "cinder-stamp",
+            "name": "Cinder Stamp",
             "input": "← ○ ○",
             "archetype": "chain",
             "limb": "leg",
@@ -9956,14 +9974,14 @@
             "active": 3,
             "recovery": 34,
             "dmg": 5,
-            "anim": "Trips over his own foot into their knee.",
+            "anim": "Drives her iron heel into the top of their foot with a shower of grit.",
             "sfx": "a stumble, a crack",
             "vfx": "a spray",
             "sim": "kick2"
           },
           {
-            "id": "collapse",
-            "name": "The Collapse",
+            "id": "slag-sweep",
+            "name": "Slag Sweep",
             "input": "← ○ ○ ○",
             "archetype": "reap",
             "limb": "both legs",
@@ -9973,7 +9991,7 @@
             "recovery": 44,
             "dmg": 7,
             "knockdown": true,
-            "anim": "Falls over completely and takes them down with him.",
+            "anim": "Drops low and sweeps both shins with her sheet-iron legs.",
             "sfx": "a tumble, a double splash",
             "vfx": "a wave",
             "sim": "sweep"
@@ -9999,8 +10017,8 @@
         ],
         "regional": [
           {
-            "id": "ink-in-the-eye",
-            "name": "Ink in the Eye",
+            "id": "tongs-crack",
+            "name": "Tongs to the Temple",
             "input": "R1 + ↑ ○",
             "archetype": "single",
             "limb": "lead arm",
@@ -10010,13 +10028,13 @@
             "recovery": 44,
             "dmg": 4,
             "target": "head",
-            "anim": "Flicks his inkpot at their face.",
+            "anim": "Claps both tongs around their ears with a ringing iron crack.",
             "sfx": "a splash, a cry",
             "vfx": "ink and blood in the eyes"
           },
           {
-            "id": "ledger",
-            "name": "The Ledger",
+            "id": "furnace-elbow",
+            "name": "Furnace Elbow",
             "input": "R1 + ○",
             "archetype": "single",
             "limb": "rear arm",
@@ -10026,13 +10044,13 @@
             "recovery": 44,
             "dmg": 5,
             "target": "body",
-            "anim": "Hits them in the stomach with a heavy ledger.",
+            "anim": "A brutal, soot-heavy downward elbow straight into the solar plexus.",
             "sfx": "a book thud",
             "vfx": "they double over"
           },
           {
-            "id": "kick-the-shin",
-            "name": "Kick the Shin",
+            "id": "flue-stomp",
+            "name": "Flue Stomp",
             "input": "R1 + ↓ ○",
             "archetype": "stamp",
             "limb": "leg",
@@ -10042,15 +10060,15 @@
             "recovery": 44,
             "dmg": 4,
             "target": "legs",
-            "anim": "A nervous little kick to the shin.",
+            "anim": "Stomps down on their lead thigh with all her weight.",
             "sfx": "a tap",
             "vfx": "a fleck"
           }
         ],
         "dash": [
           {
-            "id": "late-for-work",
-            "name": "Late for Work",
+            "id": "stoker-rush",
+            "name": "Stoker's Rush",
             "input": "✕ then ○",
             "archetype": "rush",
             "limb": "body",
@@ -10060,7 +10078,7 @@
             "recovery": 30,
             "dmg": 7,
             "knockdown": true,
-            "anim": "Runs at them holding his hat on and bumps into them.",
+            "anim": "Charges with lowered head and both tongs raised, barreling straight into their chest.",
             "sfx": "running steps, a bump, 'sorry!'",
             "vfx": "a splash",
             "sim": "dashStrike"
@@ -10068,8 +10086,8 @@
         ],
         "dive": [
           {
-            "id": "hurdle",
-            "name": "The Hurdle",
+            "id": "cinder-drop",
+            "name": "Cinder Drop",
             "input": "run, then ○",
             "archetype": "dive",
             "limb": "body",
@@ -10079,13 +10097,13 @@
             "recovery": 62,
             "dmg": 8,
             "knockdown": true,
-            "anim": "Tries to jump over a puddle and lands on them.",
+            "anim": "Leaps with both knees bent, dropping like a sack of coal onto their sternum.",
             "sfx": "a yelp, a crash",
             "vfx": "a big splash"
           },
           {
-            "id": "flail",
-            "name": "The Flail",
+            "id": "flying-clinker",
+            "name": "Flying Clinker",
             "input": "run, ○, then ○",
             "archetype": "diveChain",
             "limb": "both arms",
@@ -10094,15 +10112,15 @@
             "active": 6,
             "recovery": 48,
             "dmg": 6,
-            "anim": "Flails at them on the floor with his eyes shut.",
+            "anim": "A wild, airborne crossbody block that crashes into their ribs.",
             "sfx": "a flurry of slaps",
             "vfx": "spray"
           }
         ],
         "down": [
           {
-            "id": "signature",
-            "name": "Sign Here",
+            "id": "sump-trample",
+            "name": "Sump Trample",
             "input": "↓ ○ by a floored body",
             "archetype": "stomp",
             "limb": "leg",
@@ -10111,15 +10129,15 @@
             "active": 3,
             "recovery": 50,
             "dmg": 6,
-            "anim": "Stamps on the hand, then kneels and makes them sign something with it.",
+            "anim": "Tramples a downed opponent with heavy iron-capped dock boots.",
             "sfx": "a crunch, a pen scratching",
             "vfx": "a signature in blood"
           }
         ],
         "headbutt": [
           {
-            "id": "bowler-butt",
-            "name": "The Bowler",
+            "id": "bessemer-headbutt",
+            "name": "Bessemer Headbutt",
             "input": "□ + ○",
             "archetype": "butt",
             "limb": "head",
@@ -10128,7 +10146,7 @@
             "active": 3,
             "recovery": 46,
             "dmg": 5,
-            "anim": "Ducks in fright and butts them with the crown of his bowler.",
+            "anim": "Grabs their collar with one tong and cracks her forehead into their bridge.",
             "sfx": "a hollow bonk, a crunch",
             "vfx": "a nosebleed",
             "sim": "headbutt"
@@ -10136,8 +10154,8 @@
         ],
         "double": [
           {
-            "id": "windmill",
-            "name": "The Windmill",
+            "id": "furnace-pincer",
+            "name": "Furnace Pincer",
             "input": "✕ + ○",
             "archetype": "double",
             "limb": "both arms",
@@ -10147,31 +10165,31 @@
             "recovery": 60,
             "dmg": 7,
             "hits": 2,
-            "anim": "Windmills both arms at once.",
+            "anim": "Traps their arm between both tongs and heaves them across her hip.",
             "sfx": "two craft hits, a squeal",
             "vfx": "spray from both sides"
           }
         ],
         "hold": {
-          "id": "cling",
-          "name": "The Cling",
+          "id": "clinker-clinch",
+          "name": "The Clinker Clinch",
           "input": "△",
           "archetype": "hold",
           "duration": 100,
           "dmg": 0,
-          "anim": "Clings to them like a man in a flood.",
+          "anim": "Wraps both arms around their head in a brutal collar tie and drags them close to the furnace heat.",
           "sfx": "a panicked grab",
           "sim": "GRAB"
         },
         "clinch": [
           {
-            "id": "biting-nails",
-            "name": "Nervous Biting",
+            "id": "slag-hook",
+            "name": "Slag Hook",
             "input": "in the hold, ○",
             "archetype": "clinch",
             "duration": 64,
             "dmg": 4,
-            "anim": "Bites the nearest thing, which is an ear.",
+            "anim": "Hooks her right tongs under their armpit and drives a knee into their ribs.",
             "sfx": "a bite, a horrified 'sorry'",
             "vfx": "a torn ear",
             "sim": "HOLD"
@@ -10190,139 +10208,139 @@
         ],
         "throws": [
           {
-            "id": "shove",
-            "name": "A Shove",
+            "id": "furnace-pitch",
+            "name": "Furnace Pitch",
             "input": "in the hold, △",
             "archetype": "throw",
             "duration": 134,
             "dmg": 10,
-            "anim": "Pushes them away as hard as he can and they fall over.",
+            "anim": "Heaves them by belt and collar as if shoveling coal into an open furnace door.",
             "sfx": "a shove, a splash",
             "vfx": "a splash",
             "sim": "THROW"
           },
           {
-            "id": "tumble",
-            "name": "A Tumble",
+            "id": "tongs-slam",
+            "name": "Tongs Slam",
             "input": "in the hold, ← △",
             "archetype": "throw",
             "duration": 138,
             "dmg": 10,
-            "anim": "Trips backwards and pulls them over on top of him, then crawls out.",
+            "anim": "Clamps their jaw in the tongs and whips them straight into the water.",
             "sfx": "a fall, a groan",
             "vfx": "a splash"
           },
           {
-            "id": "notarised",
-            "name": "Notarised",
+            "id": "clinker-breaker",
+            "name": "Clinker Breaker",
             "input": "in the hold, ↓ △",
             "archetype": "throw",
             "duration": 155,
             "dmg": 13,
-            "anim": "Pushes them down and stamps his company seal onto their forehead, hard, four times.",
+            "anim": "Hoists them onto one shoulder and drops to both knees, breaking their back over her iron knee.",
             "sfx": "four heavy stamps",
             "vfx": "a red seal"
           },
           {
-            "id": "filed",
-            "name": "Filed Away",
+            "id": "pit-heave",
+            "name": "Pit Heave",
             "input": "in the hold, → △",
             "archetype": "throw",
             "duration": 134,
             "dmg": 10,
             "end": "throw",
-            "anim": "Spins round with them by accident and lets go.",
+            "anim": "Grabs one ankle and one wrist, spins once, and hurls them into the timber walls.",
             "sfx": "a spin, a yelp, a splash",
             "vfx": "a slide"
           }
         ],
         "back": {
-          "id": "paper-cut",
-          "name": "A Paper Cut",
+          "id": "stoker-suplex",
+          "name": "Stoker Suplex",
           "input": "△ from behind",
           "archetype": "longThrow",
           "duration": 190,
           "dmg": 15,
-          "anim": "Grabs them from behind and, not knowing what else to do, draws a sheet of foolscap across the throat. It works.",
+          "anim": "Grabs from behind waist and arches back, planting their crown into the mud.",
           "sfx": "a crisp paper slice, a gurgle",
           "vfx": "a thin line that opens wide"
         },
         "wall": {
-          "id": "in-arrears",
-          "name": "Payment Overdue",
+          "id": "boiler-pin",
+          "name": "Boiler Pin",
           "input": "△ with their back to a wall",
           "archetype": "longThrow",
           "duration": 200,
           "dmg": 16,
-          "anim": "Pins them to the wall and punches them over and over, counting the shillings he owes.",
+          "anim": "Pins them flat against the wall timbers and drives forearm after forearm into their throat.",
           "sfx": "a count of punches, a sob",
           "vfx": "a red patch"
         },
         "grappleDash": {
-          "id": "rushing-to-court",
-          "name": "Rushing to Court",
+          "id": "dockside-spear",
+          "name": "Dockside Spear",
           "input": "✕ then △",
           "archetype": "hold",
           "duration": 100,
           "dmg": 5,
-          "anim": "Runs and grabs them round the middle.",
+          "anim": "Dives low, tackling their legs and driving them skidding across the Sump.",
           "sfx": "a run, a grab"
         },
         "diveGrab": {
-          "id": "trip-and-tackle",
-          "name": "Trip and Tackle",
+          "id": "furnace-dive",
+          "name": "Furnace Dive",
           "input": "run, then △",
           "archetype": "longThrow",
           "duration": 188,
           "dmg": 13,
-          "anim": "Trips running and tackles them by mistake.",
+          "anim": "Catches them mid-air, clamps her tongs around their neck, and rides them to the floor.",
           "sfx": "a trip, a tackle, a splash"
         },
         "ground": {
-          "id": "final-demand",
-          "name": "The Final Demand",
+          "id": "iron-press",
+          "name": "Iron Press",
           "input": "△ by a floored body",
           "archetype": "longThrow",
           "duration": 200,
           "dmg": 15,
-          "anim": "Sits on them and reads the final demand aloud, punching once on every figure.",
+          "anim": "Kneels on their chest and presses her red-hot tongs against their forearms.",
           "sfx": "a reading voice, punches on the numbers",
           "vfx": "a pulped face"
         },
         "deflects": [
           {
-            "id": "flinch",
-            "name": "Flinch",
+            "id": "iron-ward",
+            "name": "Iron Ward",
             "input": "□ as a high strike lands",
             "archetype": "deflect",
             "duration": 44,
             "dmg": 6,
-            "anim": "Flinches so hard that his borrowed elbow comes up into their face.",
+            "anim": "Snaps her tongs up to parry a high strike, sending sparks flying.",
             "sfx": "a squeak, a crack",
             "sim": "REVERSAL"
           },
           {
-            "id": "hop",
-            "name": "Hop",
+            "id": "boot-check",
+            "name": "Boot Check",
             "input": "↓ □ as a low strike lands",
             "archetype": "deflect",
             "duration": 46,
             "dmg": 6,
-            "anim": "Hops out of the way and lands on the foot.",
+            "anim": "Catches a low kick on the iron heel of her dock boot.",
             "sfx": "a hop, a crunch"
           }
         ],
         "special": {
-          "name": "THE OVERDRAFT",
+          "name": "FULL DRAUGHT",
           "sim": "spCharge",
-          "anim": "Puts his head down, shuts his eyes, holds his bowler on, and runs as fast as he can, screaming an apology.",
-          "sfx": "running, a long rising 'sorrryyyyy', a crash",
-          "vfx": "a spray of ink and blood"
+          "anim": "Kicks open her bypass dampers; smoke roars from her flue pipes and she charges headlong, bowling the opponent over in a spray of sparks.",
+          "sfx": "a furnace blast, roaring fire, an iron crunch",
+          "vfx": "cinders, black smoke, and sparks"
         },
         "arts": [
           {
-            "id": "windfall",
-            "name": "A Windfall",
+            "id": "clinker-shovel",
+            "name": "Clinker Shovel",
             "input": "R2 + ↑",
             "archetype": "art",
             "limb": "both arms",
@@ -10332,13 +10350,13 @@
             "recovery": 60,
             "dmg": 15,
             "launch": true,
-            "anim": "Throws a handful of coins in their face and uppercuts them while they look.",
-            "sfx": "coins, a crack",
-            "vfx": "coins and blood up"
+            "anim": "Swings a heavy stoker scoop in a rising arc, launching them skyward in a spray of hot soot.",
+            "sfx": "shovel ring, roaring fire, a crack",
+            "vfx": "glowing cinders and blood up"
           },
           {
-            "id": "bankruptcy",
-            "name": "Bankruptcy",
+            "id": "slag-mill",
+            "name": "Slag Mill",
             "input": "R2 + →",
             "archetype": "art",
             "limb": "both arms",
@@ -10348,24 +10366,24 @@
             "recovery": 46,
             "dmg": 14,
             "hits": 10,
-            "anim": "Snaps completely and windmills forward with everything he has, crying.",
-            "sfx": "a sob, ten wild hits",
-            "vfx": "a red mist"
+            "anim": "Blares with fury and windmills forward with her glowing iron tongs in a relentless barrage of scorching strikes.",
+            "sfx": "furnace roar, ten iron impacts, sizzle",
+            "vfx": "sparks and a red mist"
           },
           {
-            "id": "pawned",
-            "name": "Pawned",
+            "id": "tongs-brand",
+            "name": "The Bessemer Brand",
             "input": "R2 + ↓",
             "archetype": "cinematic",
             "duration": 270,
             "dmg": 24,
-            "anim": "Uncle Gideon's man runs into the Sump with a ticket; Inkle takes their arm off and hands it over in exchange for a new one of his own.",
-            "sfx": "a running man, a tear, a ticket stamped",
-            "vfx": "an arm goes, an arm comes"
+            "anim": "Pins the victim to the pit timbers, clamps her glowing red tongs across their collarbone, and pulls them up smoking.",
+            "sfx": "iron clamp, screaming, a heavy sizzle",
+            "vfx": "charred meat, smoke, hot orange embers"
           },
           {
-            "id": "fall-on-sword",
-            "name": "Mortified",
+            "id": "blowdown",
+            "name": "Boiler Blowdown",
             "input": "R2 + ←",
             "archetype": "art",
             "limb": "body",
@@ -10375,50 +10393,48 @@
             "recovery": 50,
             "dmg": 13,
             "knockdown": true,
-            "anim": "Throws himself to the floor in shame so hard that everyone round him falls over too.",
-            "sfx": "a wail, a splash, falling bodies",
-            "vfx": "a ring of water"
+            "anim": "Slams her boots into the muck and vents superheated boiler steam in a concussive shockwave that floors everyone around her.",
+            "sfx": "steam blast, a deafening hiss, falling bodies",
+            "vfx": "a white steam burst and a ring wave of water"
           }
         ],
         "status": {
-          "name": "IN ARREARS",
+          "name": "FULL DRAUGHT",
           "drink": 60,
           "lasts": 600,
-          "anim": "Takes a swig of gin from a flat bottle and coughs. Every limb he wears flickers and is replaced by another from Uncle Gideon's window.",
+          "anim": "Cracks open her bypass petcock and downs a draught of raw kerosene; flames flare behind her goggles and her tongs burn white-hot.",
           "effects": {
-            "punch": 1.2,
-            "kick": 1.2,
-            "note": "all four limbs re-roll to new crafts; he stops apologising and stops flinching; when it ends the limbs go back"
+            "punch": 1.25,
+            "kick": 1.15,
+            "note": "her tongs burn white-hot, adding burning damage to all strikes; her attacks cannot be deflected"
           },
-          "look": "his face still and pale, the pawn tickets fluttering, new limbs every time",
-          "voice": "silent, then a whisper: 'Paid in full'"
+          "look": "white-hot tongs, sparks streaming from her sleeve vents, coal dust smoking off her shoulders",
+          "voice": "a wild, fierce roar: 'Burn, you bastards!'"
         },
         "duo": {
           "partner": "nell-sluice",
-          "name": "Rent Day",
+          "name": "Slag and Sluice",
           "archetype": "cinematic",
           "duration": 270,
           "dmg": 26,
-          "anim": "Inkle reads the arrears from a ledger while Nell beats them out of the victim's pockets, one blow per shilling."
+          "anim": "Tilly clamps the victim in her red-hot furnace tongs; Nell floods the pit trench and douses them in scalding river muck until the steam stops hissing."
         },
         "weapons": {
           "affinity": [
-            "blade",
             "blunt",
-            "polearm",
             "fist"
           ],
-          "signature": "spare-arm",
-          "style": "Uses anything he is given, badly, and is dangerous with all of it. He gets the most out of the Gallery's gifts: every spare limb thrown in is his size, and he fits it at once."
+          "signature": "nail-bat",
+          "style": "Swings heavy improvised bludgeons with brute, double-handed force, using them to batter through guards and crush knees."
         },
         "appeal": {
-          "anim": "Raises his bowler, then looks up at the Gallery hopefully, then down, embarrassed.",
-          "line": "Was... was that all right?",
-          "gift": "spare arms and legs; the Gallery is fond of him"
+          "anim": "Spits a glob of black coal dust into the pit water, barks a mocking laugh at the Gallery, and snaps her iron tongs twice in salute.",
+          "line": "Got a bit of clinker in your craw, darling?",
+          "gift": "studded cricket bats, coal shovels, and bottles of kerosene"
         }
       },
       "art": {
-        "silhouette": "A thin young clerk in a tight bowler and a too-short coat, with four limbs that do not match, each with a paper ticket fluttering on a string.",
+        "silhouette": "A tough young female stoker in rolled dungarees, red bandanna over soot-streaked hair, with scorched asbestos-wrapped arms and glowing cherry-red furnace tongs.",
         "build": "Slight, narrow-shouldered, stooped from the copying desk.",
         "palette": {
           "primary": {
@@ -10470,68 +10486,68 @@
       },
       "sound": {
         "voice": {
-          "casting": "a thin, nervous, high tenor in his twenties",
-          "accent": "a lower-middle-class clerk trying to sound educated",
-          "texture": "stammering, apologetic, breathless; very still and quiet under the Tincture"
+          "casting": "a fierce, husky, young cockney woman in her early twenties",
+          "accent": "unapologetic dockside and foundry East End slang",
+          "texture": "scrappy, energetic, combative, laced with mocking laughter"
         },
         "lines": {
           "intro": [
-            "Terribly sorry, sir, I've never done this before.",
-            "Is this the right... sorry."
+            "Mind the tongs, sweetheart. They're still fresh from the fire.",
+            "You looking to get stoked or slagged?"
           ],
           "appeal": [
-            "Was... was that all right? Sorry. Sorry.",
-            "I'm awfully sorry about all this."
+            "Got a bit of clinker in your craw, darling?",
+            "Call that a swing? My nan shovels harder than that!"
           ],
           "hit": [
-            "Sorry!",
-            "Oh! Sorry!",
-            "I didn't mean—"
+            "Take it!",
+            "Have some iron!",
+            "Burn!"
           ],
           "hurt": [
-            "Ow! Sorry.",
-            "My fault, my fault."
+            "Tch! Barely warm.",
+            "That all you got?"
           ],
-          "special": "Sorrryyyyy!",
-          "tincture": "Paid in full.",
+          "special": "FULL DRAUGHT!",
+          "tincture": "BURN, YOU BASTARDS!",
           "victory": [
-            "Oh no. Oh, no. I'm so sorry. Is he... sorry.",
-            "I'll pay for that."
+            "Dump 'em in the slag cart.",
+            "Next in line for the boiler!"
           ],
-          "defeat": "Sorry, Mother..."
+          "defeat": "Coals... going... black..."
         },
-        "efforts": "squeaks, yelps and panicked breaths",
-        "footsteps": "a different footstep for each foot, from whatever legs he has on",
-        "foley": "paper tickets fluttering on string, a ledger's pages, coins in his pocket, a pen scratching",
+        "efforts": "sharp exhalations, raspy growls, and barking laughs",
+        "footsteps": "heavy clumping dock boots with iron calks on the wet timbers",
+        "foley": "creaking scorched asbestos, iron tongs snapping shut, escaping steam hiss, coal dust crunching",
         "impact": {
-          "craft": "pawnshop-patchwork",
-          "nuance": "each hit sounds like the limb that threw it, with a little yelp"
+          "craft": "cinder-iron",
+          "nuance": "every strike rings like a heavy hammer on an anvil with a sharp sizzle of heat"
         },
         "music": {
-          "title": "Seven Shillings a Week",
-          "brief": "A nervous, plinking tune on an out-of-tune upright piano and a clarinet, getting faster and more frantic, with the scratch of a pen and a ticking office clock.",
-          "tempo": 126,
+          "title": "The Deep Flues",
+          "brief": "A driving industrial stomp with pounding iron anvils, chuffing boiler pistons, roaring fire flues, and an aggressive, syncopated street fiddle.",
+          "tempo": 132,
           "instruments": [
-            "upright piano",
-            "clarinet",
-            "pen scratch",
-            "office clock",
-            "pizzicato bass"
+            "pounding anvil",
+            "boiler pistons",
+            "furnace roar",
+            "street fiddle",
+            "heavy bass drum"
           ]
         },
         "cues": [
           {
-            "id": "inkle-ticket",
+            "id": "tilly-tongs",
             "category": "foley",
-            "note": "the pawn tickets on his limbs",
-            "prompt": "Several small paper tags on strings flutter and flap in the wind. Close microphone, dry room, a few seconds.",
+            "note": "her furnace tongs snapping shut",
+            "prompt": "Heavy cast-iron furnace tongs snap shut with a ringing metallic clank and a hiss of heat. Close microphone, dry room.",
             "seed": 4710
           },
           {
-            "id": "inkle-sorry",
+            "id": "tilly-taunt",
             "category": "voice",
-            "note": "his panicked apology",
-            "prompt": "A young man says 'sorry, sorry, sorry' in a panicked, breathless stammer, in a stone room. A few seconds.",
+            "note": "her mocking dockside taunt",
+            "prompt": "A fierce young working-class London woman barks a laugh and shouts 'Got a bit of clinker in your craw, darling?' in a stone room.",
             "seed": 4711
           }
         ]
@@ -10539,20 +10555,20 @@
       "texture": {
         "seed": 5112,
         "skin": {
-          "idea": "pale freckled skin, ink-stained fingertips, the faint start of a moustache",
-          "colour": "pale tan"
+          "idea": "sweat-slick soot-streaked tan skin with coal dust in the pores, minor forge burns on the neck",
+          "colour": "sooty tan"
         },
         "cloth": {
-          "idea": "shiny threadbare brown wool frock coat, a frayed shirt with paper cuffs, a cheap celluloid collar",
-          "colour": "threadbare brown"
+          "idea": "sleeveless faded canvas dungarees over a grease-stained henley, red bandanna tied tight, heavy leather belt",
+          "colour": "coal soot and faded indigo"
         },
         "face": {
-          "idea": "a thin pale anxious freckled face, round wire spectacles, a weak chin",
-          "colour": "pale tan"
+          "idea": "a fierce sharp-chinned young woman with sharp hazel eyes, smudges of black coal across cheekbones, sweat-curled fringe",
+          "colour": "sooty tan with brown hair"
         },
         "limb": {
-          "idea": "a mismatched pawnbroker's fitting: leather straps and buckles at the joint, a brown paper pawn ticket on a string; the limb itself rolled from the other crafts",
-          "colour": "leather brown and ticket buff"
+          "idea": "scorched asbestos lagging bound in copper wire, heavy boiler-tongs forged from pitted cast iron glowing red at the tips",
+          "colour": "cast-iron black and glowing red"
         }
       }
     }

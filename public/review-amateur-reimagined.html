@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Re-Imagined Amateur Brawlers — Pitfighter Character Options</title>
+  <style>
+    :root {
+      --bg: #0b0e14;
+      --card-bg: #131822;
+      --sub-card: #0d111a;
+      --border: #232b3b;
+      --gold: #d4af37;
+      --accent: #e5a93c;
+      --male: #58a6ff;
+      --female: #f778ba;
+      --text: #e6edf3;
+      --muted: #8b949e;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 32px 24px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .container { max-width: 1400px; margin: 0 auto; }
+    h1 { margin: 0 0 8px; font-size: 28px; color: var(--gold); }
+    p.lead { margin: 0 0 32px; color: var(--muted); font-size: 15px; max-width: 900px; line-height: 1.6; }
+
+    .concept-section {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 36px;
+    }
+    .concept-header {
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+    }
+    .concept-title {
+      font-size: 22px;
+      margin: 0 0 6px;
+      color: #fff;
+    }
+    .concept-desc {
+      font-size: 14px;
+      color: var(--muted);
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    .pair-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 860px) {
+      .pair-grid { grid-template-columns: 1fr; }
+    }
+
+    .char-card {
+      background: var(--sub-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+    }
+    .gender-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+      align-self: flex-start;
+    }
+    .badge-male { background: rgba(88, 166, 255, 0.15); color: var(--male); border: 1px solid var(--male); }
+    .badge-female { background: rgba(247, 120, 186, 0.15); color: var(--female); border: 1px solid var(--female); }
+
+    .char-name {
+      margin: 0 0 8px;
+      font-size: 17px;
+      color: #fff;
+    }
+    .img-wrap {
+      width: 100%;
+      height: 480px;
+      background: #06080c;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid #1c2230;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+      transition: transform 0.25s ease;
+    }
+    .img-wrap:hover img {
+      transform: scale(1.02);
+    }
+    .meta-box {
+      margin-top: 14px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .meta-box strong { color: #d0d7de; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Re-Imagined Amateur Brawler — Character Options</h1>
+    <p class="lead">Completely re-imagining the open Amateur Brawler slot in Pitfighter (replacing Cuthbert Inkle). Generated locally via <strong>FLUX 3</strong> on AMD Radeon RX 9070 XT across 5 distinct Victorian steampunk concepts with paired Male and Female visual designs.</p>
+
+    <!-- Concept 1 -->
+    <div class="concept-section">
+      <div class="concept-header">
+        <h2 class="concept-title">Concept 1: The Rogue Taxidermist</h2>
+        <p class="concept-desc">Assistant at an unlicensed East End curiosity museum who grafts preserved beast armatures and animal bones onto themselves. Fights with unhinged predatory panic—wild leaping claw swipes, snapping jaw tackles, and desperate flailing.</p>
+      </div>
+      <div class="pair-grid">
+        <div class="char-card">
+          <span class="gender-badge badge-male">Option 1A (Male)</span>
+          <h3 class="char-name">Barnaby Gallowglass</h3>
+          <div class="img-wrap">
+            <img src="tex/characters/amateur_reimagined/amateur_1a_taxidermist_male.png" alt="Barnaby Gallowglass">
+          </div>
+          <div class="meta-box">
+            <strong>Limbs:</strong> Taxidermy brown bear claw, badger-jaw knuckle bracket with glass eye studs, deer hock splints.<br/>
+            <strong>Attire:</strong> Stained oilcloth apron over moth-eaten waistcoat, dissecting tweezers in lapel, brass spectacles.
+          </div>
+        </div>
+        <div class="char-card">
+          <span class="gender-badge badge-female">Option 1B (Female)</span>
+          <h3 class="char-name">Morag Gallowglass</h3>
+          <div class="img-wrap">
+            <img src="tex/characters/amateur_reimagined/amateur_1b_taxidermist_female.png" alt="Morag Gallowglass">
+          </div>
+          <div class="meta-box">
+            <strong>Limbs:</strong> Articulated grey wolf jaw gauntlets, copper-bound claw sinews, carved horn splints, badger fur spats.<br/>
+            <strong>Attire:</strong> Waxed leather specimen apron over woolen dress, specimen jar bandolier, wild windblown hair.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Concept 2 -->
+    <div class="concept-section">
+      <div class="concept-header">
+        <h2 class="concept-title">Concept 2: The Sump Furnace Stoker</h2>
+        <p class="concept-desc">Scrappy, feral teenage boiler stoker from the underground steam works who entered the pit for copper coins. Dirty gutter-cockney street scrap—slings coal dust, ducks under swings, and throws wild haymakers with glowing clinker-tongs.</p>
+      </div>
+      <div class="pair-grid">
+        <div class="char-card">
+          <span class="gender-badge badge-male">Option 2A (Male)</span>
+          <h3 class="char-name">Tam "Cinder-Spit"</h3>
+          <div class="img-wrap">
+            <img src="tex/characters/amateur_reimagined/amateur_2a_stoker_male.png" alt="Tam Cinder-Spit">
+          </div>
+          <div class="meta-box">
+            <strong>Limbs:</strong> Scorched asbestos lagging, glowing copper heat pipes, cast-iron boiler-tongs, sheet-iron shins.<br/>
+            <strong>Attire:</strong> Sleeveless stoker henley, soot-stained leather braces, heavy dock boots, cocked stoker cap.
+          </div>
+        </div>
+        <div class="char-card">
+          <span class="gender-badge badge-female">Option 2B (Female)</span>
+          <h3 class="char-name">Tilly "Furnace-Tongs"</h3>
+          <div class="img-wrap">
+            <img src="tex/characters/amateur_reimagined/amateur_2b_stoker_female.png" alt="Tilly Furnace-Tongs">
+          </div>
+          <div class="meta-box">
+            <strong>Limbs:</strong> Asbestos heat wraps, braided copper heat lines, glowing iron clinker-tongs, iron boiler plates.<br/>
+            <strong>Attire:</strong> Rolled dungarees, red bandanna over soot-dusted hair, heavy welding gloves, coal dust smudges.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Concept 3 -->
+    <div class="concept-section">
+      <div class="concept-header">
+        <h2 class="concept-title">Concept 3: The Galvanic Escapologist</h2>
+        <p class="concept-desc">Escapee from the Bethlem Royal Hospital (Bedlam) who treats combat as an electro-convulsive therapy session. Fights while half-bound in canvas restraint straps and brass padlocks with unpredictable convulsive spasms that whip into flying head-scissors and blue static shocks.</p>
+      </div>
+      <div class="pair-grid">
+        <div class="char-card">
+          <span class="gender-badge badge-male">Option 3A (Male)</span>
+          <h3 class="char-name">Septimus "Twitch"</h3>
+          <div class="img-wrap">
+            <img src="tex/characters/amateur_reimagined/amateur_3a_escapologist_male.png" alt="Septimus Twitch">
+          </div>
+          <div class="meta-box">
+            <strong>Limbs:</strong> Heavy canvas straitjacket wraps with brass padlocks, copper-zinc battery coils, spark-gap electrodes.<br/>
+            <strong>Attire:</strong> Ragged asylum trousers, canvas-taped bare feet, disheveled hair, manic unhinged grin.
+          </div>
+        </div>
+        <div class="char-card">
+          <span class="gender-badge badge-female">Option 3B (Female)</span>
+          <h3 class="char-name">Sybilla "The Straitjacket"</h3>
+          <div class="img-wrap">
+            <img src="tex/characters/amateur_reimagined/amateur_3b_escapologist_female.png" alt="Sybilla Straitjacket">
+          </div>
+          <div class="meta-box">
+            <strong>Limbs:</strong> Torn canvas restraint sleeves, galvanic shock plates, copper coils, humming Leyden jar accumulators.<br/>
+            <strong>Attire:</strong> Tattered white asylum gown over dark skirts, wild dark curls framing feverish smiling face.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Concept 4 -->
+    <div class="concept-section">
+      <div class="concept-header">
+        <h2 class="concept-title">Concept 4: The Penny-Dreadful Scribe</h2>
+        <p class="concept-desc">Starving sensationalist crime writer for the Old Sorrow Gazette, forced into the pit to conduct "first-hand research" on violent murder. Clumsy, theatrical, and terrified—quotes melodrama while swinging an iron-bound legal ledger and hurling blinding ink pots.</p>
+      </div>
+      <div class="pair-grid">
+        <div class="char-card">
+          <span class="gender-badge badge-male">Option 4A (Male)</span>
+          <h3 class="char-name">Ignatius Quill</h3>
+          <div class="img-wrap">
+            <img src="tex/characters/amateur_reimagined/amateur_4a_scribe_male.png" alt="Ignatius Quill">
+          </div>
+          <div class="meta-box">
+            <strong>Limbs:</strong> Cast-iron lead typesetting blocks across knuckles, brass bookbinder hinge elbows, lead paperweight soles.<br/>
+            <strong>Attire:</strong> Ink-splattered tweed frock coat, green paper eye-shade, spectacles askew, flying murder mystery pages.
+          </div>
+        </div>
+        <div class="char-card">
+          <span class="gender-badge badge-female">Option 4B (Female)</span>
+          <h3 class="char-name">Hester Quill</h3>
+          <div class="img-wrap">
+            <img src="tex/characters/amateur_reimagined/amateur_4b_scribe_female.png" alt="Hester Quill">
+          </div>
+          <div class="meta-box">
+            <strong>Limbs:</strong> Brass printer's galleys, sharpened steel dip-pen stylus clusters, heavy book-press clamp boots.<br/>
+            <strong>Attire:</strong> Ink-smeared walking dress, green eye-shade, leather writer satchel spilling sensational pamphlets.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Concept 5 -->
+    <div class="concept-section">
+      <div class="concept-header">
+        <h2 class="concept-title">Concept 5: The Gentleman Slummer</h2>
+        <p class="concept-desc">Pompous aristocratic dandy who bought their way into the pit after reading a single pamphlet on "The Noble Art of Self-Defence." Rigid, absurd 18th-century bareknuckle postures that instantly collapse into shrieking, biting, hair-pulling panic when hit once on the nose.</p>
+      </div>
+      <div class="pair-grid">
+        <div class="char-card">
+          <span class="gender-badge badge-male">Option 5A (Male)</span>
+          <h3 class="char-name">The Hon. Algernon Fotheringay</h3>
+          <div class="img-wrap">
+            <img src="tex/characters/amateur_reimagined/amateur_5a_slummer_male.png" alt="Algernon Fotheringay">
+          </div>
+          <div class="meta-box">
+            <strong>Limbs:</strong> Polished brass clockwork sporting arms, mother-of-pearl inlays, gold filigree knuckle guards.<br/>
+            <strong>Attire:</strong> Silk brocade waistcoat, spotless white cravat, tailored fawn trousers, bleeding nose in shock.
+          </div>
+        </div>
+        <div class="char-card">
+          <span class="gender-badge badge-female">Option 5B (Female)</span>
+          <h3 class="char-name">Lady Clara Fotheringay</h3>
+          <div class="img-wrap">
+            <img src="tex/characters/amateur_reimagined/amateur_5b_slummer_female.png" alt="Lady Clara Fotheringay">
+          </div>
+          <div class="meta-box">
+            <strong>Limbs:</strong> Mirror-polished rose-gold sporting prosthetics, carved ivory plating, brass filigree wrist cuffs.<br/>
+            <strong>Attire:</strong> Tailored velvet riding habit with gold buttons, top hat with silk veil pushed up, pearl earrings.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

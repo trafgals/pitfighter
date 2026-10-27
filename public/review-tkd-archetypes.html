@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tae Kwon Do Fighter Archetype Gallery — Pitfighter Roster</title>
+  <style>
+    :root {
+      --bg: #0c0f17;
+      --card-bg: #141923;
+      --border: #222a38;
+      --accent: #d4af37;
+      --male: #4a9eff;
+      --female: #ff66aa;
+      --text: #e6edf3;
+      --muted: #8b949e;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 32px 24px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .container { max-width: 1400px; margin: 0 auto; }
+    h1 { margin: 0 0 8px; font-size: 28px; color: var(--accent); }
+    p.lead { margin: 0 0 32px; color: var(--muted); font-size: 15px; max-width: 900px; line-height: 1.5; }
+    
+    .archetype-section {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 36px;
+    }
+    .archetype-header {
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+    }
+    .archetype-title {
+      font-size: 22px;
+      margin: 0 0 6px;
+      color: #fff;
+    }
+    .archetype-desc {
+      font-size: 14px;
+      color: var(--muted);
+      margin: 0;
+      line-height: 1.6;
+    }
+    .pair-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 860px) {
+      .pair-grid { grid-template-columns: 1fr; }
+    }
+    .character-card {
+      background: #0f131c;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+    }
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-radius: 4px;
+      margin-bottom: 10px;
+      align-self: flex-start;
+    }
+    .badge.male { background: rgba(74, 158, 255, 0.15); color: var(--male); border: 1px solid var(--male); }
+    .badge.female { background: rgba(255, 102, 170, 0.15); color: var(--female); border: 1px solid var(--female); }
+    
+    .char-name {
+      margin: 0 0 8px;
+      font-size: 17px;
+      color: #fff;
+    }
+    .img-wrap {
+      width: 100%;
+      height: 480px;
+      background: #080a0f;
+      border-radius: 6px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #1a212d;
+    }
+    .img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+      transition: transform 0.25s ease;
+    }
+    .img-wrap:hover img {
+      transform: scale(1.02);
+    }
+    .meta {
+      margin-top: 14px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .meta strong { color: #d0d7de; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Tae Kwon Do Kicking Specialist — Character Options</h1>
+    <p class="lead">Generated locally via FLUX 3 (Radeon RX 9070 XT) for the open Tae Kwon Do fighter slot in Pitfighter. Compare the 5 distinct Victorian steampunk archetypes with separate Male and Female designs below.</p>
+
+    <!-- Archetype 1 -->
+    <div class="archetype-section">
+      <div class="archetype-header">
+        <h2 class="archetype-title">Archetype 1: The Steeplejack</h2>
+        <p class="archetype-desc">High-altitude church spire rigger who treats vertical height as a weapon. Fights on telescoping spring-steel railway leaf springs and forged climbing crampons with soaring drop-kicks and rafter axe kicks.</p>
+      </div>
+      <div class="pair-grid">
+        <div class="character-card">
+          <span class="badge male">Option 1A (Male)</span>
+          <h3 class="char-name">Barnaby Callow</h3>
+          <div class="img-wrap">
+            <img src="tex/characters/tkd_options/tkd_1a_steeplejack_male.png" alt="Barnaby Callow">
+          </div>
+          <div class="meta">
+            <strong>Limbs:</strong> Railway spring-steel leaf-spring legs with ratcheted climbing calipers.<br/>
+            <strong>Attire:</strong> Oiled canvas climbing smock, knotted hemp safety line, rigger's flat cap with brass goggles.
+          </div>
+        </div>
+        <div class="character-card">
+          <span class="badge female">Option 1B (Female)</span>
+          <h3 class="char-name">Bridget Callow</h3>
+          <div class="img-wrap">
+            <img src="tex/characters/tkd_options/tkd_1b_steeplejack_female.png" alt="Bridget Callow">
+          </div>
+          <div class="meta">
+            <strong>Limbs:</strong> Leaf-spring steel shins, brass climbing calipers, and mountaineering spurs.<br/>
+            <strong>Attire:</strong> Tailored leather climbing coat, tool carabiners, chalk pouch, baker boy cap.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Archetype 2 -->
+    <div class="archetype-section">
+      <div class="archetype-header">
+        <h2 class="archetype-title">Archetype 2: The Cobbler's Automaton</h2>
+        <p class="archetype-desc">Obsessive East End bootmaker engineered to deliver the "mechanically perfect human kick." Delivers rapid-fire staccato machine-gun kicks with solid cast-iron shoe lasts, measuring calipers, and heavy steel-welted brogues.</p>
+      </div>
+      <div class="pair-grid">
+        <div class="character-card">
+          <span class="badge male">Option 2A (Male)</span>
+          <h3 class="char-name">Master Thaddeus Pegg</h3>
+          <div class="img-wrap">
+            <img src="tex/characters/tkd_options/tkd_2a_cobbler_male.png" alt="Master Thaddeus Pegg">
+          </div>
+          <div class="meta">
+            <strong>Limbs:</strong> Cast-iron shoe lasts with brass sizing dials and triple-soled brogues with spur-wheels.<br/>
+            <strong>Attire:</strong> Oiled cowhide apron stuffed with awls, folded paper trade cap, magnifying spectacles.
+          </div>
+        </div>
+        <div class="character-card">
+          <span class="badge female">Option 2B (Female)</span>
+          <h3 class="char-name">Mistress Tabitha Pegg</h3>
+          <div class="img-wrap">
+            <img src="tex/characters/tkd_options/tkd_2b_cobbler_female.png" alt="Mistress Tabitha Pegg">
+          </div>
+          <div class="meta">
+            <strong>Limbs:</strong> Cast-iron lasts with engraved brass rules, awl brackets, and heavy steel oxfords.<br/>
+            <strong>Attire:</strong> Studded cordwainer apron over dark wool dress, arm bracers, spectacles on brass chain.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Archetype 3 -->
+    <div class="archetype-section">
+      <div class="archetype-header">
+        <h2 class="archetype-title">Archetype 3: The Gasometer Stilt-Walker</h2>
+        <p class="archetype-desc">Victorian knocker-up and sluice wader on 7-foot articulated telescoping brass and iron stilts. Commands extreme reach with sweeping 360-degree crescent kicks leaving roaring arcs of gas flame in the fog.</p>
+      </div>
+      <div class="pair-grid">
+        <div class="character-card">
+          <span class="badge male">Option 3A (Male)</span>
+          <h3 class="char-name">Ignatius Finch</h3>
+          <div class="img-wrap">
+            <img src="tex/characters/tkd_options/tkd_3a_stiltman_male.png" alt="Ignatius Finch">
+          </div>
+          <div class="meta">
+            <strong>Limbs:</strong> 7-foot brass telescoping stilts with knee counter-weight pendulums and flaming heel jets.<br/>
+            <strong>Attire:</strong> Billowing ragged black greatcoat, lamp-lighting pole, battered stovepipe hat with torch bracket.
+          </div>
+        </div>
+        <div class="character-card">
+          <span class="badge female">Option 3B (Female)</span>
+          <h3 class="char-name">Constance Finch</h3>
+          <div class="img-wrap">
+            <img src="tex/characters/tkd_options/tkd_3b_stiltwoman_female.png" alt="Constance Finch">
+          </div>
+          <div class="meta">
+            <strong>Limbs:</strong> Articulated brass and iron stilts with pressure gauges and blue-flame heel burners.<br/>
+            <strong>Attire:</strong> Hooded oilskin duster coat cinched with brass belt, gasmask collar, high-crowned bowler hat.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Archetype 4 -->
+    <div class="archetype-section">
+      <div class="archetype-header">
+        <h2 class="archetype-title">Archetype 4: The Shipyard Rivet-Runner</h2>
+        <p class="archetype-desc">Acrobatic dockland runner fitted with dual-action pneumatic steam-piston legs. Explosive, twitchy Tae Kwon Do with flying switch-kicks, sliding sweeps, and clouds of hissing steam.</p>
+      </div>
+      <div class="pair-grid">
+        <div class="character-card">
+          <span class="badge male">Option 4A (Male)</span>
+          <h3 class="char-name">Mickey O'Rourke</h3>
+          <div class="img-wrap">
+            <img src="tex/characters/tkd_options/tkd_4a_rivetrunner_male.png" alt="Mickey O'Rourke">
+          </div>
+          <div class="meta">
+            <strong>Limbs:</strong> Blued-steel pneumatic steam pistons with braided copper lines and boiler-plate boots.<br/>
+            <strong>Attire:</strong> Sleeveless boiler-worker henley, heavy leather braces, grease-smeared cap over one eye.
+          </div>
+        </div>
+        <div class="character-card">
+          <span class="badge female">Option 4B (Female)</span>
+          <h3 class="char-name">Molly O'Rourke</h3>
+          <div class="img-wrap">
+            <img src="tex/characters/tkd_options/tkd_4b_rivetrunner_female.png" alt="Molly O'Rourke">
+          </div>
+          <div class="meta">
+            <strong>Limbs:</strong> Dual-action pneumatic steam rams with pressure valves and knurled steel boots.<br/>
+            <strong>Attire:</strong> Grease-stained dungarees rolled at calves, striped shirt, welding gloves, red bandanna.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Archetype 5 -->
+    <div class="archetype-section">
+      <div class="archetype-header">
+        <h2 class="archetype-title">Archetype 5: The Music Hall Aerialist</h2>
+        <p class="archetype-desc">Flamboyant carnival contortionist on internal gyroscopic flywheel legs with chiming brass bells. Blends theatrical capoeira with spinning inverted Tae Kwon Do tricking.</p>
+      </div>
+      <div class="pair-grid">
+        <div class="character-card">
+          <span class="badge male">Option 5A (Male)</span>
+          <h3 class="char-name">Peregrine Skite</h3>
+          <div class="img-wrap">
+            <img src="tex/characters/tkd_options/tkd_5a_aerialist_male.png" alt="Peregrine Skite">
+          </div>
+          <div class="meta">
+            <strong>Limbs:</strong> Polished brass clockwork gyro-legs with spinning flywheels, spiral springs, and ankle bells.<br/>
+            <strong>Attire:</strong> Faded plum velvet coat with gold frogging, mismatched striped hose, feathered tricorne.
+          </div>
+        </div>
+        <div class="character-card">
+          <span class="badge female">Option 5B (Female)</span>
+          <h3 class="char-name">Peggy Skite</h3>
+          <div class="img-wrap">
+            <img src="tex/characters/tkd_options/tkd_5b_aerialist_female.png" alt="Peggy Skite">
+          </div>
+          <div class="meta">
+            <strong>Limbs:</strong> Articulated clockwork gyro-legs with whirring escapements, balance springs, and bells.<br/>
+            <strong>Attire:</strong> Gold-embroidered harlequin velvet bodice, shredded silk shorts, velvet jester cap.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

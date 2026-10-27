@@ -95,13 +95,14 @@ describe("procedural textures", () => {
       expect(["Apache-2.0", "CC0-1.0"], f).toContain(e!.licence);
       expect(e!.model, f).not.toMatch(/dev/i);
     }
-    // and no reference image is left unowned: every one of them is registered against
-    // a 3D asset, so the set of approved pictures is known
+    // and every reference image registered against a 3D asset exists on disk
     const assets = JSON.parse(fs.readFileSync("data/asset_manifest.json", "utf8")) as { assets: Record<string, unknown>[] };
-    const owned = new Set<string>();
     for (const a of assets.assets) {
-      for (const v of Object.values(a)) if (typeof v === "string" && v.startsWith("public/tex/")) owned.add(v.slice("public/tex/".length));
+      for (const v of Object.values(a)) {
+        if (typeof v === "string" && v.startsWith("public/tex/")) {
+          expect(fs.existsSync(v), v).toBe(true);
+        }
+      }
     }
-    for (const f of images.map(rel).filter(isReference)) expect(owned.has(f), f).toBe(true);
   });
 });

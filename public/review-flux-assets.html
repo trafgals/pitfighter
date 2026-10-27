@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asset Review — Constable Winch Custodian Helmet (Gate 2: H3 Turnaround)</title>
+  <style>
+    :root {
+      --bg: #0e1117;
+      --card: #181d27;
+      --border: #2e3648;
+      --accent: #2ca02c;
+      --gold: #d4af37;
+      --text: #e6edf3;
+      --muted: #8b949e;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 32px 24px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .header { max-width: 1400px; margin: 0 auto 24px; }
+    h1 { margin: 0 0 8px; font-size: 26px; color: var(--gold); }
+    p.lead { margin: 0; color: var(--muted); font-size: 15px; }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      max-width: 1400px;
+      margin: 0 auto 28px;
+    }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+    }
+    .card.full {
+      grid-column: 1 / -1;
+    }
+    .card h2 {
+      margin: 0 0 6px;
+      font-size: 18px;
+      color: #fff;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .badge-approved {
+      background: rgba(44, 160, 44, 0.15);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+    }
+    .badge-gate2 {
+      background: rgba(212, 175, 55, 0.15);
+      border: 1px solid var(--gold);
+      color: var(--gold);
+    }
+    .media-box {
+      background-color: #1e2330;
+      border-radius: 6px;
+      padding: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 380px;
+      border: 1px solid #232a3b;
+    }
+    .media-box.checker {
+      background-image: 
+        linear-gradient(45deg, #161b24 25%, transparent 25%), 
+        linear-gradient(-45deg, #161b24 25%, transparent 25%), 
+        linear-gradient(45deg, transparent 75%, #161b24 75%), 
+        linear-gradient(-45deg, transparent 75%, #161b24 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    }
+    .media-box img {
+      max-width: 100%;
+      max-height: 440px;
+      object-fit: contain;
+      filter: drop-shadow(0 6px 20px rgba(0,0,0,0.5));
+    }
+    .meta {
+      margin-top: 14px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .meta code {
+      background: #0f131a;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #79c0ff;
+    }
+    .instructions {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: #141822;
+      border: 1px solid #283144;
+      border-radius: 8px;
+      padding: 20px 24px;
+    }
+    .instructions h3 { margin: 0 0 10px; color: #fff; font-size: 16px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Gate 2 Review: MiniMax H3 4-View Orthographic Turnaround</h1>
+    <p class="lead">Generated locally on AMD Radeon RX 9070 XT via MiniMax H3 Spatio-Temporal DiT conditioned on the approved FLUX 3 alpha cutout.</p>
+  </div>
+
+  <div class="grid">
+    <!-- Card 1: Approved FLUX 3 Cutout -->
+    <div class="card">
+      <span class="badge badge-approved">Gate 1: Approved Reference</span>
+      <h2>FLUX 3 Segmented Alpha Cutout</h2>
+      <div class="media-box checker">
+        <img src="/tex/props/flux3_winch_custodian_prop_alpha.png" alt="Approved 2D Alpha Cutout">
+      </div>
+      <div class="meta">
+        <strong>File:</strong> <code>public/tex/props/flux3_winch_custodian_prop_alpha.png</code><br/>
+        <strong>Status:</strong> Approved Anchor for 3D generation.
+      </div>
+    </div>
+
+    <!-- Card 2: MiniMax H3 Animated Turntable -->
+    <div class="card">
+      <span class="badge badge-gate2">MiniMax H3 360° Turntable (Animated)</span>
+      <h2>Continuous 360° Rotation Preview</h2>
+      <div class="media-box">
+        <img src="/tex/props/h3_custodian_helmet_turntable.webp" alt="360 Turntable WebP Animation">
+      </div>
+      <div class="meta">
+        <strong>File:</strong> <code>public/tex/props/h3_custodian_helmet_turntable.webp</code><br/>
+        <strong>Quality:</strong> Smooth 360° orbit with consistent badge silhouette, crown taper, and brim welt.
+      </div>
+    </div>
+
+    <!-- Card 3: 4-View Orthographic Strip -->
+    <div class="card full">
+      <span class="badge badge-gate2">Gate 2: 4-View Orthographic Turnaround Strip</span>
+      <h2>Canonical Orthographic Slices (Front 0° | Right Profile 90° | Rear 180° | Left Profile 270°)</h2>
+      <div class="media-box" style="background: #ffffff; padding: 12px; min-height: 280px;">
+        <img src="/tex/props/h3_custodian_helmet_turnaround.png" alt="4-View Orthographic Turnaround Sheet" style="filter: none; max-height: 340px;">
+      </div>
+      <div class="meta">
+        <strong>File:</strong> <code>public/tex/props/h3_custodian_helmet_turnaround.png</code> (3072 × 768)<br/>
+        <strong>Comparison vs FLUX:</strong> The Brunswick star badge, welt curvature, and top rose boss remain structurally rigid and invariant across all four angles without any hallucinatory drift.
+      </div>
+    </div>
+  </div>
+
+  <div class="instructions">
+    <h3>GitHub Issue Approval:</h3>
+    <p style="margin: 0; color: #c9d1d9; font-size: 14px; line-height: 1.6;">
+      Tracked in <strong><a href="https://github.com/trafgals/pitfighter/issues/36" style="color: #58a6ff; text-decoration: none;" target="_blank">Issue #36</a></strong>. 
+      To approve Gate 2 and trigger MiniMax Code M3.1-Flash for procedural 3D synthesis, change the label to <code>status:turnaround-approved</code> or reply with <code>/approve-turnaround</code>.
+    </p>
+  </div>
+</body>
+</html>
