@@ -123,7 +123,7 @@ which sets how they look and how every hit sounds.
 | Muay Thai | Bosun Absalom Rook | Ship's Oak | THE CAT O' NINE (flurry) |
 | Boxing | Lady Hester Bulwark | Hydraulic Steel | A HUNDRED POUNDS TO THE INCH (flurry) |
 | Kung Fu | Percival "Oolong" Crump | Bamboo and Samovar | THE SPILLED SAMOVAR (spin) |
-| Tae Kwon Do | Columbine Vesper | Aether Glass | THE FOOTLIGHTS (fire) |
+| Tae Kwon Do | Mistress Tabitha Pegg | Cast-Iron Lasts | THE HOT WELT (fire) |
 | Judo Based | Mr. Mortimer Crape | Jet and Whalebone | INTERMENT (slam) |
 | Samurai Sword | Sir Peregrine Ashby-Lisle, Bt. | Silver and Ebony | A THOUSAND PARDONS (blade) |
 | Amateur | Mr. Cuthbert Inkle | Pawnshop Patchwork | THE OVERDRAFT (charge) |
@@ -142,7 +142,7 @@ and each fighter calls theirs by its own name:
 | Spin | hits all round | Kilnworth, Crump |
 | Slam | a low shockwave | Mule, Crape |
 | Blade | a long sweep | Sir Peregrine |
-| Fire | a long jet | Vesper |
+| Fire | a long jet | Pegg |
 
 Everything about a fighter is in one file, `src/data/characters.json`: the
 numbers the sim plays, and the whole design for the moves, looks and sounds

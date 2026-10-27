@@ -197,7 +197,7 @@
       "rules": [
         "Every hit that lands bleeds. A jab leaves a spray of droplets; a finisher throws an arc; a special or a throw opens an artery that pumps in time with the heartbeat for a few seconds.",
         "Blood mixes with the rain: it hits hard and red, then thins to pink in the puddles and runs to the nearest drain grate. The Sump floor gets redder through the match and the drains glug.",
-        "Every craft bleeds its own fluid with the blood: brass weeps clock oil, steel sprays scalding hydraulic water, lead gushes rainwater, porcelain sheds shards, oak spits splinters and tar, glass leaks burning gas, bamboo sprays boiling tea, iron drops glowing coals, whalebone springs its stays, silver never bleeds at all, the bear graft bleeds more than anything, and the pawned limbs bleed whatever they were made of.",
+        "Every craft bleeds its own fluid with the blood: brass weeps clock oil, steel sprays scalding hydraulic water, lead gushes rainwater, porcelain sheds shards, oak spits splinters and tar, the lasts shed iron filings and wax, bamboo sprays boiling tea, iron drops glowing coals, whalebone springs its stays, silver never bleeds at all, the bear graft bleeds more than anything, and the pawned limbs bleed whatever they were made of.",
         "Blood clings to clothes and skin and stays for the whole match. White gloves, cuffs and collars are the fighters' tell.",
         "A KO is never just a fall: something comes off, opens or caves in, chosen by the finishing move and the winner's craft."
       ]
@@ -315,22 +315,6 @@
       }
     },
     {
-      "id": "aether-glass",
-      "name": "Aether Glass",
-      "look": "Blown-glass tubes and bulbs in brass ferrules, filled with a glowing coloured gas that brightens with every move, like a lit sign in the rain.",
-      "hit": "A bright glass clink over a low electric buzz, with a soft whump of gas.",
-      "breaks": "Shatters and spits burning gas; it refills from a reservoir in the hip a second later.",
-      "bleeds": "Burning gas and glass with the blood; wounds glow for a moment.",
-      "tip": "spike",
-      "cue": {
-        "id": "hit-glass-skin",
-        "category": "impact",
-        "note": "a glowing glass shin kicking into a body",
-        "prompt": "A glass shin full of glowing gas kicks into a body: a bright glass clink over a low electric buzz and a soft whump of gas. Close microphone, dry room, one single impact.",
-        "seed": 4406
-      }
-    },
-    {
       "id": "foundry-iron",
       "name": "Foundry Iron",
       "look": "Black sand-cast iron with rough seams, rivets the size of thumbs, and grated vents that glow orange from the coals inside.",
@@ -418,6 +402,22 @@
         "note": "a bamboo arm striking flesh",
         "prompt": "A hollow bamboo cane strikes flesh: a woody clack with a bright brass ting and a short hiss of steam. Close microphone, dry room, one single impact.",
         "seed": 4407
+      }
+    },
+    {
+      "id": "cast-iron-lasts",
+      "name": "Cast-Iron Lasts",
+      "look": "Black cast pig-iron shoemaker's lasts with engraved brass rules along the shins, steel leaf-springs and ratchets behind the calves, and triple-soled steel-welted boots.",
+      "hit": "A dull, ringing iron clang with a spring's twang.",
+      "breaks": "Chips and throws sparks; a spring snaps loose and whips round.",
+      "bleeds": "Iron filings and black cobbler's wax with the blood.",
+      "tip": "hoof",
+      "cue": {
+        "id": "hit-last-skin",
+        "category": "impact",
+        "note": "an iron last kicking into a body",
+        "prompt": "A heavy cast-iron boot kicks into a body: a dull ringing iron clang with a short twang of a steel spring. Close microphone, dry room, one single impact.",
+        "seed": 4406
       }
     }
   ],
@@ -7417,11 +7417,11 @@
       "name": "Mistress Tabitha Pegg",
       "style": "Tae Kwon Do",
       "blurb": "Obsessive East End cordwainer and bootmaker engineered to deliver the mechanically perfect human kick with articulated cast-iron shoe lasts, brass rule gauges, and heavy steel-welted brogues.",
-      "body": "#b88464",
+      "body": "#e2c2a6",
       "accent": "#c8963e",
       "family": "kicker",
-      "special": "spBarrage",
-      "specialName": "THE OVERWOUND LAST",
+      "special": "spFire",
+      "specialName": "THE HOT WELT",
       "stats": {
         "speed": 1.06,
         "startup": -2,
@@ -7438,14 +7438,14 @@
         "horns": "none",
         "tail": "none",
         "gear": [
-          "spectacles",
-          "cordwainer-apron"
+          "goggles",
+          "gloves"
         ]
       },
       "look": {
         "def": 1.0,
         "scar": 1,
-        "paint": 0,
+        "paint": 1,
         "wrinkles": false,
         "stubble": false,
         "veins": true
@@ -7462,7 +7462,7 @@
       "title": "The Cobbler's Automaton",
       "lineage": [
         "Tae Kwon Do",
-        "Savate"
+        "Capoeira"
       ],
       "ratings": {
         "power": 4,
@@ -7508,7 +7508,7 @@
         "craft": "cast-iron-lasts",
         "arms": "Her own, sinewy and scarred with awl slips, wearing studded leather arm bracers, chalk smudges on the knuckles.",
         "legs": "Both legs from mid-thigh down: forged cast-iron shoemaker lasts fitted with engraved brass measuring rules, tension leaf-springs behind the calves, and heavy triple-soled steel oxfords with serrated welt rims.",
-        "tip": "iron-welt",
+        "tip": "hoof",
         "lean": {
           "mass": 1.15,
           "length": 1.05,
@@ -7519,8 +7519,8 @@
       "moves": {
         "high": [
           {
-            "id": "plie",
-            "name": "Plié",
+            "id": "the-chalk-mark",
+            "name": "The Chalk Mark",
             "input": "○",
             "archetype": "jab",
             "limb": "lead arm",
@@ -7529,14 +7529,14 @@
             "active": 3,
             "recovery": 30,
             "dmg": 3,
-            "anim": "A light gloved backhand flick, a dancer's arm.",
-            "sfx": "satin swish, a slap",
-            "vfx": "a spray",
+            "anim": "A quick backhand off the lead hand that leaves a chalk tick on the cheek, where the kick will go.",
+            "sfx": "a slap, a scratch of chalk",
+            "vfx": "a chalk mark and a split cheek",
             "sim": "jab1"
           },
           {
-            "id": "port-de-bras",
-            "name": "Port de Bras",
+            "id": "the-awl",
+            "name": "The Awl",
             "input": "○ ○",
             "archetype": "straight",
             "limb": "rear arm",
@@ -7545,14 +7545,14 @@
             "active": 3,
             "recovery": 30,
             "dmg": 4,
-            "anim": "A sweeping elbow on the turn.",
-            "sfx": "a swish, a crack",
-            "vfx": "a cut brow",
+            "anim": "A short rear elbow on the turn, driven like an awl through leather.",
+            "sfx": "a crack",
+            "vfx": "a cut over the eye",
             "sim": "jab2"
           },
           {
-            "id": "developpe",
-            "name": "Développé",
+            "id": "the-upper",
+            "name": "The Upper",
             "input": "○ ○ ○",
             "archetype": "finisher",
             "limb": "leg",
@@ -7562,16 +7562,16 @@
             "recovery": 30,
             "dmg": 10,
             "launch": true,
-            "anim": "Unfolds a glass leg straight up through the chin into a standing split.",
-            "sfx": "a glass clink, a bright crack, a buzz",
-            "vfx": "a violet flare, blood up",
+            "anim": "Unfolds an iron last straight up through the chin, the leg locking out on its ratchet.",
+            "sfx": "a ratchet click, an iron clang, a jaw going",
+            "vfx": "blood and teeth up",
             "sim": "punchFin"
           }
         ],
         "low": [
           {
-            "id": "battement",
-            "name": "Battement",
+            "id": "the-toe-cap",
+            "name": "The Toe Cap",
             "input": "← ○",
             "archetype": "snap",
             "limb": "leg",
@@ -7580,14 +7580,14 @@
             "active": 3,
             "recovery": 32,
             "dmg": 6,
-            "anim": "A quick glass beat-kick to the ribs.",
-            "sfx": "a glass clink",
-            "vfx": "a spark of gas",
+            "anim": "A short snap of the steel toe cap into the ribs.",
+            "sfx": "an iron knock",
+            "vfx": "a spray of sparks and blood",
             "sim": "kick1"
           },
           {
-            "id": "rond-de-jambe",
-            "name": "Rond de Jambe",
+            "id": "the-welt",
+            "name": "The Welt",
             "input": "← ○ ○",
             "archetype": "wheel",
             "limb": "leg",
@@ -7596,14 +7596,14 @@
             "active": 4,
             "recovery": 44,
             "dmg": 8,
-            "anim": "A whipping circular kick round to the head.",
-            "sfx": "a whoosh of light, a crack",
-            "vfx": "a trail of violet light",
+            "anim": "A whipping round kick to the head with the serrated welt of the sole.",
+            "sfx": "a whirr, a ringing clang",
+            "vfx": "a torn ear",
             "sim": "kick2"
           },
           {
-            "id": "fouette",
-            "name": "Fouetté",
+            "id": "the-heel-iron",
+            "name": "The Heel Iron",
             "input": "← ○ ○ ○",
             "archetype": "reap",
             "limb": "leg",
@@ -7613,16 +7613,16 @@
             "recovery": 42,
             "dmg": 10,
             "knockdown": true,
-            "anim": "A whipping turn and a glass heel into the face.",
-            "sfx": "a whirl, a glass smash",
-            "vfx": "the shin shatters, burning gas",
+            "anim": "Turns on one last and drives the other heel into the face with the springs let go.",
+            "sfx": "a spring snapping loose, a crunch",
+            "vfx": "a caved cheek",
             "sim": "sweep"
           }
         ],
         "branches": [
           {
-            "id": "au",
-            "name": "Cartwheel",
+            "id": "the-stretcher",
+            "name": "The Stretcher",
             "input": "○ ○ △",
             "archetype": "wheel",
             "limb": "both legs",
@@ -7632,13 +7632,13 @@
             "recovery": 50,
             "dmg": 9,
             "knockdown": true,
-            "anim": "Off Port de Bras, cartwheels over them with both glass legs scything.",
-            "sfx": "a whirl, two glass clinks",
-            "vfx": "two arcs of light"
+            "anim": "Off the Awl, wheels over them on her hands with both lasts scything, like a boot on the stretcher.",
+            "sfx": "a whirl, two clangs",
+            "vfx": "two gashes"
           },
           {
-            "id": "meia-lua",
-            "name": "Half-Moon",
+            "id": "half-sole",
+            "name": "Half Sole",
             "input": "← ○ ○ △",
             "archetype": "reap",
             "limb": "leg",
@@ -7648,15 +7648,15 @@
             "recovery": 44,
             "dmg": 11,
             "knockdown": true,
-            "anim": "Off Rond de Jambe, a low spinning crescent kick from the ginga sway.",
-            "sfx": "a whoosh, a smash",
-            "vfx": "a half-moon of fire"
+            "anim": "Off the Welt, a low spinning crescent of the sole across the shins.",
+            "sfx": "a scrape of iron on bone",
+            "vfx": "blood at the shins"
           }
         ],
         "regional": [
           {
-            "id": "en-pointe",
-            "name": "En Pointe",
+            "id": "the-brass-rule",
+            "name": "The Brass Rule",
             "input": "R1 + ↑ ○",
             "archetype": "stamp",
             "limb": "leg",
@@ -7666,13 +7666,13 @@
             "recovery": 42,
             "dmg": 7,
             "target": "head",
-            "anim": "A straight high kick with the brass pointe tip into the eye.",
-            "sfx": "a clink, a squelch",
-            "vfx": "the eye bursts"
+            "anim": "A straight high kick, the engraved brass rule on the shin into the eye.",
+            "sfx": "a ting, a scream",
+            "vfx": "the eye goes"
           },
           {
-            "id": "arabesque",
-            "name": "Arabesque",
+            "id": "the-back-seam",
+            "name": "The Back Seam",
             "input": "R1 + ○",
             "archetype": "stamp",
             "limb": "leg",
@@ -7682,13 +7682,13 @@
             "recovery": 42,
             "dmg": 7,
             "target": "body",
-            "anim": "A back kick held in arabesque, through the ribs.",
-            "sfx": "a clink, ribs cracking",
-            "vfx": "gas flares"
+            "anim": "A back kick held out straight on the ratchet, through the ribs.",
+            "sfx": "a ratchet click, ribs going",
+            "vfx": "blood from the mouth"
           },
           {
-            "id": "chasse",
-            "name": "Chassé",
+            "id": "the-paring-knife",
+            "name": "The Paring Knife",
             "input": "R1 + ↓ ○",
             "archetype": "stamp",
             "limb": "leg",
@@ -7698,15 +7698,15 @@
             "recovery": 40,
             "dmg": 5,
             "target": "legs",
-            "anim": "A gliding low kick across the knee.",
-            "sfx": "a glide, a crack",
-            "vfx": "a violet spark"
+            "anim": "A gliding low kick, the welt pared across the knee.",
+            "sfx": "a scrape, a crack",
+            "vfx": "the knee opens"
           }
         ],
         "dash": [
           {
-            "id": "grand-allegro",
-            "name": "Grand Allegro",
+            "id": "the-rush-order",
+            "name": "The Rush Order",
             "input": "✕ then ○",
             "archetype": "rush",
             "limb": "leg",
@@ -7716,16 +7716,16 @@
             "recovery": 30,
             "dmg": 9,
             "knockdown": true,
-            "anim": "Three running steps into a leaping split kick.",
-            "sfx": "light steps, a leap, a smash",
-            "vfx": "a burst of glass and light",
+            "anim": "Three clanking running steps into a leaping split kick.",
+            "sfx": "three iron steps, a clang",
+            "vfx": "a burst of sparks and blood",
             "sim": "dashStrike"
           }
         ],
         "dive": [
           {
-            "id": "grand-jete",
-            "name": "Grand Jeté",
+            "id": "the-cobbles",
+            "name": "Down the Cobbles",
             "input": "run, then ○",
             "archetype": "dive",
             "limb": "leg",
@@ -7735,13 +7735,13 @@
             "recovery": 58,
             "dmg": 11,
             "knockdown": true,
-            "anim": "A huge leap in full split, the leading leg crashing down on them.",
-            "sfx": "a rush of air, a glass smash",
-            "vfx": "a comet trail of light"
+            "anim": "A huge leap in full split, the leading last crashing down like a dropped anvil.",
+            "sfx": "a spring release, an iron crash",
+            "vfx": "a crater of blood"
           },
           {
-            "id": "pas-de-chat",
-            "name": "Pas de Chat",
+            "id": "hobnailed",
+            "name": "Hobnailed",
             "input": "run, ○, then ○",
             "archetype": "diveChain",
             "limb": "leg",
@@ -7750,15 +7750,15 @@
             "active": 4,
             "recovery": 48,
             "dmg": 7,
-            "anim": "Lands and stamps a glass foot down on the face.",
-            "sfx": "a clink, a crunch",
-            "vfx": "shards in the face"
+            "anim": "Lands and stamps an iron sole down on the face.",
+            "sfx": "a stamp, a crunch",
+            "vfx": "the face is printed with the sole"
           }
         ],
         "down": [
           {
-            "id": "curtain-down",
-            "name": "Curtain Down",
+            "id": "heeled",
+            "name": "Re-Heeled",
             "input": "↓ ○ by a floored body",
             "archetype": "stomp",
             "limb": "leg",
@@ -7767,15 +7767,15 @@
             "active": 3,
             "recovery": 50,
             "dmg": 8,
-            "anim": "Rises en pointe on their chest and turns a slow pirouette, drilling in.",
-            "sfx": "a grinding glass squeak, a scream",
-            "vfx": "a pointe hole"
+            "anim": "Stands on their chest and grinds the iron heel round, as if fitting it.",
+            "sfx": "a grinding squeal of iron, a scream",
+            "vfx": "a heel-shaped hole"
           }
         ],
         "headbutt": [
           {
-            "id": "reverence-butt",
-            "name": "Révérence",
+            "id": "the-goggles",
+            "name": "The Goggles",
             "input": "□ + ○",
             "archetype": "butt",
             "limb": "head",
@@ -7784,16 +7784,16 @@
             "active": 3,
             "recovery": 44,
             "dmg": 5,
-            "anim": "A deep bow that turns into a headbutt.",
-            "sfx": "a crack",
+            "anim": "Pulls her workshop goggles down and nods the brass rims into the nose.",
+            "sfx": "brass on a nose",
             "vfx": "a nosebleed",
             "sim": "headbutt"
           }
         ],
         "double": [
           {
-            "id": "scissors",
-            "name": "Ciseaux",
+            "id": "the-clicking-press",
+            "name": "The Clicking Press",
             "input": "✕ + ○",
             "archetype": "double",
             "limb": "both legs",
@@ -7803,182 +7803,182 @@
             "recovery": 54,
             "dmg": 10,
             "hits": 2,
-            "anim": "A jumping scissor kick, both glass legs into the head from both sides.",
-            "sfx": "two glass clinks in one",
-            "vfx": "two flares"
+            "anim": "A jumping scissor kick, both lasts into the head from both sides like a leather press closing.",
+            "sfx": "two iron clangs in one",
+            "vfx": "the head is pressed"
           }
         ],
         "hold": {
-          "id": "partnering",
-          "name": "Partnering",
+          "id": "the-fitting",
+          "name": "The Fitting",
           "input": "△",
           "archetype": "hold",
           "duration": 98,
           "dmg": 0,
-          "anim": "Takes their hand as a partner would, the other at their waist.",
-          "sfx": "satin, a soft buzz",
+          "anim": "Takes them by the collar and the belt as if measuring them for boots.",
+          "sfx": "a tape measure snapping out",
           "sim": "GRAB"
         },
         "clinch": [
           {
-            "id": "knee-pas",
-            "name": "Passé",
+            "id": "the-knee-cap",
+            "name": "The Knee Cap",
             "input": "in the hold, ○",
             "archetype": "clinch",
             "duration": 63,
             "dmg": 6,
-            "anim": "A glass knee lifted into the stomach.",
-            "sfx": "a clink, a cough",
-            "vfx": "a violet glow",
+            "anim": "An iron knee lifted into the stomach.",
+            "sfx": "an iron thud",
+            "vfx": "a gasp of blood",
             "sim": "HOLD"
           },
           {
-            "id": "burning-kiss",
-            "name": "A Burning Kiss",
+            "id": "the-tacks",
+            "name": "A Mouthful of Tacks",
             "input": "in the hold, ○ ○",
             "archetype": "clinch",
             "duration": 70,
             "dmg": 5,
-            "anim": "Opens her hip valve and lets a little gas out against their face.",
-            "sfx": "a hiss, a whump, a scream",
-            "vfx": "a burn"
+            "anim": "Spits the tacks she keeps in her mouth into their face, then hammers them in with the heel of her palm.",
+            "sfx": "a spit, three taps, a scream",
+            "vfx": "a face full of tacks"
           }
         ],
         "throws": [
           {
-            "id": "lift-and-drop",
-            "name": "The Lift",
+            "id": "the-last",
+            "name": "Over the Last",
             "input": "in the hold, △",
             "archetype": "throw",
             "duration": 140,
             "dmg": 13,
-            "anim": "Locks her glass legs round their waist and arches back, slamming them down.",
-            "sfx": "a whirl, a slam",
-            "vfx": "a splash of light",
+            "anim": "Locks her iron legs round their waist and arches back, slamming them head first onto the floor.",
+            "sfx": "springs, an iron crash",
+            "vfx": "a red splash",
             "sim": "THROW"
           },
           {
-            "id": "pas-de-deux",
-            "name": "Pas de Deux",
+            "id": "the-turnshoe",
+            "name": "The Turnshoe",
             "input": "in the hold, ← △",
             "archetype": "throw",
             "duration": 140,
             "dmg": 12,
-            "anim": "Turns under their arm and kicks them away behind her.",
-            "sfx": "a twirl, a kick",
-            "vfx": "a streak"
+            "anim": "Turns them inside out under her arm and kicks them away behind her.",
+            "sfx": "a twist, a clang",
+            "vfx": "a splash"
           },
           {
-            "id": "swan-dies",
-            "name": "The Dying Swan",
+            "id": "the-stitch",
+            "name": "Sixteen to the Inch",
             "input": "in the hold, ↓ △",
             "archetype": "throw",
             "duration": 160,
             "dmg": 15,
-            "anim": "Wraps a glass leg round their neck and sinks slowly to the floor in the dying swan, taking them down head first.",
-            "sfx": "a slow descent, a neck crack",
-            "vfx": "a graceful fall and a bad neck"
+            "anim": "Wraps an iron leg round their neck and sinks to the floor, taking them down head first; she counts the stitches aloud.",
+            "sfx": "a creak of springs, a crack, counting",
+            "vfx": "blood from the ears"
           },
           {
-            "id": "pirouette-throw",
-            "name": "Pirouette",
+            "id": "the-lathe",
+            "name": "The Lathe",
             "input": "in the hold, → △",
             "archetype": "throw",
             "duration": 140,
             "dmg": 12,
             "end": "throw",
-            "anim": "Spins them in five pirouettes and lets them fly.",
-            "sfx": "a whirl, a long splash",
-            "vfx": "a spiral"
+            "anim": "Spins them on her heel like a last on a lathe and lets them fly.",
+            "sfx": "a whirr rising, a long splash",
+            "vfx": "a red splash"
           }
         ],
         "back": {
-          "id": "the-swan",
-          "name": "Swan Lake",
+          "id": "bespoke",
+          "name": "Bespoke",
           "input": "△ from behind",
           "archetype": "longThrow",
           "duration": 195,
           "dmg": 17,
-          "anim": "Leaps onto their shoulders from behind, scissors the neck between her glass thighs, and backflips them into the floor.",
-          "sfx": "a leap, a neck crack, a slam",
-          "vfx": "a glowing arc"
+          "anim": "Climbs their back, scissors the neck between her iron thighs, ratchets the springs one click at a time until it goes, then backflips them into the floor.",
+          "sfx": "ratchet clicks, a crack, a gasp from the Gallery",
+          "vfx": "a fountain from the mouth"
         },
         "wall": {
-          "id": "stage-door",
-          "name": "The Stage Door",
+          "id": "the-shop-window",
+          "name": "The Shop Window",
           "input": "△ with their back to a wall",
           "archetype": "longThrow",
           "duration": 195,
           "dmg": 16,
-          "anim": "Pins them to the wall with a glass foot at the throat, holds the pose for the Gallery, then kicks with the other.",
-          "sfx": "a creak of glass, applause, a smash",
-          "vfx": "the glass at the throat glows"
+          "anim": "Pins them to the wall with an iron sole at the throat, holds them up for the Gallery like a boot in a window, then kicks with the other.",
+          "sfx": "a creak of springs, applause, a crunch",
+          "vfx": "the throat crushed"
         },
         "grappleDash": {
-          "id": "leap-of-faith",
-          "name": "Lifted",
+          "id": "the-measure",
+          "name": "Taking the Measure",
           "input": "✕ then △",
           "archetype": "hold",
           "duration": 104,
           "dmg": 7,
           "anim": "Runs and leaps into a grab round the neck with her legs.",
-          "sfx": "a leap, a glass clink"
+          "sfx": "a leap, an iron clank"
         },
         "diveGrab": {
-          "id": "flying-scissors",
-          "name": "Flying Scissors",
+          "id": "the-boot-jack",
+          "name": "The Boot Jack",
           "input": "run, then △",
           "archetype": "longThrow",
           "duration": 190,
           "dmg": 16,
-          "anim": "A flying scissor of glass legs round the neck that takes them down.",
-          "sfx": "a glass clink, a twist, a fall"
+          "anim": "A flying scissor of iron legs round the neck that wrenches them down.",
+          "sfx": "a clank, a twist, a fall"
         },
         "ground": {
-          "id": "tableau",
-          "name": "Tableau",
+          "id": "the-sizing",
+          "name": "The Sizing",
           "input": "△ by a floored body",
           "archetype": "longThrow",
           "duration": 195,
           "dmg": 14,
-          "anim": "Arranges them in a pretty pose and stamps the glass heel into the chest to hold it.",
-          "sfx": "a stamp, a gasp",
-          "vfx": "a graceful corpse"
+          "anim": "Measures the body with her brass gauge, chalks the marks, and stamps the heel through each one.",
+          "sfx": "a gauge sliding, chalk, stamps",
+          "vfx": "chalk and blood"
         },
         "deflects": [
           {
-            "id": "pas-de-cote",
-            "name": "Pas de Côté",
+            "id": "the-gauge",
+            "name": "The Gauge",
             "input": "□ as a high strike lands",
             "archetype": "deflect",
             "duration": 34,
             "dmg": 8,
-            "anim": "Sways out of the punch in the ginga and kicks back from the floor.",
-            "sfx": "a swish, a clink",
+            "anim": "Steps off the punch, measuring it, and kicks back along the line it came.",
+            "sfx": "a click, a clang",
             "sim": "REVERSAL"
           },
           {
-            "id": "entrechat",
-            "name": "Entrechat",
+            "id": "the-ratchet",
+            "name": "The Ratchet",
             "input": "↓ □ as a low strike lands",
             "archetype": "deflect",
             "duration": 36,
             "dmg": 8,
-            "anim": "Jumps the sweep, beating her legs, and lands on the leg.",
-            "sfx": "a little jump, a crunch"
+            "anim": "Springs up over the sweep on both ratchets and lands on the leg.",
+            "sfx": "a double click, an iron landing, a crack"
           }
         ],
         "special": {
-          "name": "THE OVERWOUND LAST",
-          "sim": "spBarrage",
-          "anim": "Clicks the tension ratchet behind both knees; unleashes an explosive flurry of ten machine-speed piston roundhouses driven with cold pig-iron shoe lasts, finishing with an iron-welt drop stomp.",
-          "sfx": "rapid ratcheting clockwork whine, metallic anvil clangs, heavy dull impact on bone",
-          "vfx": "sparks flying from steel shoe welts, brass gear particles, impact shockwaves"
+          "name": "THE HOT WELT",
+          "sim": "spFire",
+          "anim": "Kicks a high straight leg and opens the firebox in her heel: a long jet of burning heel-ball wax sprays across the Sump like a flare.",
+          "sfx": "a ratchet click, a hiss, a roar of flame, a scream at the far end",
+          "vfx": "a long jet of fire and molten wax, burning bodies"
         },
         "arts": [
           {
-            "id": "pirouette-art",
-            "name": "Thirty-Two Fouettés",
+            "id": "the-mainspring",
+            "name": "The Mainspring",
             "input": "R2 + ↑",
             "archetype": "art",
             "limb": "leg",
@@ -7989,13 +7989,13 @@
             "dmg": 18,
             "launch": true,
             "hits": 6,
-            "anim": "Spins on one glass pointe, the other leg whipping out six times, rising, and the last one kicks them up into the arches.",
-            "sfx": "a whirl rising, six glass smashes",
-            "vfx": "a cyclone of violet light and blood"
+            "anim": "Spins on one heel, the other last whipping out six times faster and faster as the spring unwinds, and the last one kicks them up into the arches.",
+            "sfx": "a spring unwinding, six clangs",
+            "vfx": "a cyclone of sparks and blood"
           },
           {
-            "id": "ballet-russe",
-            "name": "Danse Macabre",
+            "id": "the-rush-season",
+            "name": "The Rush Season",
             "input": "R2 + →",
             "archetype": "art",
             "limb": "both legs",
@@ -8005,24 +8005,24 @@
             "recovery": 46,
             "dmg": 17,
             "hits": 5,
-            "anim": "Dances across the Sump in a sequence of leaps, each landing on someone.",
-            "sfx": "music-box notes, five glass smashes",
-            "vfx": "five bursts of light"
+            "anim": "Clanks across the Sump in a run of leaps, each one landing on someone.",
+            "sfx": "iron steps, five crashes",
+            "vfx": "a trail of bodies"
           },
           {
-            "id": "immolation",
-            "name": "The Final Act",
+            "id": "the-firebox",
+            "name": "The Firebox",
             "input": "R2 + ↓",
             "archetype": "cinematic",
             "duration": 280,
             "dmg": 28,
-            "anim": "Embraces them in a lift, opens every valve in her legs and holds them while they burn, then sets them down and curtseys.",
-            "sfx": "a rising roar of gas, screaming, applause",
-            "vfx": "a pillar of violet fire"
+            "anim": "Lifts them in her legs, opens the firebox in each heel, and holds them in the jets while they burn, then sets them down and taps her heel twice.",
+            "sfx": "a roar of flame, screaming, two taps",
+            "vfx": "a pillar of fire"
           },
           {
-            "id": "candle-snuff",
-            "name": "The Spotlight",
+            "id": "the-heel-ball",
+            "name": "The Heel-Ball",
             "input": "R2 + ←",
             "archetype": "art",
             "limb": "both legs",
@@ -8032,23 +8032,23 @@
             "recovery": 50,
             "dmg": 14,
             "knockdown": true,
-            "anim": "A handstand split that sprays burning gas in a ring from both feet.",
-            "sfx": "a whump, a ring of fire",
-            "vfx": "a ring of flame on the water"
+            "anim": "A handstand split that sprays burning heel-ball wax in a ring from both feet.",
+            "sfx": "a hiss, a roar",
+            "vfx": "a ring of burning wax"
           }
         ],
         "status": {
-          "name": "THE LIMELIGHT",
+          "name": "OVERWOUND",
           "drink": 60,
           "lasts": 600,
-          "anim": "Takes a tube from her hip valve and breathes the pure gas. Her legs blaze white.",
+          "anim": "Takes a key from her apron and winds the ratchet behind each knee until the springs scream.",
           "effects": {
             "kick": 1.2,
             "reach": 1.1,
-            "note": "every kick sets the target alight for 2 seconds; her legs do not shatter; she leaves a trail of fire"
+            "note": "every kick throws sparks that set the target alight for 2 seconds; her lasts do not chip; she leaves a trail of sparks"
           },
-          "look": "white-hot glowing legs, fire trailing from her toes, her eyes lit",
-          "voice": "she hums the ballet's music and laughs"
+          "look": "the springs glowing red, sparks pouring from the welts, the goggles down",
+          "voice": "she counts stitches under her breath, faster and faster"
         },
         "duo": {
           "partner": "bartholomew-mule",
@@ -8063,16 +8063,16 @@
             "polearm"
           ],
           "signature": "lamplighter-pole",
-          "style": "Uses a polearm like a dance partner, spinning round it and kicking off it. With a burning pole, she becomes a fire dancer."
+          "style": "Uses a pole like a long shoe-horn, levering bodies with it and kicking off it. A lit pole goes into her firebox."
         },
         "appeal": {
-          "anim": "A deep révérence to each tier, then catches an imagined bouquet.",
-          "line": "Merci, merci! Encore?",
-          "gift": "lamplighter's poles and spiked umbrellas"
+          "anim": "Slides her goggles up, chalks a tick in the air at each tier, and taps her iron heel twice.",
+          "line": "Good leather, clean welt, no excuses.",
+          "gift": "lamplighter's poles and spare legs"
         }
       },
       "art": {
-        "silhouette": "A stern, sharp-featured artisan in a heavy cowhide cordwainer apron over dark wool, spectacles perched on a brass chain, standing on heavy cast-iron shoe lasts with visible clockwork springs.",
+        "silhouette": "A stern, sharp-featured artisan in a heavy cowhide cordwainer's apron over dark wool, brass workshop goggles on her brow and studded leather gloves, standing on heavy cast-iron shoe lasts with the clockwork springs showing.",
         "build": "Lean, muscular, upright craftsman posture with broad shoulders and heavy metallic legs.",
         "palette": {
           "primary": {
@@ -8080,19 +8080,19 @@
             "name": "oiled cowhide"
           },
           "secondary": {
-            "hex": "#4a3528",
-            "name": "cordovan leather"
+            "hex": "#e2c2a6",
+            "name": "fair skin"
           },
           "metal": {
-            "hex": "#c8963e",
-            "name": "burnished brass rules"
-          },
-          "iron": {
             "hex": "#3a3d40",
             "name": "cast pig-iron"
+          },
+          "light": {
+            "hex": "#c8963e",
+            "name": "burnished brass rules"
           }
         },
-        "costume": "A heavy oiled leather cobbler's apron with brass eyelets and awl pockets over a high-collared dark wool work dress, rolled linen sleeves with studded leather vambraces, spectacles on a fine brass chain, dark hair pinned tightly under a baker boy cap.",
+        "costume": "A heavy oiled leather cobbler's apron with brass eyelets and awl pockets over a high-collared dark wool work dress, rolled linen sleeves, studded leather gloves to the elbow, brass workshop goggles pushed up on the brow, a mouthful of tacks.",
         "alternates": [
           {
             "name": "Sunday Best",
@@ -8108,8 +8108,8 @@
           }
         ],
         "limbs": "The legs are heavy cast-iron lasts calibrated with engraved brass imperial rules along the shins; tension springs run along the calf into ratchet gears at the ankle; the feet are heavy square-toed brogues with hardened steel welts.",
-        "face": "A severe, handsome, sharp-jawed London face with acute hazel eyes behind round wire-rimmed spectacles, a pencil tucked behind the left ear.",
-        "hair": "Dark chestnut brown, pinned back in a practical braided bun under a wool baker boy cap.",
+        "face": "A severe, handsome, sharp-jawed London face with acute hazel eyes, a pencil tucked behind the left ear, black cobbler's wax smudged under the eyes (paint 1); the goggles are drawn in 3D.",
+        "hair": "Dark chestnut brown, pinned back in a practical braided bun.",
         "gore": "Shattering concussions: broken cheekbones, teeth knocked loose by steel-welted heels, sparks and hot iron fragments embedded in flesh.",
         "vfx": [
           "sparks shower from her steel shoe welts on impact",
@@ -8118,9 +8118,9 @@
         ],
         "idle": "Stands in an upright Tae Kwon Do guard, occasionally tapping her lead iron shoe last against the stone with a clear metallic ring.",
         "intro": "Pulls a wooden ruler from her apron pocket, measures the distance to the opponent, taps her iron heel to engage the ratchet, and raises her fists.",
-        "victory": "Pulls a piece of chalk from behind her ear, makes a chalk tick-mark on the defeated opponent, and slides her spectacles down to inspect her work.",
+        "victory": "Chalks a tick on the defeated opponent and pushes her goggles up to inspect her work.",
         "defeat": "A knee ratchet gives way with a sharp metallic snap; she falls to one knee, gripping the broken spring with a furious scowl.",
-        "portrait": "A three-quarter stance in her Spitalfields workshop, apron tied, spectacles glinting, one iron last resting on a wooden cobbler bench."
+        "portrait": "Three-quarter in her Spitalfields workshop, apron tied, goggles glinting on her brow, one iron last resting on a wooden cobbler's bench."
       },
       "sound": {
         "voice": {
@@ -8139,33 +8139,58 @@
             "Anyone else need stretching?",
             "That's sixteen stitches to the inch!"
           ],
+          "hit": [
+            "Too tight.",
+            "Stretch that.",
+            "Hold still."
+          ],
+          "hurt": [
+            "Hm!",
+            "Mind the welt."
+          ],
+          "special": "Mind the heel.",
+          "tincture": "(a key winding, springs screaming)",
           "victory": [
             "Hammered, stitched, and put out to dry.",
             "A poor fit from the start.",
             "Next time, break them in gently."
           ],
-          "defeat": [
-            "The mainspring... has snapped...",
-            "My bench... who's minding the shop?...",
-            "A bad batch... of iron..."
-          ]
+          "defeat": "The mainspring... has snapped..."
         },
         "cues": [
           {
             "id": "pegg-spring-ratchet",
             "category": "foley",
             "note": "the sharp click-clack of the tension ratchet in her iron knee",
-            "prompt": "A heavy mechanical ratchet clicks five times rapidly under spring tension, followed by a metallic latch engaging.",
+            "prompt": "A heavy mechanical ratchet clicks five times rapidly under spring tension, followed by a metallic latch engaging. Close microphone, dry room, one single action.",
             "seed": 5210
           },
           {
             "id": "pegg-iron-clank",
             "category": "foley",
             "note": "the dull, resonant clang of the cast-iron shoe last striking stone",
-            "prompt": "A solid cast-iron anvil weight strikes hard cobblestone with a sharp ring and heavy low thump.",
+            "prompt": "A solid cast-iron anvil weight strikes hard cobblestone with a sharp ring and heavy low thump. Close microphone, dry room, one single action.",
             "seed": 5211
           }
-        ]
+        ],
+        "efforts": "short, sharp breaths through the nose",
+        "footsteps": "heavy iron clanks on stone, with a spring's click on every step",
+        "foley": "springs creaking and ratchets clicking at every move, tacks rattling in her apron pocket, the brass rule ticking against the iron",
+        "impact": {
+          "craft": "cast-iron-lasts",
+          "nuance": "a spring's twang under the hit"
+        },
+        "music": {
+          "title": "Sixteen to the Inch",
+          "brief": "A hard, exact piece for hammered anvil, cello and snare, in the rhythm of a cobbler's hammer, ratchets clicking as a metronome, speeding up at every combo.",
+          "tempo": 152,
+          "instruments": [
+            "anvil",
+            "cello",
+            "snare drum",
+            "ratchet clicks"
+          ]
+        }
       },
       "texture": {
         "seed": 5212,
@@ -8178,8 +8203,12 @@
           "colour": "dark brown and charcoal wool"
         },
         "face": {
-          "idea": "sharp, observant, spectacles reflecting lamplight, pencil tucked behind ear",
+          "idea": "a severe sharp-jawed fair face with acute hazel eyes and light freckles, a pencil behind the ear",
           "colour": "fair with light freckling"
+        },
+        "limb": {
+          "idea": "black cast pig-iron shoe lasts with engraved brass imperial rules and steel leaf-springs, the welts serrated",
+          "colour": "black iron and brass"
         }
       }
     },

@@ -55,7 +55,7 @@ Three ideas run through every fighter:
 | 5 | Bosun Absalom Rook | Muay Thai | Ship's Oak | THE CAT O' NINE |
 | 6 | Lady Hester Bulwark | Boxing | Hydraulic Steel | A HUNDRED POUNDS TO THE INCH |
 | 7 | Percival "Oolong" Crump | Kung Fu | Bamboo and Samovar | THE SPILLED SAMOVAR |
-| 8 | Columbine Vesper | Tae Kwon Do | Aether Glass | THE FOOTLIGHTS |
+| 8 | Mistress Tabitha Pegg | Tae Kwon Do | Cast-Iron Lasts | THE HOT WELT |
 | 9 | Mr. Mortimer Crape | Judo Based | Jet and Whalebone | INTERMENT |
 | 10 | Sir Peregrine Ashby-Lisle, Bt. | Samurai Sword | Silver and Ebony | A THOUSAND PARDONS |
 | 11 | Mr. Cuthbert Inkle | Amateur | Pawnshop Patchwork | THE OVERDRAFT |

@@ -149,20 +149,20 @@
       "limb_colour": "amber and brass"
     },
     {
-      "slug": "columbine-vesper",
-      "name": "Columbine Vesper",
+      "slug": "tabitha-pegg",
+      "name": "Mistress Tabitha Pegg",
       "style": "Tae Kwon Do",
-      "body": "#b88464",
-      "accent": "#5a2a6a",
-      "seed": 5109,
-      "skin_idea": "smooth warm brown skin with a dancer's muscle, glistening with rain",
-      "skin_colour": "warm brown",
-      "cloth_idea": "torn white and violet tulle tutu, a laced violet satin bodice, long white satin gloves",
-      "cloth_colour": "white and violet",
-      "face_idea": "a delicate high-cheekboned face with dark painted eyes, a beauty spot, black hair in a high bun",
-      "face_colour": "warm brown",
-      "limb_idea": "clear blown-glass tubes and a glass globe knee filled with swirling violet-white glowing gas, brass ferrules",
-      "limb_colour": "clear glass with violet glow"
+      "body": "#e2c2a6",
+      "accent": "#c8963e",
+      "seed": 5212,
+      "skin_idea": "weathered pale East End complexion, strong jaw, smudged with black cobbler wax",
+      "skin_colour": "fair with grey-black smudge",
+      "cloth_idea": "heavy oiled cowhide apron with brass eyelets, dark wool work dress, rolled linen sleeves",
+      "cloth_colour": "dark brown and charcoal wool",
+      "face_idea": "a severe sharp-jawed fair face with acute hazel eyes and light freckles, a pencil behind the ear",
+      "face_colour": "fair with light freckling",
+      "limb_idea": "black cast pig-iron shoe lasts with engraved brass imperial rules and steel leaf-springs, the welts serrated",
+      "limb_colour": "black iron and brass"
     },
     {
       "slug": "mortimer-crape",
