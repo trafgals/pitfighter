@@ -11,82 +11,14 @@
 //   ImageData                       -> the pixel container the exporter builds
 //   canvas.toBlob(cb, type)         -> encodes that ImageData as a real PNG
 //
-// The PNG is written here rather than taken from a library: the encoder is
-// small, dependency-free and lets the build script control the bytes it puts
-// in the .glb, which matters because the asset has a hard file-size budget.
-import zlib from "node:zlib";
+// The PNG is written by the repo's own codec rather than taken from a library:
+// the encoder is small, dependency-free and lets the build script control the
+// bytes it puts in the .glb, which matters because the asset has a hard
+// file-size budget. It lives in png.mjs now, next to the decoder the publish
+// step uses, and is re-exported here so the build scripts keep their import.
+import { encodePng } from "./png.mjs";
 
-const CRC_TABLE = (() => {
-  const table = new Int32Array(256);
-  for (let n = 0; n < 256; n++) {
-    let c = n;
-    for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
-    table[n] = c;
-  }
-  return table;
-})();
-
-function crc32(buffer) {
-  let c = 0xffffffff;
-  for (let i = 0; i < buffer.length; i++) c = CRC_TABLE[(c ^ buffer[i]) & 0xff] ^ (c >>> 8);
-  return (c ^ 0xffffffff) >>> 0;
-}
-
-function pngChunk(type, data) {
-  const length = Buffer.alloc(4);
-  length.writeUInt32BE(data.length, 0);
-  const typed = Buffer.concat([Buffer.from(type, "ascii"), data]);
-  const crc = Buffer.alloc(4);
-  crc.writeUInt32BE(crc32(typed), 0);
-  return Buffer.concat([length, typed, crc]);
-}
-
-const paeth = (a, b, c) => {
-  const p = a + b - c;
-  const pa = Math.abs(p - a);
-  const pb = Math.abs(p - b);
-  const pc = Math.abs(p - c);
-  if (pa <= pb && pa <= pc) return a;
-  if (pb <= pc) return b;
-  return c;
-};
-
-/**
- * Encode RGBA pixels as a PNG.
- * Rows are filtered with the Paeth predictor, which compresses the smooth
- * gradients in a leather grain far better than no filtering at all.
- */
-export function encodePng(width, height, rgba) {
-  const stride = width * 4;
-  const raw = Buffer.alloc((stride + 1) * height);
-  for (let y = 0; y < height; y++) {
-    const out = y * (stride + 1);
-    raw[out] = 4; // Paeth
-    const row = y * stride;
-    const prev = row - stride;
-    for (let x = 0; x < stride; x++) {
-      const value = rgba[row + x];
-      const left = x >= 4 ? rgba[row + x - 4] : 0;
-      const up = y > 0 ? rgba[prev + x] : 0;
-      const upLeft = y > 0 && x >= 4 ? rgba[prev + x - 4] : 0;
-      raw[out + 1 + x] = (value - paeth(left, up, upLeft)) & 0xff;
-    }
-  }
-  const ihdr = Buffer.alloc(13);
-  ihdr.writeUInt32BE(width, 0);
-  ihdr.writeUInt32BE(height, 4);
-  ihdr[8] = 8; // bit depth
-  ihdr[9] = 6; // colour type: RGBA
-  ihdr[10] = 0; // deflate
-  ihdr[11] = 0; // adaptive filtering
-  ihdr[12] = 0; // no interlace
-  return Buffer.concat([
-    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
-    pngChunk("IHDR", ihdr),
-    pngChunk("IDAT", zlib.deflateSync(raw, { level: 9 })),
-    pngChunk("IEND", Buffer.alloc(0)),
-  ]);
-}
+export { encodePng };
 
 /**
  * Install the small DOM surface GLTFExporter needs.
