@@ -134,7 +134,7 @@
       "alpha_cutout": "public/tex/props/flux3_pegg_shoelast_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_pegg_shoelast_turnaround.png",
       "turntable": "public/tex/props/h3_pegg_shoelast_turntable.webp",
-      "glb_output": "public/models/props/pegg_cast_iron_last.glb"
+      "glb_output": "public/models/props/prop_pegg_cast_iron_last.glb"
     }
   ]
 }
