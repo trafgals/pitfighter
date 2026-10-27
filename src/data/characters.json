@@ -197,7 +197,7 @@
       "rules": [
         "Every hit that lands bleeds. A jab leaves a spray of droplets; a finisher throws an arc; a special or a throw opens an artery that pumps in time with the heartbeat for a few seconds.",
         "Blood mixes with the rain: it hits hard and red, then thins to pink in the puddles and runs to the nearest drain grate. The Sump floor gets redder through the match and the drains glug.",
-        "Every craft bleeds its own fluid with the blood: brass weeps clock oil, steel sprays scalding hydraulic water, lead gushes rainwater, porcelain sheds shards, oak spits splinters and tar, glass leaks burning gas, chitin leaks green ichor, iron drops glowing coals, whalebone springs its stays, silver never bleeds at all, the bear graft bleeds more than anything, and the pawned limbs bleed whatever they were made of.",
+        "Every craft bleeds its own fluid with the blood: brass weeps clock oil, steel sprays scalding hydraulic water, lead gushes rainwater, porcelain sheds shards, oak spits splinters and tar, glass leaks burning gas, bamboo sprays boiling tea, iron drops glowing coals, whalebone springs its stays, silver never bleeds at all, the bear graft bleeds more than anything, and the pawned limbs bleed whatever they were made of.",
         "Blood clings to clothes and skin and stays for the whole match. White gloves, cuffs and collars are the fighters' tell.",
         "A KO is never just a fall: something comes off, opens or caves in, chosen by the finishing move and the winner's craft."
       ]
@@ -331,22 +331,6 @@
       }
     },
     {
-      "id": "mantis-chitin",
-      "name": "Mantis Chitin",
-      "look": "Grown, not made: lacquer-green chitin plates with serrated raptorial spines, wet pale membrane at the joints, the edges translucent.",
-      "hit": "A dry insect click followed by a wet crunch.",
-      "breaks": "Cracks and leaks green ichor; the spines snap off in the wound.",
-      "bleeds": "Green ichor mixes with the blood into a sickly brown.",
-      "tip": "claw",
-      "cue": {
-        "id": "hit-chitin-skin",
-        "category": "impact",
-        "note": "a chitin claw striking flesh",
-        "prompt": "A hard insect claw strikes flesh: a dry sharp click followed at once by a short wet crunch. Close microphone, dry room, one single impact.",
-        "seed": 4407
-      }
-    },
-    {
       "id": "foundry-iron",
       "name": "Foundry Iron",
       "look": "Black sand-cast iron with rough seams, rivets the size of thumbs, and grated vents that glow orange from the coals inside.",
@@ -427,7 +411,14 @@
       "hit": "A hollow wooden clack with a bright brass ting and a sharp hiss of steam.",
       "breaks": "Bamboo splinters along the grain and boiling water sprays from the samovar valves.",
       "bleeds": "Amber fermented tea and steam mix with the blood.",
-      "tip": "fist"
+      "tip": "fist",
+      "cue": {
+        "id": "hit-bamboo-skin",
+        "category": "impact",
+        "note": "a bamboo arm striking flesh",
+        "prompt": "A hollow bamboo cane strikes flesh: a woody clack with a bright brass ting and a short hiss of steam. Close microphone, dry room, one single impact.",
+        "seed": 4407
+      }
     }
   ],
   "vocabulary": {
@@ -3540,8 +3531,8 @@
         "otherSelf": "Lights Out on the Ward: the night-nurse's draught. The gold in her cracks glows white-hot and the porcelain sings, and she stops naming the bones.",
         "rivals": [
           {
-            "id": "professor-thrip",
-            "why": "A quack, an apothecary's daughter selling poisons as cures, and the draught she drank is exactly what the Matron warned her about."
+            "id": "percival-crump",
+            "why": "A drunk who calls his rum medicinal. She treated his scalds once, and he poured her a cup of it."
           }
         ],
         "partner": {
@@ -6617,9 +6608,9 @@
       "blurb": "An eccentric East India tea merchant whose limbs brew boiling jasmine tea while he sways inebriated through combat.",
       "body": "#d2a679",
       "accent": "#5c2a38",
-      "family": "technique",
-      "special": "spTeaWhirl",
-      "specialName": "DRUNKEN DRAGON'S BREW",
+      "family": "kungfu",
+      "special": "spSpin",
+      "specialName": "THE SPILLED SAMOVAR",
       "stats": {
         "speed": 1.25,
         "startup": -4,
@@ -6636,20 +6627,20 @@
         "horns": "none",
         "tail": "none",
         "gear": [
-          "goggles",
-          "wings"
+          "obi",
+          "moustache"
         ]
       },
       "look": {
         "def": 0.85,
-        "scar": 0,
-        "paint": 2,
-        "wrinkles": false,
+        "scar": 1,
+        "paint": 0,
+        "wrinkles": true,
         "stubble": false,
         "veins": true
       },
       "airGrab": {
-        "name": "THE SPECIMEN PIN",
+        "name": "ONE LUMP OR TWO",
         "end": "throw",
         "dmg": 10,
         "slam": 16,
@@ -6689,12 +6680,10 @@
             "why": "Rook's cutter once impounded Crump's smuggled consignment of high-mountain oolong."
           }
         ],
-        "partner": [
-          {
-            "id": "hezekiah-smelt",
-            "why": "Smelt built the brass samovar boilers inside Crump's bamboo arms."
-          }
-        ],
+        "partner": {
+          "id": "hezekiah-smelt",
+          "why": "Smelt built the brass samovar boilers inside Crump's bamboo arms, and is paid in tea."
+        },
         "quotes": {
           "intro": "One lump or two, my dear fellow? Do mind the scald.",
           "appeal": "Behold, good people: the gentle art of the steeped leaf!",
@@ -6717,8 +6706,8 @@
       "moves": {
         "high": [
           {
-            "id": "observation",
-            "name": "Observation",
+            "id": "first-pour",
+            "name": "The First Pour",
             "input": "○",
             "archetype": "jab",
             "limb": "lead arm",
@@ -6727,14 +6716,14 @@
             "active": 2,
             "recovery": 30,
             "dmg": 3,
-            "anim": "A flicking claw strike from stillness to the face.",
-            "sfx": "a dry click",
-            "vfx": "a small spray",
+            "anim": "A loose lead-hand palm to the face, thrown as he stumbles forward as if reaching for the teapot.",
+            "sfx": "a hollow bamboo clack, a slosh",
+            "vfx": "a spray of blood and tea",
             "sim": "jab1"
           },
           {
-            "id": "hypothesis",
-            "name": "Hypothesis",
+            "id": "second-cup",
+            "name": "The Second Cup",
             "input": "○ ○",
             "archetype": "straight",
             "limb": "rear arm",
@@ -6743,14 +6732,14 @@
             "active": 2,
             "recovery": 30,
             "dmg": 4,
-            "anim": "The other claw hooks across.",
-            "sfx": "a click, a slice",
-            "vfx": "a long cut",
+            "anim": "The rear hand swings across in a cupped fist, the wrist cocked like a cup raised to the lips.",
+            "sfx": "a clack and a ting of brass",
+            "vfx": "a split lip",
             "sim": "jab2"
           },
           {
-            "id": "experiment",
-            "name": "Experiment",
+            "id": "the-refill",
+            "name": "The Refill",
             "input": "○ ○ ○",
             "archetype": "straight",
             "limb": "lead arm",
@@ -6759,14 +6748,14 @@
             "active": 2,
             "recovery": 30,
             "dmg": 4,
-            "anim": "A double snap of the lead claw, high and low.",
-            "sfx": "click-click",
-            "vfx": "two cuts",
+            "anim": "The lead hand snaps out twice, high then low, and the wrist tap spits boiling tea on each.",
+            "sfx": "two clacks and a hiss of steam",
+            "vfx": "a scald and a spatter",
             "sim": "jab3"
           },
           {
-            "id": "conclusion",
-            "name": "Conclusion",
+            "id": "bottoms-up",
+            "name": "Bottoms Up",
             "input": "○ ○ ○ ○",
             "archetype": "finisher",
             "limb": "both arms",
@@ -6776,16 +6765,16 @@
             "recovery": 30,
             "dmg": 8,
             "launch": true,
-            "anim": "Both claws hook under the jaw and flick upward, throwing them into the air.",
-            "sfx": "a wet crunch, a hiss of wings",
-            "vfx": "blood and green ichor upward",
+            "anim": "Both palms drive up under the jaw as he tips back like a man draining a flask, and the body goes up with them.",
+            "sfx": "a crunch, a gurgle of boiling water",
+            "vfx": "blood and steam upward",
             "sim": "punchFin"
           }
         ],
         "low": [
           {
-            "id": "tarsus",
-            "name": "Tarsus",
+            "id": "the-stumble",
+            "name": "The Stumble",
             "input": "← ○",
             "archetype": "snap",
             "limb": "leg",
@@ -6794,14 +6783,14 @@
             "active": 3,
             "recovery": 32,
             "dmg": 4,
-            "anim": "A quick low insect kick to the ankle.",
-            "sfx": "a dry tap",
+            "anim": "Trips forward over nothing and stamps the bamboo foot onto the ankle.",
+            "sfx": "a wooden tap, a crack",
             "vfx": "a spray",
             "sim": "kick1"
           },
           {
-            "id": "femur",
-            "name": "Femur",
+            "id": "the-totter",
+            "name": "The Totter",
             "input": "← ○ ○",
             "archetype": "chain",
             "limb": "leg",
@@ -6810,14 +6799,14 @@
             "active": 3,
             "recovery": 34,
             "dmg": 5,
-            "anim": "A sharp kick to the thigh, folding at the odd ankle.",
-            "sfx": "a crack",
+            "anim": "Totters sideways and knocks the bamboo knee into the thigh on the way past.",
+            "sfx": "a hollow knock",
             "vfx": "a spray",
             "sim": "kick2"
           },
           {
-            "id": "moult",
-            "name": "Moult",
+            "id": "falling-down-drunk",
+            "name": "Falling Down Drunk",
             "input": "← ○ ○ ○",
             "archetype": "reap",
             "limb": "leg",
@@ -6827,16 +6816,16 @@
             "recovery": 40,
             "dmg": 7,
             "knockdown": true,
-            "anim": "Drops flat to the floor and scythes with a claw along the ground at the ankles.",
-            "sfx": "a click, a slice, a fall",
+            "anim": "Falls flat on his back and scythes both bamboo legs through the ankles as he goes, then lies there a moment, chuckling.",
+            "sfx": "a fall, two clacks, a body down",
             "vfx": "blood at the ankles",
             "sim": "sweep"
           }
         ],
         "branches": [
           {
-            "id": "praying-hook",
-            "name": "The Praying Hook",
+            "id": "the-tea-cosy",
+            "name": "The Tea Cosy",
             "input": "○ ○ △",
             "archetype": "kickEnd",
             "limb": "both arms",
@@ -6846,13 +6835,13 @@
             "recovery": 42,
             "dmg": 8,
             "knockdown": true,
-            "anim": "Off Hypothesis, both claws hook behind the neck and pull the face down into her rising knee.",
-            "sfx": "a click, a knee crunch",
+            "anim": "Off the Second Cup, both hands cradle the head like a warm pot and bring it down onto his rising knee.",
+            "sfx": "a slosh, a knee crunch",
             "vfx": "blood from the nose"
           },
           {
-            "id": "flash-strike",
-            "name": "Flash Strike",
+            "id": "the-hiccup",
+            "name": "The Hiccup",
             "input": "○ ○ ○ ← ○",
             "archetype": "snap",
             "limb": "leg",
@@ -6862,15 +6851,15 @@
             "recovery": 38,
             "dmg": 7,
             "knockdown": true,
-            "anim": "Off Experiment, a sudden high kick to the temple from the same stance.",
-            "sfx": "a snap, a crack",
+            "anim": "Off the Refill, a hiccup jolts him upright and a high kick to the temple comes out of it.",
+            "sfx": "a hiccup, a snap",
             "vfx": "a spray from the temple"
           }
         ],
         "regional": [
           {
-            "id": "compound-eye",
-            "name": "Compound Eye",
+            "id": "a-drop-in-the-eye",
+            "name": "A Drop in the Eye",
             "input": "R1 + ↑ ○",
             "archetype": "single",
             "limb": "lead arm",
@@ -6880,13 +6869,13 @@
             "recovery": 40,
             "dmg": 5,
             "target": "head",
-            "anim": "A claw tip flicked into an eye.",
-            "sfx": "a click, a scream",
-            "vfx": "the eye bursts"
+            "anim": "Flicks the wrist tap open an inch from an eye. The tea is boiling.",
+            "sfx": "a hiss, a scream",
+            "vfx": "the eye scalds white"
           },
           {
-            "id": "thorax",
-            "name": "Thorax",
+            "id": "the-strainer",
+            "name": "The Strainer",
             "input": "R1 + ○",
             "archetype": "single",
             "limb": "rear arm",
@@ -6896,13 +6885,13 @@
             "recovery": 40,
             "dmg": 5,
             "target": "body",
-            "anim": "A short stabbing claw under the ribs.",
+            "anim": "A short bamboo finger-strike under the ribs, twisted like a tea strainer in the pot.",
             "sfx": "a crunch",
-            "vfx": "blood and ichor"
+            "vfx": "blood from the side"
           },
           {
-            "id": "hamstrung",
-            "name": "Hamstrung",
+            "id": "steeped",
+            "name": "Steeped",
             "input": "R1 + ↓ ○",
             "archetype": "stamp",
             "limb": "lead arm",
@@ -6912,15 +6901,15 @@
             "recovery": 40,
             "dmg": 5,
             "target": "legs",
-            "anim": "Slashes the back of the knee with a spine.",
-            "sfx": "a slice",
-            "vfx": "the leg gives"
+            "anim": "Pours a jet of boiling tea down the back of the knee, then chops it.",
+            "sfx": "a hiss, a chop",
+            "vfx": "the leg gives, steaming"
           }
         ],
         "dash": [
           {
-            "id": "darting",
-            "name": "Darting",
+            "id": "last-orders",
+            "name": "Last Orders",
             "input": "✕ then ○",
             "archetype": "rush",
             "limb": "lead arm",
@@ -6930,16 +6919,16 @@
             "recovery": 28,
             "dmg": 7,
             "knockdown": true,
-            "anim": "Vanishes forward in a blur and stabs with both claws on arrival.",
-            "sfx": "a buzz of wings, a click",
-            "vfx": "two holes",
+            "anim": "Lurches across the pit like a man late for the bar and arrives lead hand first, both feet nowhere.",
+            "sfx": "staggering slippers, a clack",
+            "vfx": "a burst mouth",
             "sim": "dashStrike"
           }
         ],
         "dive": [
           {
-            "id": "pounce",
-            "name": "The Pounce",
+            "id": "the-pratfall",
+            "name": "The Pratfall",
             "input": "run, then ○",
             "archetype": "dive",
             "limb": "both arms",
@@ -6949,13 +6938,13 @@
             "recovery": 56,
             "dmg": 8,
             "knockdown": true,
-            "anim": "A long insect leap, claws first.",
-            "sfx": "a whirr of wings, a crunch",
+            "anim": "Trips at full run and falls on them headlong, palms first, all of him.",
+            "sfx": "a stumble, a crunch",
             "vfx": "a spray"
           },
           {
-            "id": "feeding",
-            "name": "Feeding",
+            "id": "the-nightcap",
+            "name": "The Nightcap",
             "input": "run, ○, then ○",
             "archetype": "diveChain",
             "limb": "head",
@@ -6964,15 +6953,15 @@
             "active": 4,
             "recovery": 46,
             "dmg": 6,
-            "anim": "Lands on them and bites the neck, like the insect does.",
-            "sfx": "a wet bite",
-            "vfx": "a gush from the neck"
+            "anim": "Sits up on their chest, butts them in the face, and begs their pardon.",
+            "sfx": "a wet thud, 'beg pardon'",
+            "vfx": "a burst nose"
           }
         ],
         "down": [
           {
-            "id": "pinning",
-            "name": "Pinning the Specimen",
+            "id": "milk-and-sugar",
+            "name": "Milk and Sugar",
             "input": "↓ ○ by a floored body",
             "archetype": "stomp",
             "limb": "lead arm",
@@ -6981,15 +6970,15 @@
             "active": 3,
             "recovery": 50,
             "dmg": 7,
-            "anim": "Drives a long entomologist's pin through a hand into the floor.",
-            "sfx": "a pin through a hand, a scream",
-            "vfx": "a pinned hand"
+            "anim": "Stands over the body and pours a full boiling cup from the wrist tap onto the face, slowly, as one should.",
+            "sfx": "a long hiss, a scream",
+            "vfx": "the face blisters"
           }
         ],
         "headbutt": [
           {
-            "id": "antennae",
-            "name": "Antennae",
+            "id": "the-tipple",
+            "name": "The Tipple",
             "input": "□ + ○",
             "archetype": "butt",
             "limb": "head",
@@ -6998,16 +6987,16 @@
             "active": 3,
             "recovery": 44,
             "dmg": 5,
-            "anim": "A quick tilting headbutt with her goggles.",
-            "sfx": "brass goggles on a nose",
+            "anim": "Rocks back as if to drink, then rocks forward with the forehead.",
+            "sfx": "a forehead on a nose, a hiccup",
             "vfx": "a nosebleed",
             "sim": "headbutt"
           }
         ],
         "double": [
           {
-            "id": "raptorial-snap",
-            "name": "Raptorial Snap",
+            "id": "both-handles",
+            "name": "Both Handles",
             "input": "✕ + ○",
             "archetype": "double",
             "limb": "both arms",
@@ -7017,182 +7006,182 @@
             "recovery": 52,
             "dmg": 8,
             "hits": 2,
-            "anim": "Both claws snap shut on the body together like a trap.",
-            "sfx": "a double click, a crunch",
-            "vfx": "two rows of holes"
+            "anim": "Both palms strike the body together, like lifting a heavy urn by its two handles.",
+            "sfx": "a double clack, a crunch",
+            "vfx": "two bruises splitting"
           }
         ],
         "hold": {
-          "id": "the-catch",
-          "name": "The Catch",
+          "id": "an-old-friend",
+          "name": "An Old Friend",
           "input": "△",
           "archetype": "hold",
           "duration": 98,
           "dmg": 0,
-          "anim": "Folds both claws round them in the mantis catch.",
-          "sfx": "a dry click, a struggle",
+          "anim": "Throws a drunken arm round their neck like an old friend at closing time.",
+          "sfx": "a slosh, a struggle",
           "sim": "GRAB"
         },
         "clinch": [
           {
-            "id": "nibble",
-            "name": "A Nibble",
+            "id": "a-sip",
+            "name": "A Sip",
             "input": "in the hold, ○",
             "archetype": "clinch",
             "duration": 63,
             "dmg": 5,
-            "anim": "Bites at the face.",
-            "sfx": "a crunch",
-            "vfx": "a chunk of cheek",
+            "anim": "Holds them close, sips from his wrist tap, and spits the boiling mouthful into their face.",
+            "sfx": "a slurp, a spit, a scream",
+            "vfx": "a scalded face",
             "sim": "HOLD"
           },
           {
-            "id": "spines",
-            "name": "The Spines",
+            "id": "steeping",
+            "name": "Steeping",
             "input": "in the hold, ○ ○",
             "archetype": "clinch",
             "duration": 70,
             "dmg": 5,
-            "anim": "Draws the serrated spines across the arms she is holding.",
-            "sfx": "a long rasp",
-            "vfx": "the arms run red"
+            "anim": "Opens both wrist taps against the neck he is holding and lets them run.",
+            "sfx": "a long hiss",
+            "vfx": "the skin goes red and lifts"
           }
         ],
         "throws": [
           {
-            "id": "dissection",
-            "name": "Dissection",
+            "id": "the-pour",
+            "name": "The Pour",
             "input": "in the hold, △",
             "archetype": "throw",
             "duration": 136,
             "dmg": 12,
-            "anim": "Turns them over and slits them along the breastbone as they fall.",
-            "sfx": "a slice, a fall",
-            "vfx": "a long red line",
+            "anim": "Tips them over his hip like a teapot and pours them out onto their head.",
+            "sfx": "a slosh, a fall",
+            "vfx": "a red splash",
             "sim": "THROW"
           },
           {
-            "id": "specimen-jar",
-            "name": "Into the Jar",
+            "id": "the-sway",
+            "name": "The Sway",
             "input": "in the hold, ← △",
             "archetype": "throw",
             "duration": 140,
             "dmg": 12,
-            "anim": "Rolls back and flips them over her head with her feet.",
-            "sfx": "a whirr, a slam",
+            "anim": "Rolls back drunk with them on top of him and kicks them over his head with both bamboo feet.",
+            "sfx": "a creak, a whirl, a slam",
             "vfx": "a splash"
           },
           {
-            "id": "pinned-and-labelled",
-            "name": "Pinned and Labelled",
+            "id": "the-tasting",
+            "name": "The Tasting",
             "input": "in the hold, ↓ △",
             "archetype": "throw",
             "duration": 160,
             "dmg": 14,
-            "anim": "Pushes them face down and pins all four limbs to the floor with long pins, then writes a label.",
-            "sfx": "four pins, writing",
-            "vfx": "a spread-eagled specimen"
+            "anim": "Forces them face down, kneels on the back, and pours tea into an ear until it boils out of the other.",
+            "sfx": "a hiss, a gurgle, a scream",
+            "vfx": "steam from both ears"
           },
           {
-            "id": "flight",
-            "name": "Flight",
+            "id": "the-tea-clipper",
+            "name": "The Tea Clipper",
             "input": "in the hold, → △",
             "archetype": "throw",
             "duration": 136,
             "dmg": 12,
             "end": "throw",
-            "anim": "Buzzes into the air holding them and drops them on.",
-            "sfx": "wings, a long splash",
+            "anim": "Swings them round and round like a clipper rounding the Cape and lets them go.",
+            "sfx": "a whirl, a long splash",
             "vfx": "a red splash"
           }
         ],
         "back": {
-          "id": "decapitation",
-          "name": "The Female's Prerogative",
+          "id": "in-one-ear",
+          "name": "In One Ear",
           "input": "△ from behind",
           "archetype": "longThrow",
           "duration": 200,
           "dmg": 18,
-          "anim": "Climbs onto their back, folds the claws round their neck, and begins, as the female mantis does, with the head. The Gallery sees enough.",
-          "sfx": "a crunch, chewing, a gasp from the Gallery",
-          "vfx": "a fountain from the neck"
+          "anim": "From behind, puts both wrist taps to the ears and opens them full until the boilers whistle. He hums along. The Gallery sees enough.",
+          "sfx": "two jets of steam, a rising whistle, humming, a gasp from the Gallery",
+          "vfx": "steam and blood from the ears and nose"
         },
         "wall": {
-          "id": "display-case",
-          "name": "The Display Case",
+          "id": "the-tea-chest",
+          "name": "The Tea Chest",
           "input": "△ with their back to a wall",
           "archetype": "longThrow",
           "duration": 200,
           "dmg": 16,
-          "anim": "Pins them to the wall through both shoulders with claws, and studies them closely.",
-          "sfx": "two crunches, a magnifying glass, 'fascinating'",
-          "vfx": "two holes in the wall"
+          "anim": "Pins them to the wall with a forearm and packs the palm into the chest again and again, like leaves into a chest.",
+          "sfx": "palm on chest, ribs going, 'a snug fit'",
+          "vfx": "blood from the mouth"
         },
         "grappleDash": {
-          "id": "netted",
-          "name": "Netted",
+          "id": "an-old-acquaintance",
+          "name": "An Old Acquaintance",
           "input": "✕ then △",
           "archetype": "hold",
           "duration": 100,
           "dmg": 6,
-          "anim": "Darts in and snaps the claws round them.",
-          "sfx": "a buzz, a click"
+          "anim": "Staggers in and embraces them as if they had last met in Canton.",
+          "sfx": "staggering slippers, a slosh"
         },
         "diveGrab": {
-          "id": "swarm",
-          "name": "The Swarm",
+          "id": "the-toppled-urn",
+          "name": "The Toppled Urn",
           "input": "run, then △",
           "archetype": "longThrow",
           "duration": 188,
           "dmg": 15,
-          "anim": "Leaps onto their back in a flutter of wings and rides them down claws first.",
-          "sfx": "wings, a crunch"
+          "anim": "Falls on them from a run like a toppled tea urn and rides them down, every tap open.",
+          "sfx": "a crash, a hiss"
         },
         "ground": {
-          "id": "field-notes",
-          "name": "Field Notes",
+          "id": "reading-the-leaves",
+          "name": "Reading the Leaves",
           "input": "△ by a floored body",
           "archetype": "longThrow",
           "duration": 195,
           "dmg": 14,
-          "anim": "Crouches over them like an insect and takes a sample with the hooked claw.",
-          "sfx": "a scrape, a little scream, writing",
-          "vfx": "a scoop of flesh"
+          "anim": "Kneels by the body, opens the belly with a finger-strike and studies what is inside like leaves in a cup. He reads them their fortune.",
+          "sfx": "a wet tear, a murmured fortune",
+          "vfx": "a spill of entrails"
         },
         "deflects": [
           {
-            "id": "stillness",
-            "name": "Stillness",
+            "id": "a-spill",
+            "name": "A Spill",
             "input": "□ as a high strike lands",
             "archetype": "deflect",
             "duration": 32,
             "dmg": 8,
-            "anim": "The claw is suddenly holding the fist, and then the fist is not attached.",
-            "sfx": "a click, a crunch",
+            "anim": "Lurches aside so the fist misses, catches the wrist, and wrenches the arm round until the elbow goes.",
+            "sfx": "a clack, an elbow crack",
             "sim": "REVERSAL"
           },
           {
-            "id": "mimicry",
-            "name": "Mimicry",
+            "id": "the-wobble",
+            "name": "The Wobble",
             "input": "↓ □ as a low strike lands",
             "archetype": "deflect",
             "duration": 34,
             "dmg": 8,
-            "anim": "Steps onto the kicking leg like a stick insect and strikes down from it.",
-            "sfx": "a tap, a slice"
+            "anim": "Wobbles up on one leg over the kick and stamps it into the floor.",
+            "sfx": "a tap, a crack"
           }
         ],
         "special": {
-          "name": "THE WHIRLING MANTIS",
+          "name": "THE SPILLED SAMOVAR",
           "sim": "spSpin",
-          "anim": "Spins on one foot with both claws extended, wings half open, a green blur cutting everything round her.",
-          "sfx": "a buzzing whirr and a rapid series of clicks and slices",
-          "vfx": "a ring of blood and ichor"
+          "anim": "Spins on one heel with both arms out and every tap open, a whirling cloud of boiling tea scalding everything round him.",
+          "sfx": "a shrieking kettle whistle and a ring of clacks",
+          "vfx": "a ring of steam and blood"
         },
         "arts": [
           {
-            "id": "emergence",
-            "name": "Emergence",
+            "id": "coming-to-the-boil",
+            "name": "Coming to the Boil",
             "input": "R2 + ↑",
             "archetype": "art",
             "limb": "both arms",
@@ -7202,13 +7191,13 @@
             "recovery": 56,
             "dmg": 17,
             "launch": true,
-            "anim": "Unfolds her wings and rises straight up through them, both claws first.",
-            "sfx": "a wing burst, a crunch",
-            "vfx": "a spiral of blood"
+            "anim": "Crouches with the boilers rattling, then shoots straight up through them palms first in a blast of steam.",
+            "sfx": "a rising whistle, a crunch",
+            "vfx": "a spiral of steam and blood"
           },
           {
-            "id": "thousand-cuts",
-            "name": "Ten Thousand Specimens",
+            "id": "high-tea",
+            "name": "High Tea",
             "input": "R2 + →",
             "archetype": "art",
             "limb": "both arms",
@@ -7218,24 +7207,24 @@
             "recovery": 40,
             "dmg": 16,
             "hits": 12,
-            "anim": "Advances in tiny steps striking twelve times a second.",
-            "sfx": "a blur of clicks",
-            "vfx": "a red mist"
+            "anim": "Totters forward slapping twelve times a second, each palm a little hotter than the last.",
+            "sfx": "a blur of clacks and hisses",
+            "vfx": "a red, steaming mist"
           },
           {
-            "id": "the-nuptial",
-            "name": "The Nuptial Flight",
+            "id": "the-tea-ceremony",
+            "name": "The Tea Ceremony",
             "input": "R2 + ↓",
             "archetype": "cinematic",
             "duration": 290,
             "dmg": 28,
-            "anim": "Embraces them tenderly, flies them up into the dark of the arches, and drops what is left.",
-            "sfx": "wings, a scream fading upward, a long silence, a splash",
-            "vfx": "rain mixed with blood falls from above"
+            "anim": "Kneels them down, bows, and serves them the boilers' whole contents down the throat, then pours one for himself and drinks to their health.",
+            "sfx": "a bow, a gurgle, a scream that stops, a cup set down",
+            "vfx": "steam from the mouth"
           },
           {
-            "id": "stridulate",
-            "name": "Stridulation",
+            "id": "the-kettles-shriek",
+            "name": "The Kettle's Shriek",
             "input": "R2 + ←",
             "archetype": "art",
             "limb": "both arms",
@@ -7245,159 +7234,160 @@
             "recovery": 46,
             "dmg": 13,
             "knockdown": true,
-            "anim": "Rasps the claws together into a shriek that stuns everyone near, then strikes them all.",
-            "sfx": "a shrill insect rasp, then clicks",
+            "anim": "Opens every valve at once into a shriek that stuns everyone near, then palms them all down.",
+            "sfx": "a deafening kettle shriek, then clacks",
             "vfx": "blood from the ears all round"
           }
         ],
         "status": {
-          "name": "THE METAMORPHOSIS",
+          "name": "OVER-STEEPED",
           "drink": 70,
           "lasts": 600,
-          "anim": "Takes a green vial from her bag, drinks it, and the wings tear out of her jacket.",
+          "anim": "Uncorks a flask of black fermented pu-erh rum and drains it, and every vent on the boilers shrieks.",
           "effects": {
             "speed": 1.2,
             "startup": -2,
-            "note": "she can hover over a sweep; her air grab reaches twice as high; every strike heals her by a quarter of its damage"
+            "note": "he sways clear over a sweep; his air grab reaches twice as high; every strike heals him by a quarter of its damage"
           },
-          "look": "full wings, compound green eyes, her head tilting, ichor-wet",
-          "voice": "insect clicks and a soft rasp in place of words"
+          "look": "flushed scarlet, eyes glazed, steam pouring from every joint",
+          "voice": "a hiccuping, slurred baritone that breaks into song"
         },
         "duo": {
-          "partner": "mortimer-crape",
-          "name": "Post Mortem",
+          "partner": "hezekiah-smelt",
+          "name": "The Copper Kettle",
           "archetype": "cinematic",
           "duration": 280,
           "dmg": 27,
-          "anim": "Crape folds the victim onto a slab; Thrip dissects them while he holds the lamp and offers condolences."
+          "anim": "Smelt holds the victim over his furnace mouth like a kettle on the hob; Crump pours them a cup of what comes out, and thanks Smelt for the use of the stove."
         },
         "weapons": {
           "affinity": [
-            "blade"
+            "tonic",
+            "blunt"
           ],
-          "signature": "hatpin",
-          "style": "Holds a blade in a claw like a spine of her own. Prefers thin blades, above all a lady's hatpin. Drops clubs at once."
+          "signature": "tonic",
+          "style": "Drinks any bottle the Gallery throws, and fights better for it. Swings a club like a walking stick he has forgotten the use of. Hands blades back politely."
         },
         "appeal": {
-          "anim": "Pushes her goggles up, holds up a jar with something in it, and bows like a lecturer.",
-          "line": "Observe: the strike is faster than the eye.",
-          "gift": "swordsticks and bottles of tincture"
+          "anim": "Bows unsteadily to each tier, raises a cup to them, and drinks it off.",
+          "line": "Behold, good people: the gentle art of the steeped leaf!",
+          "gift": "bottles of tincture, and the odd nail bat"
         }
       },
       "art": {
-        "silhouette": "A tiny, hunched woman in a tweed jacket and brass loupes, with long folded green claws held up in the mantis stance and little wings starting between her shoulders.",
-        "build": "Small and thin, round-shouldered, long-limbed for her size.",
+        "silhouette": "A round-bellied, swaying gentleman in a sash-tied quilted waistcoat and a walrus moustache, with amber bamboo arms swelling into brass boilers at the forearms, steam trailing from the wrists.",
+        "build": "Middle-aged and soft-looking, barrel-chested and paunchy, loose in every joint.",
         "palette": {
           "primary": {
-            "hex": "#2e4a2a",
-            "name": "glasshouse green"
+            "hex": "#5c2a38",
+            "name": "oxblood plum"
           },
           "secondary": {
-            "hex": "#d8c0a4",
-            "name": "pale skin"
+            "hex": "#d2a679",
+            "name": "ruddy skin"
           },
           "metal": {
-            "hex": "#6aa04a",
-            "name": "lacquer chitin green"
+            "hex": "#b8862e",
+            "name": "samovar brass"
           },
           "light": {
-            "hex": "#d4a840",
-            "name": "brass loupes"
+            "hex": "#e8c070",
+            "name": "lacquered amber bamboo"
           }
         },
-        "costume": "A tweed lecturing jacket with leather elbow patches split for the claws, a high-collared blouse with a cameo of a beetle, a bustled walking skirt, button boots, a satchel of jars, nets and pins, and a pair of brass multi-lensed entomologist's loupes over her spectacles.",
+        "costume": "A quilted oxblood silk waistcoat over a collarless shirt with the sleeves cut away for the bamboo, a long black sash knotted at the hip, loose canvas trousers into cloth slippers, a watch-chain hung with a tea strainer, and a leather flask holster at each hip.",
         "alternates": [
           {
-            "name": "Expedition",
-            "note": "a khaki safari jacket and a pith helmet"
+            "name": "Wharf",
+            "note": "a docker's oilskin over the waistcoat, tea-chest stencils across the back"
           },
           {
-            "name": "Lecture",
-            "note": "black academic robes she was never allowed to wear"
+            "name": "Tasting Room",
+            "note": "a merchant's white linen suit, already stained"
           },
           {
-            "name": "Imago",
-            "note": "chitin spreading over half her face and the jacket gone"
+            "name": "Over-Steeped",
+            "note": "the waistcoat open, scarlet with heat, steam from every seam"
           }
         ],
-        "limbs": "The claws are segmented, lacquer-green fading to translucent at the edges, with two rows of serrated black-tipped spines. Wet pale membrane at the joints. The spines regrow, so they look uneven.",
-        "face": "A narrow, serious face, pale, freckled, large dark eyes behind thick spectacles, with green faceting starting at the corners of the eyes; painted stripes (paint 2) are the chitin coming through.",
-        "hair": "Mousy brown, scraped into a bun, a pencil stuck through it.",
-        "gore": "Cutting and piercing: neat slices, puncture rows, eyes and heads. Her KO often takes something away with her.",
+        "limbs": "Amber lacquered bamboo canes in engraved brass hoops, the forearms swelling into small riveted samovar boilers with pressure gauges and a turn-tap at each wrist. Steam beads on the lacquer; the joints are brass knuckle-pins.",
+        "face": "A round, ruddy, cheerful face flushed with drink, heavy-lidded twinkling eyes, broken veins across the nose and cheeks; the grey walrus moustache is drawn in 3D.",
+        "hair": "Thinning grey, combed back and damp with steam.",
+        "gore": "Scalds and crushing: blistered faces, steaming wounds, burst joints. His KOs are poured rather than thrown.",
         "vfx": [
-          "green ichor mixing with blood",
-          "a shimmer of wings",
-          "pin-heads glinting in the bodies"
+          "jets of white steam from the wrist taps",
+          "amber tea running into the blood",
+          "a haze of steam over the bodies"
         ],
-        "idle": "Stands motionless in the mantis stance; only her head turns, in little jerks.",
-        "intro": "Steps out from behind a glass case, adjusts her loupes, and makes a note.",
-        "victory": "Measures the body with calipers and writes it all down.",
-        "defeat": "Curls up on her side with her claws folded, like a dead insect.",
-        "portrait": "Close-up, loupes flipped down, a claw raised, a beetle on her shoulder, green light from a glasshouse."
+        "idle": "Sways in place as if on a ship's deck, takes a sip from a wrist tap, and hiccups.",
+        "intro": "Wanders in from the Gallery's tea stall with a cup and saucer, sets them down on the pit's edge, and bows.",
+        "victory": "Pours himself a fresh cup over the body and toasts the Gallery.",
+        "defeat": "Sits down heavily, takes one last sip, and tips slowly over onto his side, steaming.",
+        "portrait": "Close-up, a cup raised in a bamboo hand, steam curling off the boiler, eyes twinkling over the moustache, warm lamplight from a tea-room window."
       },
       "sound": {
         "voice": {
-          "casting": "a soft, quick, breathy mezzo in her late thirties",
-          "accent": "educated and precise, a little shy",
-          "texture": "murmuring, fascinated, as if to herself"
+          "casting": "a warm, chuckling, slightly slurred baritone in his fifties",
+          "accent": "genteel old merchant English, softened by thirty years abroad",
+          "texture": "genial, hiccuping, fond of everyone"
         },
         "lines": {
           "intro": [
-            "Do hold still. I've never seen a specimen quite like you.",
-            "Oh! You'll do nicely."
+            "One lump or two, my dear fellow? Do mind the scald.",
+            "Ah, a guest! I'll put the kettle on."
           ],
           "appeal": [
-            "Observe: the strike is faster than the eye.",
-            "A note for the Society, ladies and gentlemen."
+            "Behold, good people: the gentle art of the steeped leaf!",
+            "A toast, ladies and gentlemen, to our guest's health. What remains of it."
           ],
           "hit": [
-            "Fascinating.",
-            "Sternum.",
-            "Oh, I beg your pardon."
+            "Steady.",
+            "Oops-a-daisy.",
+            "Beg pardon, beg pardon."
           ],
           "hurt": [
-            "Ah!",
-            "Interesting."
+            "Oof!",
+            "Spilt it."
           ],
-          "special": "Watch closely.",
-          "tincture": "(insect clicking)",
+          "special": "Mind the pot!",
+          "tincture": "(a long swallow, then a kettle's shriek)",
           "victory": [
-            "Fascinating. I'll need the head.",
-            "Thank you for your contribution to science."
+            "A delightful brew! Now, let us find a rag for that blood.",
+            "Steeped to perfection."
           ],
-          "defeat": "Note... the time of... emergence..."
+          "defeat": "The pot... has gone... cold..."
         },
-        "efforts": "tiny clicks and sharp breaths",
-        "footsteps": "light, quick, irregular taps",
-        "foley": "a soft clicking of chitin at every move, the whirr of wings, jars and pins clinking in her satchel",
+        "efforts": "chuckles, hiccups and puffs",
+        "footsteps": "soft cloth slippers, scuffing and irregular, with a stagger now and then",
+        "foley": "hot water sloshing in the boilers, a hiss of steam at every move, bamboo creaking, a tea strainer jingling on the watch-chain",
         "impact": {
-          "craft": "mantis-chitin",
-          "nuance": "a faint buzz of wings under the hit"
+          "craft": "bamboo-samovar",
+          "nuance": "a slosh of hot tea under the hit"
         },
         "music": {
-          "title": "The Glasshouse",
-          "brief": "A nervous, intricate piece for harpsichord and plucked strings, with insect clicks and buzzing as percussion and a sudden silence before every strike.",
-          "tempo": 144,
+          "title": "The Tea Clipper",
+          "brief": "A lurching waltz for hammered dulcimer, accordion and teacups, swinging off the beat, with a kettle whistle rising before every strike.",
+          "tempo": 132,
           "instruments": [
-            "harpsichord",
-            "pizzicato strings",
-            "insect clicks",
-            "glass harmonica"
+            "hammered dulcimer",
+            "accordion",
+            "teacup percussion",
+            "kettle whistle"
           ]
         },
         "cues": [
           {
-            "id": "thrip-click",
+            "id": "crump-hiss",
             "category": "foley",
-            "note": "her claws flexing",
-            "prompt": "A large insect's hard claw clicks open and shut twice: dry sharp chitin clicks. Close microphone, dry room, one single action.",
+            "note": "his wrist taps venting",
+            "prompt": "A small brass valve opens on a boiling kettle: a sharp hiss of steam that tails off with a little gurgle. Close microphone, dry room, one single release.",
             "seed": 4670
           },
           {
-            "id": "thrip-wings",
+            "id": "crump-slosh",
             "category": "foley",
-            "note": "her wings unfolding",
-            "prompt": "Large thin insect wings unfold and beat once: a dry rustle and a short loud whirr. Close microphone, dry room, one single beat.",
+            "note": "the boilers sloshing as he sways",
+            "prompt": "Hot water sloshes inside a small sealed brass boiler as it is tipped, with a faint metallic knock. Close microphone, dry room, one single tilt.",
             "seed": 4671
           }
         ]
@@ -7405,20 +7395,20 @@
       "texture": {
         "seed": 5108,
         "skin": {
-          "idea": "pale freckled skin with green insect faceting starting at the eyes and the wrists",
-          "colour": "pale with green"
+          "idea": "ruddy weathered skin flushed with drink, with broken red veins and beads of steam-sweat",
+          "colour": "ruddy"
         },
         "cloth": {
-          "idea": "brown tweed jacket with leather elbow patches, a cream blouse, a dark green bustled skirt",
-          "colour": "brown tweed and green"
+          "idea": "a quilted oxblood silk waistcoat with a long black sash, a collarless cream shirt, loose canvas trousers",
+          "colour": "oxblood and black"
         },
         "face": {
-          "idea": "a narrow pale serious freckled face with large dark eyes behind thick spectacles, green faceting at the corners",
-          "colour": "pale with green"
+          "idea": "a round ruddy cheerful face with heavy-lidded twinkling eyes and broken veins across the nose and cheeks",
+          "colour": "ruddy"
         },
         "limb": {
-          "idea": "segmented lacquer-green insect chitin with rows of black-tipped serrated spines and translucent edges",
-          "colour": "lacquer green"
+          "idea": "amber lacquered bamboo cane in engraved brass hoops with small riveted brass boilers, beaded with steam",
+          "colour": "amber and brass"
         }
       }
     },

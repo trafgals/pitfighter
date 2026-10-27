@@ -133,20 +133,20 @@
       "limb_colour": "deep blued steel"
     },
     {
-      "slug": "professor-thrip",
-      "name": "Professor Emmeline Thrip",
+      "slug": "percival-crump",
+      "name": "Percival \"Oolong\" Crump",
       "style": "Kung Fu",
-      "body": "#d8c0a4",
-      "accent": "#2e4a2a",
+      "body": "#d2a679",
+      "accent": "#5c2a38",
       "seed": 5108,
-      "skin_idea": "pale freckled skin with green insect faceting starting at the eyes and the wrists",
-      "skin_colour": "pale with green",
-      "cloth_idea": "brown tweed jacket with leather elbow patches, a cream blouse, a dark green bustled skirt",
-      "cloth_colour": "brown tweed and green",
-      "face_idea": "a narrow pale serious freckled face with large dark eyes behind thick spectacles, green faceting at the corners",
-      "face_colour": "pale with green",
-      "limb_idea": "segmented lacquer-green insect chitin with rows of black-tipped serrated spines and translucent edges",
-      "limb_colour": "lacquer green"
+      "skin_idea": "ruddy weathered skin flushed with drink, with broken red veins and beads of steam-sweat",
+      "skin_colour": "ruddy",
+      "cloth_idea": "a quilted oxblood silk waistcoat with a long black sash, a collarless cream shirt, loose canvas trousers",
+      "cloth_colour": "oxblood and black",
+      "face_idea": "a round ruddy cheerful face with heavy-lidded twinkling eyes and broken veins across the nose and cheeks",
+      "face_colour": "ruddy",
+      "limb_idea": "amber lacquered bamboo cane in engraved brass hoops with small riveted brass boilers, beaded with steam",
+      "limb_colour": "amber and brass"
     },
     {
       "slug": "columbine-vesper",

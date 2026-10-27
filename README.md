@@ -122,7 +122,7 @@ which sets how they look and how every hit sounds.
 | Wrestling | The Great Bartholomew Mule | Grafted Bear | THE DANCING BEAR (slam) |
 | Muay Thai | Bosun Absalom Rook | Ship's Oak | THE CAT O' NINE (flurry) |
 | Boxing | Lady Hester Bulwark | Hydraulic Steel | A HUNDRED POUNDS TO THE INCH (flurry) |
-| Kung Fu | Professor Emmeline Thrip | Mantis Chitin | THE WHIRLING MANTIS (spin) |
+| Kung Fu | Percival "Oolong" Crump | Bamboo and Samovar | THE SPILLED SAMOVAR (spin) |
 | Tae Kwon Do | Columbine Vesper | Aether Glass | THE FOOTLIGHTS (fire) |
 | Judo Based | Mr. Mortimer Crape | Jet and Whalebone | INTERMENT (slam) |
 | Samurai Sword | Sir Peregrine Ashby-Lisle, Bt. | Silver and Ebony | A THOUSAND PARDONS (blade) |
@@ -139,7 +139,7 @@ and each fighter calls theirs by its own name:
 |---|---|---|
 | Flurry | four quick hits | Winch, Rook, Bulwark |
 | Charge | a dash through the crowd | Smelt, Sluice, Inkle |
-| Spin | hits all round | Kilnworth, Thrip |
+| Spin | hits all round | Kilnworth, Crump |
 | Slam | a low shockwave | Mule, Crape |
 | Blade | a long sweep | Sir Peregrine |
 | Fire | a long jet | Vesper |

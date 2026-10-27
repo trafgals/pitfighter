@@ -54,7 +54,7 @@ Three ideas run through every fighter:
 | 4 | The Great Bartholomew Mule | Wrestling | Grafted Bear | THE DANCING BEAR |
 | 5 | Bosun Absalom Rook | Muay Thai | Ship's Oak | THE CAT O' NINE |
 | 6 | Lady Hester Bulwark | Boxing | Hydraulic Steel | A HUNDRED POUNDS TO THE INCH |
-| 7 | Professor Emmeline Thrip | Kung Fu | Mantis Chitin | THE WHIRLING MANTIS |
+| 7 | Percival "Oolong" Crump | Kung Fu | Bamboo and Samovar | THE SPILLED SAMOVAR |
 | 8 | Columbine Vesper | Tae Kwon Do | Aether Glass | THE FOOTLIGHTS |
 | 9 | Mr. Mortimer Crape | Judo Based | Jet and Whalebone | INTERMENT |
 | 10 | Sir Peregrine Ashby-Lisle, Bt. | Samurai Sword | Silver and Ebony | A THOUSAND PARDONS |
@@ -62,7 +62,7 @@ Three ideas run through every fighter:
 
 There is one fighter for each group of *Urban Reign*'s 21 styles. `lineage`
 names the styles a fighter stands for: Sir Peregrine is both Samurai Sword and
-Gun, and Professor Thrip is Kung Fu, Speed and Master.
+Gun, and Crump is Kung Fu, Speed and Master.
 
 ## Editing a fighter
 

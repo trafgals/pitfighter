@@ -30,7 +30,7 @@ const ROSTER: [id: string, style: string][] = [
   ["bartholomew-mule", "Wrestling"],
   ["bosun-rook", "Muay Thai"],
   ["lady-bulwark", "Boxing"],
-  ["professor-thrip", "Kung Fu"],
+  ["percival-crump", "Kung Fu"],
   ["columbine-vesper", "Tae Kwon Do"],
   ["mortimer-crape", "Judo Based"],
   ["sir-peregrine", "Samurai Sword"],
