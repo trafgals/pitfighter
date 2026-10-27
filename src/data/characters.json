@@ -4325,8 +4325,8 @@
           }
         ],
         "partner": {
-          "id": "columbine-vesper",
-          "why": "They share a bill at the Alhambra. He catches her when she leaps."
+          "id": "tabitha-pegg",
+          "why": "Mule brings in heavy scrap iron lasts and railway boots; Tabitha welds them into indestructible weapons and braces for him."
         },
         "quotes": {
           "intro": "Ladies and gentlemen, children of all ages! Your attention, please, for the Great Bartholomew Mule!",
@@ -4865,12 +4865,12 @@
           "voice": "only roars and growls"
         },
         "duo": {
-          "partner": "columbine-vesper",
-          "name": "The Finale",
+          "partner": "tabitha-pegg",
+          "name": "The Last Fitting",
           "archetype": "cinematic",
           "duration": 290,
           "dmg": 28,
-          "anim": "He throws Columbine into the air, she lands on the victim's shoulders, scissors their neck and he catches them both in a bear hug, crushing the victim between them."
+          "anim": "Mule lifts the victim by the lapels; Tabitha leaps, using Mule's shoulder as a fulcrum to deliver a calibrated dual-heel drop into the chest, driving them into the floor."
         },
         "weapons": {
           "affinity": [
@@ -5875,8 +5875,8 @@
             "why": "She called his act vulgar in the Morning Lamp. He has been trying to hug her ever since."
           },
           {
-            "id": "columbine-vesper",
-            "why": "The Bulwark gas company lit the Hippodrome footlights that took Columbine's legs. Hester has never apologised, which for her is unheard of."
+            "id": "tabitha-pegg",
+            "why": "The Bulwark gas company attempted to seize Pegg's Spitalfields workshop for a coal storage depot; Tabitha drove Hester's bailiffs into the street with a flurry of iron shoe lasts."
           }
         ],
         "partner": {
@@ -7423,103 +7423,108 @@
       }
     },
     {
-      "id": "columbine-vesper",
-      "name": "Columbine Vesper",
+      "id": "tabitha-pegg",
+      "name": "Mistress Tabitha Pegg",
       "style": "Tae Kwon Do",
-      "blurb": "Prima ballerina of the Hippodrome, dancing on legs of glowing glass. Every kick is a curtain call.",
+      "blurb": "Obsessive East End cordwainer and bootmaker engineered to deliver the mechanically perfect human kick with articulated cast-iron shoe lasts, brass rule gauges, and heavy steel-welted brogues.",
       "body": "#b88464",
-      "accent": "#5a2a6a",
+      "accent": "#c8963e",
       "family": "kicker",
-      "special": "spFire",
-      "specialName": "THE FOOTLIGHTS",
+      "special": "spBarrage",
+      "specialName": "THE OVERWOUND LAST",
       "stats": {
-        "speed": 1.08,
+        "speed": 1.06,
         "startup": -2,
-        "punch": 0.8,
-        "kick": 1.35,
-        "grab": 0.95,
-        "reach": 1.12,
+        "punch": 0.85,
+        "kick": 1.4,
+        "grab": 0.9,
+        "reach": 1.1,
         "string": 2,
         "torso": 0.95,
         "grabReach": 1
       },
       "kit": {
-        "size": 0.94,
+        "size": 0.98,
         "horns": "none",
         "tail": "none",
         "gear": [
-          "topknot"
+          "spectacles",
+          "cordwainer-apron"
         ]
       },
       "look": {
-        "def": 0.95,
-        "scar": 0,
-        "paint": 1,
+        "def": 1.0,
+        "scar": 1,
+        "paint": 0,
         "wrinkles": false,
         "stubble": false,
-        "veins": false
+        "veins": true
       },
       "airGrab": {
-        "name": "THE GRAND JETÉ",
+        "name": "THE LAST DROP",
         "end": "bounce",
-        "dmg": 14,
-        "slam": 20,
-        "lift": 0.9,
-        "dur": 42
+        "dmg": 15,
+        "slam": 22,
+        "lift": 0.85,
+        "dur": 40
       },
-      "short": "COLUMBINE",
-      "title": "The Gaslight Ballerina",
+      "short": "TABITHA",
+      "title": "The Cobbler's Automaton",
       "lineage": [
         "Tae Kwon Do",
-        "Capoeira"
+        "Savate"
       ],
       "ratings": {
-        "power": 3,
+        "power": 4,
         "speed": 4,
-        "reach": 5,
+        "reach": 4,
         "grapple": 2,
-        "defence": 2,
-        "technique": 4,
+        "defence": 3,
+        "technique": 5,
         "difficulty": 4
       },
       "profile": {
-        "age": 23,
-        "from": "the Hippodrome, Gaiety Lane",
-        "trade": "Prima ballerina",
-        "height": "1.68 m",
-        "bio": "Columbine Vesper was born Mary Ann Pike in a court off Gaiety Lane, and danced her way from the back row of the Hippodrome to its first night in seven years. On her first night as prima the gas footlights exploded and took both her legs to the hip. A glassblower from the lamp works made her new ones from the same lamp glass, filled with the glowing aether-gas that lights the city: they shine through her tights, brighten when she moves and burn when she kicks. She can dance on them better than she ever could. The Hippodrome will not have a cripple, so she dances in the Sump, and the Gallery has never seen anything so beautiful or so many people set on fire.",
-        "personality": "Gracious, radiant, vain, coldly ambitious. She lives for the applause and has no feeling at all about what she does to get it.",
-        "manners": "A curtsey for everything: before the bout, after every knockdown, over every body. 'Merci.' Soft-spoken. Thanks the orchestra.",
-        "violence": "Kicks from impossible angles: high, spinning, inverted, the glass shins smashing into faces and spraying burning gas, then refilling. Capoeira's sway and a ballerina's line.",
-        "otherSelf": "The Limelight: she breathes the pure gas from her own hip valve. Her legs blaze white, she trails fire, and she will not stop dancing.",
+        "age": 31,
+        "from": "Barrow & Sons Cordwainers, Spitalfields",
+        "trade": "Master Cordwainer & Prosthetic Last-Fitter",
+        "height": "1.72 m",
+        "bio": "Tabitha Pegg spent fourteen years hammering box calf and pigskin over iron lasts in the damp cellars of Spitalfields, until an industrial steam-press crushed both her feet during a rush order for the Royal Horse Guards. Rather than beg, Pegg shut herself in her workshop for six months and emerged on legs of her own forging: articulated cast-iron shoemaker lasts, calibrated brass measuring calipers, and heavy triple-soled steel brogues fitted with spring-ratchet clockwork. She treats human combat as an exacting sizing problem—every knee strike, roundhouse, and spinning hook kick measured to the millimeter and driven home with thirty pounds of cold pig-iron.",
+        "personality": "Methodical, acerbic, relentlessly exacting. She views every opponent not as a fighter, but as an ill-fitting boot that needs stretching, paring down, or hammering flat.",
+        "manners": "Takes chalk from behind her ear and marks the opponent's lapel or cheek before kicking it. Measures distances with a brass sliding gauge. 'Stand straight; you're throwing my welt off.'",
+        "violence": "Rapid-fire machine-gun kicks with mathematical precision. High-speed staccato Tae Kwon Do roundhouses, piercing steel-tipped toe jabs, and shattering iron-welt heel drops.",
+        "otherSelf": "Overwound Springs: she clicks a tension ratchet behind her knee; the clockwork springs scream at double speed, unleashing an uncontrollable blizzard of rhythmic kicks.",
         "rivals": [
           {
+            "id": "hezekiah-smelt",
+            "why": "Smelt's chimney-sweep furnace soot ruins her fine top-grain box calf leather and gums up her knee ratchets."
+          },
+          {
             "id": "lady-bulwark",
-            "why": "The Bulwark gas company lit the footlights that exploded. Lady Hester has never apologised."
+            "why": "The Bulwark gas company attempted to seize Pegg's Spitalfields workshop for a coal storage depot; Tabitha drove Hester's bailiffs into the street with a flurry of iron shoe lasts."
           }
         ],
         "partner": {
           "id": "bartholomew-mule",
-          "why": "They share the Alhambra bill. He catches her when she leaps."
+          "why": "Mule brings in heavy scrap iron lasts and railway boots; Tabitha welds them into indestructible weapons and braces for him."
         },
         "quotes": {
-          "intro": "Bonsoir. Shall we dance?",
-          "appeal": "Merci, merci! Encore?",
-          "victory": "And... curtain.",
-          "defeat": "The lights... are going down..."
+          "intro": "Hold still. Let's see what size you take.",
+          "appeal": "Good leather, clean welt, no excuses.",
+          "victory": "Hammered, stitched, and put out to dry.",
+          "defeat": "The mainspring... has snapped..."
         }
       },
       "limbs": {
-        "craft": "aether-glass",
-        "arms": "Her own, slender, in long satin gloves.",
-        "legs": "Both legs from the hip: blown-glass tubes and bulbs in brass ferrules, filled with violet-white aether that brightens on every move, a glass knee like a lamp globe, a pointed glass foot that ends in a brass pointe tip.",
-        "tip": "spike",
+        "craft": "cast-iron-lasts",
+        "arms": "Her own, sinewy and scarred with awl slips, wearing studded leather arm bracers, chalk smudges on the knuckles.",
+        "legs": "Both legs from mid-thigh down: forged cast-iron shoemaker lasts fitted with engraved brass measuring rules, tension leaf-springs behind the calves, and heavy triple-soled steel oxfords with serrated welt rims.",
+        "tip": "iron-welt",
         "lean": {
-          "mass": 0.95,
-          "length": 1.15,
-          "swing": 1.15
+          "mass": 1.15,
+          "length": 1.05,
+          "swing": 1.1
         },
-        "wear": "Glass shatters on a hard hit and the gas burns out; the leg refills from a reservoir at the hip over a second, dimmer each time. Shards stay in whoever she kicked."
+        "wear": "Sparks fly from the steel welts on hard impact; clockwork springs whine as tension builds; chipped black iron flakes off the lasts during heavy exchanges."
       },
       "moves": {
         "high": [
@@ -7974,11 +7979,11 @@
           }
         ],
         "special": {
-          "name": "THE FOOTLIGHTS",
-          "sim": "spFire",
-          "anim": "Kicks a high battement and opens the valve at her toe: a long jet of burning aether shoots across the Sump like a stage flare.",
-          "sfx": "a hiss, a whoosh of gas lighting, a scream at the far end",
-          "vfx": "a long violet-white flame, burning body"
+          "name": "THE OVERWOUND LAST",
+          "sim": "spBarrage",
+          "anim": "Clicks the tension ratchet behind both knees; unleashes an explosive flurry of ten machine-speed piston roundhouses driven with cold pig-iron shoe lasts, finishing with an iron-welt drop stomp.",
+          "sfx": "rapid ratcheting clockwork whine, metallic anvil clangs, heavy dull impact on bone",
+          "vfx": "sparks flying from steel shoe welts, brass gear particles, impact shockwaves"
         },
         "arts": [
           {
@@ -8057,11 +8062,11 @@
         },
         "duo": {
           "partner": "bartholomew-mule",
-          "name": "The Finale",
+          "name": "The Last Fitting",
           "archetype": "cinematic",
           "duration": 290,
           "dmg": 28,
-          "anim": "Mule throws her into the air; she lands on the victim's shoulders and scissors their neck; Mule hugs them both and crushes the victim between them."
+          "anim": "Mule lifts the victim by the collar; Tabitha leaps, using Mule's shoulder as a fulcrum to deliver a calibrated dual-heel drop directly into the victim's chest, driving them through the floorboards."
         },
         "weapons": {
           "affinity": [
@@ -8077,141 +8082,114 @@
         }
       },
       "art": {
-        "silhouette": "A slender dancer with her hair in a high bun, a short ragged tutu, and two glowing violet glass legs, always on her toes.",
-        "build": "Slender and long-limbed, a dancer's neck and posture.",
+        "silhouette": "A stern, sharp-featured artisan in a heavy cowhide cordwainer apron over dark wool, spectacles perched on a brass chain, standing on heavy cast-iron shoe lasts with visible clockwork springs.",
+        "build": "Lean, muscular, upright craftsman posture with broad shoulders and heavy metallic legs.",
         "palette": {
           "primary": {
-            "hex": "#5a2a6a",
-            "name": "theatre violet"
+            "hex": "#2b241e",
+            "name": "oiled cowhide"
           },
           "secondary": {
-            "hex": "#b88464",
-            "name": "warm brown skin"
+            "hex": "#4a3528",
+            "name": "cordovan leather"
           },
           "metal": {
-            "hex": "#d8b048",
-            "name": "brass ferrules"
+            "hex": "#c8963e",
+            "name": "burnished brass rules"
           },
-          "light": {
-            "hex": "#c8a8ff",
-            "name": "aether glow"
+          "iron": {
+            "hex": "#3a3d40",
+            "name": "cast pig-iron"
           }
         },
-        "costume": "A torn white and violet tutu, a laced violet bodice, long white satin gloves to the elbow, a velvet choker with a cameo, black ribbons tied round the glass at the ankles like pointe-shoe ribbons, a single feather in her bun.",
+        "costume": "A heavy oiled leather cobbler's apron with brass eyelets and awl pockets over a high-collared dark wool work dress, rolled linen sleeves with studded leather vambraces, spectacles on a fine brass chain, dark hair pinned tightly under a baker boy cap.",
         "alternates": [
           {
-            "name": "Black Swan",
-            "note": "black tutu and feathers, the gas burning red"
+            "name": "Sunday Best",
+            "note": "dark green corduroy apron and polished brass lasts"
           },
           {
-            "name": "Rehearsal",
-            "note": "a grey practice wrap, the glass dimmed"
+            "name": "Foundry Shift",
+            "note": "blackened leather, soot-stained cheeks, red-hot iron welts"
           },
           {
-            "name": "Gaslight",
-            "note": "the legs burning a gas-blue, the tutu sky blue"
+            "name": "Workhouse Grey",
+            "note": "coarse unbleached canvas apron and rusted raw iron lasts"
           }
         ],
-        "limbs": "The legs are long tapering tubes of clear glass with violet-white gas swirling inside, banded by brass ferrules at the hip, knee and ankle; the knee is a glass globe like a lamp; the feet end in brass pointe tips. They light the floor round her and reflect in every puddle.",
-        "face": "A delicate, high-cheekboned face with dark painted eyes (paint 1), a small smile, a beauty spot.",
-        "hair": "Black, in a severe high bun with a feather.",
-        "gore": "Burning and lacerating: glass shards in the face, flash burns, flesh charred where the gas caught. Her KO leaves them alight.",
+        "limbs": "The legs are heavy cast-iron lasts calibrated with engraved brass imperial rules along the shins; tension springs run along the calf into ratchet gears at the ankle; the feet are heavy square-toed brogues with hardened steel welts.",
+        "face": "A severe, handsome, sharp-jawed London face with acute hazel eyes behind round wire-rimmed spectacles, a pencil tucked behind the left ear.",
+        "hair": "Dark chestnut brown, pinned back in a practical braided bun under a wool baker boy cap.",
+        "gore": "Shattering concussions: broken cheekbones, teeth knocked loose by steel-welted heels, sparks and hot iron fragments embedded in flesh.",
         "vfx": [
-          "violet light from her legs on the wet floor",
-          "glass shards and burning gas from a smashed shin",
-          "a trail of light on her kicks"
+          "sparks shower from her steel shoe welts on impact",
+          "brass gear particles burst when her tension springs release",
+          "kinetic shockwaves ripple along the ground from heel drops"
         ],
-        "idle": "Sways in a slow ginga, then rises en pointe and holds it.",
-        "intro": "A spotlight finds her; she rises on her toes and curtseys as the legs light up one bulb at a time.",
-        "victory": "A long, deep curtsey, catches a thrown rose, and her legs dim.",
-        "defeat": "The light in her legs goes out bulb by bulb; she sinks into a dying swan.",
-        "portrait": "A full-length pose en pointe in an arabesque, legs glowing violet, rain falling through the light."
+        "idle": "Stands in an upright Tae Kwon Do guard, occasionally tapping her lead iron shoe last against the stone with a clear metallic ring.",
+        "intro": "Pulls a wooden ruler from her apron pocket, measures the distance to the opponent, taps her iron heel to engage the ratchet, and raises her fists.",
+        "victory": "Pulls a piece of chalk from behind her ear, makes a chalk tick-mark on the defeated opponent, and slides her spectacles down to inspect her work.",
+        "defeat": "A knee ratchet gives way with a sharp metallic snap; she falls to one knee, gripping the broken spring with a furious scowl.",
+        "portrait": "A three-quarter stance in her Spitalfields workshop, apron tied, spectacles glinting, one iron last resting on a wooden cobbler bench."
       },
       "sound": {
         "voice": {
-          "casting": "a light, sweet, breathy soprano in her early twenties",
-          "accent": "an affected stage French over a court-of-Gaiety-Lane working-class voice that slips through when she is hurt",
-          "texture": "soft, delighted, faintly bored"
+          "casting": "a sharp, dry, articulate contralto in her early thirties",
+          "accent": "unapologetic East London / Spitalfields artisan cockney, brisk and precise",
+          "texture": "acerbic, dry, confident, entirely unruffled"
         },
         "lines": {
           "intro": [
-            "Bonsoir. Shall we dance?",
-            "The orchestra, if you please."
+            "Hold still. Let's see what size you take.",
+            "Stand straight; you're throwing my welt off.",
+            "I've broken stouter lasts than you."
           ],
           "appeal": [
-            "Merci, merci! Encore?",
-            "Flowers, darlings, flowers!"
+            "Good leather, clean welt, no excuses.",
+            "Anyone else need stretching?",
+            "That's sixteen stitches to the inch!"
           ],
-          "hit": [
-            "Et un.",
-            "Et deux.",
-            "Voilà."
-          ],
-          "hurt": [
-            "Ow! (in her real voice)",
-            "Oh, la."
-          ],
-          "special": "Lights!",
-          "tincture": "(laughing and humming)",
           "victory": [
-            "And... curtain.",
-            "Merci, merci."
+            "Hammered, stitched, and put out to dry.",
+            "A poor fit from the start.",
+            "Next time, break them in gently."
           ],
-          "defeat": "The lights... are going down..."
-        },
-        "efforts": "small breathy gasps, like a dancer landing",
-        "footsteps": "sharp glass taps, like a fingernail on a bottle, with a low electric hum",
-        "foley": "the hum of the gas in her legs that rises with speed, glass tinkling, satin rustling, a music box she carries",
-        "impact": {
-          "craft": "aether-glass",
-          "nuance": "a rising buzz on the kicks, a whump of gas on the big ones"
-        },
-        "music": {
-          "title": "The Hippodrome",
-          "brief": "A ballet waltz for a full theatre orchestra, warped and slightly too fast, with a celesta melody, a glass-harmonica countermelody and the hiss of gas footlights.",
-          "tempo": 150,
-          "instruments": [
-            "theatre orchestra",
-            "celesta",
-            "glass harmonica",
-            "harp",
-            "gas hiss"
+          "defeat": [
+            "The mainspring... has snapped...",
+            "My bench... who's minding the shop?...",
+            "A bad batch... of iron..."
           ]
         },
         "cues": [
           {
-            "id": "columbine-hum",
+            "id": "pegg-spring-ratchet",
             "category": "foley",
-            "note": "the gas humming in her glass legs",
-            "prompt": "A glass tube full of glowing gas hums with a low electric buzz that rises and falls. Close microphone, dry room, a few seconds.",
-            "seed": 4680
+            "note": "the sharp click-clack of the tension ratchet in her iron knee",
+            "prompt": "A heavy mechanical ratchet clicks five times rapidly under spring tension, followed by a metallic latch engaging.",
+            "seed": 5210
           },
           {
-            "id": "columbine-flare",
+            "id": "pegg-iron-clank",
             "category": "foley",
-            "note": "the jet of burning gas from her special",
-            "prompt": "A jet of gas is released and lit: a sharp hiss, then a whooshing roar of flame that dies away. Outdoors in the rain, one single burst.",
-            "seed": 4681
+            "note": "the dull, resonant clang of the cast-iron shoe last striking stone",
+            "prompt": "A solid cast-iron anvil weight strikes hard cobblestone with a sharp ring and heavy low thump.",
+            "seed": 5211
           }
         ]
       },
       "texture": {
-        "seed": 5109,
+        "seed": 5212,
         "skin": {
-          "idea": "smooth warm brown skin with a dancer's muscle, glistening with rain",
-          "colour": "warm brown"
+          "idea": "weathered pale East End complexion, strong jaw, smudged with black cobbler wax",
+          "colour": "fair with grey-black smudge"
         },
         "cloth": {
-          "idea": "torn white and violet tulle tutu, a laced violet satin bodice, long white satin gloves",
-          "colour": "white and violet"
+          "idea": "heavy oiled cowhide apron with brass eyelets, dark wool work dress, rolled linen sleeves",
+          "colour": "dark brown and charcoal wool"
         },
         "face": {
-          "idea": "a delicate high-cheekboned face with dark painted eyes, a beauty spot, black hair in a high bun",
-          "colour": "warm brown"
-        },
-        "limb": {
-          "idea": "clear blown-glass tubes and a glass globe knee filled with swirling violet-white glowing gas, brass ferrules",
-          "colour": "clear glass with violet glow"
+          "idea": "sharp, observant, spectacles reflecting lamplight, pencil tucked behind ear",
+          "colour": "fair with light freckling"
         }
       }
     },
