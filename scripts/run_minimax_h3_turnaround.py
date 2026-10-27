@@ -198,9 +198,40 @@ def run_h3_turntable(input_alpha_path, output_sheet_path, prompt=None):
     os.makedirs(os.path.dirname(output_sheet_path), exist_ok=True)
     strip.save(output_sheet_path, quality=95)
     print(f"[MiniMax H3] 4-view orthographic turnaround sheet saved: {output_sheet_path}")
-    return output_sheet_path
+
+    # Generate animated WebP turntable
+    turntable_webp_path = output_sheet_path.replace("_turnaround.png", "_turntable.webp")
+    if turntable_webp_path == output_sheet_path:
+        turntable_webp_path = output_sheet_path.rsplit(".", 1)[0] + "_turntable.webp"
+
+    try:
+        sampled_indices = range(0, num_frames, 2)
+        anim_frames = []
+        for idx in sampled_indices:
+            fn = images_info[idx]["filename"]
+            sub = images_info[idx].get("subfolder", "")
+            fp = os.path.join(COMFY_OUTPUT, sub, fn)
+            anim_frames.append(Image.open(fp).convert("RGB").resize((400, 400), Image.Resampling.LANCZOS))
+        
+        if anim_frames:
+            anim_frames[0].save(
+                turntable_webp_path,
+                save_all=True,
+                append_images=anim_frames[1:],
+                duration=80,
+                loop=0,
+                quality=85
+            )
+            print(f"[MiniMax H3] Animated turntable saved: {turntable_webp_path}")
+    except Exception as e:
+        print(f"[MiniMax H3] Warning: failed to save turntable webp: {e}")
+
+    return output_sheet_path, turntable_webp_path
 
 if __name__ == "__main__":
     src = "public/tex/props/flux3_winch_custodian_prop_alpha.png"
     dst = "public/tex/props/h3_custodian_helmet_turnaround.png"
+    if len(sys.argv) > 2:
+        src = sys.argv[1]
+        dst = sys.argv[2]
     run_h3_turntable(src, dst)
