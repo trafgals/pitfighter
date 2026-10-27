@@ -30,6 +30,14 @@
       "turnaround_sheet": "public/tex/props/h3_custodian_helmet_turnaround.png",
       "turntable": "public/tex/props/h3_custodian_helmet_turntable.webp",
       "glb_output": "public/models/props/prop_winch_custodian_helmet.glb",
+      "validation": {
+        "rim_mesh": "Crown_Opening_Rim",
+        "front_mesh": "Brunswick_Star_Badge_Plate",
+        "closeup_mesh": "Brunswick_Star_Badge_Plate",
+        "closeup_fit": 0.048,
+        "closeup_label": "Badge close-up",
+        "view_fit": 0.17
+      },
       "measured": {
         "triangles": 22848,
         "bytes": 1414112,
@@ -41,6 +49,53 @@
       },
       "build": "node scripts/build_prop_winch_custodian_helmet.mjs",
       "validate": "node scripts/capture_prop_renders.mjs prop_winch_custodian_helmet"
+    },
+    {
+      "id": "prop_smelt_stovepipe",
+      "name": "Ironmaster Chimney Stovepipe Hat",
+      "character": "Mr. Hezekiah Smelt",
+      "category": "headgear",
+      "slot": "head_socket",
+      "poly_budget": 35000,
+      "file_budget_bytes": 1572864,
+      "scale_dimensions_cm": {
+        "width": 27.7,
+        "height": 44.6,
+        "depth": 27.7
+      },
+      "status": "gate:3-review-ingame-3d",
+      "pivot": {
+        "convention": "head_socket_normalized",
+        "origin": "the base opening: the crown's head-entry rim lies on the y=0 plane, centred on the hat's axis",
+        "forward": "+Z",
+        "up": "+Y",
+        "units": "metres",
+        "note": "The brim hangs 2.6 cm below the origin and the chimney's mouth reaches 42 cm above it, so the prop is 44.6 cm tall - the '~45 cm total height with chimney stack' the issue asks for. The hat is a surface of revolution apart from the brim's front droop, which is what marks +Z as the front."
+      },
+      "reference_concept": "public/tex/characters/hezekiah_smelt.jpg",
+      "alpha_cutout": "public/tex/props/flux3_smelt_stovepipe_elongated_alpha.png",
+      "turnaround_sheet": "public/tex/props/h3_smelt_stovepipe_turnaround.png",
+      "turntable": "public/tex/props/h3_smelt_stovepipe_turntable.webp",
+      "glb_output": "public/models/props/prop_smelt_stovepipe.glb",
+      "validation": {
+        "rim_mesh": "Crown_Opening_Rim",
+        "axis_mesh": "Chimney_Stack",
+        "closeup_focus": [0, 0.024, 0.0832],
+        "closeup_fit": 0.045,
+        "closeup_label": "Gold band close-up",
+        "view_fit": 0.225
+      },
+      "measured": {
+        "triangles": 15520,
+        "bytes": 1125852,
+        "bbox_min_cm": [-13.85, -2.59, -13.85],
+        "bbox_max_cm": [13.85, 42.0, 13.85],
+        "meshes": 31,
+        "materials": 8,
+        "embedded_images": 8
+      },
+      "build": "node scripts/build_prop_smelt_stovepipe.mjs",
+      "validate": "node scripts/capture_prop_renders.mjs prop_smelt_stovepipe"
     }
   ]
 }
