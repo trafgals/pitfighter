@@ -25,12 +25,6 @@ const CHROME = process.env.CHROME_PATH || "C:\\Program Files\\Google\\Chrome\\Ap
 const WIDTH = 900;
 const HEIGHT = 1100;
 
-const VIEWS = [
-  { name: "front", label: "Front (0deg, badge to camera)" },
-  { name: "profile", label: "Profile (90deg, right side)" },
-  { name: "badge", label: "Badge close-up" },
-];
-
 const assetId = process.argv[2];
 if (!assetId) {
   console.error("usage: node scripts/capture_prop_renders.mjs <asset_id>");
@@ -47,6 +41,38 @@ const budget = {
   dimensionsCm: entry?.scale_dimensions_cm ?? { width: 22, height: 32, depth: 26 },
 };
 const toleranceCm = 0.2; // 2mm
+
+// What to check, and how to frame the close-up.
+//
+// The checks are declared per asset in the manifest, because a prop is not
+// always a badge on a helmet: a stovepipe hat has no badge, but it does have
+// a flue that has to run up the middle of the crown. The defaults are the
+// helmet's, so an asset with no validation block still gets checked the way
+// it was before.
+const validation = entry?.validation ?? {};
+// An asset that declares its own validation block says what it has: a block
+// with no front_mesh means the asset has no front feature at all, and the +Z
+// check does not apply to it. An asset with no block keeps the helmet's
+// defaults, so a missing badge there is still a failure and not a check that
+// quietly goes away.
+const hasValidation = !!entry?.validation;
+const rimMeshName = validation.rim_mesh ?? "Crown_Opening_Rim";
+const frontMeshName = validation.front_mesh ?? (hasValidation ? null : "Brunswick_Star_Badge_Plate");
+const axisMeshName = validation.axis_mesh ?? null;
+const viewFit = validation.view_fit ?? 0.17;
+const closeupFit = validation.closeup_fit ?? 0.048;
+const closeupLabel = validation.closeup_label ?? "Badge close-up";
+// The close-up is framed on a point in the model's own space when the
+// manifest gives one, and on a mesh's centre otherwise.
+const closeupFocus = validation.closeup_focus
+  ? validation.closeup_focus.join(",")
+  : (validation.closeup_mesh ?? "");
+
+const VIEWS = [
+  { name: "front", label: "Front (0deg, badge to camera)" },
+  { name: "profile", label: "Profile (90deg, right side)" },
+  { name: "badge", label: closeupLabel },
+];
 
 /** Where the .glb for this asset actually is. */
 function resolveModel() {
@@ -164,7 +190,7 @@ async function main() {
 
   // The base opening: the crown's head-entry rim must sit on the origin's
   // plane, and the asset's axis must be centred on X.
-  const rim = report.meshes.find((mesh) => mesh.name === "Crown_Opening_Rim");
+  const rim = report.meshes.find((mesh) => mesh.name === rimMeshName);
   if (rim) {
     check(
       Math.abs(rim.bbox.max[1]) <= 0.002 && Math.abs(rim.bbox.min[1]) <= 0.002,
@@ -173,20 +199,46 @@ async function main() {
     );
     check(
       Math.abs(rim.bbox.centre[0]) <= 0.002,
-      "the helmet's axis is centred on X",
+      "the asset's axis is centred on X",
       `rim centre x ${cm(rim.bbox.centre[0])} cm`,
     );
   } else {
-    check(false, "the model has a crown opening rim to measure", "Crown_Opening_Rim not found");
+    check(false, "the model has a crown opening rim to measure", `${rimMeshName} not found`);
   }
 
-  // +Z is forward: the badge has to be on the front face.
-  const badge = report.meshes.find((mesh) => mesh.name === "Brunswick_Star_Badge_Plate");
-  if (badge) {
-    check(badge.bbox.centre[2] > 0.02, "the badge is on the front face (+Z)", `badge centre z ${cm(badge.bbox.centre[2])} cm`);
-    check(Math.abs(badge.bbox.centre[0]) <= 0.003, "the badge is centred left to right", `badge centre x ${cm(badge.bbox.centre[0])} cm`);
+  // +Z is forward: a badge has to be on the front face. Not every prop has
+  // one, so this only runs for an asset that declares it - and a declared
+  // badge that is not in the model is a failure, not a skipped check.
+  if (frontMeshName) {
+    const front = report.meshes.find((mesh) => mesh.name === frontMeshName);
+    if (front) {
+      check(front.bbox.centre[2] > 0.02, "the badge is on the front face (+Z)", `badge centre z ${cm(front.bbox.centre[2])} cm`);
+      check(Math.abs(front.bbox.centre[0]) <= 0.003, "the badge is centred left to right", `badge centre x ${cm(front.bbox.centre[0])} cm`);
+    } else {
+      check(false, "the model has a badge to check", `${frontMeshName} not found`);
+    }
   } else {
-    check(false, "the model has a badge to check", "Brunswick_Star_Badge_Plate not found");
+    console.log("  (no front feature declared for this asset: the +Z badge check does not apply)");
+  }
+
+  // An asset that carries a part up its middle - a chimney through a crown -
+  // has to be centred on both axes, or the socket cannot place it.
+  if (axisMeshName) {
+    const axis = report.meshes.find((mesh) => mesh.name === axisMeshName);
+    if (axis) {
+      check(
+        Math.abs(axis.bbox.centre[0]) <= 0.002,
+        "the stack runs up the asset's axis (centred on X)",
+        `centre x ${cm(axis.bbox.centre[0])} cm`,
+      );
+      check(
+        Math.abs(axis.bbox.centre[2]) <= 0.002,
+        "the stack runs up the asset's axis (centred on Z)",
+        `centre z ${cm(axis.bbox.centre[2])} cm`,
+      );
+    } else {
+      check(false, "the model has the axis mesh to check", `${axisMeshName} not found`);
+    }
   }
 
   // ---- the renders --------------------------------------------------------
@@ -229,7 +281,10 @@ async function main() {
     missing.push(`${response.status()} ${response.url()}`);
   });
 
-  const url = `http://127.0.0.1:${PORT}/tools/prop-capture/capture.html?model=/${modelFile.replace(/^public\//, "")}&width=${WIDTH}&height=${HEIGHT}`;
+  const url =
+    `http://127.0.0.1:${PORT}/tools/prop-capture/capture.html?model=/${modelFile.replace(/^public\//, "")}` +
+    `&width=${WIDTH}&height=${HEIGHT}&fit=${viewFit}&closeupFit=${closeupFit}` +
+    `&closeup=${encodeURIComponent(closeupFocus)}`;
   await page.goto(url, { waitUntil: "load" });
   await page.waitForFunction(() => window.__propCapture && window.__propCapture.ready, { timeout: 60_000, polling: "raf" });
 
