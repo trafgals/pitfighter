@@ -64,9 +64,18 @@ const closeupFit = validation.closeup_fit ?? 0.048;
 const closeupLabel = validation.closeup_label ?? "Badge close-up";
 // The close-up is framed on a point in the model's own space when the
 // manifest gives one, and on a mesh's centre otherwise.
+//
+// It has to be framed on something. With no target at all the capture page
+// centres the close-up on the whole model, so the "detail" render shows the
+// entire prop and the run still reports success - a badge close-up that never
+// showed the badge. An asset that names no close-up of its own falls back to
+// the front feature it declares, and an asset that declares no validation
+// block at all falls back to the helmet's badge, which is what the capture
+// page used to find by itself before the target became the manifest's job.
+const closeupMeshName = validation.closeup_mesh ?? frontMeshName;
 const closeupFocus = validation.closeup_focus
   ? validation.closeup_focus.join(",")
-  : (validation.closeup_mesh ?? "");
+  : (closeupMeshName ?? "");
 
 const VIEWS = [
   { name: "front", label: "Front (0deg, badge to camera)" },
@@ -219,6 +228,19 @@ async function main() {
     }
   } else {
     console.log("  (no front feature declared for this asset: the +Z badge check does not apply)");
+  }
+
+  // The close-up is one of the three renders a reviewer looks at, so it has
+  // to be framed on the detail it promises. This fails only for an asset that
+  // declares a validation block with no close-up target and no front feature
+  // to fall back on: the one case where the capture page would quietly
+  // centre the close-up on the whole model and call it a pass.
+  if (!closeupFocus) {
+    check(
+      false,
+      "the close-up is framed on a declared target",
+      "the manifest names no closeup_mesh, no closeup_focus and no front feature",
+    );
   }
 
   // An asset that carries a part up its middle - a chimney through a crown -
