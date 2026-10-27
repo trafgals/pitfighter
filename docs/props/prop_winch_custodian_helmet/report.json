@@ -1,7 +1,7 @@
 {
   "asset": "prop_winch_custodian_helmet",
   "model": "public/models/props/prop_winch_custodian_helmet.glb",
-  "capturedAt": "2026-10-27T03:27:17.926Z",
+  "capturedAt": "2026-10-27T08:48:27.226Z",
   "budget": {
     "triangles": 35000,
     "bytes": 1572864,
@@ -141,7 +141,7 @@
     },
     {
       "view": "badge",
-      "label": "Badge close-up",
+      "label": "Brunswick star badge close-up",
       "file": "test-output/props/prop_winch_custodian_helmet/badge.png",
       "bytes": 1277578
     }
@@ -194,7 +194,7 @@
     },
     {
       "ok": true,
-      "message": "the helmet's axis is centred on X",
+      "message": "the asset's axis is centred on X",
       "detail": "rim centre x 0 cm"
     },
     {

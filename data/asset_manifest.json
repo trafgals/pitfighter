@@ -13,17 +13,17 @@
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
         "width": 22.0,
-        "height": 32.2,
-        "depth": 26.2
+        "height": 32.0,
+        "depth": 26.0
       },
-      "status": "gate:3-review-ingame-3d",
+      "status": "status:asset-approved",
       "pivot": {
         "convention": "head_socket_normalized",
-        "origin": "the base opening: the helmet's rim opening lies on the y=0 plane, centred on the head cavity",
+        "origin": "the base opening: the crown's head-entry rim lies on the y=0 plane, centred on the helmet's axis",
         "forward": "+Z",
         "up": "+Y",
         "units": "metres",
-        "note": "The Brunswick star badge faces along +Z. Head enters from -Y through the rim opening."
+        "note": "The brim hangs 4.5 cm below the origin, the way a custodian helmet's brim does; the asset's lowest point is the brim's rolled lip and the total height is 32 cm."
       },
       "reference_concept": "public/tex/characters/obadiah_winch.jpg",
       "alpha_cutout": "public/tex/props/flux3_winch_custodian_prop_alpha.png",
@@ -31,33 +31,29 @@
       "turntable": "public/tex/props/h3_custodian_helmet_turntable.webp",
       "glb_output": "public/models/props/prop_winch_custodian_helmet.glb",
       "validation": {
-        "rim_mesh": "Helmet_Rim",
-        "badge_mesh": "Badge_Brunswick_Star",
-        "closeup_focus": [
-          0,
-          0.05,
-          0.125
-        ],
-        "closeup_fit": 0.065,
+        "rim_mesh": "Crown_Opening_Rim",
+        "front_mesh": "Brunswick_Star_Badge_Plate",
+        "closeup_mesh": "Brunswick_Star_Badge_Plate",
+        "closeup_fit": 0.048,
         "closeup_label": "Brunswick star badge close-up",
-        "view_fit": 0.165
+        "view_fit": 0.17
       },
       "measured": {
         "triangles": 22848,
-        "bytes": 1348824,
+        "bytes": 1414112,
         "bbox_min_cm": [
           -11.0,
-          -0.0,
-          -13.1
+          -4.5,
+          -12.5
         ],
         "bbox_max_cm": [
           11.0,
-          32.2,
-          13.1
+          27.5,
+          13.5
         ],
-        "meshes": 34,
-        "materials": 8,
-        "embedded_images": 8
+        "meshes": 17,
+        "materials": 7,
+        "embedded_images": 7
       },
       "build": "node scripts/build_prop_winch_custodian_helmet.mjs",
       "validate": "node scripts/capture_prop_renders.mjs prop_winch_custodian_helmet"
