@@ -1,0 +1,156 @@
+{
+  "asset": "prop_crump_samovar",
+  "model": "public/models/props/prop_crump_samovar.glb",
+  "capturedAt": "2026-10-27T11:19:42.117Z",
+  "budget": {
+    "triangles": 28000,
+    "bytes": 1572864,
+    "dimensionsCm": {
+      "width": 22,
+      "height": 38.5,
+      "depth": 24
+    }
+  },
+  "triangles": 192,
+  "bytes": 15252,
+  "dimensionsCm": {
+    "width": 22,
+    "height": 38.5,
+    "depth": 24
+  },
+  "bbox": {
+    "min": [
+      -0.10999999940395355,
+      -0.1599999964237213,
+      -0.10999999940395355
+    ],
+    "max": [
+      0.10999999940395355,
+      0.22500000014901161,
+      0.12999999955296518
+    ]
+  },
+  "meshes": [
+    {
+      "name": "Handle_Grip_Urn",
+      "triangles": 96,
+      "material": 0
+    },
+    {
+      "name": "Samovar_Lid",
+      "triangles": 48,
+      "material": 1
+    },
+    {
+      "name": "mesh_2",
+      "triangles": 48,
+      "material": 2
+    }
+  ],
+  "materials": [
+    "(unnamed)",
+    "(unnamed)",
+    "(unnamed)"
+  ],
+  "renders": [
+    {
+      "view": "front",
+      "label": "Front (0deg, badge to camera)",
+      "file": "test-output/props/prop_crump_samovar/front.png",
+      "bytes": 50455
+    },
+    {
+      "view": "profile",
+      "label": "Profile (90deg, right side)",
+      "file": "test-output/props/prop_crump_samovar/profile.png",
+      "bytes": 43824
+    },
+    {
+      "view": "badge",
+      "label": "Ornate samovar lid close-up",
+      "file": "test-output/props/prop_crump_samovar/badge.png",
+      "bytes": 94996
+    }
+  ],
+  "checks": [
+    {
+      "ok": true,
+      "message": "the model has triangles",
+      "detail": "192"
+    },
+    {
+      "ok": true,
+      "message": "triangle count is under budget",
+      "detail": "192 < 28000"
+    },
+    {
+      "ok": true,
+      "message": "file size is within budget",
+      "detail": "0.015 MB <= 1.5 MB"
+    },
+    {
+      "ok": true,
+      "message": "the mesh has no structural problems",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "no vertex position is NaN or infinite",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "message": "width matches the spec (22 cm)",
+      "detail": "22 cm"
+    },
+    {
+      "ok": true,
+      "message": "height matches the spec (38.5 cm)",
+      "detail": "38.5 cm"
+    },
+    {
+      "ok": true,
+      "message": "depth matches the spec (24 cm)",
+      "detail": "24 cm"
+    },
+    {
+      "ok": true,
+      "message": "the handle grip is centred on the origin's plane (y = 0)",
+      "detail": "grip centre y 0 cm"
+    },
+    {
+      "ok": true,
+      "message": "the handle grip is centred on X",
+      "detail": "grip centre x 0 cm"
+    },
+    {
+      "ok": true,
+      "message": "every asset the page asked for was served",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the model loads in a WebGL renderer without errors",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the renderer reported no load errors",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the renderer sees the same triangle count as the file",
+      "detail": "192 vs 192"
+    },
+    {
+      "ok": true,
+      "message": "every verification render has real content"
+    },
+    {
+      "ok": true,
+      "message": "the front render is a real image",
+      "detail": "50455 bytes"
+    }
+  ]
+}

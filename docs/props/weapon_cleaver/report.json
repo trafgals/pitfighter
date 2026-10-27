@@ -1,0 +1,150 @@
+{
+  "asset": "weapon_cleaver",
+  "model": "public/models/props/weapon_cleaver.glb",
+  "capturedAt": "2026-10-27T12:23:21.260Z",
+  "budget": {
+    "triangles": 16000,
+    "bytes": 1572864,
+    "dimensionsCm": {
+      "width": 3.2,
+      "height": 36,
+      "depth": 11.6
+    }
+  },
+  "triangles": 76,
+  "bytes": 6980,
+  "dimensionsCm": {
+    "width": 3.2,
+    "height": 36,
+    "depth": 11.6
+  },
+  "bbox": {
+    "min": [
+      -0.01600000075995922,
+      -0.07000000029802322,
+      -0.01600000075995922
+    ],
+    "max": [
+      0.01600000075995922,
+      0.28999999940395355,
+      0.09999999970197677
+    ]
+  },
+  "meshes": [
+    {
+      "name": "Handle_Grip_Scales",
+      "triangles": 64,
+      "material": 0
+    },
+    {
+      "name": "Cleaver_Blade_Steel",
+      "triangles": 12,
+      "material": 1
+    }
+  ],
+  "materials": [
+    "(unnamed)",
+    "(unnamed)"
+  ],
+  "renders": [
+    {
+      "view": "front",
+      "label": "Front (0deg, badge to camera)",
+      "file": "test-output/props/weapon_cleaver/front.png",
+      "bytes": 9024
+    },
+    {
+      "view": "profile",
+      "label": "Profile (90deg, right side)",
+      "file": "test-output/props/weapon_cleaver/profile.png",
+      "bytes": 9481
+    },
+    {
+      "view": "badge",
+      "label": "Carbon steel meat cleaver blade close-up",
+      "file": "test-output/props/weapon_cleaver/badge.png",
+      "bytes": 13993
+    }
+  ],
+  "checks": [
+    {
+      "ok": true,
+      "message": "the model has triangles",
+      "detail": "76"
+    },
+    {
+      "ok": true,
+      "message": "triangle count is under budget",
+      "detail": "76 < 16000"
+    },
+    {
+      "ok": true,
+      "message": "file size is within budget",
+      "detail": "0.007 MB <= 1.5 MB"
+    },
+    {
+      "ok": true,
+      "message": "the mesh has no structural problems",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "no vertex position is NaN or infinite",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "message": "width matches the spec (3.2 cm)",
+      "detail": "3.2 cm"
+    },
+    {
+      "ok": true,
+      "message": "height matches the spec (36 cm)",
+      "detail": "36 cm"
+    },
+    {
+      "ok": true,
+      "message": "depth matches the spec (11.6 cm)",
+      "detail": "11.6 cm"
+    },
+    {
+      "ok": true,
+      "message": "the handle grip is centred on the origin's plane (y = 0)",
+      "detail": "grip centre y 0 cm"
+    },
+    {
+      "ok": true,
+      "message": "the handle grip is centred on X",
+      "detail": "grip centre x 0 cm"
+    },
+    {
+      "ok": true,
+      "message": "every asset the page asked for was served",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the model loads in a WebGL renderer without errors",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the renderer reported no load errors",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the renderer sees the same triangle count as the file",
+      "detail": "76 vs 76"
+    },
+    {
+      "ok": true,
+      "message": "every verification render has real content"
+    },
+    {
+      "ok": true,
+      "message": "the front render is a real image",
+      "detail": "9024 bytes"
+    }
+  ]
+}

@@ -1,0 +1,156 @@
+{
+  "asset": "prop_rook_souwester",
+  "model": "public/models/props/prop_rook_souwester.glb",
+  "capturedAt": "2026-10-27T10:38:46.765Z",
+  "budget": {
+    "triangles": 20000,
+    "bytes": 1572864,
+    "dimensionsCm": {
+      "width": 32.3,
+      "height": 23.8,
+      "depth": 36.9
+    }
+  },
+  "triangles": 856,
+  "bytes": 26244,
+  "dimensionsCm": {
+    "width": 32.3,
+    "height": 23.8,
+    "depth": 36.9
+  },
+  "bbox": {
+    "min": [
+      -0.16167961061000824,
+      -0.09499999970197678,
+      -0.22000000178813933
+    ],
+    "max": [
+      0.16167961061000824,
+      0.143499995470047,
+      0.14949999451637266
+    ]
+  },
+  "meshes": [
+    {
+      "name": "Crown_Opening_Rim",
+      "triangles": 64,
+      "material": 0
+    },
+    {
+      "name": "Crown_Dome",
+      "triangles": 744,
+      "material": 1
+    },
+    {
+      "name": "Neck_Flap",
+      "triangles": 48,
+      "material": 2
+    }
+  ],
+  "materials": [
+    "(unnamed)",
+    "(unnamed)",
+    "(unnamed)"
+  ],
+  "renders": [
+    {
+      "view": "front",
+      "label": "Front (0deg, badge to camera)",
+      "file": "test-output/props/prop_rook_souwester/front.png",
+      "bytes": 52742
+    },
+    {
+      "view": "profile",
+      "label": "Profile (90deg, right side)",
+      "file": "test-output/props/prop_rook_souwester/profile.png",
+      "bytes": 60925
+    },
+    {
+      "view": "badge",
+      "label": "Storm neck flap close-up",
+      "file": "test-output/props/prop_rook_souwester/badge.png",
+      "bytes": 53606
+    }
+  ],
+  "checks": [
+    {
+      "ok": true,
+      "message": "the model has triangles",
+      "detail": "856"
+    },
+    {
+      "ok": true,
+      "message": "triangle count is under budget",
+      "detail": "856 < 20000"
+    },
+    {
+      "ok": true,
+      "message": "file size is within budget",
+      "detail": "0.025 MB <= 1.5 MB"
+    },
+    {
+      "ok": true,
+      "message": "the mesh has no structural problems",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "no vertex position is NaN or infinite",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "message": "width matches the spec (32.3 cm)",
+      "detail": "32.3 cm"
+    },
+    {
+      "ok": true,
+      "message": "height matches the spec (23.8 cm)",
+      "detail": "23.8 cm"
+    },
+    {
+      "ok": true,
+      "message": "depth matches the spec (36.9 cm)",
+      "detail": "36.9 cm"
+    },
+    {
+      "ok": true,
+      "message": "the base opening sits on the origin's plane (y = 0)",
+      "detail": "rim y 0..0 cm"
+    },
+    {
+      "ok": true,
+      "message": "the asset's axis is centred on X",
+      "detail": "rim centre x 0 cm"
+    },
+    {
+      "ok": true,
+      "message": "every asset the page asked for was served",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the model loads in a WebGL renderer without errors",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the renderer reported no load errors",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the renderer sees the same triangle count as the file",
+      "detail": "856 vs 856"
+    },
+    {
+      "ok": true,
+      "message": "every verification render has real content"
+    },
+    {
+      "ok": true,
+      "message": "the front render is a real image",
+      "detail": "52742 bytes"
+    }
+  ]
+}

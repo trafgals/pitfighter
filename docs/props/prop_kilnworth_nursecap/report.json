@@ -1,0 +1,162 @@
+{
+  "asset": "prop_kilnworth_nursecap",
+  "model": "public/models/props/prop_kilnworth_nursecap.glb",
+  "capturedAt": "2026-10-27T09:43:24.120Z",
+  "budget": {
+    "triangles": 20000,
+    "bytes": 1572864,
+    "dimensionsCm": {
+      "width": 18,
+      "height": 11.5,
+      "depth": 18
+    }
+  },
+  "triangles": 100,
+  "bytes": 9756,
+  "dimensionsCm": {
+    "width": 18,
+    "height": 11.5,
+    "depth": 18
+  },
+  "bbox": {
+    "min": [
+      -0.09000000357627869,
+      -1.9984015237346206e-17,
+      -0.09000000357627869
+    ],
+    "max": [
+      0.09000000357627869,
+      0.11499999970197677,
+      0.09000000357627869
+    ]
+  },
+  "meshes": [
+    {
+      "name": "Crown_Opening_Rim",
+      "triangles": 64,
+      "material": 0
+    },
+    {
+      "name": "Crown_Body",
+      "triangles": 12,
+      "material": 1
+    },
+    {
+      "name": "Red_Cross_Emblem",
+      "triangles": 12,
+      "material": 2
+    },
+    {
+      "name": "mesh_3",
+      "triangles": 12,
+      "material": 3
+    }
+  ],
+  "materials": [
+    "(unnamed)",
+    "(unnamed)",
+    "(unnamed)",
+    "(unnamed)"
+  ],
+  "renders": [
+    {
+      "view": "front",
+      "label": "Front (0deg, badge to camera)",
+      "file": "test-output/props/prop_kilnworth_nursecap/front.png",
+      "bytes": 7043
+    },
+    {
+      "view": "profile",
+      "label": "Profile (90deg, right side)",
+      "file": "test-output/props/prop_kilnworth_nursecap/profile.png",
+      "bytes": 6260
+    },
+    {
+      "view": "badge",
+      "label": "Crimson Geneva cross close-up",
+      "file": "test-output/props/prop_kilnworth_nursecap/badge.png",
+      "bytes": 9833
+    }
+  ],
+  "checks": [
+    {
+      "ok": true,
+      "message": "the model has triangles",
+      "detail": "100"
+    },
+    {
+      "ok": true,
+      "message": "triangle count is under budget",
+      "detail": "100 < 20000"
+    },
+    {
+      "ok": true,
+      "message": "file size is within budget",
+      "detail": "0.009 MB <= 1.5 MB"
+    },
+    {
+      "ok": true,
+      "message": "the mesh has no structural problems",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "no vertex position is NaN or infinite",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "message": "width matches the spec (18 cm)",
+      "detail": "18 cm"
+    },
+    {
+      "ok": true,
+      "message": "height matches the spec (11.5 cm)",
+      "detail": "11.5 cm"
+    },
+    {
+      "ok": true,
+      "message": "depth matches the spec (18 cm)",
+      "detail": "18 cm"
+    },
+    {
+      "ok": true,
+      "message": "the base opening sits on the origin's plane (y = 0)",
+      "detail": "rim y 0..0 cm"
+    },
+    {
+      "ok": true,
+      "message": "the asset's axis is centred on X",
+      "detail": "rim centre x 0 cm"
+    },
+    {
+      "ok": true,
+      "message": "every asset the page asked for was served",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the model loads in a WebGL renderer without errors",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the renderer reported no load errors",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the renderer sees the same triangle count as the file",
+      "detail": "100 vs 100"
+    },
+    {
+      "ok": true,
+      "message": "every verification render has real content"
+    },
+    {
+      "ok": true,
+      "message": "the front render is a real image",
+      "detail": "7043 bytes"
+    }
+  ]
+}

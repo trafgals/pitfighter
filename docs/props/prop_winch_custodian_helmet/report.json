@@ -1,7 +1,7 @@
 {
   "asset": "prop_winch_custodian_helmet",
   "model": "public/models/props/prop_winch_custodian_helmet.glb",
-  "capturedAt": "2026-10-27T08:48:27.226Z",
+  "capturedAt": "2026-10-27T04:45:10.647Z",
   "budget": {
     "triangles": 35000,
     "bytes": 1572864,
@@ -11,8 +11,8 @@
       "depth": 26
     }
   },
-  "triangles": 22848,
-  "bytes": 1414112,
+  "triangles": 23576,
+  "bytes": 1451656,
   "dimensionsCm": {
     "width": 22,
     "height": 32,
@@ -62,6 +62,16 @@
       "material": 3
     },
     {
+      "name": "Chinstrap_Leather_Band",
+      "triangles": 480,
+      "material": 3
+    },
+    {
+      "name": "Chinstrap_Brass_Buckle",
+      "triangles": 12,
+      "material": 4
+    },
+    {
       "name": "Crown_Seam_Left",
       "triangles": 560,
       "material": 0
@@ -72,95 +82,105 @@
       "material": 0
     },
     {
-      "name": "Ear_Boss_Left",
-      "triangles": 306,
-      "material": 0
+      "name": "Ear_Rosette_Left_Base",
+      "triangles": 80,
+      "material": 5
     },
     {
-      "name": "Ear_Boss_Right",
-      "triangles": 306,
-      "material": 0
-    },
-    {
-      "name": "Brunswick_Star_Badge_Plate",
-      "triangles": 60,
+      "name": "Ear_Rosette_Left_Stud",
+      "triangles": 272,
       "material": 4
     },
     {
-      "name": "Brunswick_Star_Centre_Ring",
+      "name": "Ear_Rosette_Right_Base",
+      "triangles": 80,
+      "material": 5
+    },
+    {
+      "name": "Ear_Rosette_Right_Stud",
+      "triangles": 272,
+      "material": 4
+    },
+    {
+      "name": "Brunswick_Star_Badge_Plate",
+      "triangles": 124,
+      "material": 5
+    },
+    {
+      "name": "Brunswick_Star_Garter_Ring",
       "triangles": 3648,
-      "material": 5
-    },
-    {
-      "name": "Brunswick_Star_Inner_Five_Point",
-      "triangles": 36,
-      "material": 5
-    },
-    {
-      "name": "Summit_Crest_Plate",
-      "triangles": 172,
-      "material": 3
-    },
-    {
-      "name": "Summit_Brass_Button",
-      "triangles": 400,
       "material": 6
+    },
+    {
+      "name": "Brunswick_Star_Faceted_Medallion",
+      "triangles": 36,
+      "material": 6
+    },
+    {
+      "name": "Summit_Rosette_Vent_Disc",
+      "triangles": 252,
+      "material": 5
+    },
+    {
+      "name": "Summit_Brass_Finial_Button",
+      "triangles": 400,
+      "material": 4
     },
     {
       "name": "Summit_Brass_Stud_Front",
       "triangles": 144,
-      "material": 6
+      "material": 4
     },
     {
       "name": "Summit_Brass_Stud_Back",
       "triangles": 144,
-      "material": 6
+      "material": 4
     }
   ],
   "materials": [
-    "Crown_Navy_Felt",
-    "Crown_Inner_Lining",
-    "Welt_Dark_Leather",
-    "Brim_Black_Leather",
-    "Brass_Aged",
-    "Brass_Worn_Medallion",
-    "Brass_Aged_Plain"
+    "M_NavyFeltCloth",
+    "M_FeltLiningInner",
+    "M_BrowWeltLeather",
+    "M_BurnishedBlackLeather",
+    "M_PolishedBrassHardware",
+    "M_AntiqueBrunswickBrass",
+    "M_GildedBrassMedallion"
   ],
   "renders": [
     {
       "view": "front",
       "label": "Front (0deg, badge to camera)",
       "file": "test-output/props/prop_winch_custodian_helmet/front.png",
-      "bytes": 638530
+      "bytes": 579779
     },
     {
       "view": "profile",
       "label": "Profile (90deg, right side)",
       "file": "test-output/props/prop_winch_custodian_helmet/profile.png",
-      "bytes": 648586
+      "bytes": 594948
     },
     {
       "view": "badge",
-      "label": "Brunswick star badge close-up",
+      "label": "Badge close-up",
       "file": "test-output/props/prop_winch_custodian_helmet/badge.png",
-      "bytes": 1277578
+      "bytes": 1166186
     }
   ],
   "checks": [
     {
       "ok": true,
       "message": "the model has triangles",
-      "detail": "22848"
+      "detail": "23576"
     },
     {
       "ok": true,
       "message": "triangle count is under budget",
-      "detail": "22848 < 35000"
+      "detail": "23576 < 35000"
     },
     {
       "ok": true,
       "message": "file size is within budget",
-      "detail": "1.349 MB <= 1.5 MB"
+      "detail": "1.384 MB <= 1.5 MB"
     },
     {
       "ok": true,
@@ -194,13 +214,13 @@
     },
     {
       "ok": true,
-      "message": "the asset's axis is centred on X",
+      "message": "the helmet's axis is centred on X",
       "detail": "rim centre x 0 cm"
     },
     {
       "ok": true,
       "message": "the badge is on the front face (+Z)",
-      "detail": "badge centre z 8.7 cm"
+      "detail": "badge centre z 7.6 cm"
     },
     {
       "ok": true,
@@ -225,7 +245,7 @@
     {
       "ok": true,
       "message": "the renderer sees the same triangle count as the file",
-      "detail": "22848 vs 22848"
+      "detail": "23576 vs 23576"
     },
     {
       "ok": true,
@@ -234,7 +254,7 @@
     {
       "ok": true,
       "message": "the front render is a real image",
-      "detail": "638530 bytes"
+      "detail": "579779 bytes"
     }
   ]
 }

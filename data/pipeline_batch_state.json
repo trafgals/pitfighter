@@ -1,0 +1,804 @@
+{
+  "version": "1.0.0",
+  "created_at": "2026-10-27T17:37:22.803192",
+  "updated_at": "2026-10-27T23:14:24.147953",
+  "active_id": "pickup_tonic",
+  "items": [
+    {
+      "id": "prop_pegg_cast_iron_last",
+      "name": "Calibrated Cast-Iron Shoe Last",
+      "character": "Mistress Tabitha Pegg",
+      "category": "weapon",
+      "slot": "weapon_socket",
+      "poly_budget": 30000,
+      "scale_dimensions_cm": {
+        "width": 14,
+        "height": 34,
+        "depth": 12
+      },
+      "alpha_file": "public/tex/props/flux3_pegg_shoelast_alpha.png",
+      "turnaround_file": "public/tex/props/h3_pegg_shoelast_turnaround.png",
+      "turntable_file": "public/tex/props/h3_pegg_shoelast_turntable.webp",
+      "glb_file": "public/models/props/prop_pegg_cast_iron_last.glb",
+      "build_cmd": "node scripts/build_prop_pegg_cast_iron_last.mjs",
+      "prompt": "Authentic Victorian cobbler cast-iron foot shoe last bludgeon, calibrated brass rule plate with imperial markings, knurled thumbscrew, cordovan leather grip, isolated on white background.",
+      "stages": {
+        "stage_1_alpha": {
+          "status": "completed",
+          "output": "public/tex/props/flux3_pegg_shoelast_alpha.png",
+          "completed_at": "2026-10-27T17:37:22.808484"
+        },
+        "stage_2_turnaround": {
+          "status": "completed",
+          "output": "public/tex/props/h3_pegg_shoelast_turnaround.png",
+          "completed_at": "2026-10-27T17:37:22.811502"
+        },
+        "stage_3_glb": {
+          "status": "completed",
+          "output": "public/models/props/prop_pegg_cast_iron_last.glb",
+          "completed_at": "2026-10-27T17:37:22.814257"
+        },
+        "stage_4_validate": {
+          "status": "completed",
+          "output": "docs/props/prop_pegg_cast_iron_last/report.json",
+          "completed_at": "2026-10-27T17:37:22.817334"
+        }
+      }
+    },
+    {
+      "id": "prop_crape_spiked_brolly",
+      "name": "Mourner's Spiked Mortuary Brolly",
+      "character": "Mistress Martha Crape",
+      "category": "weapon",
+      "slot": "weapon_socket",
+      "poly_budget": 25000,
+      "scale_dimensions_cm": {
+        "width": 12,
+        "height": 92,
+        "depth": 12
+      },
+      "alpha_file": "public/tex/props/flux3_crape_brolly_alpha.png",
+      "turnaround_file": "public/tex/props/h3_crape_brolly_turnaround.png",
+      "turntable_file": "public/tex/props/h3_crape_brolly_turntable.webp",
+      "glb_file": "public/models/props/prop_crape_spiked_brolly.glb",
+      "build_cmd": "node scripts/build_prop_crape_spiked_brolly.mjs",
+      "prompt": "Victorian gentleman's heavy mourning black silk umbrella, long sharpened steel mortuary ferrule spike, carved whalebone crook handle inlaid with faceted jet beads, brass ribs, isolated on solid white background.",
+      "stages": {
+        "stage_1_alpha": {
+          "status": "completed",
+          "output": "public/tex/props/flux3_crape_brolly_alpha.png",
+          "completed_at": "2026-10-27T17:37:36.984110"
+        },
+        "stage_2_turnaround": {
+          "status": "completed",
+          "output": "public/tex/props/h3_crape_brolly_turnaround.png",
+          "error": "Missing Stage 1 alpha: C:\\code\\trafgals\\pitfighter\\public/tex/props/flux3_crape_brolly_alpha.png",
+          "completed_at": "2026-10-27T17:56:06.262069"
+        },
+        "stage_3_glb": {
+          "status": "completed",
+          "output": "public/models/props/prop_crape_spiked_brolly.glb",
+          "error": "Build command failed with code 1: node scripts/build_prop_crape_spiked_brolly.mjs"
+        },
+        "stage_4_validate": {
+          "status": "completed",
+          "output": "docs/props/prop_crape_spiked_brolly/report.json"
+        }
+      }
+    },
+    {
+      "id": "prop_eleanor_weeping_rapier",
+      "name": "Weeping Rapier Swordstick",
+      "character": "Lady Eleanor Ashby-Lisle",
+      "category": "weapon",
+      "slot": "weapon_socket",
+      "poly_budget": 25000,
+      "scale_dimensions_cm": {
+        "width": 8,
+        "height": 95,
+        "depth": 8
+      },
+      "alpha_file": "public/tex/props/flux3_eleanor_rapier_alpha.png",
+      "turnaround_file": "public/tex/props/h3_eleanor_rapier_turnaround.png",
+      "turntable_file": "public/tex/props/h3_eleanor_rapier_turntable.webp",
+      "glb_file": "public/models/props/prop_eleanor_weeping_rapier.glb",
+      "build_cmd": "node scripts/build_prop_eleanor_weeping_rapier.mjs",
+      "prompt": "Elegantly carved Victorian malacca walking cane swordstick, polished sterling silver crying maiden head pommel, concealed razor-sharp hollow-ground blued steel rapier blade, isolated on solid white background.",
+      "stages": {
+        "stage_1_alpha": {
+          "status": "completed",
+          "output": "public/tex/props/flux3_eleanor_rapier_alpha.png",
+          "completed_at": "2026-10-27T17:37:49.100995"
+        },
+        "stage_2_turnaround": {
+          "status": "completed",
+          "output": "public/tex/props/h3_eleanor_rapier_turnaround.png",
+          "error": "Missing Stage 1 alpha: C:\\code\\trafgals\\pitfighter\\public/tex/props/flux3_eleanor_rapier_alpha.png",
+          "completed_at": "2026-10-27T18:16:43.085718"
+        },
+        "stage_3_glb": {
+          "status": "completed",
+          "output": "public/models/props/prop_eleanor_weeping_rapier.glb",
+          "completed_at": "2026-10-27T18:16:43.089049"
+        },
+        "stage_4_validate": {
+          "status": "completed",
+          "output": "docs/props/prop_eleanor_weeping_rapier/report.json",
+          "completed_at": "2026-10-27T18:16:45.954415"
+        }
+      }
+    },
+    {
+      "id": "prop_tilly_clinker_tongs",
+      "name": "Cast-Iron Sump Clinker-Tongs",
+      "character": "Tilly Furnace-Tongs",
+      "category": "weapon",
+      "slot": "weapon_socket",
+      "poly_budget": 25000,
+      "scale_dimensions_cm": {
+        "width": 16,
+        "height": 72,
+        "depth": 10
+      },
+      "alpha_file": "public/tex/props/flux3_tilly_tongs_alpha.png",
+      "turnaround_file": "public/tex/props/h3_tilly_tongs_turnaround.png",
+      "turntable_file": "public/tex/props/h3_tilly_tongs_turntable.webp",
+      "glb_file": "public/models/props/prop_tilly_clinker_tongs.glb",
+      "build_cmd": "node scripts/build_prop_tilly_clinker_tongs.mjs",
+      "prompt": "Heavy industrial boiler furnace clinker tongs, pitted blackened cast iron, double scissor pivot joint, clawed serrated clamping jaws, heat-wrapped asbestos grip, glowing coal ember flecks, isolated on solid white background.",
+      "stages": {
+        "stage_1_alpha": {
+          "status": "completed",
+          "output": "public/tex/props/flux3_tilly_tongs_alpha.png",
+          "completed_at": "2026-10-27T17:38:03.219063"
+        },
+        "stage_2_turnaround": {
+          "status": "completed",
+          "output": "public/tex/props/h3_tilly_tongs_turnaround.png",
+          "error": "Missing Stage 1 alpha: C:\\code\\trafgals\\pitfighter\\public/tex/props/flux3_tilly_tongs_alpha.png",
+          "completed_at": "2026-10-27T19:01:40.471987"
+        },
+        "stage_3_glb": {
+          "status": "completed",
+          "output": "public/models/props/prop_tilly_clinker_tongs.glb",
+          "completed_at": "2026-10-27T19:01:40.475593"
+        },
+        "stage_4_validate": {
+          "status": "completed",
+          "output": "docs/props/prop_tilly_clinker_tongs/report.json",
+          "completed_at": "2026-10-27T19:01:44.605568"
+        }
+      }
+    },
+    {
+      "id": "prop_sluice_flatcap",
+      "name": "Waterlogged Tweed Flatcap",
+      "character": "Nell Sluice",
+      "category": "headgear",
+      "slot": "head_socket",
+      "poly_budget": 20000,
+      "scale_dimensions_cm": {
+        "width": 24,
+        "height": 14,
+        "depth": 27
+      },
+      "alpha_file": "public/tex/props/flux3_sluice_flatcap_alpha.png",
+      "turnaround_file": "public/tex/props/h3_sluice_flatcap_turnaround.png",
+      "turntable_file": "public/tex/props/h3_sluice_flatcap_turntable.webp",
+      "glb_file": "public/models/props/prop_sluice_flatcap.glb",
+      "build_cmd": "node scripts/build_prop_sluice_flatcap.mjs",
+      "prompt": "Authentic waterlogged Victorian street mudlark tweed flatcap, coarse herringbone wool, stiff curved peak brim, tarnished copper wire brim repair, oilcloth lining, isolated on solid white background.",
+      "stages": {
+        "stage_1_alpha": {
+          "status": "completed",
+          "output": "public/tex/props/flux3_sluice_flatcap_alpha.png",
+          "completed_at": "2026-10-27T17:38:17.339426"
+        },
+        "stage_2_turnaround": {
+          "status": "completed",
+          "output": "public/tex/props/h3_sluice_flatcap_turnaround.png",
+          "error": "Missing Stage 1 alpha: C:\\code\\trafgals\\pitfighter\\public/tex/props/flux3_sluice_flatcap_alpha.png",
+          "completed_at": "2026-10-27T19:15:10.561255"
+        },
+        "stage_3_glb": {
+          "status": "completed",
+          "output": "public/models/props/prop_sluice_flatcap.glb",
+          "completed_at": "2026-10-27T19:15:10.564795"
+        },
+        "stage_4_validate": {
+          "status": "completed",
+          "output": "docs/props/prop_sluice_flatcap/report.json",
+          "completed_at": "2026-10-27T19:15:13.452441"
+        }
+      }
+    },
+    {
+      "id": "prop_kilnworth_nursecap",
+      "name": "Starched Field-Nurse Cap",
+      "character": "Matron Prudence Kilnworth",
+      "category": "headgear",
+      "slot": "head_socket",
+      "poly_budget": 20000,
+      "scale_dimensions_cm": {
+        "width": 22,
+        "height": 18,
+        "depth": 20
+      },
+      "alpha_file": "public/tex/props/flux3_kilnworth_nursecap_alpha.png",
+      "turnaround_file": "public/tex/props/h3_kilnworth_nursecap_turnaround.png",
+      "turntable_file": "public/tex/props/h3_kilnworth_nursecap_turntable.webp",
+      "glb_file": "public/models/props/prop_kilnworth_nursecap.glb",
+      "build_cmd": "node scripts/build_prop_kilnworth_nursecap.mjs",
+      "prompt": "Severe Victorian starched white linen field nurse head bonnet cap, folded triangular crown, crimson embroidered Geneva cross emblem, bone sewing pins, clean stiff folds, isolated on solid white background.",
+      "stages": {
+        "stage_1_alpha": {
+          "status": "completed",
+          "output": "public/tex/props/flux3_kilnworth_nursecap_alpha.png",
+          "completed_at": "2026-10-27T17:38:37.685316"
+        },
+        "stage_2_turnaround": {
+          "status": "completed",
+          "output": "public/tex/props/h3_kilnworth_nursecap_turnaround.png",
+          "error": "Missing Stage 1 alpha: C:\\code\\trafgals\\pitfighter\\public/tex/props/flux3_kilnworth_nursecap_alpha.png",
+          "completed_at": "2026-10-27T19:43:19.664668"
+        },
+        "stage_3_glb": {
+          "status": "completed",
+          "output": "public/models/props/prop_kilnworth_nursecap.glb",
+          "completed_at": "2026-10-27T19:43:19.842204"
+        },
+        "stage_4_validate": {
+          "status": "completed",
+          "output": "docs/props/prop_kilnworth_nursecap/report.json",
+          "completed_at": "2026-10-27T19:43:24.361656"
+        }
+      }
+    },
+    {
+      "id": "prop_mule_championship_belt",
+      "name": "Engraved Gilt Championship Belt",
+      "character": "The Great Bartholomew Mule",
+      "category": "gear",
+      "slot": "torso_socket",
+      "poly_budget": 25000,
+      "scale_dimensions_cm": {
+        "width": 38,
+        "height": 22,
+        "depth": 32
+      },
+      "alpha_file": "public/tex/props/flux3_mule_belt_alpha.png",
+      "turnaround_file": "public/tex/props/h3_mule_belt_turnaround.png",
+      "turntable_file": "public/tex/props/h3_mule_belt_turntable.webp",
+      "glb_file": "public/models/props/prop_mule_championship_belt.glb",
+      "build_cmd": "node scripts/build_prop_mule_championship_belt.mjs",
+      "prompt": "Massive Victorian bare-knuckle prize fighting championship belt, heavy oval embossed gold plate engraved with fighting bears and floral filigree, thick studded oxblood leather strap, brass buckles, isolated on solid white background.",
+      "stages": {
+        "stage_1_alpha": {
+          "status": "completed",
+          "output": "public/tex/props/flux3_mule_belt_alpha.png",
+          "completed_at": "2026-10-27T17:38:52.008370"
+        },
+        "stage_2_turnaround": {
+          "status": "completed",
+          "output": "public/tex/props/h3_mule_belt_turnaround.png",
+          "error": "Missing Stage 1 alpha: C:\\code\\trafgals\\pitfighter\\public/tex/props/flux3_mule_belt_alpha.png",
+          "completed_at": "2026-10-27T20:11:10.378835"
+        },
+        "stage_3_glb": {
+          "status": "completed",
+          "output": "public/models/props/prop_mule_championship_belt.glb",
+          "completed_at": "2026-10-27T20:11:10.382338"
+        },
+        "stage_4_validate": {
+          "status": "completed",
+          "output": "docs/props/prop_mule_championship_belt/report.json",
+          "completed_at": "2026-10-27T20:11:13.643716"
+        }
+      }
+    },
+    {
+      "id": "prop_rook_souwester",
+      "name": "Foul-Weather Oilskin Sou'wester",
+      "character": "Bosun Absalom Rook",
+      "category": "headgear",
+      "slot": "head_socket",
+      "poly_budget": 20000,
+      "scale_dimensions_cm": {
+        "width": 28,
+        "height": 22,
+        "depth": 34
+      },
+      "alpha_file": "public/tex/props/flux3_rook_souwester_alpha.png",
+      "turnaround_file": "public/tex/props/h3_rook_souwester_turnaround.png",
+      "turntable_file": "public/tex/props/h3_rook_souwester_turntable.webp",
+      "glb_file": "public/models/props/prop_rook_souwester.glb",
+      "build_cmd": "node scripts/build_prop_rook_souwester.mjs",
+      "prompt": "Traditional 19th-century heavy tarpaulin oilskin sailor sou'wester hat, deep rear neck flap, upturned front brim, brass chin strap eyelets, salty sea-weathered patina, isolated on solid white background.",
+      "stages": {
+        "stage_1_alpha": {
+          "status": "completed",
+          "output": "public/tex/props/flux3_rook_souwester_alpha.png",
+          "completed_at": "2026-10-27T17:39:06.133848"
+        },
+        "stage_2_turnaround": {
+          "status": "completed",
+          "output": "public/tex/props/h3_rook_souwester_turnaround.png",
+          "error": "Missing Stage 1 alpha: C:\\code\\trafgals\\pitfighter\\public/tex/props/flux3_rook_souwester_alpha.png",
+          "completed_at": "2026-10-27T20:38:43.858097"
+        },
+        "stage_3_glb": {
+          "status": "completed",
+          "output": "public/models/props/prop_rook_souwester.glb",
+          "completed_at": "2026-10-27T20:38:43.861952"
+        },
+        "stage_4_validate": {
+          "status": "completed",
+          "output": "docs/props/prop_rook_souwester/report.json",
+          "completed_at": "2026-10-27T20:38:46.972589"
+        }
+      }
+    },
+    {
+      "id": "prop_bulwark_pistons",
+      "name": "Hydraulic Arm Rams & Gauges",
+      "character": "Lady Hester Bulwark",
+      "category": "gear",
+      "slot": "arm_sockets",
+      "poly_budget": 28000,
+      "scale_dimensions_cm": {
+        "width": 20,
+        "height": 38,
+        "depth": 18
+      },
+      "alpha_file": "public/tex/props/flux3_bulwark_pistons_alpha.png",
+      "turnaround_file": "public/tex/props/h3_bulwark_pistons_turnaround.png",
+      "turntable_file": "public/tex/props/h3_bulwark_pistons_turntable.webp",
+      "glb_file": "public/models/props/prop_bulwark_pistons.glb",
+      "build_cmd": "node scripts/build_prop_bulwark_pistons.mjs",
+      "prompt": "Victorian steampunk hydraulic forearm bracers, polished blued steel hydraulic rams, braided red rubber pressure hoses, miniature circular brass pressure gauge with needle, filigree mounting cuffs, isolated on solid white background.",
+      "stages": {
+        "stage_1_alpha": {
+          "status": "completed",
+          "output": "public/tex/props/flux3_bulwark_pistons_alpha.png",
+          "completed_at": "2026-10-27T17:39:20.250934"
+        },
+        "stage_2_turnaround": {
+          "status": "completed",
+          "output": "public/tex/props/h3_bulwark_pistons_turnaround.png",
+          "error": "Missing Stage 1 alpha: C:\\code\\trafgals\\pitfighter\\public/tex/props/flux3_bulwark_pistons_alpha.png",
+          "completed_at": "2026-10-27T21:06:41.244848"
+        },
+        "stage_3_glb": {
+          "status": "completed",
+          "output": "public/models/props/prop_bulwark_pistons.glb",
+          "completed_at": "2026-10-27T21:06:41.248271"
+        },
+        "stage_4_validate": {
+          "status": "completed",
+          "output": "docs/props/prop_bulwark_pistons/report.json",
+          "completed_at": "2026-10-27T21:06:44.876290"
+        }
+      }
+    },
+    {
+      "id": "prop_crump_samovar",
+      "name": "Brass Tea Samovar Steam Boiler",
+      "character": "Percival Oolong Crump",
+      "category": "gear",
+      "slot": "torso_socket",
+      "poly_budget": 28000,
+      "scale_dimensions_cm": {
+        "width": 26,
+        "height": 42,
+        "depth": 22
+      },
+      "alpha_file": "public/tex/props/flux3_crump_samovar_alpha.png",
+      "turnaround_file": "public/tex/props/h3_crump_samovar_turnaround.png",
+      "turntable_file": "public/tex/props/h3_crump_samovar_turntable.webp",
+      "glb_file": "public/models/props/prop_crump_samovar.glb",
+      "build_cmd": "node scripts/build_prop_crump_samovar.mjs",
+      "prompt": "Miniature Victorian brass Russian tea samovar back-boiler harness, polished copper urn boiler, twin brass spigots, steam safety whistle valve, leather shoulder straps, isolated on solid white background.",
+      "stages": {
+        "stage_1_alpha": {
+          "status": "completed",
+          "output": "public/tex/props/flux3_crump_samovar_alpha.png",
+          "completed_at": "2026-10-27T17:39:34.368553"
+        },
+        "stage_2_turnaround": {
+          "status": "completed",
+          "output": "public/tex/props/h3_crump_samovar_turnaround.png",
+          "error": "Missing Stage 1 alpha: C:\\code\\trafgals\\pitfighter\\public/tex/props/flux3_crump_samovar_alpha.png",
+          "completed_at": "2026-10-27T21:19:38.645305"
+        },
+        "stage_3_glb": {
+          "status": "completed",
+          "output": "public/models/props/prop_crump_samovar.glb",
+          "completed_at": "2026-10-27T21:19:38.648619"
+        },
+        "stage_4_validate": {
+          "status": "completed",
+          "output": "docs/props/prop_crump_samovar/report.json",
+          "completed_at": "2026-10-27T21:19:42.304803"
+        }
+      }
+    },
+    {
+      "id": "weapon_knuckleduster",
+      "name": "Brass Knuckleduster",
+      "character": "the Gallery",
+      "category": "weapon",
+      "slot": "hand_socket",
+      "poly_budget": 15000,
+      "scale_dimensions_cm": {
+        "width": 12,
+        "height": 8,
+        "depth": 3
+      },
+      "alpha_file": "public/tex/props/flux3_knuckleduster_alpha.png",
+      "turnaround_file": "public/tex/props/h3_knuckleduster_turnaround.png",
+      "turntable_file": "public/tex/props/h3_knuckleduster_turntable.webp",
+      "glb_file": "public/models/props/weapon_knuckleduster.glb",
+      "build_cmd": "node scripts/build_weapon_knuckleduster.mjs",
+      "prompt": "Heavy Victorian solid brass knuckleduster, four oval finger loops, curved palm grip engraved with coat of arms crest, polished brass with dark patina in grooves, isolated on white background.",
+      "stages": {
+        "stage_1_alpha": {
+          "status": "completed",
+          "output": "public/tex/props/flux3_knuckleduster_alpha.png",
+          "completed_at": "2026-10-27T17:39:48.485536"
+        },
+        "stage_2_turnaround": {
+          "status": "completed",
+          "output": "public/tex/props/h3_knuckleduster_turnaround.png",
+          "error": "Missing Stage 1 alpha: C:\\code\\trafgals\\pitfighter\\public/tex/props/flux3_knuckleduster_alpha.png",
+          "completed_at": "2026-10-27T21:32:32.020720"
+        },
+        "stage_3_glb": {
+          "status": "completed",
+          "output": "public/models/props/weapon_knuckleduster.glb",
+          "completed_at": "2026-10-27T21:32:32.023945"
+        },
+        "stage_4_validate": {
+          "status": "completed",
+          "output": "docs/props/weapon_knuckleduster/report.json",
+          "completed_at": "2026-10-27T21:32:34.753467"
+        }
+      }
+    },
+    {
+      "id": "weapon_coal_shovel",
+      "name": "Stoker's Shovel",
+      "character": "the Gallery",
+      "category": "weapon",
+      "slot": "hand_socket",
+      "poly_budget": 20000,
+      "scale_dimensions_cm": {
+        "width": 24,
+        "height": 98,
+        "depth": 14
+      },
+      "alpha_file": "public/tex/props/flux3_coal_shovel_alpha.png",
+      "turnaround_file": "public/tex/props/h3_coal_shovel_turnaround.png",
+      "turntable_file": "public/tex/props/h3_coal_shovel_turntable.webp",
+      "glb_file": "public/models/props/weapon_coal_shovel.glb",
+      "build_cmd": "node scripts/build_weapon_coal_shovel.mjs",
+      "prompt": "Long-handled heavy forged iron coal shovel, wide scoop blade worn sharp along lip, ash wood D-grip handle, heat-darkened metal with glowing coal dust flecks, isolated on white background.",
+      "stages": {
+        "stage_1_alpha": {
+          "status": "completed",
+          "output": "public/tex/props/flux3_coal_shovel_alpha.png",
+          "completed_at": "2026-10-27T17:40:02.602599"
+        },
+        "stage_2_turnaround": {
+          "status": "completed",
+          "output": "public/tex/props/h3_coal_shovel_turnaround.png",
+          "error": "Missing Stage 1 alpha: C:\\code\\trafgals\\pitfighter\\public/tex/props/flux3_coal_shovel_alpha.png",
+          "completed_at": "2026-10-27T21:45:20.202305"
+        },
+        "stage_3_glb": {
+          "status": "completed",
+          "output": "public/models/props/weapon_coal_shovel.glb",
+          "completed_at": "2026-10-27T21:45:20.206023"
+        },
+        "stage_4_validate": {
+          "status": "completed",
+          "output": "docs/props/weapon_coal_shovel/report.json",
+          "completed_at": "2026-10-27T21:45:22.780649"
+        }
+      }
+    },
+    {
+      "id": "weapon_bone_saw",
+      "name": "Surgeon's Bone Saw",
+      "character": "the Gallery",
+      "category": "weapon",
+      "slot": "hand_socket",
+      "poly_budget": 18000,
+      "scale_dimensions_cm": {
+        "width": 6,
+        "height": 38,
+        "depth": 3
+      },
+      "alpha_file": "public/tex/props/flux3_bone_saw_alpha.png",
+      "turnaround_file": "public/tex/props/h3_bone_saw_turnaround.png",
+      "turntable_file": "public/tex/props/h3_bone_saw_turntable.webp",
+      "glb_file": "public/models/props/weapon_bone_saw.glb",
+      "build_cmd": "node scripts/build_weapon_bone_saw.mjs",
+      "prompt": "19th-century amputation bone saw, polished carved ivory pistol grip handle, nickel-plated steel frame, fine serrated cross-cut surgical blade, isolated on solid white background.",
+      "stages": {
+        "stage_1_alpha": {
+          "status": "completed",
+          "output": "public/tex/props/flux3_bone_saw_alpha.png",
+          "completed_at": "2026-10-27T17:40:16.720371"
+        },
+        "stage_2_turnaround": {
+          "status": "completed",
+          "output": "public/tex/props/h3_bone_saw_turnaround.png",
+          "error": "Missing Stage 1 alpha: C:\\code\\trafgals\\pitfighter\\public/tex/props/flux3_bone_saw_alpha.png",
+          "completed_at": "2026-10-27T21:57:36.342094"
+        },
+        "stage_3_glb": {
+          "status": "completed",
+          "output": "public/models/props/weapon_bone_saw.glb",
+          "completed_at": "2026-10-27T21:57:36.568947"
+        },
+        "stage_4_validate": {
+          "status": "completed",
+          "output": "docs/props/weapon_bone_saw/report.json",
+          "completed_at": "2026-10-27T21:57:39.118570"
+        }
+      }
+    },
+    {
+      "id": "weapon_nail_bat",
+      "name": "Studded Cricket Bat",
+      "character": "the Gallery",
+      "category": "weapon",
+      "slot": "hand_socket",
+      "poly_budget": 20000,
+      "scale_dimensions_cm": {
+        "width": 11,
+        "height": 86,
+        "depth": 8
+      },
+      "alpha_file": "public/tex/props/flux3_nail_bat_alpha.png",
+      "turnaround_file": "public/tex/props/h3_nail_bat_turnaround.png",
+      "turntable_file": "public/tex/props/h3_nail_bat_turntable.webp",
+      "glb_file": "public/models/props/weapon_nail_bat.glb",
+      "build_cmd": "node scripts/build_weapon_nail_bat.mjs",
+      "prompt": "Traditional English willow cricket bat driven through with rusty square iron horseshoe nails, cane handle wrapped in black cord, oiled wood grain, isolated on solid white background.",
+      "stages": {
+        "stage_1_alpha": {
+          "status": "completed",
+          "output": "public/tex/props/flux3_nail_bat_alpha.png",
+          "completed_at": "2026-10-27T17:40:30.837416"
+        },
+        "stage_2_turnaround": {
+          "status": "completed",
+          "output": "public/tex/props/h3_nail_bat_turnaround.png",
+          "error": "Missing Stage 1 alpha: C:\\code\\trafgals\\pitfighter\\public/tex/props/flux3_nail_bat_alpha.png",
+          "completed_at": "2026-10-27T22:10:28.735824"
+        },
+        "stage_3_glb": {
+          "status": "completed",
+          "output": "public/models/props/weapon_nail_bat.glb",
+          "completed_at": "2026-10-27T22:10:28.739219"
+        },
+        "stage_4_validate": {
+          "status": "completed",
+          "output": "docs/props/weapon_nail_bat/report.json",
+          "completed_at": "2026-10-27T22:10:32.124650"
+        }
+      }
+    },
+    {
+      "id": "weapon_cleaver",
+      "name": "Butcher's Cleaver",
+      "character": "the Gallery",
+      "category": "weapon",
+      "slot": "hand_socket",
+      "poly_budget": 16000,
+      "scale_dimensions_cm": {
+        "width": 14,
+        "height": 36,
+        "depth": 4
+      },
+      "alpha_file": "public/tex/props/flux3_cleaver_alpha.png",
+      "turnaround_file": "public/tex/props/h3_cleaver_turnaround.png",
+      "turntable_file": "public/tex/props/h3_cleaver_turntable.webp",
+      "glb_file": "public/models/props/weapon_cleaver.glb",
+      "build_cmd": "node scripts/build_weapon_cleaver.mjs",
+      "prompt": "Heavy Victorian meat meat cleaver from Smithfield meat market, rectangular carbon steel blade with round hanging hole, brass-pinned walnut scales handle, isolated on solid white background.",
+      "stages": {
+        "stage_1_alpha": {
+          "status": "completed",
+          "output": "public/tex/props/flux3_cleaver_alpha.png",
+          "completed_at": "2026-10-27T17:40:44.953869"
+        },
+        "stage_2_turnaround": {
+          "status": "completed",
+          "output": "public/tex/props/h3_cleaver_turnaround.png",
+          "error": "Missing Stage 1 alpha: C:\\code\\trafgals\\pitfighter\\public/tex/props/flux3_cleaver_alpha.png",
+          "completed_at": "2026-10-27T22:23:17.591200"
+        },
+        "stage_3_glb": {
+          "status": "completed",
+          "output": "public/models/props/weapon_cleaver.glb",
+          "completed_at": "2026-10-27T22:23:17.783766"
+        },
+        "stage_4_validate": {
+          "status": "completed",
+          "output": "docs/props/weapon_cleaver/report.json",
+          "completed_at": "2026-10-27T22:23:21.455392"
+        }
+      }
+    },
+    {
+      "id": "weapon_piston_gauntlet",
+      "name": "Piston Gauntlet",
+      "character": "the Gallery",
+      "category": "weapon",
+      "slot": "hand_socket",
+      "poly_budget": 25000,
+      "scale_dimensions_cm": {
+        "width": 18,
+        "height": 42,
+        "depth": 16
+      },
+      "alpha_file": "public/tex/props/flux3_piston_gauntlet_alpha.png",
+      "turnaround_file": "public/tex/props/h3_piston_gauntlet_turnaround.png",
+      "turntable_file": "public/tex/props/h3_piston_gauntlet_turntable.webp",
+      "glb_file": "public/models/props/weapon_piston_gauntlet.glb",
+      "build_cmd": "node scripts/build_weapon_piston_gauntlet.mjs",
+      "prompt": "Heavy steampunk steam gauntlet with spring-loaded steel ram over knuckles, miniature forearm boiler canister, brass exhaust pressure ports, leather strapping, isolated on solid white background.",
+      "stages": {
+        "stage_1_alpha": {
+          "status": "completed",
+          "output": "public/tex/props/flux3_piston_gauntlet_alpha.png",
+          "completed_at": "2026-10-27T17:40:59.072371"
+        },
+        "stage_2_turnaround": {
+          "status": "completed",
+          "output": "public/tex/props/h3_piston_gauntlet_turnaround.png",
+          "error": "Missing Stage 1 alpha: C:\\code\\trafgals\\pitfighter\\public/tex/props/flux3_piston_gauntlet_alpha.png",
+          "completed_at": "2026-10-27T22:35:43.391128"
+        },
+        "stage_3_glb": {
+          "status": "completed",
+          "output": "public/models/props/weapon_piston_gauntlet.glb",
+          "completed_at": "2026-10-27T22:35:43.394420"
+        },
+        "stage_4_validate": {
+          "status": "completed",
+          "output": "docs/props/weapon_piston_gauntlet/report.json",
+          "completed_at": "2026-10-27T22:35:46.159118"
+        }
+      }
+    },
+    {
+      "id": "weapon_lamplighter_pole",
+      "name": "Lamplighter's Pole",
+      "character": "the Gallery",
+      "category": "weapon",
+      "slot": "hand_socket",
+      "poly_budget": 20000,
+      "scale_dimensions_cm": {
+        "width": 10,
+        "height": 180,
+        "depth": 10
+      },
+      "alpha_file": "public/tex/props/flux3_lamplighter_pole_alpha.png",
+      "turnaround_file": "public/tex/props/h3_lamplighter_pole_turnaround.png",
+      "turntable_file": "public/tex/props/h3_lamplighter_pole_turntable.webp",
+      "glb_file": "public/models/props/weapon_lamplighter_pole.glb",
+      "build_cmd": "node scripts/build_weapon_lamplighter_pole.mjs",
+      "prompt": "Long brass-tipped Victorian street lamplighter pole, curved gas-cock shutoff hook at tip, brass oil lamp wick canister, dark ash wood shaft, isolated on solid white background.",
+      "stages": {
+        "stage_1_alpha": {
+          "status": "completed",
+          "output": "public/tex/props/flux3_lamplighter_pole_alpha.png",
+          "completed_at": "2026-10-27T17:41:13.205660"
+        },
+        "stage_2_turnaround": {
+          "status": "completed",
+          "output": "public/tex/props/h3_lamplighter_pole_turnaround.png",
+          "error": "Missing Stage 1 alpha: C:\\code\\trafgals\\pitfighter\\public/tex/props/flux3_lamplighter_pole_alpha.png",
+          "completed_at": "2026-10-27T22:48:31.697149"
+        },
+        "stage_3_glb": {
+          "status": "completed",
+          "output": "public/models/props/weapon_lamplighter_pole.glb",
+          "completed_at": "2026-10-27T22:48:31.700787"
+        },
+        "stage_4_validate": {
+          "status": "completed",
+          "output": "docs/props/weapon_lamplighter_pole/report.json",
+          "completed_at": "2026-10-27T22:48:34.394394"
+        }
+      }
+    },
+    {
+      "id": "weapon_chair",
+      "name": "Private Box Chair",
+      "character": "the Gallery",
+      "category": "weapon",
+      "slot": "hand_socket",
+      "poly_budget": 25000,
+      "scale_dimensions_cm": {
+        "width": 46,
+        "height": 88,
+        "depth": 48
+      },
+      "alpha_file": "public/tex/props/flux3_chair_alpha.png",
+      "turnaround_file": "public/tex/props/h3_chair_turnaround.png",
+      "turntable_file": "public/tex/props/h3_chair_turntable.webp",
+      "glb_file": "public/models/props/weapon_chair.glb",
+      "build_cmd": "node scripts/build_weapon_chair.mjs",
+      "prompt": "Ornate Victorian theatre private box salon chair, carved gilt gold leaf rococo wood frame, tufted crimson velvet upholstery seat and padded oval back, isolated on solid white background.",
+      "stages": {
+        "stage_1_alpha": {
+          "status": "completed",
+          "output": "public/tex/props/flux3_chair_alpha.png",
+          "completed_at": "2026-10-27T17:41:27.322070"
+        },
+        "stage_2_turnaround": {
+          "status": "completed",
+          "output": "public/tex/props/h3_chair_turnaround.png",
+          "error": "Missing Stage 1 alpha: C:\\code\\trafgals\\pitfighter\\public/tex/props/flux3_chair_alpha.png",
+          "completed_at": "2026-10-27T23:01:20.122543"
+        },
+        "stage_3_glb": {
+          "status": "completed",
+          "output": "public/models/props/weapon_chair.glb",
+          "completed_at": "2026-10-27T23:01:20.126016"
+        },
+        "stage_4_validate": {
+          "status": "completed",
+          "output": "docs/props/weapon_chair/report.json",
+          "completed_at": "2026-10-27T23:01:22.957146"
+        }
+      }
+    },
+    {
+      "id": "pickup_tonic",
+      "name": "Bottle of Tincture",
+      "character": "the Gallery",
+      "category": "pickup",
+      "slot": "hand_socket",
+      "poly_budget": 12000,
+      "scale_dimensions_cm": {
+        "width": 7,
+        "height": 18,
+        "depth": 7
+      },
+      "alpha_file": "public/tex/props/flux3_tonic_alpha.png",
+      "turnaround_file": "public/tex/props/h3_tonic_turnaround.png",
+      "turntable_file": "public/tex/props/h3_tonic_turntable.webp",
+      "glb_file": "public/models/props/pickup_tonic.glb",
+      "build_cmd": "node scripts/build_pickup_tonic.mjs",
+      "prompt": "Victorian apothecary elixir bottle, ribbed emerald green glass, wax-sealed cork stopper, stained paper prescription label with engraved apothecary crest, glowing amber fluid inside, isolated on white background.",
+      "stages": {
+        "stage_1_alpha": {
+          "status": "completed",
+          "output": "public/tex/props/flux3_tonic_alpha.png",
+          "completed_at": "2026-10-27T17:41:41.437092"
+        },
+        "stage_2_turnaround": {
+          "status": "completed",
+          "output": "public/tex/props/h3_tonic_turnaround.png",
+          "error": "Missing Stage 1 alpha: C:\\code\\trafgals\\pitfighter\\public/tex/props/flux3_tonic_alpha.png",
+          "completed_at": "2026-10-27T23:14:20.631150"
+        },
+        "stage_3_glb": {
+          "status": "completed",
+          "output": "public/models/props/pickup_tonic.glb",
+          "completed_at": "2026-10-27T23:14:20.634430"
+        },
+        "stage_4_validate": {
+          "status": "completed",
+          "output": "docs/props/pickup_tonic/report.json",
+          "completed_at": "2026-10-27T23:14:24.147948"
+        }
+      }
+    }
+  ]
+}

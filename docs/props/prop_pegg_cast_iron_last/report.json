@@ -1,0 +1,222 @@
+{
+  "asset": "prop_pegg_cast_iron_last",
+  "model": "public/models/props/prop_pegg_cast_iron_last.glb",
+  "capturedAt": "2026-10-27T07:35:33.036Z",
+  "budget": {
+    "triangles": 30000,
+    "bytes": 1572864,
+    "dimensionsCm": {
+      "width": 14,
+      "height": 34,
+      "depth": 12
+    }
+  },
+  "triangles": 4316,
+  "bytes": 244860,
+  "dimensionsCm": {
+    "width": 14,
+    "height": 34,
+    "depth": 12
+  },
+  "bbox": {
+    "min": [
+      -0.06880000233650208,
+      -0.14879999940097333,
+      -0.06200000037997961
+    ],
+    "max": [
+      0.07100000002607704,
+      0.19099999971687795,
+      0.05799999988824129
+    ]
+  },
+  "meshes": [
+    {
+      "name": "Handle_Grip_Leather",
+      "triangles": 96,
+      "material": 0
+    },
+    {
+      "name": "Handle_Pommel_Brass",
+      "triangles": 720,
+      "material": 1
+    },
+    {
+      "name": "Handle_Collar_Brass",
+      "triangles": 96,
+      "material": 1
+    },
+    {
+      "name": "Heel_Horn_Stalk",
+      "triangles": 768,
+      "material": 2
+    },
+    {
+      "name": "Heel_Horn_Finial",
+      "triangles": 600,
+      "material": 2
+    },
+    {
+      "name": "Cast_Iron_Foot_Body",
+      "triangles": 1656,
+      "material": 2
+    },
+    {
+      "name": "Toe_Anvil_Plate",
+      "triangles": 12,
+      "material": 2
+    },
+    {
+      "name": "Brass_Rule_Plate",
+      "triangles": 12,
+      "material": 1
+    },
+    {
+      "name": "Brass_Sizing_Dial_Bezel",
+      "triangles": 80,
+      "material": 1
+    },
+    {
+      "name": "mesh_9",
+      "triangles": 72,
+      "material": 1
+    },
+    {
+      "name": "mesh_10",
+      "triangles": 48,
+      "material": 3
+    },
+    {
+      "name": "mesh_11",
+      "triangles": 72,
+      "material": 1
+    },
+    {
+      "name": "mesh_12",
+      "triangles": 48,
+      "material": 3
+    },
+    {
+      "name": "mesh_13",
+      "triangles": 12,
+      "material": 3
+    },
+    {
+      "name": "mesh_14",
+      "triangles": 12,
+      "material": 3
+    },
+    {
+      "name": "mesh_15",
+      "triangles": 12,
+      "material": 3
+    }
+  ],
+  "materials": [
+    "(unnamed)",
+    "(unnamed)",
+    "(unnamed)",
+    "(unnamed)"
+  ],
+  "renders": [
+    {
+      "view": "front",
+      "label": "Front (0deg, badge to camera)",
+      "file": "test-output/props/prop_pegg_cast_iron_last/front.png",
+      "bytes": 48174
+    },
+    {
+      "view": "profile",
+      "label": "Profile (90deg, right side)",
+      "file": "test-output/props/prop_pegg_cast_iron_last/profile.png",
+      "bytes": 40106
+    },
+    {
+      "view": "badge",
+      "label": "Brass rule & calibration dial close-up",
+      "file": "test-output/props/prop_pegg_cast_iron_last/badge.png",
+      "bytes": 80313
+    }
+  ],
+  "checks": [
+    {
+      "ok": true,
+      "message": "the model has triangles",
+      "detail": "4316"
+    },
+    {
+      "ok": true,
+      "message": "triangle count is under budget",
+      "detail": "4316 < 30000"
+    },
+    {
+      "ok": true,
+      "message": "file size is within budget",
+      "detail": "0.234 MB <= 1.5 MB"
+    },
+    {
+      "ok": true,
+      "message": "the mesh has no structural problems",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "no vertex position is NaN or infinite",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "message": "width matches the spec (14 cm)",
+      "detail": "14 cm"
+    },
+    {
+      "ok": true,
+      "message": "height matches the spec (34 cm)",
+      "detail": "34 cm"
+    },
+    {
+      "ok": true,
+      "message": "depth matches the spec (12 cm)",
+      "detail": "12 cm"
+    },
+    {
+      "ok": true,
+      "message": "the handle grip is centred on the origin's plane (y = 0)",
+      "detail": "grip centre y -6.2 cm"
+    },
+    {
+      "ok": true,
+      "message": "the handle grip is centred on X",
+      "detail": "grip centre x 0 cm"
+    },
+    {
+      "ok": true,
+      "message": "every asset the page asked for was served",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the model loads in a WebGL renderer without errors",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the renderer reported no load errors",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the renderer sees the same triangle count as the file",
+      "detail": "4316 vs 4316"
+    },
+    {
+      "ok": true,
+      "message": "every verification render has real content"
+    },
+    {
+      "ok": true,
+      "message": "the front render is a real image",
+      "detail": "48174 bytes"
+    }
+  ]
+}

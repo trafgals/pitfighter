@@ -1,0 +1,156 @@
+{
+  "asset": "weapon_piston_gauntlet",
+  "model": "public/models/props/weapon_piston_gauntlet.glb",
+  "capturedAt": "2026-10-27T12:35:45.969Z",
+  "budget": {
+    "triangles": 25000,
+    "bytes": 1572864,
+    "dimensionsCm": {
+      "width": 15,
+      "height": 33,
+      "depth": 18.2
+    }
+  },
+  "triangles": 156,
+  "bytes": 12548,
+  "dimensionsCm": {
+    "width": 15,
+    "height": 33,
+    "depth": 18.2
+  },
+  "bbox": {
+    "min": [
+      -0.07500000298023224,
+      -0.14000000059604645,
+      -0.07500000298023224
+    ],
+    "max": [
+      0.07500000298023224,
+      0.18999999932944775,
+      0.10700000151991844
+    ]
+  },
+  "meshes": [
+    {
+      "name": "Handle_Grip_Sleeve",
+      "triangles": 80,
+      "material": 0
+    },
+    {
+      "name": "Knuckle_Ram_Plate",
+      "triangles": 12,
+      "material": 1
+    },
+    {
+      "name": "Mini_Steam_Boiler",
+      "triangles": 64,
+      "material": 2
+    }
+  ],
+  "materials": [
+    "(unnamed)",
+    "(unnamed)",
+    "(unnamed)"
+  ],
+  "renders": [
+    {
+      "view": "front",
+      "label": "Front (0deg, badge to camera)",
+      "file": "test-output/props/weapon_piston_gauntlet/front.png",
+      "bytes": 33467
+    },
+    {
+      "view": "profile",
+      "label": "Profile (90deg, right side)",
+      "file": "test-output/props/weapon_piston_gauntlet/profile.png",
+      "bytes": 40362
+    },
+    {
+      "view": "badge",
+      "label": "Steam boiler canister close-up",
+      "file": "test-output/props/weapon_piston_gauntlet/badge.png",
+      "bytes": 84647
+    }
+  ],
+  "checks": [
+    {
+      "ok": true,
+      "message": "the model has triangles",
+      "detail": "156"
+    },
+    {
+      "ok": true,
+      "message": "triangle count is under budget",
+      "detail": "156 < 25000"
+    },
+    {
+      "ok": true,
+      "message": "file size is within budget",
+      "detail": "0.012 MB <= 1.5 MB"
+    },
+    {
+      "ok": true,
+      "message": "the mesh has no structural problems",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "no vertex position is NaN or infinite",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "message": "width matches the spec (15 cm)",
+      "detail": "15 cm"
+    },
+    {
+      "ok": true,
+      "message": "height matches the spec (33 cm)",
+      "detail": "33 cm"
+    },
+    {
+      "ok": true,
+      "message": "depth matches the spec (18.2 cm)",
+      "detail": "18.2 cm"
+    },
+    {
+      "ok": true,
+      "message": "the handle grip is centred on the origin's plane (y = 0)",
+      "detail": "grip centre y 0 cm"
+    },
+    {
+      "ok": true,
+      "message": "the handle grip is centred on X",
+      "detail": "grip centre x 0 cm"
+    },
+    {
+      "ok": true,
+      "message": "every asset the page asked for was served",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the model loads in a WebGL renderer without errors",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the renderer reported no load errors",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the renderer sees the same triangle count as the file",
+      "detail": "156 vs 156"
+    },
+    {
+      "ok": true,
+      "message": "every verification render has real content"
+    },
+    {
+      "ok": true,
+      "message": "the front render is a real image",
+      "detail": "33467 bytes"
+    }
+  ]
+}

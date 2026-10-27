@@ -1,0 +1,218 @@
+{
+  "asset": "prop_crape_spiked_brolly",
+  "model": "public/models/props/prop_crape_spiked_brolly.glb",
+  "capturedAt": "2026-10-27T08:00:37.779Z",
+  "budget": {
+    "triangles": 25000,
+    "bytes": 1572864,
+    "dimensionsCm": {
+      "width": 12,
+      "height": 92,
+      "depth": 12
+    }
+  },
+  "triangles": 6184,
+  "bytes": 346924,
+  "dimensionsCm": {
+    "width": 11.9,
+    "height": 91.9,
+    "depth": 11.9
+  },
+  "bbox": {
+    "min": [
+      -0.05950000137090683,
+      -0.11873817443847656,
+      -0.05950000137090683
+    ],
+    "max": [
+      0.05950000137090683,
+      0.7999999982118606,
+      0.05950000137090683
+    ]
+  },
+  "meshes": [
+    {
+      "name": "Umbrella_Shaft_Oak",
+      "triangles": 80,
+      "material": 0
+    },
+    {
+      "name": "Handle_Grip_Crook",
+      "triangles": 1024,
+      "material": 0
+    },
+    {
+      "name": "mesh_2",
+      "triangles": 216,
+      "material": 1
+    },
+    {
+      "name": "mesh_3",
+      "triangles": 216,
+      "material": 1
+    },
+    {
+      "name": "mesh_4",
+      "triangles": 216,
+      "material": 1
+    },
+    {
+      "name": "mesh_5",
+      "triangles": 216,
+      "material": 1
+    },
+    {
+      "name": "mesh_6",
+      "triangles": 216,
+      "material": 1
+    },
+    {
+      "name": "mesh_7",
+      "triangles": 216,
+      "material": 1
+    },
+    {
+      "name": "Handle_Finial_Jet",
+      "triangles": 352,
+      "material": 1
+    },
+    {
+      "name": "Handle_Collar_Brass",
+      "triangles": 96,
+      "material": 2
+    },
+    {
+      "name": "Furled_Silk_Canopy",
+      "triangles": 2592,
+      "material": 3
+    },
+    {
+      "name": "Canopy_Retention_Strap",
+      "triangles": 576,
+      "material": 1
+    },
+    {
+      "name": "Strap_Brass_Button",
+      "triangles": 64,
+      "material": 2
+    },
+    {
+      "name": "Ferrule_Runner_Collar",
+      "triangles": 96,
+      "material": 2
+    },
+    {
+      "name": "Mortuary_Ferrule_Spear",
+      "triangles": 8,
+      "material": 4
+    }
+  ],
+  "materials": [
+    "(unnamed)",
+    "(unnamed)",
+    "(unnamed)",
+    "(unnamed)",
+    "(unnamed)"
+  ],
+  "renders": [
+    {
+      "view": "front",
+      "label": "Front (0deg, badge to camera)",
+      "file": "test-output/props/prop_crape_spiked_brolly/front.png",
+      "bytes": 45770
+    },
+    {
+      "view": "profile",
+      "label": "Profile (90deg, right side)",
+      "file": "test-output/props/prop_crape_spiked_brolly/profile.png",
+      "bytes": 45107
+    },
+    {
+      "view": "badge",
+      "label": "Mortuary ferrule spear spike close-up",
+      "file": "test-output/props/prop_crape_spiked_brolly/badge.png",
+      "bytes": 38093
+    }
+  ],
+  "checks": [
+    {
+      "ok": true,
+      "message": "the model has triangles",
+      "detail": "6184"
+    },
+    {
+      "ok": true,
+      "message": "triangle count is under budget",
+      "detail": "6184 < 25000"
+    },
+    {
+      "ok": true,
+      "message": "file size is within budget",
+      "detail": "0.331 MB <= 1.5 MB"
+    },
+    {
+      "ok": true,
+      "message": "the mesh has no structural problems",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "no vertex position is NaN or infinite",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "message": "width matches the spec (12 cm)",
+      "detail": "11.9 cm"
+    },
+    {
+      "ok": true,
+      "message": "height matches the spec (92 cm)",
+      "detail": "91.9 cm"
+    },
+    {
+      "ok": true,
+      "message": "depth matches the spec (12 cm)",
+      "detail": "11.9 cm"
+    },
+    {
+      "ok": true,
+      "message": "the handle grip is centred on the origin's plane (y = 0)",
+      "detail": "grip centre y -2.9 cm"
+    },
+    {
+      "ok": true,
+      "message": "the handle grip is centred on X",
+      "detail": "grip centre x 0 cm"
+    },
+    {
+      "ok": true,
+      "message": "every asset the page asked for was served",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the model loads in a WebGL renderer without errors",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the renderer reported no load errors",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the renderer sees the same triangle count as the file",
+      "detail": "6184 vs 6184"
+    },
+    {
+      "ok": true,
+      "message": "every verification render has real content"
+    },
+    {
+      "ok": true,
+      "message": "the front render is a real image",
+      "detail": "45770 bytes"
+    }
+  ]
+}

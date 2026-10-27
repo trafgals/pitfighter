@@ -87,6 +87,7 @@ function readPositions(json, bin, index) {
 const IDENTITY = [0, 0, 0, 1];
 /** Compose a node's local TRS into a column-major 4x4. */
 function nodeMatrix(node) {
+  if (node.matrix) return node.matrix;
   const t = node.translation ?? [0, 0, 0];
   const r = node.rotation ?? IDENTITY;
   const s = node.scale ?? [1, 1, 1];
