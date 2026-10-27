@@ -314,6 +314,33 @@ async function main() {
     }
   }
 
+  // A grip-normalized prop has no crown rim, so the rim check does not run
+  // for it - which means the frame it is placed by is only checked at all if
+  // the manifest names the features that carry it. Without them the run
+  // would go green on a prop whose handle was never measured, and the socket
+  // would be handed an asset that can sit anywhere in the hand.
+  //
+  // The check is failure-only on purpose: a head-socket prop is already
+  // checked against its rim, and a grip prop that names its origin and
+  // forward features is checked against those. Only the prop that declares
+  // neither is missing a check, and only that one gets this line.
+  if (!isHeadSocket) {
+    if (!originMeshName) {
+      check(
+        false,
+        "the manifest names the feature the prop is placed by",
+        "a grip_normalized asset must declare validation.origin_mesh",
+      );
+    }
+    if (!forwardMeshName) {
+      check(
+        false,
+        "the manifest names the feature that points forward",
+        "a grip_normalized asset must declare validation.forward_mesh",
+      );
+    }
+  }
+
   // ---- the renders --------------------------------------------------------
   await startServer();
   const launchedAt = Date.now();
