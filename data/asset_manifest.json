@@ -64,7 +64,7 @@
     },
     {
       "id": "prop_smelt_stovepipe",
-      "name": "Ironmaster Chimney Stovepipe Hat",
+      "name": "Ironmaster Elongated Stovepipe Hat",
       "character": "Mr. Hezekiah Smelt",
       "category": "headgear",
       "slot": "head_socket",
@@ -82,7 +82,7 @@
         "forward": "+Z",
         "up": "+Y",
         "units": "metres",
-        "note": "The brim hangs 2.6 cm below the origin and the chimney's mouth reaches 42 cm above it, so the prop is 44.6 cm tall - the '~45 cm total height with chimney stack' the issue asks for. The hat is a surface of revolution apart from the brim's front droop, which is what marks +Z as the front."
+        "note": "The brim hangs 2.6 cm below the origin and the crown summit reaches 42.0 cm above it, so the prop stands 44.6 cm tall - matching the elongated Victorian stovepipe hat in the approved H3 turnaround footage 1:1. The brim's front droop and side curls mark +Z as the front."
       },
       "reference_concept": "public/tex/characters/hezekiah_smelt.jpg",
       "alpha_cutout": "public/tex/props/flux3_smelt_stovepipe_elongated_alpha.png",
@@ -91,32 +91,31 @@
       "glb_output": "public/models/props/prop_smelt_stovepipe.glb",
       "validation": {
         "rim_mesh": "Crown_Opening_Rim",
-        "axis_mesh": "Chimney_Stack",
         "closeup_focus": [
           0,
-          0.024,
-          0.0832
+          0.045,
+          0.083
         ],
-        "closeup_fit": 0.045,
-        "closeup_label": "Gold band close-up",
-        "view_fit": 0.225
+        "closeup_fit": 0.055,
+        "closeup_label": "Gold filigree band close-up",
+        "view_fit": 0.235
       },
       "measured": {
-        "triangles": 15520,
-        "bytes": 1125852,
+        "triangles": 15360,
+        "bytes": 742828,
         "bbox_min_cm": [
           -13.85,
-          -2.59,
+          -2.58,
           -13.85
         ],
         "bbox_max_cm": [
           13.85,
-          42.0,
+          42.01,
           13.85
         ],
-        "meshes": 31,
-        "materials": 8,
-        "embedded_images": 8
+        "meshes": 8,
+        "materials": 4,
+        "embedded_images": 4
       },
       "build": "node scripts/build_prop_smelt_stovepipe.mjs",
       "validate": "node scripts/capture_prop_renders.mjs prop_smelt_stovepipe"

@@ -1,7 +1,7 @@
 {
   "asset": "prop_smelt_stovepipe",
   "model": "public/models/props/prop_smelt_stovepipe.glb",
-  "capturedAt": "2026-10-27T04:57:08.055Z",
+  "capturedAt": "2026-10-27T06:50:51.888Z",
   "budget": {
     "triangles": 35000,
     "bytes": 1572864,
@@ -11,8 +11,8 @@
       "depth": 27.7
     }
   },
-  "triangles": 15520,
-  "bytes": 1125852,
+  "triangles": 15360,
+  "bytes": 742828,
   "dimensionsCm": {
     "width": 27.7,
     "height": 44.6,
@@ -21,25 +21,25 @@
   "bbox": {
     "min": [
       -0.13850000500679016,
-      -0.025887176394462585,
+      -0.025787174701690674,
       -0.13850000500679016
     ],
     "max": [
       0.13850000500679016,
-      0.41999998688697815,
+      0.42010000348091125,
       0.13850000500679016
     ]
   },
   "meshes": [
     {
       "name": "Crown_Shell_Black_Silk",
-      "triangles": 3600,
+      "triangles": 5040,
       "material": 0
     },
     {
-      "name": "Crown_Inner_Lining",
-      "triangles": 1296,
-      "material": 1
+      "name": "Crown_Top_Cap",
+      "triangles": 2160,
+      "material": 0
     },
     {
       "name": "Crown_Top_Rolled_Rim",
@@ -52,8 +52,13 @@
       "material": 1
     },
     {
+      "name": "Crown_Inner_Lining",
+      "triangles": 2160,
+      "material": 1
+    },
+    {
       "name": "Brim_Swept_Silk",
-      "triangles": 2112,
+      "triangles": 2496,
       "material": 2
     },
     {
@@ -63,175 +68,51 @@
     },
     {
       "name": "Band_Gold_Filigree",
-      "triangles": 720,
+      "triangles": 1008,
       "material": 3
-    },
-    {
-      "name": "Band_Bead_Trim_Top",
-      "triangles": 1008,
-      "material": 4
-    },
-    {
-      "name": "Band_Bead_Trim_Bottom",
-      "triangles": 1008,
-      "material": 4
-    },
-    {
-      "name": "Chimney_Stack",
-      "triangles": 1632,
-      "material": 5
-    },
-    {
-      "name": "Chimney_Rivet_0.312_0",
-      "triangles": 80,
-      "material": 6
-    },
-    {
-      "name": "Chimney_Rivet_0.312_1",
-      "triangles": 80,
-      "material": 6
-    },
-    {
-      "name": "Chimney_Rivet_0.312_2",
-      "triangles": 80,
-      "material": 6
-    },
-    {
-      "name": "Chimney_Rivet_0.312_3",
-      "triangles": 80,
-      "material": 6
-    },
-    {
-      "name": "Chimney_Rivet_0.312_4",
-      "triangles": 80,
-      "material": 6
-    },
-    {
-      "name": "Chimney_Rivet_0.312_5",
-      "triangles": 80,
-      "material": 6
-    },
-    {
-      "name": "Chimney_Rivet_0.312_6",
-      "triangles": 80,
-      "material": 6
-    },
-    {
-      "name": "Chimney_Rivet_0.312_7",
-      "triangles": 80,
-      "material": 6
-    },
-    {
-      "name": "Chimney_Rivet_0.312_8",
-      "triangles": 80,
-      "material": 6
-    },
-    {
-      "name": "Chimney_Rivet_0.312_9",
-      "triangles": 80,
-      "material": 6
-    },
-    {
-      "name": "Chimney_Rivet_0.356_0",
-      "triangles": 80,
-      "material": 6
-    },
-    {
-      "name": "Chimney_Rivet_0.356_1",
-      "triangles": 80,
-      "material": 6
-    },
-    {
-      "name": "Chimney_Rivet_0.356_2",
-      "triangles": 80,
-      "material": 6
-    },
-    {
-      "name": "Chimney_Rivet_0.356_3",
-      "triangles": 80,
-      "material": 6
-    },
-    {
-      "name": "Chimney_Rivet_0.356_4",
-      "triangles": 80,
-      "material": 6
-    },
-    {
-      "name": "Chimney_Rivet_0.356_5",
-      "triangles": 80,
-      "material": 6
-    },
-    {
-      "name": "Chimney_Rivet_0.356_6",
-      "triangles": 80,
-      "material": 6
-    },
-    {
-      "name": "Chimney_Rivet_0.356_7",
-      "triangles": 80,
-      "material": 6
-    },
-    {
-      "name": "Chimney_Rivet_0.356_8",
-      "triangles": 80,
-      "material": 6
-    },
-    {
-      "name": "Chimney_Rivet_0.356_9",
-      "triangles": 80,
-      "material": 6
-    },
-    {
-      "name": "Chimney_Ember_Glow",
-      "triangles": 48,
-      "material": 7
     }
   ],
   "materials": [
     "Silk_Black_Crown",
     "Silk_Inner_Lining",
     "Silk_Black_Brim",
-    "Gold_Filigree_Band",
-    "Gold_Bead_Trim",
-    "Iron_Cast_Chimney",
-    "Iron_Rivet",
-    "Ember_Glow"
+    "Gold_Filigree_Band"
   ],
   "renders": [
     {
       "view": "front",
       "label": "Front (0deg, badge to camera)",
       "file": "test-output/props/prop_smelt_stovepipe/front.png",
-      "bytes": 271808
+      "bytes": 456931
     },
     {
       "view": "profile",
       "label": "Profile (90deg, right side)",
       "file": "test-output/props/prop_smelt_stovepipe/profile.png",
-      "bytes": 240554
+      "bytes": 415909
     },
     {
       "view": "badge",
-      "label": "Gold band close-up",
+      "label": "Gold filigree band close-up",
       "file": "test-output/props/prop_smelt_stovepipe/badge.png",
-      "bytes": 489426
+      "bytes": 1134976
     }
   ],
   "checks": [
     {
       "ok": true,
       "message": "the model has triangles",
-      "detail": "15520"
+      "detail": "15360"
     },
     {
       "ok": true,
       "message": "triangle count is under budget",
-      "detail": "15520 < 35000"
+      "detail": "15360 < 35000"
     },
     {
       "ok": true,
       "message": "file size is within budget",
-      "detail": "1.074 MB <= 1.5 MB"
+      "detail": "0.708 MB <= 1.5 MB"
     },
     {
       "ok": true,
@@ -270,16 +151,6 @@
     },
     {
       "ok": true,
-      "message": "the stack runs up the asset's axis (centred on X)",
-      "detail": "centre x 0 cm"
-    },
-    {
-      "ok": true,
-      "message": "the stack runs up the asset's axis (centred on Z)",
-      "detail": "centre z 0 cm"
-    },
-    {
-      "ok": true,
       "message": "every asset the page asked for was served",
       "detail": ""
     },
@@ -296,7 +167,7 @@
     {
       "ok": true,
       "message": "the renderer sees the same triangle count as the file",
-      "detail": "15520 vs 15520"
+      "detail": "15360 vs 15360"
     },
     {
       "ok": true,
@@ -305,7 +176,7 @@
     {
       "ok": true,
       "message": "the front render is a real image",
-      "detail": "271808 bytes"
+      "detail": "456931 bytes"
     }
   ]
 }
