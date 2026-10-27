@@ -1,25 +1,20 @@
 # prop_smelt_stovepipe
 
-The verification renders for the Ironmaster Chimney Stovepipe Hat, produced by
+The verification renders for the Ironmaster Elongated Stovepipe Hat (Option A: 1:1 match with MiniMax H3 4-view turnaround and turntable), produced by
 
 ```
 node scripts/capture_prop_renders.mjs prop_smelt_stovepipe
 ```
 
 - `front.png` - the hat from the front, on the head socket's frame: the crown's
-  head-entry rim on the origin's plane, the brim's droop marking the front, and
-  the chimney stack running up the middle.
-- `profile.png` - the hat from the side, where the chimney's flare and the
-  brim's fall read most clearly.
-- `badge.png` - the close-up. It is the gold band and its chased scrollwork for
-  this asset; the capture script writes the close-up under that name for every
-  asset it renders.
+  head-entry rim on the origin's plane, the brim's front droop, and the full
+  44.6 cm elongated silk crown summit.
+- `profile.png` - the hat from the side, showcasing the authentic 19th-century dandy
+  lateral brim welt curl and trumpet crown flare.
+- `badge.png` - the close-up of the rich embossed Victorian gold filigree band,
+  with rinceaux acanthus scrollwork and integrated beaded fillets.
 - `report.json` - the capture report: the budgets, the bounding box, the mesh
-  list and the eighteen checks the run passed.
-
-The renders are committed at 720x880 so a reviewer can open them straight from
-the issue; the full-size versions are written to `test-output/props/` by the
-capture script and are not in the repository.
+  list and the validation checks passed.
 
 The model itself is `public/models/props/prop_smelt_stovepipe.glb`, and
 the spec, the frame contract and the measured figures are in
