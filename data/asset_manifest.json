@@ -145,46 +145,46 @@
         },
         "regions": [
           {
-            "label": "the cast last carries the prop's surface",
+            "label": "the lower half of the prop carries the prop's surface",
             "min_cm": [
-              -12.0,
-              -11.0,
+              -3.4,
+              2.0,
               -5.0
             ],
             "max_cm": [
-              12.0,
-              10.0,
+              0.0,
+              8.6,
               40.0
             ],
             "expect": "filled",
-            "min_area_cm2": 300
+            "min_area_cm2": 8
           },
           {
-            "label": "the brass sizing plate carries the prop's surface",
+            "label": "the upper half of the prop carries the prop's surface",
             "min_cm": [
-              -8.0,
-              14.0,
+              3.3,
+              21.5,
               -5.0
             ],
             "max_cm": [
-              8.0,
-              40.0,
-              25.0
+              6.7,
+              28.0,
+              40.0
             ],
             "expect": "filled",
-            "min_area_cm2": 200
+            "min_area_cm2": 8
           },
           {
-            "label": "the space in front of the toe anvil (+Z) is clear",
+            "label": "the space beside the prop is clear",
             "min_cm": [
-              -12.0,
-              -11.0,
-              41.0
+              -13.5,
+              34.5,
+              -5.0
             ],
             "max_cm": [
-              12.0,
-              10.0,
-              56.0
+              -10.1,
+              41.0,
+              40.0
             ],
             "expect": "empty",
             "max_area_cm2": 10
@@ -197,7 +197,7 @@
         ],
         "closeup_fit": 0.12,
         "closeup_label": "The brass sizing plate and its thumbscrew",
-        "view_fit": 0.371,
+        "view_fit": 0.369,
         "dimension_tolerance_pct": 5
       },
       "measured": {
@@ -257,13 +257,13 @@
           {
             "label": "the lower half of the prop carries the prop's surface",
             "min_cm": [
-              -10.1,
-              13.1,
+              -8.2,
+              11.1,
               -17.5
             ],
             "max_cm": [
-              -1.9,
-              24.6,
+              -0.0,
+              22.6,
               17.5
             ],
             "expect": "filled",
@@ -272,13 +272,13 @@
           {
             "label": "the upper half of the prop carries the prop's surface",
             "min_cm": [
-              -1.9,
-              47.6,
+              -0.0,
+              45.6,
               -17.5
             ],
             "max_cm": [
-              6.2,
-              59.0,
+              8.1,
+              57.0,
               17.5
             ],
             "expect": "filled",
@@ -287,12 +287,12 @@
           {
             "label": "the space beside the prop is clear",
             "min_cm": [
-              -18.1,
-              70.5,
+              -16.2,
+              68.5,
               -17.5
             ],
             "max_cm": [
-              -10.1,
+              -8.2,
               80.0,
               17.5
             ],
@@ -363,90 +363,90 @@
           "y_max_cm": 89.0,
           "centre_x_cm": 0.0,
           "centre_z_cm": 0.0,
-          "roll_deg": -33.9,
+          "roll_deg": 32.1,
           "upside_down": true
         },
         "regions": [
           {
             "label": "the lower half of the prop carries the prop's surface",
             "min_cm": [
-              -0.2,
+              -0.0,
               16.9,
-              -2.2
+              -4.8
             ],
             "max_cm": [
-              1.8,
+              2.2,
               28.9,
-              2.2
+              4.8
             ],
             "expect": "filled",
-            "min_area_cm2": 8
+            "min_area_cm2": 9
           },
           {
             "label": "the upper half of the prop carries the prop's surface",
             "min_cm": [
-              -2.2,
-              77.0,
-              -2.2
+              -0.0,
+              52.9,
+              -4.8
             ],
             "max_cm": [
-              -0.9,
-              89.0,
-              2.2
+              2.2,
+              65.0,
+              4.8
             ],
             "expect": "filled",
-            "min_area_cm2": 5
+            "min_area_cm2": 9
           },
           {
             "label": "the space beside the prop is clear",
             "min_cm": [
-              -2.2,
-              40.9,
-              -2.2
+              -9.1,
+              77.0,
+              -4.8
             ],
             "max_cm": [
-              -0.9,
-              52.9,
-              2.2
+              -6.9,
+              89.0,
+              4.8
             ],
             "expect": "empty",
             "max_area_cm2": 10
           }
         ],
         "closeup_focus": [
-          -0.012,
-          0.775,
+          0.0,
+          0.03,
           0.0
         ],
-        "closeup_fit": 0.08,
+        "closeup_fit": 0.12,
         "closeup_label": "The weeping-maiden pommel and the hilt",
-        "view_fit": 0.482,
+        "view_fit": 0.492,
         "dimension_tolerance_pct": 5
       },
-      "build": null,
+      "measured": {
+        "triangles": 19998,
+        "bbox_min_cm": [
+          -9.1,
+          -7.2,
+          -4.8
+        ],
+        "bbox_max_cm": [
+          9.1,
+          89.0,
+          4.8
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 940236
+      },
+      "build": "python scripts/run_pixal3d_mesh.py prop_eleanor_weeping_rapier",
       "validate": "node scripts/capture_prop_renders.mjs prop_eleanor_weeping_rapier",
       "reference_concept": "public/tex/props/flux3_prop_eleanor_weeping_rapier_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_eleanor_rapier_alpha.png",
-      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
-      "stand_in_measured": {
-        "triangles": 888,
-        "bytes": 32412,
-        "bbox_min_cm": [
-          -2.2,
-          -7.2,
-          -2.2
-        ],
-        "bbox_max_cm": [
-          2.2,
-          89,
-          2.2
-        ],
-        "meshes": 4,
-        "materials": 4,
-        "embedded_images": 0
-      },
       "turnaround_sheet": "public/tex/props/h3_eleanor_rapier_turnaround.png",
-      "turntable": "docs/props/prop_eleanor_weeping_rapier/turntable.webp"
+      "turntable": "docs/props/prop_eleanor_weeping_rapier/turntable.webp",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 19,998 triangles, 940,236 bytes, 19/21 capture checks. The reconstruction reproduces the approved art's shape, so its proportions are the art's own and not the spec's: width 18.1 cm against 4.4 cm (+311%), depth 9.7 cm against 4.4 cm (+120%). This entry's dimensions (4.4 x 96.2 x 4.4 cm) were measured off the deleted procedural stand-in. A director's decision is needed: amend scale_dimensions_cm to the measured 18.1 x 96.2 x 9.7 cm, or re-cut the alpha so the rebuild lands on the spec. The tolerance is left at 5%."
     },
     {
       "id": "prop_tilly_clinker_tongs",
@@ -556,7 +556,9 @@
         "meshes": 8,
         "materials": 8,
         "embedded_images": 0
-      }
+      },
+      "turnaround_sheet": "public/tex/props/h3_tilly_tongs_turnaround.png",
+      "turntable": "docs/props/prop_tilly_clinker_tongs/turntable.webp"
     },
     {
       "id": "prop_sluice_flatcap",
