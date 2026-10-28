@@ -16,6 +16,7 @@ Writes:
 
 Usage: python scripts/run_minimax_h3_turnaround.py <alpha.png> <sheet.png> [--preview out.webp]
        [--symmetric] [--length 124] [--seed 1890] [--steps 16]
+       python scripts/run_minimax_h3_turnaround.py - <sheet.png> --from-frames h3_turntable_frames_01985_.png [--symmetric]
 """
 import os
 import sys
@@ -244,10 +245,28 @@ def run_h3_turntable(input_alpha_path, output_sheet_path, prompt=None, preview_p
                 break
     seconds = round(time.time() - started)
 
-    frames = [
-        Image.open(os.path.join(COMFY_OUTPUT, info.get("subfolder", ""), info["filename"])).convert("RGB")
-        for info in images_info
-    ]
+    names = [os.path.join(info.get("subfolder", ""), info["filename"]) for info in images_info]
+    h3 = {"length": length, "seed": seed, "steps": steps, "seconds": seconds}
+    return write_sheet(names, output_sheet_path, preview_path, symmetric, h3)
+
+
+def clip_from_frames(first, clip_frames=LENGTH):
+    """The names of a clip already in ComfyUI's output, from its first frame's name.
+
+    SaveImage numbers frames on from the last file with the prefix, so a clip is
+    the run of clip_frames numbers starting at its first frame.
+    """
+    prefix, number = first.rsplit("_", 2)[0], int(first.rsplit("_", 2)[1])
+    names = [f"{prefix}_{number + i:05d}_.png" for i in range(clip_frames)]
+    missing = [n for n in names if not os.path.exists(os.path.join(COMFY_OUTPUT, n))]
+    if missing:
+        raise FileNotFoundError(f"{len(missing)} frames of the clip are not in {COMFY_OUTPUT}, e.g. {missing[0]}")
+    return names
+
+
+def write_sheet(names, output_sheet_path, preview_path=None, symmetric=False, h3=None):
+    """Pick the views from a clip's frames (names in ComfyUI's output) and write the sheet and its record."""
+    frames = [Image.open(os.path.join(COMFY_OUTPUT, n)).convert("RGB") for n in names]
     picked, right_mirrored = pick_views(frames, symmetric)
     degrees_per_frame = 180.0 / picked["back"]
     print(f"[MiniMax H3] Views: {picked}, {degrees_per_frame:.2f} deg/frame"
@@ -274,8 +293,8 @@ def run_h3_turntable(input_alpha_path, output_sheet_path, prompt=None, preview_p
         "right_mirrored": right_mirrored,
         "clip_frames": len(frames),
         "degrees_per_frame": round(degrees_per_frame, 3),
-        "h3": {"length": length, "seed": seed, "steps": steps, "width": w, "height": h, "seconds": seconds},
-        "comfy_frames": [info["filename"] for info in images_info],
+        "h3": {**(h3 or {}), "width": w, "height": h},
+        "comfy_frames": [os.path.basename(n) for n in names],
     }
     if right_mirrored:
         record["degrees"]["right"] = round(360 - record["degrees"]["left"], 1)
@@ -294,14 +313,21 @@ def run_h3_turntable(input_alpha_path, output_sheet_path, prompt=None, preview_p
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("alpha")
+    ap.add_argument("alpha", help="the alpha cutout; ignored with --from-frames")
     ap.add_argument("sheet")
     ap.add_argument("--preview")
+    ap.add_argument("--from-frames", metavar="FIRST",
+                    help="re-cut a clip already in ComfyUI's output instead of rendering one, "
+                         "e.g. h3_turntable_frames_01985_.png; no GPU")
     ap.add_argument("--symmetric", action="store_true",
                     help="the prop is the same on both sides, so a missing right view may be the left mirrored")
     ap.add_argument("--length", type=int, default=LENGTH)
     ap.add_argument("--seed", type=int, default=1890)
     ap.add_argument("--steps", type=int, default=16)
     a = ap.parse_args()
+    if a.from_frames:
+        write_sheet(clip_from_frames(a.from_frames, a.length), a.sheet, a.preview, a.symmetric,
+                    {"length": a.length, "reused": a.from_frames})
+        sys.exit(0)
     run_h3_turntable(a.alpha, a.sheet, preview_path=a.preview, symmetric=a.symmetric,
                      length=a.length, seed=a.seed, steps=a.steps)
