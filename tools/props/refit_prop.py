@@ -29,6 +29,9 @@ import sys
 
 from PIL import Image
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import pose  # noqa: E402
+
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 MANIFEST = os.path.join(ROOT, "data", "asset_manifest.json")
 
@@ -100,17 +103,22 @@ def cells_of(alpha):
 
 
 def mapper(box, size, frame, measured):
-    """Cutout pixels to model centimetres, on the model's own measured box."""
+    """Cutout pixels to model centimetres, on the model's own measured box.
+
+    The pixels are the ones inside the cutout's cropped box, so they are
+    counted from the crop's own corner: a cutout that is turned over or rolled
+    has its object somewhere in the middle of the image, and the mapping has
+    to be about the object and not about where the image happened to put it.
+    """
     w, h = size
-    cx0, cy0, cx1, cy1 = box
     width = measured["width"]
     height = measured["height"]
     left = frame["centre_x_cm"] - width / 2
     top = frame["y_max_cm"]
 
     def to_cm(px, py):
-        x = left + (px - cx0) / max(1, cx1 - cx0) * width
-        y = top - (py - cy0) / max(1, cy1 - cy0) * height
+        x = left + px / max(1, w) * width
+        y = top - py / max(1, h) * height
         return x, y
 
     return to_cm
@@ -160,7 +168,9 @@ def main():
     frame = entry["validation"]["frame"]
 
     alpha_path = os.path.join(ROOT, entry["alpha_cutout"])
-    alpha = alpha_of(alpha_path)
+    # the art is drawn leaning, or the other way up, and the mesh stands on its
+    # pivot: the boxes are cut from the art in the frame the mesh stands in
+    alpha = pose.posed_cutout(alpha_of(alpha_path), frame)
     box = alpha.getbbox()
     size, cells = cells_of(alpha)
     to_cm = mapper(box, size, frame, measured)

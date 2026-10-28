@@ -38,11 +38,10 @@ function Capture($id) {
 Write-Output "=== POSE $AssetId ==="
 & $PY "$SCRATCH\lean_fit.py" $AssetId --fix 2>&1 | ForEach-Object { Write-Output $_ }
 
-Write-Output "=== REFIT $AssetId ==="
-& $PY "$SCRATCH\refit_prop.py" $AssetId 2>&1 | ForEach-Object { Write-Output $_ }
-
-Capture $AssetId
-
+# The mesh is compared with the sheet it was built from before the validation
+# boxes are fitted onto it: a reconstruction can come out mirrored, and the
+# boxes are cut from the art, so they have to be fitted on the mesh as it
+# ends up.
 Write-Output "=== ORIENTATION $AssetId ==="
 $check = & $PY "$SCRATCH\compare_front.py" $sheet $AssetId --json
 Write-Output $check
@@ -50,10 +49,19 @@ $info = $check | Select-Object -Last 1 | ConvertFrom-Json
 if ($info.mirrored) {
   Write-Output "the reconstruction came out mirrored: flipping it"
   & $PY "$SCRATCH\mirror_prop.py" $AssetId 2>&1 | ForEach-Object { Write-Output $_ }
-  Capture $AssetId
   $check = & $PY "$SCRATCH\compare_front.py" $sheet $AssetId --json
   Write-Output $check
+  $after = $check | Select-Object -Last 1 | ConvertFrom-Json
+  if ($after.mirrored) {
+    Write-Output "the flip did not make it match: flipping it back"
+    & $PY "$SCRATCH\mirror_prop.py" $AssetId 2>&1 | ForEach-Object { Write-Output $_ }
+  }
 }
+
+Write-Output "=== REFIT $AssetId ==="
+& $PY "$SCRATCH\refit_prop.py" $AssetId 2>&1 | ForEach-Object { Write-Output $_ }
+
+Capture $AssetId
 
 $commentPath = "test-output/$AssetId-comment.md"
 Write-Output "=== REPORT $AssetId ==="

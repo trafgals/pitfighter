@@ -20,6 +20,9 @@ import sys
 import numpy as np
 from PIL import Image, ImageDraw
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import pose  # noqa: E402
+
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 MANIFEST = os.path.join(ROOT, "data", "asset_manifest.json")
 VIEWS = ["front", "left", "back", "right"]
@@ -71,6 +74,12 @@ def tile_mask(sheet, index):
     return a.min(axis=2) < 235
 
 
+def image_mask(img):
+    """The outline of the object in a view, whatever the view is."""
+    a = np.asarray(img.convert("RGB")).astype(np.int16)
+    return a.min(axis=2) < 235
+
+
 def project(verts, tris):
     """The mesh's outline seen down the Z axis, as a square mask."""
     x, y = verts[:, 0], verts[:, 1]
@@ -109,9 +118,14 @@ def main():
     model = normalise(project(verts, tris))
     sheet = Image.open(sheet_path).convert("RGB")
 
+    # the mesh stands in the frame its art is turned over and rolled into, so
+    # the views it is compared with are the sheet's views put in that frame
+    frame = entry.get("validation", {}).get("frame", {})
     scores = {}
     for i, view in enumerate(VIEWS):
-        mask = normalise(tile_mask(sheet, i))
+        tile = sheet.crop((i * sheet.height, 0, (i + 1) * sheet.height, sheet.height))
+        posed = pose.posed_view(tile, view, frame)
+        mask = normalise(image_mask(posed))
         scores[view] = {"straight": round(float(iou(model, mask)), 3),
                         "mirrored": round(float(iou(model, mask[:, ::-1])), 3)}
 
