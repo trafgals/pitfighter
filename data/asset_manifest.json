@@ -28,7 +28,7 @@
       "reference_concept": "public/tex/characters/obadiah_winch.jpg",
       "alpha_cutout": "public/tex/props/flux3_winch_custodian_prop_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_custodian_helmet_turnaround.png",
-      "turntable": "public/tex/props/h3_custodian_helmet_turntable.webp",
+      "turntable": "docs/props/prop_winch_custodian_helmet/turntable.webp",
       "glb_output": "public/models/props/prop_winch_custodian_helmet.glb",
       "validation": {
         "rim_mesh": "Crown_Opening_Rim",
@@ -83,7 +83,7 @@
       "reference_concept": "public/tex/characters/hezekiah_smelt.jpg",
       "alpha_cutout": "public/tex/props/flux3_smelt_stovepipe_elongated_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_smelt_stovepipe_turnaround.png",
-      "turntable": "public/tex/props/h3_smelt_stovepipe_turntable.webp",
+      "turntable": "docs/props/prop_smelt_stovepipe/turntable.webp",
       "glb_output": "public/models/props/prop_smelt_stovepipe.glb",
       "validation": {
         "rim_mesh": "Crown_Opening_Rim",
@@ -141,7 +141,7 @@
       "reference_concept": "public/tex/characters/tabitha_pegg.png",
       "alpha_cutout": "public/tex/props/flux3_pegg_shoelast_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_pegg_shoelast_turnaround.png",
-      "turntable": "public/tex/props/h3_pegg_shoelast_turntable.webp",
+      "turntable": "docs/props/prop_pegg_cast_iron_last/turntable.webp",
       "glb_output": "public/models/props/prop_pegg_cast_iron_last.glb"
     },
     {
@@ -192,7 +192,7 @@
       "reference_concept": "public/tex/props/flux3_prop_crape_spiked_brolly_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_crape_brolly_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_crape_brolly_turnaround.png",
-      "turntable": "public/tex/props/h3_crape_brolly_turntable.webp"
+      "turntable": "docs/props/prop_crape_spiked_brolly/turntable.webp"
     },
     {
       "id": "prop_eleanor_weeping_rapier",
@@ -250,7 +250,7 @@
       "reference_concept": "public/tex/props/flux3_prop_eleanor_weeping_rapier_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_eleanor_rapier_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_eleanor_rapier_turnaround.png",
-      "turntable": "public/tex/props/h3_eleanor_rapier_turntable.webp"
+      "turntable": "docs/props/prop_eleanor_weeping_rapier/turntable.webp"
     },
     {
       "id": "prop_tilly_clinker_tongs",
@@ -308,7 +308,7 @@
       "reference_concept": "public/tex/props/flux3_prop_tilly_clinker_tongs_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_tilly_tongs_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_tilly_tongs_turnaround.png",
-      "turntable": "public/tex/props/h3_tilly_tongs_turntable.webp"
+      "turntable": "docs/props/prop_tilly_clinker_tongs/turntable.webp"
     },
     {
       "id": "prop_sluice_flatcap",
@@ -366,7 +366,7 @@
       "reference_concept": "public/tex/props/flux3_prop_sluice_flatcap_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_sluice_flatcap_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_sluice_flatcap_turnaround.png",
-      "turntable": "public/tex/props/h3_sluice_flatcap_turntable.webp"
+      "turntable": "docs/props/prop_sluice_flatcap/turntable.webp"
     },
     {
       "id": "prop_kilnworth_nursecap",
@@ -424,7 +424,7 @@
       "reference_concept": "public/tex/props/flux3_prop_kilnworth_nursecap_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_kilnworth_nursecap_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_kilnworth_nursecap_turnaround.png",
-      "turntable": "public/tex/props/h3_kilnworth_nursecap_turntable.webp"
+      "turntable": "docs/props/prop_kilnworth_nursecap/turntable.webp"
     },
     {
       "id": "prop_mule_championship_belt",
@@ -482,7 +482,7 @@
       "reference_concept": "public/tex/props/flux3_prop_mule_championship_belt_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_mule_belt_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_mule_belt_turnaround.png",
-      "turntable": "public/tex/props/h3_mule_belt_turntable.webp"
+      "turntable": "docs/props/prop_mule_championship_belt/turntable.webp"
     },
     {
       "id": "prop_rook_souwester",
@@ -540,7 +540,7 @@
       "reference_concept": "public/tex/props/flux3_prop_rook_souwester_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_rook_souwester_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_rook_souwester_turnaround.png",
-      "turntable": "public/tex/props/h3_rook_souwester_turntable.webp"
+      "turntable": "docs/props/prop_rook_souwester/turntable.webp"
     },
     {
       "id": "prop_bulwark_pistons",
@@ -598,7 +598,7 @@
       "reference_concept": "public/tex/props/flux3_prop_bulwark_pistons_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_bulwark_pistons_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_bulwark_pistons_turnaround.png",
-      "turntable": "public/tex/props/h3_bulwark_pistons_turntable.webp"
+      "turntable": "docs/props/prop_bulwark_pistons/turntable.webp"
     },
     {
       "id": "prop_crump_samovar",
@@ -656,7 +656,7 @@
       "reference_concept": "public/tex/props/flux3_prop_crump_samovar_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_crump_samovar_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_crump_samovar_turnaround.png",
-      "turntable": "public/tex/props/h3_crump_samovar_turntable.webp"
+      "turntable": "docs/props/prop_crump_samovar/turntable.webp"
     },
     {
       "id": "weapon_knuckleduster",
@@ -714,7 +714,7 @@
       "reference_concept": "public/tex/props/flux3_weapon_knuckleduster_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_knuckleduster_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_knuckleduster_turnaround.png",
-      "turntable": "public/tex/props/h3_knuckleduster_turntable.webp"
+      "turntable": "docs/props/weapon_knuckleduster/turntable.webp"
     },
     {
       "id": "weapon_coal_shovel",
@@ -772,7 +772,7 @@
       "reference_concept": "public/tex/props/flux3_weapon_coal_shovel_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_coal_shovel_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_coal_shovel_turnaround.png",
-      "turntable": "public/tex/props/h3_coal_shovel_turntable.webp"
+      "turntable": "docs/props/weapon_coal_shovel/turntable.webp"
     },
     {
       "id": "weapon_bone_saw",
@@ -830,7 +830,7 @@
       "reference_concept": "public/tex/props/flux3_weapon_bone_saw_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_bone_saw_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_bone_saw_turnaround.png",
-      "turntable": "public/tex/props/h3_bone_saw_turntable.webp"
+      "turntable": "docs/props/weapon_bone_saw/turntable.webp"
     },
     {
       "id": "weapon_nail_bat",
@@ -888,7 +888,7 @@
       "reference_concept": "public/tex/props/flux3_weapon_nail_bat_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_nail_bat_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_nail_bat_turnaround.png",
-      "turntable": "public/tex/props/h3_nail_bat_turntable.webp"
+      "turntable": "docs/props/weapon_nail_bat/turntable.webp"
     },
     {
       "id": "weapon_cleaver",
@@ -946,7 +946,7 @@
       "reference_concept": "public/tex/props/flux3_weapon_cleaver_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_cleaver_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_cleaver_turnaround.png",
-      "turntable": "public/tex/props/h3_cleaver_turntable.webp"
+      "turntable": "docs/props/weapon_cleaver/turntable.webp"
     },
     {
       "id": "weapon_piston_gauntlet",
@@ -1004,7 +1004,7 @@
       "reference_concept": "public/tex/props/flux3_weapon_piston_gauntlet_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_piston_gauntlet_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_piston_gauntlet_turnaround.png",
-      "turntable": "public/tex/props/h3_piston_gauntlet_turntable.webp"
+      "turntable": "docs/props/weapon_piston_gauntlet/turntable.webp"
     },
     {
       "id": "weapon_lamplighter_pole",
@@ -1062,7 +1062,7 @@
       "reference_concept": "public/tex/props/flux3_weapon_lamplighter_pole_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_lamplighter_pole_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_lamplighter_pole_turnaround.png",
-      "turntable": "public/tex/props/h3_lamplighter_pole_turntable.webp"
+      "turntable": "docs/props/weapon_lamplighter_pole/turntable.webp"
     },
     {
       "id": "weapon_chair",
@@ -1127,7 +1127,7 @@
       },
       "measured": {
         "triangles": 19986,
-        "bytes": 1356704,
+        "bytes": 1303240,
         "bbox_min_cm": [
           -26.1,
           -41.5,
@@ -1142,13 +1142,13 @@
         "materials": 1,
         "embedded_images": 3
       },
-      "source": "Pixal3D multi-view reconstruction (ComfyUI) from the turnaround sheet; scripts/build_weapon_chair.mjs builds the earlier procedural chair",
-      "build": null,
+      "source": "Pixal3D multi-view reconstruction (ComfyUI, public/tex/workflows/pixal3d_multiview.json) from the four-view sheet, shrunk and placed on the pivot by the same script; scripts/build_weapon_chair.mjs builds the earlier procedural chair",
+      "build": "python scripts/run_pixal3d_mesh.py weapon_chair",
       "validate": "node scripts/capture_prop_renders.mjs weapon_chair",
       "reference_concept": "public/tex/props/flux3_weapon_chair_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_chair_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_chair_turnaround.png",
-      "turntable": "public/tex/props/h3_chair_turntable.webp"
+      "turntable": "docs/props/weapon_chair/turntable.webp"
     },
     {
       "id": "pickup_tonic",
@@ -1206,7 +1206,7 @@
       "reference_concept": "public/tex/props/flux3_pickup_tonic_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_tonic_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_tonic_turnaround.png",
-      "turntable": "public/tex/props/h3_tonic_turntable.webp"
+      "turntable": "docs/props/pickup_tonic/turntable.webp"
     }
   ]
 }

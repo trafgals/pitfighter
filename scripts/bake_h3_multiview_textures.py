@@ -36,7 +36,7 @@ def load_h3_keyframe(frame_idx):
         return Image.open(fn).convert("RGB")
     
     # Fallback to webp
-    webp_path = os.path.join(ROOT, "public", "tex", "props", "h3_chair_turntable.webp")
+    webp_path = os.path.join(ROOT, "docs", "props", "weapon_chair", "turntable.webp")
     from PIL import ImageSequence
     im = Image.open(webp_path)
     frames = list(ImageSequence.Iterator(im))
