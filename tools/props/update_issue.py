@@ -47,21 +47,31 @@ def report_of(asset_id):
         return json.load(f)
 
 
-def render_links(asset_id):
-    """The published renders, linked to the branch they are committed on."""
+def render_table(asset_id):
+    """The published renders, as a table of pictures.
+
+    The reviewer is on the issue, not on the branch, so the prop is put in
+    front of them there rather than as links they have to follow.
+    """
     report = report_of(asset_id)
     if not report:
         return ""
     renders = report.get("renders") or []
     if not renders:
         return ""
-    links = []
+    labels = []
+    cells = []
     for render in renders:
         view = render.get("view", "?")
         label = render.get("label", view)
         url = f"https://raw.githubusercontent.com/{REPO}/{BRANCH}/docs/props/{asset_id}/{view}.png"
-        links.append(f"[{label}]({url})")
-    return " | ".join(links)
+        labels.append(label)
+        cells.append(f"![{label}]({url})")
+    return (
+        "| " + " | ".join(labels) + " |\n"
+        "| " + " | ".join(":---:" for _ in labels) + " |\n"
+        "| " + " | ".join(cells) + " |\n"
+    )
 
 
 def status_section(asset_id, entry, report):
@@ -103,9 +113,12 @@ def status_section(asset_id, entry, report):
             f"{tol}%."
         )
     lines.append(f"* **Checks:** **{passed} / {len(checks)}** automated quality checks pass.")
-    links = render_links(asset_id)
-    if links:
-        lines.append(f"* **Renders:** {links}")
+    table = render_table(asset_id)
+    if table:
+        lines.append("* **Renders:** the verification renders, below and in the comment.")
+        lines.append("")
+        lines.append(table.rstrip("\n"))
+        lines.append("")
     lines.append(
         f"* **Gate:** `{entry.get('status')}`"
         + (" - held for the decision above." if off else " - ready for the in-game review.")
