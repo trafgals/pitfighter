@@ -163,7 +163,7 @@ def write_glb(doc, blob):
             + struct.pack("<II", len(blob), 0x004E4942) + blob)
 
 
-def image_sizes(doc):
+def image_sizes(doc, colour_px=COLOUR_PX, orm_px=ORM_PX, normal_px=NORMAL_PX):
     """The pixel size each image is shipped at, from the material slots that read it."""
     sizes = {}
     def want(tex, px):
@@ -173,11 +173,11 @@ def image_sizes(doc):
         sizes[src] = max(sizes.get(src, 0), px)
     for m in doc.get("materials", []):
         pbr = m.get("pbrMetallicRoughness", {})
-        want(pbr.get("baseColorTexture"), COLOUR_PX)
-        want(pbr.get("metallicRoughnessTexture"), ORM_PX)
-        want(m.get("occlusionTexture"), ORM_PX)
-        want(m.get("emissiveTexture"), COLOUR_PX)
-        want(m.get("normalTexture"), NORMAL_PX)
+        want(pbr.get("baseColorTexture"), colour_px)
+        want(pbr.get("metallicRoughnessTexture"), orm_px)
+        want(m.get("occlusionTexture"), orm_px)
+        want(m.get("emissiveTexture"), colour_px)
+        want(m.get("normalTexture"), normal_px)
     return sizes
 
 
@@ -273,24 +273,62 @@ def place(doc, views, height_cm, y_min_cm=0.0, centre_x_cm=0.0, centre_z_cm=0.0,
     return scale
 
 
-def shrink_glb(data, fit=None):
+def shrink_glb(data, fit=None, budget=None):
     """Smaller textures as JPEG, 16-bit indices where they fit, and no tangents.
 
     fit, when given, is place()'s keyword arguments: the reconstruction is turned,
     scaled and moved onto the asset's pivot first.
+
+    budget, when given, is the byte budget the asset has to ship inside. The
+    textures are stepped down until the file fits: a mesh that ships over its
+    budget is a defect, and the budget is the one number in the manifest that
+    is ours to meet rather than the art's to answer for.
     """
+    best = None
+    for colour_px, orm_px, normal_px, quality in size_ladder(budget):
+        out = shrink_once(data, fit, colour_px, orm_px, normal_px, quality)
+        best = out
+        if budget is None or len(out) <= budget:
+            return out
+    return best
+
+
+def size_ladder(budget):
+    """The texture sizes and JPEG quality to try, in order.
+
+    The first entry is what the chair shipped with. The rest give up texture
+    detail a step at a time, so a prop that comes out over budget loses a
+    little quality rather than failing to ship.
+    """
+    ladder = [
+        (COLOUR_PX, ORM_PX, NORMAL_PX, JPEG_QUALITY),
+        (COLOUR_PX, ORM_PX, NORMAL_PX, 85),
+        (COLOUR_PX, ORM_PX, NORMAL_PX, 80),
+        (COLOUR_PX, ORM_PX, NORMAL_PX, 75),
+        (768, 768, NORMAL_PX, 85),
+        (768, 768, 384, 85),
+        (768, 768, 384, 75),
+        (512, 512, 256, 80),
+        (512, 512, 256, 70),
+        (256, 256, 256, 65),
+    ]
+    return ladder if budget else ladder[:1]
+
+
+def shrink_once(data, fit, colour_px, orm_px, normal_px, quality):
+    """One pass of the shrink, at a given texture size and JPEG quality."""
     doc, blob = read_glb(data)
     views = [bytes(blob[v.get("byteOffset", 0):v.get("byteOffset", 0) + v["byteLength"]]) for v in doc["bufferViews"]]
     if fit:
         place(doc, views, **fit)
 
-    for i, px in image_sizes(doc).items():
+    for i, px in image_sizes(doc, colour_px, orm_px, normal_px).items():
         img = doc["images"][i]
         im = Image.open(io.BytesIO(views[img["bufferView"]])).convert("RGB")
         if im.width > px:
             im = im.resize((px, px), Image.Resampling.LANCZOS)
         out = io.BytesIO()
-        im.save(out, format="JPEG", quality=JPEG_QUALITY, optimize=True)
+        im.save(out, format="JPEG", quality=quality, optimize=True)
         views[img["bufferView"]] = out.getvalue()
         img["mimeType"] = "image/jpeg"
 
@@ -414,10 +452,12 @@ def reconstruct(asset_id, seed=None, faces=None, out=None):
     else:
         raw = os.path.join(COMFY_OUTPUT, glbs[0].get("subfolder", ""), glbs[0]["filename"])
     with open(raw, "rb") as f:
-        data = shrink_glb(f.read(), fit)
+        data = shrink_glb(f.read(), fit, entry.get("file_budget_bytes"))
     with open(out_path, "wb") as f:
         f.write(data)
-    print(f"[Pixal3D] {os.path.getsize(raw):,} bytes from {raw} shrunk to {len(data):,} in {out_path}")
+    budget = entry.get("file_budget_bytes")
+    print(f"[Pixal3D] {os.path.getsize(raw):,} bytes from {raw} shrunk to {len(data):,} in {out_path}"
+          + (f" (budget {budget:,})" if budget else ""))
     return out_path
 
 
@@ -429,10 +469,15 @@ if __name__ == "__main__":
     ap.add_argument("--out", help="write the GLB here instead of the manifest's glb_output")
     ap.add_argument("--shrink", nargs=2, metavar=("IN", "OUT"),
                     help="shrink a GLB ComfyUI already made; with an asset, place it on that asset's pivot too")
+    ap.add_argument("--budget", type=int,
+                    help="the byte budget to fit inside when shrinking; without one the textures "
+                         "are left at the size they are already at")
     a = ap.parse_args()
     if a.shrink:
+        entry = manifest_entry(a.asset) if a.asset else None
         with open(a.shrink[0], "rb") as f:
-            data = shrink_glb(f.read(), fit_of(manifest_entry(a.asset)) if a.asset else None)
+            data = shrink_glb(f.read(), fit_of(entry) if entry else None,
+                              a.budget or (entry.get("file_budget_bytes") if entry else None))
         with open(a.shrink[1], "wb") as f:
             f.write(data)
         print(f"{a.shrink[1]}: {len(data):,} bytes")

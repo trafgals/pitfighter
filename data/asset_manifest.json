@@ -1105,7 +1105,7 @@
         "meshes": 1,
         "materials": 1,
         "embedded_images": 3,
-        "bytes": 1600204
+        "bytes": 1467436
       },
       "build": "python scripts/run_pixal3d_mesh.py prop_bulwark_pistons",
       "validate": "node scripts/capture_prop_renders.mjs prop_bulwark_pistons",
@@ -1113,7 +1113,7 @@
       "alpha_cutout": "public/tex/props/flux3_bulwark_pistons_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_bulwark_pistons_turnaround.png",
       "turntable": "docs/props/prop_bulwark_pistons/turntable.webp",
-      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 19,994 triangles, 1,600,204 bytes, 18/21 capture checks. The checks that do not pass: file size is within budget; width matches the spec (10.5 cm +/- 5%); depth matches the spec (11.5 cm +/- 5%). The mesh measures 37.8 x 33 x 21.2 cm against a spec of 10.5 x 33 x 11.5 cm. The finding is recorded in the manifest and the tolerance is left at 5%."
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 19,994 triangles, 1,467,436 bytes, 19/21 capture checks. The reconstruction reproduces the approved art's shape, so its proportions are the art's own and not the spec's: width 37.8 cm against 10.5 cm (+260%), depth 21.2 cm against 11.5 cm (+84%). This entry's dimensions (10.5 x 33 x 11.5 cm) were measured off the deleted procedural stand-in. A director's decision is needed: amend scale_dimensions_cm to the measured 37.8 x 33 x 21.2 cm, or re-cut the alpha so the rebuild lands on the spec. The tolerance is left at 5%."
     },
     {
       "id": "prop_crump_samovar",

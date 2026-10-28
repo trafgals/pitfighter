@@ -5,7 +5,6 @@
 > every check, and the renders are here so the finding can be judged, not
 > because the asset is approved. The checks that did not pass:
 
-> - file size is within budget (1.526 MB <= 1.5 MB)
 > - width matches the spec (10.5 cm +/- 5%) (37.8 cm)
 > - depth matches the spec (11.5 cm +/- 5%) (21.2 cm)
 

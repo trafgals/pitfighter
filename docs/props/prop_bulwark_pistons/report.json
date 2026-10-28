@@ -1,7 +1,7 @@
 {
   "asset": "prop_bulwark_pistons",
   "model": "public/models/props/prop_bulwark_pistons.glb",
-  "capturedAt": "2026-10-28T23:53:44.587Z",
+  "capturedAt": "2026-10-28T23:57:35.768Z",
   "budget": {
     "triangles": 28000,
     "bytes": 1572864,
@@ -12,7 +12,7 @@
     }
   },
   "triangles": 19994,
-  "bytes": 1600204,
+  "bytes": 1467436,
   "dimensionsCm": {
     "width": 37.8,
     "height": 33,
@@ -45,19 +45,19 @@
       "view": "front",
       "label": "Front (0deg, +Z to camera)",
       "file": "test-output/props/prop_bulwark_pistons/front.png",
-      "bytes": 427054
+      "bytes": 435911
     },
     {
       "view": "profile",
       "label": "Profile (90deg, right side)",
       "file": "test-output/props/prop_bulwark_pistons/profile.png",
-      "bytes": 244899
+      "bytes": 251017
     },
     {
       "view": "badge",
       "label": "The brass pressure gauge",
       "file": "test-output/props/prop_bulwark_pistons/badge.png",
-      "bytes": 921689
+      "bytes": 962597
     }
   ],
   "checks": [
@@ -72,9 +72,9 @@
       "detail": "19994 < 28000"
     },
     {
-      "ok": false,
+      "ok": true,
       "message": "file size is within budget",
-      "detail": "1.526 MB <= 1.5 MB"
+      "detail": "1.399 MB <= 1.5 MB"
     },
     {
       "ok": true,
@@ -163,7 +163,7 @@
     {
       "ok": true,
       "message": "the front render is a real image",
-      "detail": "427054 bytes"
+      "detail": "435911 bytes"
     }
   ]
 }
