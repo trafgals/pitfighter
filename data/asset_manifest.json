@@ -1111,7 +1111,9 @@
         "meshes": 3,
         "materials": 3,
         "embedded_images": 0
-      }
+      },
+      "turnaround_sheet": "public/tex/props/h3_bulwark_pistons_turnaround.png",
+      "turntable": "docs/props/prop_bulwark_pistons/turntable.webp"
     },
     {
       "id": "prop_crump_samovar",

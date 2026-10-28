@@ -18,13 +18,13 @@ back to `python` on the path.
 ## The order a prop goes through
 
 1. **Sheet** - `scripts/run_minimax_h3_turnaround.py` renders the prop's H3
-   four-view turnaround sheet from its alpha cutout. `run_sheets.ps1` runs the
+   four-view turnaround sheet from its alpha cutout. `chain_sheets.ps1` runs the
    queue; `reroll_clips.ps1` re-renders the clips that never reach the back
    view; `salvage_clip.ps1` cuts a sheet from a clip that is already in
    ComfyUI's output, so a chain that is restarted mid-clip does not spend the
    GPU on it twice.
 2. **Mesh** - `scripts/run_pixal3d_mesh.py <asset_id>` cuts the sheet, runs
-   Pixal3D on ComfyUI and places the mesh on the pivot. `mesh_each_sheet.ps1`
+   Pixal3D on ComfyUI and places the mesh on the pivot. `chain_meshes.ps1`
    runs the queue as the sheets land.
 3. **Pose** - `lean_fit.py` measures how far the placed mesh leans. A prop
    whose approved art is drawn on the diagonal is rolled back onto its pivot,
@@ -60,3 +60,38 @@ procedural stand-in, and the art is what the prop looks like.
 That is a director's decision - amend `scale_dimensions_cm` to the art's
 measurements, or re-cut the alpha so the rebuild lands on the spec. The
 tolerance stays at 5%.
+
+## Running it for hours
+
+The whole set is a day's work on one GPU, so the pipeline is run detached from
+any shell: a process that belongs to a shell's tree is killed with it. Started
+through the WMI service it belongs to the service instead, and outlives the
+shell that asked for it:
+
+```powershell
+$r = Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{
+  CommandLine = 'pwsh -NoProfile -File "C:\path\to\tools\props\supervisor.ps1"'
+}
+```
+
+`supervisor.ps1` runs the three chains and restarts each one when it ends.
+`guardian.ps1` watches the supervisor and starts another if it goes.
+`start_comfyui.ps1` brings ComfyUI up on the discrete card, because ROCm lists
+the integrated Radeon first some of the time and a model that does not fit
+there fails with "HIP error: invalid kernel file" before it draws anything.
+The supervisor watches for that too and moves a ComfyUI that came up on the
+wrong card.
+
+Three things about ComfyUI's queue are worth knowing before changing it:
+
+- **A clip conditions on the file that is on disk when it runs, not the one
+  that was on disk when it was queued.** ComfyUI's LoadImage node reads the
+  anchor file when the job starts, so a clip that waits behind another one
+  picks up whatever prop wrote the anchor last - the bulwark was once queued
+  to render the sluice. Each prop writes its own anchor file now, named after
+  its sheet.
+- **A queue does not survive a restart.** A clip or a reconstruction that was
+  in flight when ComfyUI went is lost, and the chains re-queue it, so nothing
+  has to be salvaged by hand.
+- **One job at a time.** The sheet chain and the mesh chain share the queue,
+  so a mesh waits behind the clips and the GPU never idles.

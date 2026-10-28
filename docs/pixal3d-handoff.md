@@ -32,6 +32,35 @@ The per-prop tools - the pose check, the region re-fit, the orientation check,
 the manifest record and the commit - are in `tools/props/`, with a README that
 gives the order.
 
+## Running it for hours
+
+Rebuilding the whole set is a day's work on one GPU, so it is run detached from
+any shell: a process that belongs to a shell's tree is killed with it. Started
+through the WMI service it belongs to the service instead, and outlives the
+shell that asked for it. `tools/props/supervisor.ps1` runs the three chains and
+restarts each one when it ends; `tools/props/guardian.ps1` starts another
+supervisor if the first goes; `tools/props/start_comfyui.ps1` brings ComfyUI
+up on the discrete card.
+
+That last one matters. ROCm lists the integrated Radeon first some of the time,
+and ComfyUI takes whichever is first: a model that does not fit on the
+integrated card fails with "HIP error: invalid kernel file" before it draws
+anything, and every prompt after it fails the same way. The launcher pins the
+card by name and the supervisor moves a ComfyUI that came up on the wrong one.
+
+Three facts about ComfyUI's queue, each of which cost a run:
+
+- **A clip conditions on the file that is on disk when it runs.** LoadImage
+  reads the anchor file when the job starts, so a clip that waits behind
+  another one picks up whatever prop wrote the anchor last - the bulwark was
+  queued to render the sluice, and the rook's clip came back a flatcap. Each
+  prop writes its own anchor file now, named after its sheet.
+- **A queue does not survive a restart.** Whatever was in flight when ComfyUI
+  went is lost, and the chains re-queue it, so nothing has to be salvaged by
+  hand.
+- **One job at a time.** The sheet chain and the mesh chain share the queue,
+  so a mesh waits behind the clips and the GPU never idles.
+
 ## Step 1: render a fresh H3 clip and sheet per prop
 
 The old sheets and turntables have been deleted: they were cut at the wrong
