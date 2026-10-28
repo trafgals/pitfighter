@@ -30,20 +30,23 @@ export const CHUNK_BIN = 0x004e4942;
 
 /** Split a .glb into its JSON and binary chunks. */
 export function parseGlb(buffer) {
-  if (buffer.length < 12) throw new Error("too short to be a GLB");
-  if (buffer.readUInt32LE(0) !== GLB_MAGIC) throw new Error("bad GLB magic (not a binary glTF)");
-  const version = buffer.readUInt32LE(4);
+  // The chunk walk below reads little-endian words, which is Buffer's job, so
+  // accept a plain Uint8Array by copying it into one first.
+  const buf = Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer);
+  if (buf.length < 12) throw new Error("too short to be a GLB");
+  if (buf.readUInt32LE(0) !== GLB_MAGIC) throw new Error("bad GLB magic (not a binary glTF)");
+  const version = buf.readUInt32LE(4);
   if (version !== 2) throw new Error(`unsupported GLB version ${version}`);
-  const declared = buffer.readUInt32LE(8);
-  const total = Math.min(declared, buffer.length);
+  const declared = buf.readUInt32LE(8);
+  const total = Math.min(declared, buf.length);
   let offset = 12;
   let json = null;
   let bin = null;
   const chunks = [];
   while (offset + 8 <= total) {
-    const length = buffer.readUInt32LE(offset);
-    const type = buffer.readUInt32LE(offset + 4);
-    const body = buffer.subarray(offset + 8, offset + 8 + length);
+    const length = buf.readUInt32LE(offset);
+    const type = buf.readUInt32LE(offset + 4);
+    const body = buf.subarray(offset + 8, offset + 8 + length);
     chunks.push({ type, length });
     if (type === CHUNK_JSON) json = JSON.parse(body.toString("utf8"));
     else if (type === CHUNK_BIN) bin = body;
@@ -85,11 +88,67 @@ function readPositions(json, bin, index) {
 }
 
 const IDENTITY = [0, 0, 0, 1];
-/** Compose a node's local TRS into a column-major 4x4. */
-function nodeMatrix(node) {
+const IDENTITY_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+const AXIS = ["x", "y", "z"];
+
+/** True for an array of exactly `length` finite numbers. */
+function isFiniteList(value, length) {
+  return Array.isArray(value) && value.length === length && value.every((n) => Number.isFinite(n));
+}
+
+/**
+ * A node's local transform as a column-major 4x4.
+ *
+ * The glTF spec gives a node EITHER a `matrix` OR a translation/rotation/scale
+ * triple, never both, and the two are mutually exclusive. A node that carries
+ * a `matrix` therefore has no TRS to read: reading the TRS of such a node
+ * yields the identity, which silently drops the transform the file actually
+ * declares and puts the mesh in the wrong place.
+ *
+ * The matrix wins, exactly as three.js's own GLTFLoader does it - it applies
+ * `node.matrix` when the node has one and falls back to the TRS otherwise.
+ * Without this, a model exported with a matrix node measures against the
+ * wrong frame: the reader reported the pegg last 10 cm shorter than it is,
+ * and put its grip on the origin plane when the file puts it 6.2 cm below.
+ *
+ * A transform that is not usable - a matrix that is not 16 finite numbers, or
+ * a TRS with a non-finite component - is reported as a problem rather than
+ * multiplied into the world transform. Multiplying it in would poison every
+ * world point with NaN, and NaN compares false against everything, so the
+ * bounds would quietly measure short instead of reporting a broken file.
+ */
+function nodeMatrix(node, problems, label) {
+  if (node.matrix != null) {
+    if (!isFiniteList(node.matrix, 16)) {
+      problems.push(`node "${label}" declares a malformed matrix (expected 16 finite numbers)`);
+      return IDENTITY_MATRIX;
+    }
+    // A zero-length basis column is a zero scale on that axis: the geometry
+    // is flattened along it, which makes the model unreviewable.
+    const columns = [
+      [node.matrix[0], node.matrix[1], node.matrix[2]],
+      [node.matrix[4], node.matrix[5], node.matrix[6]],
+      [node.matrix[8], node.matrix[9], node.matrix[10]],
+    ];
+    const zeroAxis = columns.findIndex((c) => Math.hypot(...c) === 0);
+    if (zeroAxis >= 0) {
+      problems.push(`node "${label}" has a zero scale on the ${AXIS[zeroAxis]} axis, which collapses the geometry along it`);
+    }
+    return node.matrix;
+  }
   const t = node.translation ?? [0, 0, 0];
   const r = node.rotation ?? IDENTITY;
   const s = node.scale ?? [1, 1, 1];
+  if (!isFiniteList(t, 3) || !isFiniteList(r, 4) || !isFiniteList(s, 3)) {
+    problems.push(
+      `node "${label}" declares a malformed transform (translation, rotation and scale must be finite numbers)`,
+    );
+    return IDENTITY_MATRIX;
+  }
+  const zeroAxis = s.findIndex((n) => n === 0);
+  if (zeroAxis >= 0) {
+    problems.push(`node "${label}" has a zero scale on the ${AXIS[zeroAxis]} axis, which collapses the geometry along it`);
+  }
   const [x, y, z, w] = r;
   const x2 = x + x, y2 = y + y, z2 = z + z;
   const xx = x * x2, xy = x * y2, xz = x * z2;
@@ -144,9 +203,11 @@ export function inspectGlb(file) {
   const world = new Array((json.nodes ?? []).length).fill(null);
   const roots = json.scenes?.[json.scene ?? 0]?.nodes ?? (json.nodes ?? []).map((_, i) => i);
   const visit = (nodeIndex, parent) => {
-    const m = multiply(parent ?? [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1], nodeMatrix(json.nodes[nodeIndex]));
+    const node = json.nodes[nodeIndex];
+    const label = node.name ?? `node ${nodeIndex}`;
+    const m = multiply(parent ?? IDENTITY_MATRIX, nodeMatrix(node, problems, label));
     world[nodeIndex] = m;
-    for (const child of json.nodes[nodeIndex].children ?? []) visit(child, m);
+    for (const child of node.children ?? []) visit(child, m);
   };
   for (const root of roots) visit(root, null);
 
@@ -219,7 +280,7 @@ export function inspectGlb(file) {
     const nodeIndexes = (json.nodes ?? [])
       .map((node, i) => (node.mesh === meshIndex ? i : -1))
       .filter((i) => i >= 0);
-    const matrices = nodeIndexes.map((i) => world[i] ?? [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
+    const matrices = nodeIndexes.map((i) => world[i] ?? IDENTITY_MATRIX);
     const meshMin = [Infinity, Infinity, Infinity];
     const meshMax = [-Infinity, -Infinity, -Infinity];
     for (const primitive of mesh.primitives ?? []) {
