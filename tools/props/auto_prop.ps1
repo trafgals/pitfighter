@@ -142,14 +142,14 @@ gh issue comment $Issue --body-file $commentPath
 if ($LASTEXITCODE) { Write-Output "gh issue comment failed"; exit 1 }
 
 # the issue's own 3D section says the prop is queued; it says what was built
-# from here on, so the issue is the whole story
+# from here on, so the issue is the whole story. It also puts the issue's
+# labels in line with what was built - a rebuilt prop is in the review queue,
+# a prop that is still being made carries the stage it is at.
 & $PY "$SCRATCH\update_issue.py" $AssetId $Issue 2>&1 | ForEach-Object { Write-Output $_ }
 if ($LASTEXITCODE) { Write-Output "the issue body could not be updated" }
 
 if (-not $failed.Count) {
-  gh issue edit $Issue --remove-label "gate:2-review-turnaround" --add-label "gate:3-review-ingame-3d"
-  if ($LASTEXITCODE) { Write-Output "gh issue edit failed"; exit 1 }
   Write-Output "=== SHIPPED $AssetId (issue #$Issue, $passed/$total checks) ==="
 } else {
-  Write-Output "=== RECORDED $AssetId (issue #$Issue, $passed/$total checks, gate held at 2) ==="
+  Write-Output "=== RECORDED $AssetId (issue #$Issue, $passed/$total checks, held on the finding) ==="
 }

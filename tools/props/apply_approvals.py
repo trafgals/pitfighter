@@ -47,6 +47,18 @@ GATE_3 = "gate:3-review-ingame-3d"
 GATE_2 = "gate:2-review-turnaround"
 APPROVED = "status:asset-approved"
 
+# The labels the pipeline puts on an asset issue. An approval clears them
+# all and leaves the approval label in their place.
+MANAGED = [
+    GATE_2,
+    GATE_3,
+    "stage:h3-turnaround",
+    "stage:pixal3d-mesh",
+    "stage:minimax-code-3d",
+    "held:finding",
+    "asset:3d-built",
+]
+
 
 def gh(*args):
     # gh writes UTF-8, and an issue body carries characters the system's own
@@ -101,16 +113,14 @@ def main():
         # the turnaround sign-off moves the issue on, but only once the asset
         # is built and its capture passed: there is nothing to review in game
         # before then
-        if turnaround and built and status == APPROVED:
-            continue
-        if turnaround and built and GATE_2 in labels and status not in (APPROVED,):
+        if turnaround and built and status not in (APPROVED,):
             report = os.path.join(ROOT, "test-output", "props", asset_id, "report.json")
             passed = False
             if os.path.exists(report):
                 with open(report, encoding="utf-8") as f:
                     checks = json.load(f).get("checks", [])
                 passed = bool(checks) and all(c.get("ok") for c in checks)
-            if passed:
+            if passed and status != GATE_3:
                 changed.append((asset_id, issue, status, GATE_3, labels))
 
     if not changed:
@@ -124,11 +134,13 @@ def main():
         entry = by_id[asset_id]
         entry["status"] = now
         write_manifest(manifest)
-        if APPROVED in now:
-            gh("issue", "edit", str(issue), "--remove-label", GATE_3, "--remove-label", GATE_2,
-               "--add-label", APPROVED)
-        else:
-            gh("issue", "edit", str(issue), "--remove-label", GATE_2, "--add-label", GATE_3)
+        # the pipeline's own labels come off, and the approval goes on
+        args = ["issue", "edit", str(issue)]
+        for label in MANAGED:
+            if label in labels and label != now:
+                args += ["--remove-label", label]
+        args += ["--add-label", now]
+        gh(*args)
         print(f"  issue #{issue} relabelled")
 
     if apply:

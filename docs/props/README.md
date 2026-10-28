@@ -57,9 +57,25 @@ script.
 A rebuilt prop is reviewed **on its GitHub issue**, not here. This folder
 holds the evidence the issue points at.
 
-The asset issues are the ones labelled `gate:2-review-turnaround`:
+The asset issues are the ones labelled `asset:3d-built` - a prop that has
+been rebuilt, so there is a 3D asset to look at:
 
-<https://github.com/trafgals/pitfighter/issues?q=label:gate%3A2-review-turnaround>
+<https://github.com/trafgals/pitfighter/issues?q=label:asset%3A3d-built>
+
+The labels say where each prop is, so the list can be scanned:
+
+| label | what it means |
+| :--- | :--- |
+| `asset:3d-built` | the prop has been rebuilt - there is a 3D asset to review |
+| `held:finding` | and a check does not pass, so it needs a decision as well |
+| `gate:3-review-ingame-3d` | and it passes every check, so it is in the in-game review |
+| `stage:h3-turnaround` | the turnaround sheet is still being generated |
+| `stage:pixal3d-mesh` | the sheet is done and the mesh is being generated |
+| `gate:2-review-turnaround` | the prop is still before its 3D gate |
+| `status:asset-approved` | a human has signed it off |
+
+A prop that has no 3D asset yet has no picture on its issue, and that is the
+truth of it rather than a gap in the review: it has not been built.
 
 ### What is on the issue
 

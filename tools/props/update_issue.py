@@ -21,6 +21,18 @@ REPORT_DIR = os.path.join(ROOT, "test-output", "props")
 BRANCH = "feat/pixal3d-props-rebuild"
 REPO = "trafgals/pitfighter"
 
+# The labels the pipeline manages on an asset issue, and nothing else. A
+# reviewer's own labels - an approval, a revision request - are left alone.
+MANAGED_LABELS = [
+    "gate:2-review-turnaround",
+    "gate:3-review-ingame-3d",
+    "stage:h3-turnaround",
+    "stage:pixal3d-mesh",
+    "stage:minimax-code-3d",
+    "held:finding",
+    "asset:3d-built",
+]
+
 
 def gh(*args):
     # gh writes UTF-8, and an issue body carries characters the system's own
@@ -72,6 +84,56 @@ def render_table(asset_id):
         "| " + " | ".join(":---:" for _ in labels) + " |\n"
         "| " + " | ".join(cells) + " |\n"
     )
+
+
+def labels_for(entry, report):
+    """The labels an asset issue carries, from what has actually been built.
+
+    The issue list is the review surface, so the label has to say whether
+    there is a 3D asset to look at. A prop that has been rebuilt carries
+    `asset:3d-built`, and whether it also needs a decision is a second label
+    rather than a second gate: a prop held on a finding is still at gate 2,
+    and saying so with a gate label would claim a gate it has not reached.
+    """
+    if report:
+        labels = ["asset:3d-built"]
+        if any(not c.get("ok") for c in report.get("checks", [])):
+            labels.append("held:finding")
+        else:
+            labels.append("gate:3-review-ingame-3d")
+        return labels
+    if entry.get("turnaround_sheet"):
+        # the sheet is made; the mesh is the one still to come
+        return ["stage:pixal3d-mesh", "gate:2-review-turnaround"]
+    return ["stage:h3-turnaround", "gate:2-review-turnaround"]
+
+
+def sync_labels(issue, entry, report):
+    """Put the issue's labels in line with what the manifest says.
+
+    The label used to be the same on every asset issue, so a prop with a
+    built 3D asset and a prop still waiting for one looked alike in the
+    list. It is the label the reviewer scans, so it carries the state.
+    """
+    labels = labels_for(entry, report)
+    current = json.loads(gh("issue", "view", str(issue), "--json", "labels"))["labels"]
+    names = [label["name"] for label in current]
+    if "status:asset-approved" in names:
+        # a human has signed this one off; leave their labels alone
+        return labels
+    if sorted(names) == sorted(set(names) & set(MANAGED_LABELS) | set(labels)):
+        return labels
+
+    args = ["issue", "edit", str(issue)]
+    for label in MANAGED_LABELS:
+        if label in names and label not in labels:
+            args += ["--remove-label", label]
+    for label in labels:
+        if label not in names:
+            args += ["--add-label", label]
+    if len(args) > 3:
+        gh(*args)
+    return labels
 
 
 def status_section(asset_id, entry, report):
@@ -182,7 +244,8 @@ def main():
     with open(path, "w", encoding="utf-8", newline="\n") as f:
         f.write(body)
     gh("issue", "edit", issue, "--body-file", path)
-    print(f"issue #{issue} updated for {asset_id}")
+    labels = sync_labels(issue, entry, report)
+    print(f"issue #{issue} updated for {asset_id} (labels: {', '.join(labels)})")
     return 0
 
 

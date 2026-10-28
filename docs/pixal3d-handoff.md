@@ -3,8 +3,10 @@
 Every prop except `weapon_chair` was made by the old pipeline. Its H3 sheets
 picked tiles at frames 0/31/62/93, which are really about 0/60/120/180°, not
 front/left/back/right, and its meshes were primitive procedural stand-ins that
-never used the sheets. Those stand-ins have been deleted: the 18 props with
-status `gate:2-rebuild-pixal3d` have no GLB and `build: null`. The custodian
+never used the sheets. Those stand-ins have been deleted: the 18 props with no
+GLB and `build: null` sit at `gate:2-review-turnaround` until they are
+rebuilt, and a prop that has been rebuilt and then held on a finding reads
+`gate:2-rebuild-pixal3d`. The custodian
 helmet and Smelt stovepipe keep their older hand-built GLBs; rebuild them too
 if Pixal3D does better. The chair is the reference: it
 was rebuilt by the scripts below and passes 21/21 checks.
@@ -182,7 +184,16 @@ spec exactly - passes.
 GPU is asked for anything. It is a director's decision: amend
 `scale_dimensions_cm` to the measured dimensions, or re-cut the alpha so the
 rebuild lands on the spec. **Do not widen the tolerance**, and leave the gate
-at `gate:2-review-turnaround` for the prop that needs the decision.
+at `gate:2-rebuild-pixal3d` for the prop that needs the decision.
+
+The gate and the issue's label say different things on purpose. The gate is
+where the asset has got to: a prop that has been rebuilt and passes every
+check is at `gate:3-review-ingame-3d`, and a prop that is held on a finding
+is still at `gate:2-rebuild-pixal3d` until that finding is settled. The
+labels are what the reviewer scans, and they say whether there is a 3D asset
+to look at: `asset:3d-built` for a prop that has one, `held:finding` for one
+that also needs a decision, and a `stage:` label for a prop that is still
+being generated.
 
 ## Done
 
