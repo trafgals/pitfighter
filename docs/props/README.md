@@ -32,6 +32,13 @@ perfectly fine in a picture - a prop on the wrong frame is not a broken
 render - so a failed run must not put its images in front of a reviewer as if
 they had passed.
 
+`--held` publishes the renders of a prop that is held at a gate, with a README
+that says it is held and lists the checks that did not pass. The review
+happens on the issue, and a reviewer cannot judge a prop they cannot see, so
+the picture is put in front of them - but never as if it had passed. The
+README, the issue's 3D section and the comment under it all carry the
+finding.
+
 ## Why it is a script
 
 The resize used to be done by hand, and it was done wrong: the Smelt's renders
@@ -44,3 +51,78 @@ The renders committed before this step existed were resized with the same
 Lanczos filter by a tool outside the repository, so they are the same picture
 as this step produces but not the same bytes. New renders come from the
 script.
+
+## Reviewing a rebuilt prop
+
+A rebuilt prop is reviewed **on its GitHub issue**, not here. This folder
+holds the evidence the issue points at.
+
+The asset issues are the ones labelled `gate:2-review-turnaround`:
+
+<https://github.com/trafgals/pitfighter/issues?q=label:gate%3A2-review-turnaround>
+
+### What is on the issue
+
+Each rebuilt prop's issue carries, in its **3. Model Status** section, what
+was built, what it measures, the checks it passed and its renders. The same
+numbers are in a comment under the issue, with the render pictures in it.
+
+| what | where |
+| :--- | :--- |
+| the concept art and the alpha cutout it was built from | section 1 of the issue |
+| the four-view turnaround sheet it was reconstructed from | section 2 of the issue |
+| what was built, what it measures, the checks, the renders, the gate | section 3 of the issue |
+| the render pictures, in a comment | the `Pixal3D Multi-View Reconstruction` comment |
+| the full capture report | `docs/props/<asset_id>/report.json` |
+
+### How to review it
+
+1. **Open the renders.** `front.png` is the prop from the front, `profile.png`
+   is it from the right side, and `badge.png` is a close-up of the detail the
+   capture was pointed at. They are 720x880 so they open straight from the
+   issue.
+2. **Compare them with the concept art** in section 1 of the same issue. The
+   reconstruction is built from the turnaround sheet, so it should be the same
+   prop in the same shape - a different silhouette, a missing part or a
+   mirrored detail is a defect, not a style difference.
+3. **Read the checks.** `report.json` lists every check the capture ran and
+   whether it passed. The ones that matter to a reviewer are the dimensions
+   against the spec, the triangle and byte budgets, and the validation boxes
+   that hold the prop's business end in frame.
+4. **Decide.**
+
+### The three things a reviewer can say
+
+**Approve it.** Comment `/approve-3d` on the issue, or add the label
+`status:asset-approved`. Then run:
+
+```bash
+python tools/props/apply_approvals.py --apply
+```
+
+That carries the approval into `data/asset_manifest.json`, moves the issue's
+labels to match and commits it. Run it without `--apply` first to see what it
+would change. The pipeline never approves anything itself - it only records an
+approval a human has already given.
+
+**Send it back.** Add the label `status:revision-requested` and say what is
+wrong in a comment. The prop stays at its current gate until the rebuild
+answers the comment.
+
+**Answer the dimensions question.** A prop whose capture did not pass every
+check is usually held for one reason: the reconstruction reproduces the
+proportions of the approved art, and the approved art is not the shape the
+manifest's `scale_dimensions_cm` were measured from. Those figures came from
+the procedural stand-ins this pipeline replaces. The finding is written on the
+issue, and the fix is one of two:
+
+- **Amend the spec** - change `scale_dimensions_cm` in
+  `data/asset_manifest.json` to the measured figures on the issue, on the
+  grounds that the approved art is what the prop looks like; or
+- **Re-cut the alpha** - redraw the cutout so the rebuild lands on the spec as
+  written.
+
+The tolerance stays at 5%. It is not widened to make a prop fit.
+
+Until that is answered the prop stays at `gate:2-rebuild-pixal3d`, and a
+`/approve-3d` on it is a statement about the art, not about the fit.

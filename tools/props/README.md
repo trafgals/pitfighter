@@ -95,3 +95,20 @@ Three things about ComfyUI's queue are worth knowing before changing it:
   has to be salvaged by hand.
 - **One job at a time.** The sheet chain and the mesh chain share the queue,
   so a mesh waits behind the clips and the GPU never idles.
+
+## Reviewing
+
+The review happens on the prop's GitHub issue, and `docs/props/README.md` is
+the guide a reviewer follows: what is on the issue, how to judge the renders
+against the concept art, and how to approve a prop or send it back.
+
+Two scripts carry a reviewer's verdict back into the repository:
+
+- `update_issue.py <asset_id> <issue>` rewrites the issue's 3D section from
+  what was actually built - the measured block, the checks that did not pass,
+  the renders and the gate - and points the issue's own review controls at the
+  guide.
+- `apply_approvals.py` reads the issues and moves the manifest and the labels
+  to match an approval a human has already given, by a `/approve-3d` comment
+  or a `status:asset-approved` label. It is a dry run until it is given
+  `--apply`, and it never approves anything itself.

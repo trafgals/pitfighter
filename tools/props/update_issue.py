@@ -114,6 +114,29 @@ def status_section(asset_id, entry, report):
     return "\n".join(lines)
 
 
+REVIEW_HEADING = "### Human-in-the-Loop Review Controls"
+
+REVIEW_POINTER = (
+    "\n\n"
+    "> The rebuild is reviewed here: the renders and the checks are in the 3D\n"
+    "> section above, and how to judge them and sign them off is written up in\n"
+    "> `docs/props/README.md`.\n"
+)
+
+
+def add_review_pointer(body):
+    """Point the issue's own review controls at the review guide.
+
+    The controls say how to approve, but not where to look - and a reviewer
+    who opens the issue should not have to go looking for the guide.
+    """
+    if "docs/props/README.md" in body:
+        return body
+    if REVIEW_HEADING not in body:
+        return body
+    return body.replace(REVIEW_HEADING, REVIEW_HEADING + REVIEW_POINTER, 1)
+
+
 def main():
     asset_id, issue = sys.argv[1], sys.argv[2]
     entry = entry_of(asset_id)
@@ -139,6 +162,8 @@ def main():
         body = pattern.sub(new_section + "\n---\n\n", body)
     else:
         body = body.rstrip() + "\n\n---\n\n" + new_section
+
+    body = add_review_pointer(body)
 
     path = os.path.join(ROOT, "test-output", f"issue-{issue}-body.md")
     with open(path, "w", encoding="utf-8", newline="\n") as f:
