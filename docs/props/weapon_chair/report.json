@@ -1,7 +1,7 @@
 {
   "asset": "weapon_chair",
   "model": "public/models/props/weapon_chair.glb",
-  "capturedAt": "2026-10-27T13:01:22.780Z",
+  "capturedAt": "2026-10-28T01:15:57.942Z",
   "budget": {
     "triangles": 25000,
     "bytes": 1572864,
@@ -11,8 +11,8 @@
       "depth": 48
     }
   },
-  "triangles": 368,
-  "bytes": 27924,
+  "triangles": 832,
+  "bytes": 1077052,
   "dimensionsCm": {
     "width": 48,
     "height": 87,
@@ -21,90 +21,80 @@
   "bbox": {
     "min": [
       -0.23999999463558197,
-      -0.41999999344348904,
-      -0.23999999463558197
+      -0.4150591790676117,
+      -0.2473628669977188
     ],
     "max": [
       0.23999999463558197,
-      0.4499999976158142,
-      0.23999999463558197
+      0.4549408257007599,
+      0.23263712227344513
     ]
   },
   "meshes": [
     {
-      "name": "mesh_0",
-      "triangles": 48,
+      "name": "Handle_Grip_Seat",
+      "triangles": 128,
       "material": 0
     },
     {
-      "name": "mesh_1",
-      "triangles": 48,
-      "material": 1
-    },
-    {
-      "name": "mesh_2",
-      "triangles": 48,
-      "material": 2
-    },
-    {
-      "name": "mesh_3",
-      "triangles": 48,
-      "material": 3
-    },
-    {
-      "name": "Handle_Grip_Seat",
-      "triangles": 96,
-      "material": 4
-    },
-    {
       "name": "Tufted_Backrest",
-      "triangles": 80,
-      "material": 5
+      "triangles": 128,
+      "material": 0
+    },
+    {
+      "name": "Armrests",
+      "triangles": 256,
+      "material": 0
+    },
+    {
+      "name": "Chair_Legs",
+      "triangles": 256,
+      "material": 0
+    },
+    {
+      "name": "Forward_Feature",
+      "triangles": 64,
+      "material": 0
     }
   ],
   "materials": [
-    "(unnamed)",
-    "(unnamed)",
-    "(unnamed)",
-    "(unnamed)",
-    "(unnamed)",
-    "(unnamed)"
+    "Victorian_Chair_Baked_8k"
   ],
   "renders": [
     {
       "view": "front",
       "label": "Front (0deg, badge to camera)",
       "file": "test-output/props/weapon_chair/front.png",
-      "bytes": 30181
+      "bytes": 238453
     },
     {
       "view": "profile",
       "label": "Profile (90deg, right side)",
       "file": "test-output/props/weapon_chair/profile.png",
-      "bytes": 29325
+      "bytes": 125615
     },
     {
       "view": "badge",
       "label": "Tufted crimson velvet backrest close-up",
       "file": "test-output/props/weapon_chair/badge.png",
-      "bytes": 20253
+      "bytes": 617647
     }
   ],
   "checks": [
     {
       "ok": true,
       "message": "the model has triangles",
-      "detail": "368"
+      "detail": "832"
     },
     {
       "ok": true,
       "message": "triangle count is under budget",
-      "detail": "368 < 25000"
+      "detail": "832 < 25000"
     },
     {
       "ok": true,
       "message": "file size is within budget",
-      "detail": "0.027 MB <= 1.5 MB"
+      "detail": "1.027 MB <= 1.5 MB"
     },
     {
       "ok": true,
@@ -133,13 +123,13 @@
     },
     {
       "ok": true,
-      "message": "the handle grip is centred on the origin's plane (y = 0)",
-      "detail": "grip centre y 4 cm"
+      "message": "the origin feature is centred on the origin",
+      "detail": "centre 0, 0, 0 cm"
     },
     {
       "ok": true,
-      "message": "the handle grip is centred on X",
-      "detail": "grip centre x 0 cm"
+      "message": "the forward feature is on the front face (+Z)",
+      "detail": "centre z 22.2 cm"
     },
     {
       "ok": true,
@@ -159,7 +149,7 @@
     {
       "ok": true,
       "message": "the renderer sees the same triangle count as the file",
-      "detail": "368 vs 368"
+      "detail": "832 vs 832"
     },
     {
       "ok": true,
@@ -168,7 +158,7 @@
     {
       "ok": true,
       "message": "the front render is a real image",
-      "detail": "30181 bytes"
+      "detail": "238453 bytes"
     }
   ]
 }
