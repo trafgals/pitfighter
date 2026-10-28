@@ -2,22 +2,28 @@
 // Capture verification renders of a 3D prop and check it against its spec.
 //
 //   node scripts/capture_prop_renders.mjs <asset_id>
+//   node scripts/capture_prop_renders.mjs <asset_id> --publish
 //
 // The asset is looked up in data/asset_manifest.json, rendered from three
 // fixed angles in headless Chrome, and measured against the budgets the
-// manifest records: triangle count, file size, dimensions and the
-// head-socket frame. The renders and the report are written to
-// test-output/props/<asset_id>/.
+// manifest records: triangle count, file size, dimensions and the frame the
+// manifest's pivot convention describes - a head-socket prop's base opening,
+// or a grip-normalized prop's handle. The renders and the report are written
+// to test-output/props/<asset_id>/.
+//
+// With --publish the renders are then put into the repository at the size a
+// reviewer opens them at, which is the whole publish step: docs/props/ is
+// never written by hand.
 //
 // This is the gate a human reviewer looks at before the prop is allowed into
 // the game, so it fails loudly: a missing budget check, an out-of-spec
 // dimension or a mesh that will not load all end in a non-zero exit.
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import puppeteer from "puppeteer-core";
-import { inspectGlb } from "./lib/glb_inspect.mjs";
+import { inspectGlb, readWorldTriangles, surfaceAreaInBox } from "./lib/glb_inspect.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const PORT = Number(process.env.PROP_CAPTURE_PORT || 5200);
@@ -27,9 +33,12 @@ const HEIGHT = 1100;
 
 const assetId = process.argv[2];
 if (!assetId) {
-  console.error("usage: node scripts/capture_prop_renders.mjs <asset_id>");
+  console.error("usage: node scripts/capture_prop_renders.mjs <asset_id> [--publish]");
   process.exit(2);
 }
+
+// Whether the run also publishes the renders into the repository.
+const publish = process.argv.includes("--publish");
 
 const manifestPath = path.join(ROOT, "data/asset_manifest.json");
 const manifest = fs.existsSync(manifestPath) ? JSON.parse(fs.readFileSync(manifestPath, "utf8")) : { assets: [] };
@@ -56,20 +65,51 @@ const validation = entry?.validation ?? {};
 // defaults, so a missing badge there is still a failure and not a check that
 // quietly goes away.
 const hasValidation = !!entry?.validation;
-const rimMeshName = validation.rim_mesh ?? "Crown_Opening_Rim";
-const frontMeshName = validation.front_mesh ?? (hasValidation ? null : "Brunswick_Star_Badge_Plate");
+// A head-socket prop is placed by its base opening: the rim lies on the
+// origin's plane and the hat's axis runs up through it. A grip-normalized
+// prop is placed by its handle instead - there is no rim to measure, and
+// asking one of those props for a crown opening is a check no build of it
+// could ever pass. The manifest's pivot convention is what tells the two
+// apart, and a head-socket prop keeps the helmet's defaults either way.
+const pivotConvention = entry?.pivot?.convention ?? "head_socket_normalized";
+const isHeadSocket = pivotConvention === "head_socket_normalized";
+const rimMeshName = validation.rim_mesh ?? (isHeadSocket ? "Crown_Opening_Rim" : null);
+const frontMeshName = validation.front_mesh ?? (hasValidation || !isHeadSocket ? null : "Brunswick_Star_Badge_Plate");
+// A prop that is placed by its handle says what sits at the origin and what
+// sits in front of it, so the frame can be checked instead of trusted.
+const originMeshName = validation.origin_mesh ?? null;
+const forwardMeshName = validation.forward_mesh ?? null;
 const axisMeshName = validation.axis_mesh ?? null;
+// A generated mesh (an image-to-3D reconstruction) is one welded surface
+// with no parts to name, so its frame is declared as geometry instead: where
+// its bounding box has to sit, and boxes in model space that must hold
+// surface or must be clear. A clear box in front of a filled one is what
+// tells forward from back, so a model turned the wrong way fails it.
+const frame = validation.frame ?? null;
+const regions = validation.regions ?? [];
+// A reconstruction's proportions come out of the model, not a builder's
+// numbers, so its width and depth are held to a percentage of the spec.
+const dimensionTolerancePct = validation.dimension_tolerance_pct ?? 0;
 const viewFit = validation.view_fit ?? 0.17;
 const closeupFit = validation.closeup_fit ?? 0.048;
 const closeupLabel = validation.closeup_label ?? "Badge close-up";
 // The close-up is framed on a point in the model's own space when the
 // manifest gives one, and on a mesh's centre otherwise.
+//
+// It has to be framed on something. With no target at all the capture page
+// centres the close-up on the whole model, so the "detail" render shows the
+// entire prop and the run still reports success - a badge close-up that never
+// showed the badge. An asset that names no close-up of its own falls back to
+// the front feature it declares, and an asset that declares no validation
+// block at all falls back to the helmet's badge, which is what the capture
+// page used to find by itself before the target became the manifest's job.
+const closeupMeshName = validation.closeup_mesh ?? frontMeshName;
 const closeupFocus = validation.closeup_focus
   ? validation.closeup_focus.join(",")
-  : (validation.closeup_mesh ?? "");
+  : (closeupMeshName ?? "");
 
 const VIEWS = [
-  { name: "front", label: "Front (0deg, badge to camera)" },
+  { name: "front", label: "Front (0deg, +Z to camera)" },
   { name: "profile", label: "Profile (90deg, right side)" },
   { name: "badge", label: closeupLabel },
 ];
@@ -96,11 +136,17 @@ let server = null;
 let browser = null;
 const teardown = (code) => {
   try {
-    // Close the browser by hand: puppeteer's own close() shells out to
-    // taskkill, which complains loudly on stderr about processes that have
-    // already gone.
+    // Chrome and its helpers go down as a tree, and taskkill is loud about
+    // the ones that have already gone: it writes an ERROR line for each of
+    // them to stderr, so a run that passed every check used to end in a
+    // block of red noise that reads like a failure. A caller that only
+    // wants the checks cannot tell the two apart.
+    //
+    // The kill is synchronous and its output is piped, which keeps it off the
+    // console: spawnSync collects what taskkill said and gives it back as
+    // buffers nobody reads, and the tree is gone before the process exits.
     const child = browser?.process?.();
-    if (child?.pid) spawn("taskkill", ["/pid", String(child.pid), "/T", "/F"], { stdio: "ignore" });
+    if (child?.pid) spawnSync("taskkill", ["/pid", String(child.pid), "/T", "/F"], { stdio: "pipe" });
   } catch {}
   try {
     if (server) server.kill();
@@ -172,38 +218,33 @@ async function main() {
   check(report.nonFinite === 0, "no vertex position is NaN or infinite", `${report.nonFinite}`);
 
   const dims = report.bbox.size.map(cm);
-  check(
-    Math.abs(dims[0] - expected.width) <= toleranceCm,
-    `width matches the spec (${expected.width} cm)`,
-    `${dims[0]} cm`,
-  );
-  check(
-    Math.abs(dims[1] - expected.height) <= toleranceCm,
-    `height matches the spec (${expected.height} cm)`,
-    `${dims[1]} cm`,
-  );
-  check(
-    Math.abs(dims[2] - expected.depth) <= toleranceCm,
-    `depth matches the spec (${expected.depth} cm)`,
-    `${dims[2]} cm`,
-  );
+  const within = (actual, spec) => Math.abs(actual - spec) <= Math.max(toleranceCm, (spec * dimensionTolerancePct) / 100);
+  const toleranceLabel = dimensionTolerancePct ? ` +/- ${dimensionTolerancePct}%` : "";
+  check(within(dims[0], expected.width), `width matches the spec (${expected.width} cm${toleranceLabel})`, `${dims[0]} cm`);
+  check(within(dims[1], expected.height), `height matches the spec (${expected.height} cm${toleranceLabel})`, `${dims[1]} cm`);
+  check(within(dims[2], expected.depth), `depth matches the spec (${expected.depth} cm${toleranceLabel})`, `${dims[2]} cm`);
 
   // The base opening: the crown's head-entry rim must sit on the origin's
-  // plane, and the asset's axis must be centred on X.
-  const rim = report.meshes.find((mesh) => mesh.name === rimMeshName);
-  if (rim) {
-    check(
-      Math.abs(rim.bbox.max[1]) <= 0.002 && Math.abs(rim.bbox.min[1]) <= 0.002,
-      "the base opening sits on the origin's plane (y = 0)",
-      `rim y ${cm(rim.bbox.min[1])}..${cm(rim.bbox.max[1])} cm`,
-    );
-    check(
-      Math.abs(rim.bbox.centre[0]) <= 0.002,
-      "the asset's axis is centred on X",
-      `rim centre x ${cm(rim.bbox.centre[0])} cm`,
-    );
+  // plane, and the asset's axis must be centred on X. A prop that is placed
+  // by its handle has no base opening, so there is nothing to measure there.
+  if (rimMeshName) {
+    const rim = report.meshes.find((mesh) => mesh.name === rimMeshName);
+    if (rim) {
+      check(
+        Math.abs(rim.bbox.max[1]) <= 0.002 && Math.abs(rim.bbox.min[1]) <= 0.002,
+        "the base opening sits on the origin's plane (y = 0)",
+        `rim y ${cm(rim.bbox.min[1])}..${cm(rim.bbox.max[1])} cm`,
+      );
+      check(
+        Math.abs(rim.bbox.centre[0]) <= 0.002,
+        "the asset's axis is centred on X",
+        `rim centre x ${cm(rim.bbox.centre[0])} cm`,
+      );
+    } else {
+      check(false, "the model has a crown opening rim to measure", `${rimMeshName} not found`);
+    }
   } else {
-    check(false, "the model has a crown opening rim to measure", `${rimMeshName} not found`);
+    console.log("  (no base opening declared for this asset: the y = 0 rim check does not apply)");
   }
 
   // +Z is forward: a badge has to be on the front face. Not every prop has
@@ -219,6 +260,19 @@ async function main() {
     }
   } else {
     console.log("  (no front feature declared for this asset: the +Z badge check does not apply)");
+  }
+
+  // The close-up is one of the three renders a reviewer looks at, so it has
+  // to be framed on the detail it promises. This fails only for an asset that
+  // declares a validation block with no close-up target and no front feature
+  // to fall back on: the one case where the capture page would quietly
+  // centre the close-up on the whole model and call it a pass.
+  if (!closeupFocus) {
+    check(
+      false,
+      "the close-up is framed on a declared target",
+      "the manifest names no closeup_mesh, no closeup_focus and no front feature",
+    );
   }
 
   // An asset that carries a part up its middle - a chimney through a crown -
@@ -238,6 +292,105 @@ async function main() {
       );
     } else {
       check(false, "the model has the axis mesh to check", `${axisMeshName} not found`);
+    }
+  }
+
+  // The origin: a prop that is placed by its handle has to have that handle
+  // where the socket expects it - centred on the origin, not wherever the
+  // builder thought the handle belonged.
+  if (originMeshName) {
+    const origin = report.meshes.find((mesh) => mesh.name === originMeshName);
+    if (origin) {
+      check(
+        Math.abs(origin.bbox.centre[0]) <= 0.003 &&
+        Math.abs(origin.bbox.centre[1]) <= 0.003 &&
+        Math.abs(origin.bbox.centre[2]) <= 0.003,
+        "the origin feature is centred on the origin",
+        `centre ${origin.bbox.centre.map(cm).join(", ")} cm`,
+      );
+    } else {
+      check(false, "the model has the origin feature to check", `${originMeshName} not found`);
+    }
+  }
+
+  // The forward direction: the feature the pivot names as forward has to sit
+  // in front of the origin, on +Z.
+  if (forwardMeshName) {
+    const forward = report.meshes.find((mesh) => mesh.name === forwardMeshName);
+    if (forward) {
+      check(
+        forward.bbox.centre[2] > 0.02,
+        "the forward feature is on the front face (+Z)",
+        `centre z ${cm(forward.bbox.centre[2])} cm`,
+      );
+    } else {
+      check(false, "the model has the forward feature to check", `${forwardMeshName} not found`);
+    }
+  }
+
+  // The frame of a prop with no named parts: its bounding box against the
+  // numbers the manifest gives, within half a centimetre.
+  if (frame) {
+    const frameToleranceCm = frame.tolerance_cm ?? 0.5;
+    const centre = report.bbox.min.map((v, i) => (v + report.bbox.max[i]) / 2);
+    const framed = [
+      ["y_min_cm", "the base sits where the pivot puts it", report.bbox.min[1]],
+      ["y_max_cm", "the top sits where the pivot puts it", report.bbox.max[1]],
+      ["centre_x_cm", "the asset is centred on X", centre[0]],
+      ["centre_z_cm", "the asset is centred on Z", centre[2]],
+    ];
+    for (const [key, message, actual] of framed) {
+      if (frame[key] === undefined) continue;
+      check(
+        Math.abs(cm(actual) - frame[key]) <= frameToleranceCm,
+        `${message} (${frame[key]} cm)`,
+        `${cm(actual)} cm`,
+      );
+    }
+  }
+
+  // Surface that has to be there, and space that has to be clear.
+  if (regions.length) {
+    const triangles = readWorldTriangles(modelPath);
+    for (const region of regions) {
+      const box = { min: region.min_cm.map((v) => v / 100), max: region.max_cm.map((v) => v / 100) };
+      const areaCm2 = Math.round(surfaceAreaInBox(triangles, box) * 1e4);
+      if (region.expect === "empty") {
+        const limit = region.max_area_cm2 ?? 5;
+        check(areaCm2 <= limit, `${region.label} is clear`, `${areaCm2} cm2 of surface <= ${limit}`);
+      } else {
+        const limit = region.min_area_cm2 ?? 50;
+        check(areaCm2 >= limit, `${region.label} is there`, `${areaCm2} cm2 of surface >= ${limit}`);
+      }
+    }
+  }
+
+  // A grip-normalized prop has no crown rim, so the rim check does not run
+  // for it - which means the frame it is placed by is only checked at all if
+  // the manifest names the features that carry it. Without them the run
+  // would go green on a prop whose handle was never measured, and the socket
+  // would be handed an asset that can sit anywhere in the hand.
+  //
+  // The check is failure-only on purpose: a head-socket prop is already
+  // checked against its rim, and a grip prop that names its origin and
+  // forward features is checked against those. Only the prop that declares
+  // neither is missing a check, and only that one gets this line.
+  // A frame or a clear region stands in for the named features: either one
+  // is a check that the prop sits and points where the socket expects.
+  if (!isHeadSocket) {
+    if (!originMeshName && !frame) {
+      check(
+        false,
+        "the manifest names the feature the prop is placed by",
+        "a grip_normalized asset must declare validation.origin_mesh or validation.frame",
+      );
+    }
+    if (!forwardMeshName && !regions.some((region) => region.expect === "empty")) {
+      check(
+        false,
+        "the manifest names the feature that points forward",
+        "a grip_normalized asset must declare validation.forward_mesh, or a clear region in validation.regions",
+      );
     }
   }
 
@@ -349,7 +502,25 @@ async function main() {
     console.error("FAILED:");
     for (const item of failed) console.error(`  - ${item.message}${item.detail ? ` (${item.detail})` : ""}`);
   }
-  teardown(failed.length ? 1 : 0);
+
+  // The publish step puts the review renders into the repository, resized to
+  // the size they are committed at. It runs only on a green capture: a
+  // rejected asset must not end up in front of a reviewer as if it had
+  // passed, and a failed capture's images look perfectly fine.
+  //
+  // PROP_PUBLISH_OUT sends the published renders somewhere else, which is
+  // how the step is exercised without writing to docs/props/.
+  let published = true;
+  if (publish && !failed.length) {
+    const out = process.env.PROP_PUBLISH_OUT ? ["--out", process.env.PROP_PUBLISH_OUT] : [];
+    const result = spawnSync(process.execPath, [path.join(ROOT, "scripts/publish_prop_renders.mjs"), assetId, ...out], {
+      cwd: ROOT,
+      stdio: "inherit",
+    });
+    published = result.status === 0;
+    if (!published) console.error("the publish step failed");
+  }
+  teardown(failed.length || !published ? 1 : 0);
 }
 
 main().catch((error) => {

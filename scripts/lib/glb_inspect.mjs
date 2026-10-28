@@ -30,20 +30,23 @@ export const CHUNK_BIN = 0x004e4942;
 
 /** Split a .glb into its JSON and binary chunks. */
 export function parseGlb(buffer) {
-  if (buffer.length < 12) throw new Error("too short to be a GLB");
-  if (buffer.readUInt32LE(0) !== GLB_MAGIC) throw new Error("bad GLB magic (not a binary glTF)");
-  const version = buffer.readUInt32LE(4);
+  // The chunk walk below reads little-endian words, which is Buffer's job, so
+  // accept a plain Uint8Array by copying it into one first.
+  const buf = Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer);
+  if (buf.length < 12) throw new Error("too short to be a GLB");
+  if (buf.readUInt32LE(0) !== GLB_MAGIC) throw new Error("bad GLB magic (not a binary glTF)");
+  const version = buf.readUInt32LE(4);
   if (version !== 2) throw new Error(`unsupported GLB version ${version}`);
-  const declared = buffer.readUInt32LE(8);
-  const total = Math.min(declared, buffer.length);
+  const declared = buf.readUInt32LE(8);
+  const total = Math.min(declared, buf.length);
   let offset = 12;
   let json = null;
   let bin = null;
   const chunks = [];
   while (offset + 8 <= total) {
-    const length = buffer.readUInt32LE(offset);
-    const type = buffer.readUInt32LE(offset + 4);
-    const body = buffer.subarray(offset + 8, offset + 8 + length);
+    const length = buf.readUInt32LE(offset);
+    const type = buf.readUInt32LE(offset + 4);
+    const body = buf.subarray(offset + 8, offset + 8 + length);
     chunks.push({ type, length });
     if (type === CHUNK_JSON) json = JSON.parse(body.toString("utf8"));
     else if (type === CHUNK_BIN) bin = body;
@@ -85,11 +88,67 @@ function readPositions(json, bin, index) {
 }
 
 const IDENTITY = [0, 0, 0, 1];
-/** Compose a node's local TRS into a column-major 4x4. */
-function nodeMatrix(node) {
+const IDENTITY_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+const AXIS = ["x", "y", "z"];
+
+/** True for an array of exactly `length` finite numbers. */
+function isFiniteList(value, length) {
+  return Array.isArray(value) && value.length === length && value.every((n) => Number.isFinite(n));
+}
+
+/**
+ * A node's local transform as a column-major 4x4.
+ *
+ * The glTF spec gives a node EITHER a `matrix` OR a translation/rotation/scale
+ * triple, never both, and the two are mutually exclusive. A node that carries
+ * a `matrix` therefore has no TRS to read: reading the TRS of such a node
+ * yields the identity, which silently drops the transform the file actually
+ * declares and puts the mesh in the wrong place.
+ *
+ * The matrix wins, exactly as three.js's own GLTFLoader does it - it applies
+ * `node.matrix` when the node has one and falls back to the TRS otherwise.
+ * Without this, a model exported with a matrix node measures against the
+ * wrong frame: the reader reported the pegg last 10 cm shorter than it is,
+ * and put its grip on the origin plane when the file puts it 6.2 cm below.
+ *
+ * A transform that is not usable - a matrix that is not 16 finite numbers, or
+ * a TRS with a non-finite component - is reported as a problem rather than
+ * multiplied into the world transform. Multiplying it in would poison every
+ * world point with NaN, and NaN compares false against everything, so the
+ * bounds would quietly measure short instead of reporting a broken file.
+ */
+function nodeMatrix(node, problems, label) {
+  if (node.matrix != null) {
+    if (!isFiniteList(node.matrix, 16)) {
+      problems.push(`node "${label}" declares a malformed matrix (expected 16 finite numbers)`);
+      return IDENTITY_MATRIX;
+    }
+    // A zero-length basis column is a zero scale on that axis: the geometry
+    // is flattened along it, which makes the model unreviewable.
+    const columns = [
+      [node.matrix[0], node.matrix[1], node.matrix[2]],
+      [node.matrix[4], node.matrix[5], node.matrix[6]],
+      [node.matrix[8], node.matrix[9], node.matrix[10]],
+    ];
+    const zeroAxis = columns.findIndex((c) => Math.hypot(...c) === 0);
+    if (zeroAxis >= 0) {
+      problems.push(`node "${label}" has a zero scale on the ${AXIS[zeroAxis]} axis, which collapses the geometry along it`);
+    }
+    return node.matrix;
+  }
   const t = node.translation ?? [0, 0, 0];
   const r = node.rotation ?? IDENTITY;
   const s = node.scale ?? [1, 1, 1];
+  if (!isFiniteList(t, 3) || !isFiniteList(r, 4) || !isFiniteList(s, 3)) {
+    problems.push(
+      `node "${label}" declares a malformed transform (translation, rotation and scale must be finite numbers)`,
+    );
+    return IDENTITY_MATRIX;
+  }
+  const zeroAxis = s.findIndex((n) => n === 0);
+  if (zeroAxis >= 0) {
+    problems.push(`node "${label}" has a zero scale on the ${AXIS[zeroAxis]} axis, which collapses the geometry along it`);
+  }
   const [x, y, z, w] = r;
   const x2 = x + x, y2 = y + y, z2 = z + z;
   const xx = x * x2, xy = x * y2, xz = x * z2;
@@ -124,6 +183,91 @@ function transformPoint(m, x, y, z) {
   ];
 }
 
+/** World transform per node: walk the scene graph from the roots. */
+function worldMatrices(json, problems = []) {
+  const world = new Array((json.nodes ?? []).length).fill(null);
+  const roots = json.scenes?.[json.scene ?? 0]?.nodes ?? (json.nodes ?? []).map((_, i) => i);
+  const visit = (nodeIndex, parent) => {
+    const m = multiply(parent ?? [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1], nodeMatrix(json.nodes[nodeIndex], problems, json.nodes[nodeIndex].name ?? `node ${nodeIndex}`));
+    world[nodeIndex] = m;
+    for (const child of json.nodes[nodeIndex].children ?? []) visit(child, m);
+  };
+  for (const root of roots) visit(root, null);
+  return world;
+}
+
+/**
+ * Every triangle of a .glb in world space, as a flat array of 9 numbers per
+ * triangle. Triangles with a non-finite corner are left out; inspectGlb
+ * already reports those.
+ */
+export function readWorldTriangles(file) {
+  const { json, bin } = parseGlb(fs.readFileSync(file));
+  const world = worldMatrices(json);
+  const out = [];
+  (json.nodes ?? []).forEach((node, nodeIndex) => {
+    const mesh = node.mesh === undefined ? null : json.meshes?.[node.mesh];
+    if (!mesh || !world[nodeIndex]) return;
+    for (const primitive of mesh.primitives ?? []) {
+      if (primitive.attributes?.POSITION === undefined) continue;
+      if (primitive.mode !== undefined && primitive.mode !== MODE_TRIANGLES) continue;
+      const { values, count } = readPositions(json, bin, primitive.attributes.POSITION);
+      const indices = primitive.indices !== undefined ? readAccessor(json, bin, primitive.indices).values : null;
+      const corners = indices ? indices.length : count;
+      for (let i = 0; i + 2 < corners; i += 3) {
+        const tri = [];
+        for (let c = 0; c < 3; c++) {
+          const v = indices ? indices[i + c] : i + c;
+          tri.push(...transformPoint(world[nodeIndex], values[v * 3], values[v * 3 + 1], values[v * 3 + 2]));
+        }
+        if (tri.every(Number.isFinite)) out.push(...tri);
+      }
+    }
+  });
+  return Float64Array.from(out);
+}
+
+/**
+ * How much surface (m^2) lies inside an axis-aligned box. Each triangle is
+ * sampled on a barycentric grid fine enough to resolve about 5 mm, so a
+ * large procedural face that only crosses the box counts for the part inside
+ * it, not all or nothing on its centroid.
+ */
+export function surfaceAreaInBox(triangles, box) {
+  const [x0, y0, z0] = box.min;
+  const [x1, y1, z1] = box.max;
+  let area = 0;
+  for (let t = 0; t < triangles.length; t += 9) {
+    const a = triangles.subarray(t, t + 3);
+    const b = triangles.subarray(t + 3, t + 6);
+    const c = triangles.subarray(t + 6, t + 9);
+    const tMin = [0, 1, 2].map((k) => Math.min(a[k], b[k], c[k]));
+    const tMax = [0, 1, 2].map((k) => Math.max(a[k], b[k], c[k]));
+    if (tMax[0] < x0 || tMin[0] > x1 || tMax[1] < y0 || tMin[1] > y1 || tMax[2] < z0 || tMin[2] > z1) continue;
+    const u = [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
+    const v = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
+    const cross = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
+    const triArea = Math.hypot(...cross) / 2;
+    if (!triArea) continue;
+    const longest = Math.max(Math.hypot(...u), Math.hypot(...v), Math.hypot(c[0] - b[0], c[1] - b[1], c[2] - b[2]));
+    const n = Math.min(64, Math.max(1, Math.ceil(longest / 0.005)));
+    // n^2 equal sub-triangles; each is represented by its centroid.
+    let inside = 0;
+    for (let i = 0; i < n; i++) {
+      for (let j = 0; i + j < n; j++) {
+        for (const [s, r] of i + j < n - 1 ? [[i + 1 / 3, j + 1 / 3], [i + 2 / 3, j + 2 / 3]] : [[i + 1 / 3, j + 1 / 3]]) {
+          const p0 = a[0] + (u[0] * s + v[0] * r) / n;
+          const p1 = a[1] + (u[1] * s + v[1] * r) / n;
+          const p2 = a[2] + (u[2] * s + v[2] * r) / n;
+          if (p0 >= x0 && p0 <= x1 && p1 >= y0 && p1 <= y1 && p2 >= z0 && p2 <= z1) inside++;
+        }
+      }
+    }
+    area += (triArea * inside) / (n * n);
+  }
+  return area;
+}
+
 /**
  * Inspect a .glb file on disk.
  * Returns triangle counts, a world-space bounding box, per-mesh detail and the
@@ -144,9 +288,11 @@ export function inspectGlb(file) {
   const world = new Array((json.nodes ?? []).length).fill(null);
   const roots = json.scenes?.[json.scene ?? 0]?.nodes ?? (json.nodes ?? []).map((_, i) => i);
   const visit = (nodeIndex, parent) => {
-    const m = multiply(parent ?? [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1], nodeMatrix(json.nodes[nodeIndex]));
+    const node = json.nodes[nodeIndex];
+    const label = node.name ?? `node ${nodeIndex}`;
+    const m = multiply(parent ?? IDENTITY_MATRIX, nodeMatrix(node, problems, label));
     world[nodeIndex] = m;
-    for (const child of json.nodes[nodeIndex].children ?? []) visit(child, m);
+    for (const child of node.children ?? []) visit(child, m);
   };
   for (const root of roots) visit(root, null);
 
@@ -219,7 +365,7 @@ export function inspectGlb(file) {
     const nodeIndexes = (json.nodes ?? [])
       .map((node, i) => (node.mesh === meshIndex ? i : -1))
       .filter((i) => i >= 0);
-    const matrices = nodeIndexes.map((i) => world[i] ?? [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
+    const matrices = nodeIndexes.map((i) => world[i] ?? IDENTITY_MATRIX);
     const meshMin = [Infinity, Infinity, Infinity];
     const meshMax = [-Infinity, -Infinity, -Infinity];
     for (const primitive of mesh.primitives ?? []) {
