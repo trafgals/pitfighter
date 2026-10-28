@@ -257,44 +257,44 @@
           {
             "label": "the lower half of the prop carries the prop's surface",
             "min_cm": [
-              -0.3,
-              11.1,
-              -6.0
+              -10.1,
+              13.1,
+              -17.5
             ],
             "max_cm": [
-              1.7,
-              22.6,
-              6.0
+              -1.9,
+              24.6,
+              17.5
             ],
             "expect": "filled",
-            "min_area_cm2": 8
+            "min_area_cm2": 33
           },
           {
             "label": "the upper half of the prop carries the prop's surface",
             "min_cm": [
-              -0.3,
-              45.5,
-              -6.0
+              -1.9,
+              47.6,
+              -17.5
             ],
             "max_cm": [
-              1.7,
-              57.0,
-              6.0
+              6.2,
+              59.0,
+              17.5
             ],
             "expect": "filled",
-            "min_area_cm2": 8
+            "min_area_cm2": 32
           },
           {
             "label": "the space beside the prop is clear",
             "min_cm": [
-              -6.0,
-              11.1,
-              -6.0
+              -18.1,
+              70.5,
+              -17.5
             ],
             "max_cm": [
-              -4.2,
-              22.6,
-              6.0
+              -10.1,
+              80.0,
+              17.5
             ],
             "expect": "empty",
             "max_area_cm2": 10
@@ -307,33 +307,33 @@
         ],
         "closeup_fit": 0.15,
         "closeup_label": "The crook handle and the ferrule spike",
-        "view_fit": 0.467,
+        "view_fit": 0.588,
         "dimension_tolerance_pct": 5
       },
-      "build": null,
+      "measured": {
+        "triangles": 19992,
+        "bbox_min_cm": [
+          -32.3,
+          -11.9,
+          -17.5
+        ],
+        "bbox_max_cm": [
+          32.3,
+          80.0,
+          17.5
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 1310572
+      },
+      "build": "python scripts/run_pixal3d_mesh.py prop_crape_spiked_brolly",
       "validate": "node scripts/capture_prop_renders.mjs prop_crape_spiked_brolly",
       "reference_concept": "public/tex/props/flux3_prop_crape_spiked_brolly_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_crape_brolly_alpha.png",
-      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
-      "stand_in_measured": {
-        "triangles": 6184,
-        "bytes": 346924,
-        "bbox_min_cm": [
-          -6,
-          -11.9,
-          -6
-        ],
-        "bbox_max_cm": [
-          6,
-          80,
-          6
-        ],
-        "meshes": 15,
-        "materials": 5,
-        "embedded_images": 4
-      },
       "turnaround_sheet": "public/tex/props/h3_crape_brolly_turnaround.png",
-      "turntable": "docs/props/prop_crape_spiked_brolly/turntable.webp"
+      "turntable": "docs/props/prop_crape_spiked_brolly/turntable.webp",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 19,992 triangles, 1,310,572 bytes, 19/21 capture checks. The reconstruction reproduces the approved art faithfully (the bone crook handle, the ferrule spike and the open black canopy all land where the concept art has them). It came out of Pixal3D mirrored in X - the silhouette matched the sheet's back view, 0.949, instead of its front view - so it was flipped back and re-captured: the front silhouette now matches the sheet's front view at 0.936. The width and depth checks still fail: 64.7 cm against the 11.9 cm spec and 35 cm against 11.9 cm, while the height is exact at 91.9 cm. The approved art is an open mortuary parasol 64.7 x 91.9 x 35 cm; this entry's dimensions (11.9 x 91.9 x 11.9 cm) were measured off the deleted procedural stand-in, which was a furled stick. Two ways forward for the director: amend scale_dimensions_cm to the approved art's 64.7 x 91.9 x 35 cm, or re-cut the alpha as a furled parasol. The tolerance is left at 5%."
     },
     {
       "id": "prop_eleanor_weeping_rapier",
@@ -442,7 +442,9 @@
         "meshes": 4,
         "materials": 4,
         "embedded_images": 0
-      }
+      },
+      "turnaround_sheet": "public/tex/props/h3_eleanor_rapier_turnaround.png",
+      "turntable": "docs/props/prop_eleanor_weeping_rapier/turntable.webp"
     },
     {
       "id": "prop_tilly_clinker_tongs",
