@@ -117,10 +117,10 @@ def build_workflow(names, prefix, seed=None, faces=None):
     return wf
 
 
-def run(wf, deadline_s=14400):
+def run(wf, deadline_s=28800):
     """Queue a workflow and return its history entry once it has finished.
 
-    A reconstruction takes about 8 minutes; four hours without a result means
+    A reconstruction takes about 8 minutes; eight hours without a result means
     ComfyUI lost the prompt (a restart, say), so give up rather than wait
     forever. The wait is generous because ComfyUI is one GPU on a shared
     queue: a reconstruction that waits behind a turnaround clip starts an hour

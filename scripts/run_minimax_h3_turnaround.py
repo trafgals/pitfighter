@@ -38,8 +38,14 @@ COMFY_OUTPUT = r"C:\Users\dimit\Documents\comfy\ComfyUI_windows_portable_amd\Com
 LENGTH = 124
 VIEWS = ["front", "left", "back", "right"]
 
-def prepare_input_image(alpha_image_path, target_size=(768, 768), bg_color=(255, 255, 255)):
-    """Composite RGBA alpha image over clean solid background and center it."""
+def prepare_input_image(alpha_image_path, target_size=(768, 768), bg_color=(255, 255, 255), name=None):
+    """Composite RGBA alpha image over clean solid background and center it.
+
+    The name matters: ComfyUI's LoadImage node reads the file when the job
+    runs, not when it is queued, so a clip that waits behind another one reads
+    whatever the last prop wrote under a shared name. Every prop gets its own
+    anchor file, so a queued clip always conditions on its own artwork.
+    """
     im = Image.open(alpha_image_path)
     if im.mode != "RGBA":
         im = im.convert("RGBA")
@@ -62,7 +68,7 @@ def prepare_input_image(alpha_image_path, target_size=(768, 768), bg_color=(255,
     canvas.paste(im_resized, (offset_x, offset_y), im_resized)
 
     final_rgb = canvas.convert("RGB")
-    out_filename = "h3_turntable_anchor.png"
+    out_filename = name or "h3_turntable_anchor.png"
     target_path = os.path.join(COMFY_INPUT, out_filename)
     final_rgb.save(target_path, quality=95)
     print(f"[MiniMax H3] Prepared anchor image: {target_path} ({target_size[0]}x{target_size[1]})")
@@ -211,7 +217,9 @@ def run_h3_turntable(input_alpha_path, output_sheet_path, prompt=None, preview_p
         )
 
     print(f"[MiniMax H3] Starting turnaround generation from {input_alpha_path}...")
-    anchor_file = prepare_input_image(input_alpha_path, target_size=(768, 768))
+    stem = os.path.splitext(os.path.basename(output_sheet_path))[0]
+    anchor_file = prepare_input_image(input_alpha_path, target_size=(768, 768),
+                                      name=f"anchor_{stem}.png")
 
     workflow = build_workflow(anchor_file, prompt, width=768, height=768, length=length, seed=seed, steps=steps)
 
