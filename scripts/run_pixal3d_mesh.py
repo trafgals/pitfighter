@@ -204,7 +204,31 @@ def turn_matrix(turn_deg):
     raise ValueError(f"a prop's turn has to be 0, 90 or 270 degrees, not {turn_deg}")
 
 
-def place(doc, views, height_cm, y_min_cm=0.0, centre_x_cm=0.0, centre_z_cm=0.0, turn_deg=0):
+def roll_matrix(roll_deg):
+    """The rotation that stands a reconstruction up on its pivot.
+
+    Some props are approved art drawn leaning: a rapier drawn at an angle
+    across the frame, a tool drawn on the diagonal. The drawing's angle is a
+    pose, not a shape, and the pivot asks for the prop to stand along its own
+    axis, so the reconstruction is rolled back the way the art leans before it
+    is turned onto the pivot.
+
+    The roll is about the camera's axis, which is the axis the sheet's front
+    view is drawn in, and it happens before the turn so that the turn still
+    decides which way the prop faces.
+
+    It is a proper rotation, so the winding of the triangles is untouched and
+    the mesh stays outside-out.
+    """
+    import math
+    import numpy as np
+    angle = math.radians(float(roll_deg))
+    cos, sin = math.cos(angle), math.sin(angle)
+    return np.array([[cos, -sin, 0.0], [sin, cos, 0.0], [0.0, 0.0, 1.0]])
+
+
+def place(doc, views, height_cm, y_min_cm=0.0, centre_x_cm=0.0, centre_z_cm=0.0, turn_deg=0,
+          roll_deg=0.0):
     """Turn a reconstruction to face +Z, scale it to the spec's height and put its base on the pivot.
 
     Pixal3D builds the object facing -Z, about a metre tall, centred on the
@@ -213,7 +237,7 @@ def place(doc, views, height_cm, y_min_cm=0.0, centre_x_cm=0.0, centre_z_cm=0.0,
     gives them a tolerance.
     """
     import numpy as np
-    matrix = turn_matrix(turn_deg)
+    matrix = turn_matrix(turn_deg) @ roll_matrix(roll_deg)
     prims = [p for mesh in doc["meshes"] for p in mesh["primitives"]]
     def floats(acc_index):
         acc = doc["accessors"][acc_index]
@@ -224,8 +248,11 @@ def place(doc, views, height_cm, y_min_cm=0.0, centre_x_cm=0.0, centre_z_cm=0.0,
         return acc, np.frombuffer(views[acc["bufferView"]], dtype="<f4", count=acc["count"] * width).reshape(-1, width).copy()
     pos = [floats(p["attributes"]["POSITION"]) for p in prims]
     allp = np.concatenate([a for _, a in pos])
-    scale = height_cm / 100.0 / (allp[:, 1].max() - allp[:, 1].min())
-    turned = allp @ matrix.T * scale
+    # the roll happens before the turn, and the height is fitted to the rolled
+    # mesh: a prop that is stood up is taller than it was drawn
+    rolled = allp @ roll_matrix(roll_deg).T
+    scale = height_cm / 100.0 / (rolled[:, 1].max() - rolled[:, 1].min())
+    turned = rolled @ turn_matrix(turn_deg).T * scale
     shift = np.array([centre_x_cm / 100.0 - (turned[:, 0].max() + turned[:, 0].min()) / 2,
                       y_min_cm / 100.0 - turned[:, 1].min(),
                       centre_z_cm / 100.0 - (turned[:, 2].max() + turned[:, 2].min()) / 2])
@@ -340,6 +367,7 @@ def fit_of(entry):
         "centre_x_cm": frame.get("centre_x_cm", 0.0),
         "centre_z_cm": frame.get("centre_z_cm", 0.0),
         "turn_deg": frame.get("turn_deg", 0),
+        "roll_deg": frame.get("roll_deg", 0.0),
     }
 
 
@@ -358,7 +386,13 @@ def reconstruct(asset_id, seed=None, faces=None, out=None):
         # the textures baked from these same views both come out the right way
         # up; turning the mesh over afterwards would leave the bake upside down
         # on the surface.
-        views = {v: ImageOps.flip(img) for v, img in views.items()}
+        #
+        # Turning the object over is a half turn about the front view's
+        # horizontal axis, so the two broadside views are turned over the other
+        # way and the two side views are turned over sideways: each tile is
+        # flipped about the axis the object's turn runs along in that view.
+        views = {v: (ImageOps.flip(img) if v in ("front", "back") else ImageOps.mirror(img))
+                 for v, img in views.items()}
         print(f"[Pixal3D] {asset_id} is built upside down: the sheet is turned over first")
     names = {v: upload(img, f"{asset_id}_view_{v}.png") for v, img in views.items()}
     print(f"[Pixal3D] Uploaded the {', '.join(names)} views of {entry['turnaround_sheet']}")

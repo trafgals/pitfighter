@@ -362,7 +362,9 @@
           "y_min_cm": -7.2,
           "y_max_cm": 89.0,
           "centre_x_cm": 0.0,
-          "centre_z_cm": 0.0
+          "centre_z_cm": 0.0,
+          "roll_deg": -33.9,
+          "upside_down": true
         },
         "regions": [
           {
@@ -473,7 +475,8 @@
           "y_min_cm": -26,
           "y_max_cm": 51.1,
           "centre_x_cm": 0.0,
-          "centre_z_cm": 0.0
+          "centre_z_cm": 0.0,
+          "roll_deg": -24.7
         },
         "regions": [
           {
@@ -1021,7 +1024,8 @@
           "y_min_cm": -14,
           "y_max_cm": 19,
           "centre_x_cm": 0.05,
-          "centre_z_cm": 0.5
+          "centre_z_cm": 0.5,
+          "roll_deg": 55.9
         },
         "regions": [
           {
@@ -1239,7 +1243,8 @@
           "y_min_cm": -1.5,
           "y_max_cm": 4.2,
           "centre_x_cm": 0.0,
-          "centre_z_cm": 0.0
+          "centre_z_cm": 0.0,
+          "roll_deg": 42.1
         },
         "regions": [
           {
@@ -1348,7 +1353,8 @@
           "y_min_cm": -40.5,
           "y_max_cm": 60.0,
           "centre_x_cm": 0.0,
-          "centre_z_cm": 0.0
+          "centre_z_cm": 0.0,
+          "roll_deg": -24.7
         },
         "regions": [
           {
@@ -1457,7 +1463,8 @@
           "y_min_cm": -5.5,
           "y_max_cm": 30.5,
           "centre_x_cm": 0.0,
-          "centre_z_cm": 0.0
+          "centre_z_cm": 0.0,
+          "roll_deg": 36.7
         },
         "regions": [
           {
@@ -1566,7 +1573,9 @@
           "y_min_cm": -13,
           "y_max_cm": 71,
           "centre_x_cm": 0.0,
-          "centre_z_cm": 1.05
+          "centre_z_cm": 1.05,
+          "roll_deg": 28.9,
+          "upside_down": true
         },
         "regions": [
           {
@@ -1675,7 +1684,8 @@
           "y_min_cm": -7,
           "y_max_cm": 29,
           "centre_x_cm": 0.0,
-          "centre_z_cm": 4.2
+          "centre_z_cm": 4.2,
+          "roll_deg": 42.8
         },
         "regions": [
           {
@@ -1784,7 +1794,8 @@
           "y_min_cm": -14,
           "y_max_cm": 19,
           "centre_x_cm": 0.0,
-          "centre_z_cm": 1.6
+          "centre_z_cm": 1.6,
+          "roll_deg": 10.8
         },
         "regions": [
           {
