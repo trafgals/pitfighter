@@ -321,6 +321,7 @@ DEFAULT_QUEUE = [
         "turntable_file": "docs/props/weapon_chair/turntable.webp",
         "glb_file": "public/models/props/weapon_chair.glb",
         "mesh": "pixal3d",
+        "symmetric": True,
         "prompt": "Ornate Victorian theatre private box salon chair, carved gilt gold leaf rococo wood frame, tufted crimson velvet upholstery seat and padded oval back, isolated on solid white background.",
     },
     {
@@ -350,6 +351,11 @@ def load_state():
             with open(STATE_FILE, "r", encoding="utf-8") as f:
                 state = json.load(f)
             log(f"Loaded existing state from {STATE_FILE} ({len(state.get('items', []))} tracked items)")
+            # the queue above says how each item is made; the state file only keeps its progress
+            queue = {item["id"]: item for item in DEFAULT_QUEUE}
+            for i, item in enumerate(state.get("items", [])):
+                if item["id"] in queue:
+                    state["items"][i] = {**queue[item["id"]], "stages": item["stages"]}
             return state
         except Exception as e:
             log(f"Warning: Corrupt state file ({e}), backing up and creating fresh queue.")
@@ -470,6 +476,8 @@ def run_stage_2_turnaround(item):
     log(f"  [Stage 2 Turnaround] Generating MiniMax H3 turntable for {item['id']}...")
     h3_script = os.path.join(ROOT, "scripts", "run_minimax_h3_turnaround.py")
     cmd = [sys.executable, h3_script, alpha_path, turnaround_path, "--preview", turntable_path]
+    if item.get("symmetric"):
+        cmd.append("--symmetric")
     subprocess.run(cmd, check=True)
     return os.path.exists(turnaround_path)
 

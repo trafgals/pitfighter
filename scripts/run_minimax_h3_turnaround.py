@@ -4,16 +4,18 @@ H3 does not turn the object a full circle in the clip: over 124 frames it turns
 about 240 degrees, so frames at 1/4, 1/2 and 3/4 of the clip are not the side,
 back and other side. The back is found instead as the frame whose silhouette is
 the front's silhouette mirrored, the side as the frame halfway to it, and the
-other side as the frame as far past the back, or, when the clip ends before it,
-as the first side mirrored (right for a prop that is the same both sides).
+other side as the frame as far past the back. When the clip ends before that, a prop
+declared symmetric (--symmetric) gets the first side mirrored; any other prop
+gets no right view, and Pixal3D reconstructs from the other three.
 
 Writes:
   <sheet>.png   the four views side by side, in Pixal3D's order: front, left, back, right
+                (a missing right view is a white tile)
   <sheet>.json  which frame each view came from, its angle, and the H3 settings
   --preview     an animated WebP of the clip, for review (kept out of public/)
 
 Usage: python scripts/run_minimax_h3_turnaround.py <alpha.png> <sheet.png> [--preview out.webp]
-       [--length 124] [--seed 1890] [--steps 16]
+       [--symmetric] [--length 124] [--seed 1890] [--steps 16]
 """
 import os
 import sys
@@ -162,8 +164,11 @@ def iou(a, b):
     union = np.logical_or(a, b).sum()
     return float(np.logical_and(a, b).sum()) / union if union else 0.0
 
-def pick_views(frames, min_rise=0.15, smooth=5):
+def pick_views(frames, symmetric=False, min_rise=0.15, smooth=5):
     """Frame indices of the front, left, back and right views, and whether right is the left mirrored.
+
+    Right is None when the clip ends before it and the prop is not symmetric:
+    a mirrored side would put one-sided details on the wrong side.
 
     The back is the frame, past the first quarter of the clip, whose silhouette best
     matches the front's mirrored: a half turn mirrors the outline. Perspective
@@ -189,11 +194,14 @@ def pick_views(frames, min_rise=0.15, smooth=5):
         )
     left = round(back / 2)
     right = back + left
-    mirrored = right >= len(frames)
-    return {"front": 0, "left": left, "back": back, "right": left if mirrored else right}, mirrored
+    if right < len(frames):
+        return {"front": 0, "left": left, "back": back, "right": right}, False
+    if symmetric:
+        return {"front": 0, "left": left, "back": back, "right": left}, True
+    return {"front": 0, "left": left, "back": back, "right": None}, False
 
 def run_h3_turntable(input_alpha_path, output_sheet_path, prompt=None, preview_path=None,
-                     length=LENGTH, seed=1890, steps=16):
+                     symmetric=False, length=LENGTH, seed=1890, steps=16):
     if prompt is None:
         prompt = (
             "A smooth continuous 360-degree turntable rotation of the exact object around the vertical axis at constant speed. "
@@ -240,15 +248,18 @@ def run_h3_turntable(input_alpha_path, output_sheet_path, prompt=None, preview_p
         Image.open(os.path.join(COMFY_OUTPUT, info.get("subfolder", ""), info["filename"])).convert("RGB")
         for info in images_info
     ]
-    picked, right_mirrored = pick_views(frames)
+    picked, right_mirrored = pick_views(frames, symmetric)
     degrees_per_frame = 180.0 / picked["back"]
     print(f"[MiniMax H3] Views: {picked}, {degrees_per_frame:.2f} deg/frame"
-          + (", right is the left mirrored" if right_mirrored else ""))
+          + (", right is the left mirrored" if right_mirrored else "")
+          + (", no right view: the clip ends before it" if picked["right"] is None else ""))
 
     # The four views side by side, in the order Pixal3D takes them
     w, h = frames[0].size
     strip = Image.new("RGB", (w * 4, h), (255, 255, 255))
     for i, view in enumerate(VIEWS):
+        if picked[view] is None:
+            continue
         img = frames[picked[view]]
         if view == "right" and right_mirrored:
             img = ImageOps.mirror(img)
@@ -259,7 +270,7 @@ def run_h3_turntable(input_alpha_path, output_sheet_path, prompt=None, preview_p
     record = {
         "views": VIEWS,
         "frames": picked,
-        "degrees": {v: round(picked[v] * degrees_per_frame, 1) for v in VIEWS},
+        "degrees": {v: None if picked[v] is None else round(picked[v] * degrees_per_frame, 1) for v in VIEWS},
         "right_mirrored": right_mirrored,
         "clip_frames": len(frames),
         "degrees_per_frame": round(degrees_per_frame, 3),
@@ -286,8 +297,11 @@ if __name__ == "__main__":
     ap.add_argument("alpha")
     ap.add_argument("sheet")
     ap.add_argument("--preview")
+    ap.add_argument("--symmetric", action="store_true",
+                    help="the prop is the same on both sides, so a missing right view may be the left mirrored")
     ap.add_argument("--length", type=int, default=LENGTH)
     ap.add_argument("--seed", type=int, default=1890)
     ap.add_argument("--steps", type=int, default=16)
     a = ap.parse_args()
-    run_h3_turntable(a.alpha, a.sheet, preview_path=a.preview, length=a.length, seed=a.seed, steps=a.steps)
+    run_h3_turntable(a.alpha, a.sheet, preview_path=a.preview, symmetric=a.symmetric,
+                     length=a.length, seed=a.seed, steps=a.steps)

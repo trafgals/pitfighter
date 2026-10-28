@@ -83,18 +83,38 @@ describe("the reconstructed props", () => {
     describe(asset.id, () => {
       const glb = readGlb(asset.glb_output);
 
-      it("has a four-view sheet to rebuild from and a frame to place the result in", () => {
+      it("has a four-view sheet to rebuild from", () => {
         const sheet = fs.readFileSync(path.join(ROOT, asset.turnaround_sheet));
         // PNG header: width and height are the first two fields of IHDR
         expect(sheet.readUInt32BE(16)).toBe(4 * sheet.readUInt32BE(20));
-        expect(asset.validation?.frame?.y_min_cm).toBeTypeOf("number");
-        expect(asset.scale_dimensions_cm?.height).toBeGreaterThan(0);
+      });
+
+      it("stands on its pivot at the spec's height", () => {
+        const frame = asset.validation.frame;
+        const min = [Infinity, Infinity, Infinity];
+        const max = [-Infinity, -Infinity, -Infinity];
+        for (const prim of glb.json.meshes.flatMap((m: any) => m.primitives)) {
+          const acc = glb.json.accessors[prim.attributes.POSITION];
+          acc.min.forEach((v: number, i: number) => (min[i] = Math.min(min[i], v)));
+          acc.max.forEach((v: number, i: number) => (max[i] = Math.max(max[i], v)));
+        }
+        const cm = (m: number) => m * 100;
+        expect(cm(min[1])).toBeCloseTo(frame.y_min_cm, 0);
+        expect(cm(max[1])).toBeCloseTo(frame.y_max_cm, 0);
+        expect(cm(max[1] - min[1])).toBeCloseTo(asset.scale_dimensions_cm.height, 0);
+        expect(cm((min[0] + max[0]) / 2)).toBeCloseTo(frame.centre_x_cm ?? 0, 0);
+        expect(cm((min[2] + max[2]) / 2)).toBeCloseTo(frame.centre_z_cm ?? 0, 0);
       });
 
       it("ships within its byte and triangle budgets", () => {
+        // the same bounds as the capture's checks: bytes within, triangles under
+        const triangles = glb.json.meshes
+          .flatMap((m: any) => m.primitives)
+          .reduce((n: number, p: any) => n + glb.json.accessors[p.indices].count / 3, 0);
         expect(glb.bytes).toBeLessThanOrEqual(asset.file_budget_bytes);
+        expect(triangles).toBeLessThan(asset.poly_budget);
         expect(glb.bytes).toBe(asset.measured.bytes);
-        expect(asset.measured.triangles).toBeLessThanOrEqual(asset.poly_budget);
+        expect(triangles).toBe(asset.measured.triangles);
       });
 
       it("has JPEG textures no bigger than the game draws them", () => {
@@ -121,8 +141,8 @@ describe("the reconstructed props", () => {
 
 describe("the review files", () => {
   it("are not in public/, which ships with the game", () => {
-    const props = fs.readdirSync(path.join(ROOT, "public/tex/props"));
-    expect(props.filter((f) => /turntable\.(webp|gif|mp4)$/.test(f))).toEqual([]);
+    const shipped = fs.readdirSync(path.join(ROOT, "public"), { recursive: true }).map(String);
+    expect(shipped.filter((f) => /turntable\.(webp|gif|mp4)$/.test(f))).toEqual([]);
   });
 
   it("are where the manifest says", () => {

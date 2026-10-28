@@ -45,12 +45,18 @@ JPEG_QUALITY = 90
 
 
 def cut_sheet(sheet_path):
-    """The four square views of a sheet, in Pixal3D's order."""
+    """The square views of a sheet, in Pixal3D's order, leaving out any its record says is missing."""
     sheet = Image.open(sheet_path).convert("RGB")
     side = sheet.height
     if sheet.width != side * 4:
         raise ValueError(f"{sheet_path} is {sheet.width}x{sheet.height}; a four-view sheet is four squares wide")
-    return {v: sheet.crop((i * side, 0, (i + 1) * side, side)) for i, v in enumerate(VIEWS)}
+    record_path = os.path.splitext(sheet_path)[0] + ".json"
+    frames = {}
+    if os.path.exists(record_path):
+        with open(record_path, encoding="utf-8") as f:
+            frames = json.load(f).get("frames", {})
+    return {v: sheet.crop((i * side, 0, (i + 1) * side, side))
+            for i, v in enumerate(VIEWS) if not (v in frames and frames[v] is None)}
 
 
 def upload(img, name):
@@ -70,12 +76,32 @@ def upload(img, name):
 
 
 def build_workflow(names, prefix, seed=None, faces=None):
-    """The chair's workflow with this asset's views and output names filled in."""
+    """The chair's workflow with this asset's views and output names filled in.
+
+    A view missing from names is taken out: its load, mask, crop and save
+    nodes, and its input to the conditioning.
+    """
+    if "front" not in names:
+        raise ValueError("Pixal3D poses the mesh on the front view; a sheet needs one")
     with open(WORKFLOW, encoding="utf-8") as f:
-        text = f.read()
+        wf = json.loads(f.read().replace("{prefix}", prefix))
+    conditioning = next(n for n in wf.values() if n["class_type"] == "Pixal3DMultiViewConditioning")
     for v in VIEWS:
-        text = text.replace("{" + v + "}", names[v])
-    wf = json.loads(text.replace("{prefix}", prefix))
+        load = next(k for k, n in wf.items() if n["class_type"] == "LoadImage" and n["inputs"]["image"] == "{" + v + "}")
+        if v in names:
+            wf[load]["inputs"]["image"] = names[v]
+            continue
+        # everything fed only by this view's image, short of the conditioning
+        chain = {load}
+        while True:
+            more = {k for k, n in wf.items() if k not in chain and n is not conditioning
+                    and any(isinstance(x, list) and x[0] in chain for x in n["inputs"].values())}
+            if not more:
+                break
+            chain |= more
+        for k in chain:
+            del wf[k]
+        del conditioning["inputs"][v]
     if seed is not None:
         for node in wf.values():
             if node["class_type"] == "KSampler":
@@ -281,19 +307,21 @@ def reconstruct(asset_id, seed=None, faces=None, out=None):
     out_path = out or os.path.join(ROOT, entry["glb_output"])
 
     names = {v: upload(img, f"{asset_id}_view_{v}.png") for v, img in cut_sheet(sheet).items()}
-    print(f"[Pixal3D] Uploaded the four views of {entry['turnaround_sheet']}")
+    print(f"[Pixal3D] Uploaded the {', '.join(names)} views of {entry['turnaround_sheet']}")
     prefix = f"3d/pixal3d_{asset_id}"
+    started = time.time()
     entry_h = run(build_workflow(names, prefix, seed, faces))
 
     glbs = [o for node in entry_h["outputs"].values() for key in ("3d", "glb", "meshes", "files")
             for o in node.get(key, []) if isinstance(o, dict) and "highpoly" not in o.get("filename", "")]
     if not glbs:
-        # SaveGLB names its file after the prefix; take the newest one that matches
+        # SaveGLB names its file after the prefix; take the newest one this run wrote
         folder = os.path.join(COMFY_OUTPUT, "3d")
-        found = sorted((f for f in os.listdir(folder) if f.startswith(f"pixal3d_{asset_id}_0") and f.endswith(".glb")),
+        found = sorted((f for f in os.listdir(folder) if f.startswith(f"pixal3d_{asset_id}_0") and f.endswith(".glb")
+                        and os.path.getmtime(os.path.join(folder, f)) >= started),
                        key=lambda f: os.path.getmtime(os.path.join(folder, f)))
         if not found:
-            raise FileNotFoundError(f"no GLB named pixal3d_{asset_id}_* in {folder}")
+            raise FileNotFoundError(f"this run wrote no GLB named pixal3d_{asset_id}_* in {folder}")
         raw = os.path.join(folder, found[-1])
     else:
         raw = os.path.join(COMFY_OUTPUT, glbs[0].get("subfolder", ""), glbs[0]["filename"])

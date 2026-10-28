@@ -732,7 +732,8 @@
       "turnaround_file": "public/tex/props/h3_chair_turnaround.png",
       "turntable_file": "docs/props/weapon_chair/turntable.webp",
       "glb_file": "public/models/props/weapon_chair.glb",
-      "build_cmd": "node scripts/build_weapon_chair.mjs",
+      "mesh": "pixal3d",
+      "symmetric": true,
       "prompt": "Ornate Victorian theatre private box salon chair, carved gilt gold leaf rococo wood frame, tufted crimson velvet upholstery seat and padded oval back, isolated on solid white background.",
       "stages": {
         "stage_1_alpha": {
