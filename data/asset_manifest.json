@@ -482,44 +482,44 @@
           {
             "label": "the lower half of the prop carries the prop's surface",
             "min_cm": [
-              -0.1,
+              -22.3,
               -6.7,
-              -1.6
+              -10.8
             ],
             "max_cm": [
-              1.9,
-              2.9,
-              1.6
+              -11.2,
+              3.0,
+              10.8
             ],
             "expect": "filled",
-            "min_area_cm2": 7
+            "min_area_cm2": 38
           },
           {
             "label": "the upper half of the prop carries the prop's surface",
             "min_cm": [
-              -1.9,
-              31.8,
-              -1.6
+              0.0,
+              22.2,
+              -10.8
             ],
             "max_cm": [
-              0.1,
-              41.5,
-              1.6
+              11.1,
+              31.9,
+              10.8
             ],
             "expect": "filled",
-            "min_area_cm2": 7
+            "min_area_cm2": 38
           },
           {
             "label": "the space beside the prop is clear",
             "min_cm": [
-              -7.5,
-              12.6,
-              -1.6
+              -44.5,
+              41.5,
+              -10.8
             ],
             "max_cm": [
-              -5.6,
-              22.2,
-              1.6
+              -33.4,
+              51.1,
+              10.8
             ],
             "expect": "empty",
             "max_area_cm2": 10
@@ -532,33 +532,33 @@
         ],
         "closeup_fit": 0.12,
         "closeup_label": "The serrated clamping jaws",
-        "view_fit": 0.393,
+        "view_fit": 0.599,
         "dimension_tolerance_pct": 5
       },
-      "build": null,
+      "measured": {
+        "triangles": 19998,
+        "bbox_min_cm": [
+          -44.6,
+          -26.0,
+          -10.8
+        ],
+        "bbox_max_cm": [
+          44.6,
+          51.1,
+          10.8
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 1223692
+      },
+      "build": "python scripts/run_pixal3d_mesh.py prop_tilly_clinker_tongs",
       "validate": "node scripts/capture_prop_renders.mjs prop_tilly_clinker_tongs",
       "reference_concept": "public/tex/props/flux3_prop_tilly_clinker_tongs_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_tilly_tongs_alpha.png",
-      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
-      "stand_in_measured": {
-        "triangles": 416,
-        "bytes": 33364,
-        "bbox_min_cm": [
-          -7.5,
-          -26,
-          -1.6
-        ],
-        "bbox_max_cm": [
-          7.5,
-          51.1,
-          1.6
-        ],
-        "meshes": 8,
-        "materials": 8,
-        "embedded_images": 0
-      },
       "turnaround_sheet": "public/tex/props/h3_tilly_tongs_turnaround.png",
-      "turntable": "docs/props/prop_tilly_clinker_tongs/turntable.webp"
+      "turntable": "docs/props/prop_tilly_clinker_tongs/turntable.webp",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 19,998 triangles, 1,223,692 bytes, 19/21 capture checks. The reconstruction reproduces the approved art's shape, so its proportions are the art's own and not the spec's: width 89.1 cm against 15 cm (+494%), depth 21.7 cm against 3.2 cm (+578%). This entry's dimensions (15 x 77.1 x 3.2 cm) were measured off the deleted procedural stand-in. A director's decision is needed: amend scale_dimensions_cm to the measured 89.1 x 77.1 x 21.7 cm, or re-cut the alpha so the rebuild lands on the spec. The tolerance is left at 5%."
     },
     {
       "id": "prop_sluice_flatcap",
@@ -778,7 +778,9 @@
         "meshes": 4,
         "materials": 4,
         "embedded_images": 0
-      }
+      },
+      "turnaround_sheet": "public/tex/props/h3_kilnworth_nursecap_turnaround.png",
+      "turntable": "docs/props/prop_kilnworth_nursecap/turntable.webp"
     },
     {
       "id": "prop_mule_championship_belt",
