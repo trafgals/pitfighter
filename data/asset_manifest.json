@@ -1016,7 +1016,7 @@
         "height": 33,
         "depth": 11.5
       },
-      "status": "gate:2-review-turnaround",
+      "status": "gate:2-rebuild-pixal3d",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -1037,44 +1037,44 @@
           {
             "label": "the lower half of the prop carries the prop's surface",
             "min_cm": [
-              -0.3,
+              -14.1,
               -5.8,
-              -5.2
+              -10.1
             ],
             "max_cm": [
-              1.7,
+              -9.4,
               -1.6,
-              6.2
+              11.1
             ],
             "expect": "filled",
-            "min_area_cm2": 4
+            "min_area_cm2": 7
           },
           {
             "label": "the upper half of the prop carries the prop's surface",
             "min_cm": [
-              -2.9,
-              6.6,
-              -5.2
+              0.0,
+              10.8,
+              -10.1
             ],
             "max_cm": [
-              -0.9,
-              10.8,
-              6.2
+              4.7,
+              14.9,
+              11.1
             ],
             "expect": "filled",
-            "min_area_cm2": 4
+            "min_area_cm2": 7
           },
           {
             "label": "the space beside the prop is clear",
             "min_cm": [
-              -5.2,
+              -18.8,
               14.9,
-              -5.2
+              -10.1
             ],
             "max_cm": [
-              -3.5,
+              -14.1,
               19.0,
-              6.2
+              11.1
             ],
             "expect": "empty",
             "max_area_cm2": 10
@@ -1087,33 +1087,33 @@
         ],
         "closeup_fit": 0.08,
         "closeup_label": "The brass pressure gauge",
-        "view_fit": 0.182,
+        "view_fit": 0.272,
         "dimension_tolerance_pct": 5
       },
-      "build": null,
+      "measured": {
+        "triangles": 19994,
+        "bbox_min_cm": [
+          -18.8,
+          -14.0,
+          -10.1
+        ],
+        "bbox_max_cm": [
+          18.9,
+          19.0,
+          11.1
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 1600204
+      },
+      "build": "python scripts/run_pixal3d_mesh.py prop_bulwark_pistons",
       "validate": "node scripts/capture_prop_renders.mjs prop_bulwark_pistons",
       "reference_concept": "public/tex/props/flux3_prop_bulwark_pistons_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_bulwark_pistons_alpha.png",
-      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
-      "stand_in_measured": {
-        "triangles": 216,
-        "bytes": 15800,
-        "bbox_min_cm": [
-          -5.2,
-          -14,
-          -5.2
-        ],
-        "bbox_max_cm": [
-          5.3,
-          19,
-          6.2
-        ],
-        "meshes": 3,
-        "materials": 3,
-        "embedded_images": 0
-      },
       "turnaround_sheet": "public/tex/props/h3_bulwark_pistons_turnaround.png",
-      "turntable": "docs/props/prop_bulwark_pistons/turntable.webp"
+      "turntable": "docs/props/prop_bulwark_pistons/turntable.webp",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 19,994 triangles, 1,600,204 bytes, 18/21 capture checks. The checks that do not pass: file size is within budget; width matches the spec (10.5 cm +/- 5%); depth matches the spec (11.5 cm +/- 5%). The mesh measures 37.8 x 33 x 21.2 cm against a spec of 10.5 x 33 x 11.5 cm. The finding is recorded in the manifest and the tolerance is left at 5%."
     },
     {
       "id": "prop_crump_samovar",
