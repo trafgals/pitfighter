@@ -1073,9 +1073,9 @@
       "poly_budget": 25000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 48,
+        "width": 52,
         "height": 87,
-        "depth": 48
+        "depth": 54
       },
       "status": "gate:3-review-ingame-3d",
       "pivot": {
@@ -1087,8 +1087,6 @@
       },
       "glb_output": "public/models/props/weapon_chair.glb",
       "validation": {
-        "rim_mesh": "Handle_Grip_Seat",
-        "closeup_mesh": "Tufted_Backrest",
         "closeup_focus": [
           0,
           0.26,
@@ -1096,26 +1094,56 @@
         ],
         "closeup_fit": 0.15,
         "closeup_label": "Tufted crimson velvet backrest close-up",
-        "view_fit": 0.55
+        "view_fit": 0.55,
+        "dimension_tolerance_pct": 5,
+        "frame": {
+          "y_min_cm": -41.5,
+          "y_max_cm": 45.5,
+          "centre_x_cm": 0,
+          "centre_z_cm": 0
+        },
+        "regions": [
+          {
+            "label": "the seat",
+            "min_cm": [-15, -10, -9],
+            "max_cm": [15, 5, 18],
+            "expect": "filled",
+            "min_area_cm2": 300
+          },
+          {
+            "label": "the backrest, behind the seat (-Z)",
+            "min_cm": [-15, 20, -28],
+            "max_cm": [15, 40, -9],
+            "expect": "filled",
+            "min_area_cm2": 300
+          },
+          {
+            "label": "the space in front of the backrest (+Z)",
+            "min_cm": [-15, 15, 0],
+            "max_cm": [15, 40, 28],
+            "expect": "empty"
+          }
+        ]
       },
       "measured": {
-        "triangles": 368,
-        "bytes": 27924,
+        "triangles": 19986,
+        "bytes": 1356704,
         "bbox_min_cm": [
-          -24,
-          -42,
-          -24
+          -26.1,
+          -41.5,
+          -26.8
         ],
         "bbox_max_cm": [
-          24,
-          45,
-          24
+          26.1,
+          45.5,
+          26.8
         ],
-        "meshes": 6,
-        "materials": 6,
-        "embedded_images": 0
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3
       },
-      "build": "node scripts/build_weapon_chair.mjs",
+      "source": "Pixal3D multi-view reconstruction (ComfyUI) from the turnaround sheet; scripts/build_weapon_chair.mjs builds the earlier procedural chair",
+      "build": null,
       "validate": "node scripts/capture_prop_renders.mjs weapon_chair",
       "reference_concept": "public/tex/props/flux3_weapon_chair_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_chair_alpha.png",

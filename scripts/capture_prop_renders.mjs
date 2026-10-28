@@ -23,7 +23,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import puppeteer from "puppeteer-core";
-import { inspectGlb } from "./lib/glb_inspect.mjs";
+import { inspectGlb, readWorldTriangles, surfaceAreaInBox } from "./lib/glb_inspect.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const PORT = Number(process.env.PROP_CAPTURE_PORT || 5200);
@@ -80,6 +80,16 @@ const frontMeshName = validation.front_mesh ?? (hasValidation || !isHeadSocket ?
 const originMeshName = validation.origin_mesh ?? null;
 const forwardMeshName = validation.forward_mesh ?? null;
 const axisMeshName = validation.axis_mesh ?? null;
+// A generated mesh (an image-to-3D reconstruction) is one welded surface
+// with no parts to name, so its frame is declared as geometry instead: where
+// its bounding box has to sit, and boxes in model space that must hold
+// surface or must be clear. A clear box in front of a filled one is what
+// tells forward from back, so a model turned the wrong way fails it.
+const frame = validation.frame ?? null;
+const regions = validation.regions ?? [];
+// A reconstruction's proportions come out of the model, not a builder's
+// numbers, so its width and depth are held to a percentage of the spec.
+const dimensionTolerancePct = validation.dimension_tolerance_pct ?? 0;
 const viewFit = validation.view_fit ?? 0.17;
 const closeupFit = validation.closeup_fit ?? 0.048;
 const closeupLabel = validation.closeup_label ?? "Badge close-up";
@@ -202,21 +212,11 @@ async function main() {
   check(report.nonFinite === 0, "no vertex position is NaN or infinite", `${report.nonFinite}`);
 
   const dims = report.bbox.size.map(cm);
-  check(
-    Math.abs(dims[0] - expected.width) <= toleranceCm,
-    `width matches the spec (${expected.width} cm)`,
-    `${dims[0]} cm`,
-  );
-  check(
-    Math.abs(dims[1] - expected.height) <= toleranceCm,
-    `height matches the spec (${expected.height} cm)`,
-    `${dims[1]} cm`,
-  );
-  check(
-    Math.abs(dims[2] - expected.depth) <= toleranceCm,
-    `depth matches the spec (${expected.depth} cm)`,
-    `${dims[2]} cm`,
-  );
+  const within = (actual, spec) => Math.abs(actual - spec) <= Math.max(toleranceCm, (spec * dimensionTolerancePct) / 100);
+  const toleranceLabel = dimensionTolerancePct ? ` +/- ${dimensionTolerancePct}%` : "";
+  check(within(dims[0], expected.width), `width matches the spec (${expected.width} cm${toleranceLabel})`, `${dims[0]} cm`);
+  check(within(dims[1], expected.height), `height matches the spec (${expected.height} cm${toleranceLabel})`, `${dims[1]} cm`);
+  check(within(dims[2], expected.depth), `depth matches the spec (${expected.depth} cm${toleranceLabel})`, `${dims[2]} cm`);
 
   // The base opening: the crown's head-entry rim must sit on the origin's
   // plane, and the asset's axis must be centred on X. A prop that is placed
@@ -322,6 +322,43 @@ async function main() {
     }
   }
 
+  // The frame of a prop with no named parts: its bounding box against the
+  // numbers the manifest gives, within half a centimetre.
+  if (frame) {
+    const frameToleranceCm = frame.tolerance_cm ?? 0.5;
+    const centre = report.bbox.min.map((v, i) => (v + report.bbox.max[i]) / 2);
+    const framed = [
+      ["y_min_cm", "the base sits where the pivot puts it", report.bbox.min[1]],
+      ["y_max_cm", "the top sits where the pivot puts it", report.bbox.max[1]],
+      ["centre_x_cm", "the asset is centred on X", centre[0]],
+      ["centre_z_cm", "the asset is centred on Z", centre[2]],
+    ];
+    for (const [key, message, actual] of framed) {
+      if (frame[key] === undefined) continue;
+      check(
+        Math.abs(cm(actual) - frame[key]) <= frameToleranceCm,
+        `${message} (${frame[key]} cm)`,
+        `${cm(actual)} cm`,
+      );
+    }
+  }
+
+  // Surface that has to be there, and space that has to be clear.
+  if (regions.length) {
+    const triangles = readWorldTriangles(modelPath);
+    for (const region of regions) {
+      const box = { min: region.min_cm.map((v) => v / 100), max: region.max_cm.map((v) => v / 100) };
+      const areaCm2 = Math.round(surfaceAreaInBox(triangles, box) * 1e4);
+      if (region.expect === "empty") {
+        const limit = region.max_area_cm2 ?? 5;
+        check(areaCm2 <= limit, `${region.label} is clear`, `${areaCm2} cm2 of surface <= ${limit}`);
+      } else {
+        const limit = region.min_area_cm2 ?? 50;
+        check(areaCm2 >= limit, `${region.label} is there`, `${areaCm2} cm2 of surface >= ${limit}`);
+      }
+    }
+  }
+
   // A grip-normalized prop has no crown rim, so the rim check does not run
   // for it - which means the frame it is placed by is only checked at all if
   // the manifest names the features that carry it. Without them the run
@@ -332,19 +369,21 @@ async function main() {
   // checked against its rim, and a grip prop that names its origin and
   // forward features is checked against those. Only the prop that declares
   // neither is missing a check, and only that one gets this line.
+  // A frame or a clear region stands in for the named features: either one
+  // is a check that the prop sits and points where the socket expects.
   if (!isHeadSocket) {
-    if (!originMeshName) {
+    if (!originMeshName && !frame) {
       check(
         false,
         "the manifest names the feature the prop is placed by",
-        "a grip_normalized asset must declare validation.origin_mesh",
+        "a grip_normalized asset must declare validation.origin_mesh or validation.frame",
       );
     }
-    if (!forwardMeshName) {
+    if (!forwardMeshName && !regions.some((region) => region.expect === "empty")) {
       check(
         false,
         "the manifest names the feature that points forward",
-        "a grip_normalized asset must declare validation.forward_mesh",
+        "a grip_normalized asset must declare validation.forward_mesh, or a clear region in validation.regions",
       );
     }
   }
