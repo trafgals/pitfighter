@@ -3,9 +3,12 @@
 Master Resumable 3D Asset Batch Pipeline for Pit Fighter: Old Sorrow
 Executes end-to-end asset generation across all remaining assets:
   Stage 1: 2D Reference & Isolated Watertight Alpha (FLUX 3 + BiRefNet / Rembg)
-  Stage 2: MiniMax H3 4-View Orthographic Turnaround (3072x768) + 360 Turntable WebP
-  Stage 3: 3D Binary GLB Mesh Synthesis with PBR Materials
-  Stage 4: Headless Chrome Verification Renders & Budget Compliance Checks
+  Stage 2: MiniMax H3 turntable, cut to a front/left/back/right sheet (3072x768),
+           with a WebP preview in docs/props/<id>/
+  Stage 3: 3D GLB: a Pixal3D reconstruction from the sheet (scripts/run_pixal3d_mesh.py),
+           or the item's own build_cmd for the props still built procedurally
+  Stage 4: Headless Chrome Verification Renders & Budget Compliance Checks, published
+           to docs/props/<id>/ by scripts/publish_prop_renders.mjs
 
 State is persisted atomically to `data/pipeline_batch_state.json` after every single step.
 If interrupted or crashed, re-running this script resumes exactly from the last incomplete step.
@@ -58,7 +61,7 @@ DEFAULT_QUEUE = [
         "scale_dimensions_cm": {"width": 14.0, "height": 34.0, "depth": 12.0},
         "alpha_file": "public/tex/props/flux3_pegg_shoelast_alpha.png",
         "turnaround_file": "public/tex/props/h3_pegg_shoelast_turnaround.png",
-        "turntable_file": "public/tex/props/h3_pegg_shoelast_turntable.webp",
+        "turntable_file": "docs/props/prop_pegg_cast_iron_last/turntable.webp",
         "glb_file": "public/models/props/prop_pegg_cast_iron_last.glb",
         "build_cmd": "node scripts/build_prop_pegg_cast_iron_last.mjs",
         "prompt": "Authentic Victorian cobbler cast-iron foot shoe last bludgeon, calibrated brass rule plate with imperial markings, knurled thumbscrew, cordovan leather grip, isolated on white background.",
@@ -73,7 +76,7 @@ DEFAULT_QUEUE = [
         "scale_dimensions_cm": {"width": 12.0, "height": 92.0, "depth": 12.0},
         "alpha_file": "public/tex/props/flux3_crape_brolly_alpha.png",
         "turnaround_file": "public/tex/props/h3_crape_brolly_turnaround.png",
-        "turntable_file": "public/tex/props/h3_crape_brolly_turntable.webp",
+        "turntable_file": "docs/props/prop_crape_spiked_brolly/turntable.webp",
         "glb_file": "public/models/props/prop_crape_spiked_brolly.glb",
         "build_cmd": "node scripts/build_prop_crape_spiked_brolly.mjs",
         "prompt": "Victorian gentleman's heavy mourning black silk umbrella, long sharpened steel mortuary ferrule spike, carved whalebone crook handle inlaid with faceted jet beads, brass ribs, isolated on solid white background.",
@@ -88,7 +91,7 @@ DEFAULT_QUEUE = [
         "scale_dimensions_cm": {"width": 8.0, "height": 95.0, "depth": 8.0},
         "alpha_file": "public/tex/props/flux3_eleanor_rapier_alpha.png",
         "turnaround_file": "public/tex/props/h3_eleanor_rapier_turnaround.png",
-        "turntable_file": "public/tex/props/h3_eleanor_rapier_turntable.webp",
+        "turntable_file": "docs/props/prop_eleanor_weeping_rapier/turntable.webp",
         "glb_file": "public/models/props/prop_eleanor_weeping_rapier.glb",
         "build_cmd": "node scripts/build_prop_eleanor_weeping_rapier.mjs",
         "prompt": "Elegantly carved Victorian malacca walking cane swordstick, polished sterling silver crying maiden head pommel, concealed razor-sharp hollow-ground blued steel rapier blade, isolated on solid white background.",
@@ -103,7 +106,7 @@ DEFAULT_QUEUE = [
         "scale_dimensions_cm": {"width": 16.0, "height": 72.0, "depth": 10.0},
         "alpha_file": "public/tex/props/flux3_tilly_tongs_alpha.png",
         "turnaround_file": "public/tex/props/h3_tilly_tongs_turnaround.png",
-        "turntable_file": "public/tex/props/h3_tilly_tongs_turntable.webp",
+        "turntable_file": "docs/props/prop_tilly_clinker_tongs/turntable.webp",
         "glb_file": "public/models/props/prop_tilly_clinker_tongs.glb",
         "build_cmd": "node scripts/build_prop_tilly_clinker_tongs.mjs",
         "prompt": "Heavy industrial boiler furnace clinker tongs, pitted blackened cast iron, double scissor pivot joint, clawed serrated clamping jaws, heat-wrapped asbestos grip, glowing coal ember flecks, isolated on solid white background.",
@@ -118,7 +121,7 @@ DEFAULT_QUEUE = [
         "scale_dimensions_cm": {"width": 24.0, "height": 14.0, "depth": 27.0},
         "alpha_file": "public/tex/props/flux3_sluice_flatcap_alpha.png",
         "turnaround_file": "public/tex/props/h3_sluice_flatcap_turnaround.png",
-        "turntable_file": "public/tex/props/h3_sluice_flatcap_turntable.webp",
+        "turntable_file": "docs/props/prop_sluice_flatcap/turntable.webp",
         "glb_file": "public/models/props/prop_sluice_flatcap.glb",
         "build_cmd": "node scripts/build_prop_sluice_flatcap.mjs",
         "prompt": "Authentic waterlogged Victorian street mudlark tweed flatcap, coarse herringbone wool, stiff curved peak brim, tarnished copper wire brim repair, oilcloth lining, isolated on solid white background.",
@@ -133,7 +136,7 @@ DEFAULT_QUEUE = [
         "scale_dimensions_cm": {"width": 22.0, "height": 18.0, "depth": 20.0},
         "alpha_file": "public/tex/props/flux3_kilnworth_nursecap_alpha.png",
         "turnaround_file": "public/tex/props/h3_kilnworth_nursecap_turnaround.png",
-        "turntable_file": "public/tex/props/h3_kilnworth_nursecap_turntable.webp",
+        "turntable_file": "docs/props/prop_kilnworth_nursecap/turntable.webp",
         "glb_file": "public/models/props/prop_kilnworth_nursecap.glb",
         "build_cmd": "node scripts/build_prop_kilnworth_nursecap.mjs",
         "prompt": "Severe Victorian starched white linen field nurse head bonnet cap, folded triangular crown, crimson embroidered Geneva cross emblem, bone sewing pins, clean stiff folds, isolated on solid white background.",
@@ -148,7 +151,7 @@ DEFAULT_QUEUE = [
         "scale_dimensions_cm": {"width": 38.0, "height": 22.0, "depth": 32.0},
         "alpha_file": "public/tex/props/flux3_mule_belt_alpha.png",
         "turnaround_file": "public/tex/props/h3_mule_belt_turnaround.png",
-        "turntable_file": "public/tex/props/h3_mule_belt_turntable.webp",
+        "turntable_file": "docs/props/prop_mule_championship_belt/turntable.webp",
         "glb_file": "public/models/props/prop_mule_championship_belt.glb",
         "build_cmd": "node scripts/build_prop_mule_championship_belt.mjs",
         "prompt": "Massive Victorian bare-knuckle prize fighting championship belt, heavy oval embossed gold plate engraved with fighting bears and floral filigree, thick studded oxblood leather strap, brass buckles, isolated on solid white background.",
@@ -163,7 +166,7 @@ DEFAULT_QUEUE = [
         "scale_dimensions_cm": {"width": 28.0, "height": 22.0, "depth": 34.0},
         "alpha_file": "public/tex/props/flux3_rook_souwester_alpha.png",
         "turnaround_file": "public/tex/props/h3_rook_souwester_turnaround.png",
-        "turntable_file": "public/tex/props/h3_rook_souwester_turntable.webp",
+        "turntable_file": "docs/props/prop_rook_souwester/turntable.webp",
         "glb_file": "public/models/props/prop_rook_souwester.glb",
         "build_cmd": "node scripts/build_prop_rook_souwester.mjs",
         "prompt": "Traditional 19th-century heavy tarpaulin oilskin sailor sou'wester hat, deep rear neck flap, upturned front brim, brass chin strap eyelets, salty sea-weathered patina, isolated on solid white background.",
@@ -178,7 +181,7 @@ DEFAULT_QUEUE = [
         "scale_dimensions_cm": {"width": 20.0, "height": 38.0, "depth": 18.0},
         "alpha_file": "public/tex/props/flux3_bulwark_pistons_alpha.png",
         "turnaround_file": "public/tex/props/h3_bulwark_pistons_turnaround.png",
-        "turntable_file": "public/tex/props/h3_bulwark_pistons_turntable.webp",
+        "turntable_file": "docs/props/prop_bulwark_pistons/turntable.webp",
         "glb_file": "public/models/props/prop_bulwark_pistons.glb",
         "build_cmd": "node scripts/build_prop_bulwark_pistons.mjs",
         "prompt": "Victorian steampunk hydraulic forearm bracers, polished blued steel hydraulic rams, braided red rubber pressure hoses, miniature circular brass pressure gauge with needle, filigree mounting cuffs, isolated on solid white background.",
@@ -193,7 +196,7 @@ DEFAULT_QUEUE = [
         "scale_dimensions_cm": {"width": 26.0, "height": 42.0, "depth": 22.0},
         "alpha_file": "public/tex/props/flux3_crump_samovar_alpha.png",
         "turnaround_file": "public/tex/props/h3_crump_samovar_turnaround.png",
-        "turntable_file": "public/tex/props/h3_crump_samovar_turntable.webp",
+        "turntable_file": "docs/props/prop_crump_samovar/turntable.webp",
         "glb_file": "public/models/props/prop_crump_samovar.glb",
         "build_cmd": "node scripts/build_prop_crump_samovar.mjs",
         "prompt": "Miniature Victorian brass Russian tea samovar back-boiler harness, polished copper urn boiler, twin brass spigots, steam safety whistle valve, leather shoulder straps, isolated on solid white background.",
@@ -210,7 +213,7 @@ DEFAULT_QUEUE = [
         "scale_dimensions_cm": {"width": 12.0, "height": 8.0, "depth": 3.0},
         "alpha_file": "public/tex/props/flux3_knuckleduster_alpha.png",
         "turnaround_file": "public/tex/props/h3_knuckleduster_turnaround.png",
-        "turntable_file": "public/tex/props/h3_knuckleduster_turntable.webp",
+        "turntable_file": "docs/props/weapon_knuckleduster/turntable.webp",
         "glb_file": "public/models/props/weapon_knuckleduster.glb",
         "build_cmd": "node scripts/build_weapon_knuckleduster.mjs",
         "prompt": "Heavy Victorian solid brass knuckleduster, four oval finger loops, curved palm grip engraved with coat of arms crest, polished brass with dark patina in grooves, isolated on white background.",
@@ -225,7 +228,7 @@ DEFAULT_QUEUE = [
         "scale_dimensions_cm": {"width": 24.0, "height": 98.0, "depth": 14.0},
         "alpha_file": "public/tex/props/flux3_coal_shovel_alpha.png",
         "turnaround_file": "public/tex/props/h3_coal_shovel_turnaround.png",
-        "turntable_file": "public/tex/props/h3_coal_shovel_turntable.webp",
+        "turntable_file": "docs/props/weapon_coal_shovel/turntable.webp",
         "glb_file": "public/models/props/weapon_coal_shovel.glb",
         "build_cmd": "node scripts/build_weapon_coal_shovel.mjs",
         "prompt": "Long-handled heavy forged iron coal shovel, wide scoop blade worn sharp along lip, ash wood D-grip handle, heat-darkened metal with glowing coal dust flecks, isolated on white background.",
@@ -240,7 +243,7 @@ DEFAULT_QUEUE = [
         "scale_dimensions_cm": {"width": 6.0, "height": 38.0, "depth": 3.0},
         "alpha_file": "public/tex/props/flux3_bone_saw_alpha.png",
         "turnaround_file": "public/tex/props/h3_bone_saw_turnaround.png",
-        "turntable_file": "public/tex/props/h3_bone_saw_turntable.webp",
+        "turntable_file": "docs/props/weapon_bone_saw/turntable.webp",
         "glb_file": "public/models/props/weapon_bone_saw.glb",
         "build_cmd": "node scripts/build_weapon_bone_saw.mjs",
         "prompt": "19th-century amputation bone saw, polished carved ivory pistol grip handle, nickel-plated steel frame, fine serrated cross-cut surgical blade, isolated on solid white background.",
@@ -255,7 +258,7 @@ DEFAULT_QUEUE = [
         "scale_dimensions_cm": {"width": 11.0, "height": 86.0, "depth": 8.0},
         "alpha_file": "public/tex/props/flux3_nail_bat_alpha.png",
         "turnaround_file": "public/tex/props/h3_nail_bat_turnaround.png",
-        "turntable_file": "public/tex/props/h3_nail_bat_turntable.webp",
+        "turntable_file": "docs/props/weapon_nail_bat/turntable.webp",
         "glb_file": "public/models/props/weapon_nail_bat.glb",
         "build_cmd": "node scripts/build_weapon_nail_bat.mjs",
         "prompt": "Traditional English willow cricket bat driven through with rusty square iron horseshoe nails, cane handle wrapped in black cord, oiled wood grain, isolated on solid white background.",
@@ -270,7 +273,7 @@ DEFAULT_QUEUE = [
         "scale_dimensions_cm": {"width": 14.0, "height": 36.0, "depth": 4.0},
         "alpha_file": "public/tex/props/flux3_cleaver_alpha.png",
         "turnaround_file": "public/tex/props/h3_cleaver_turnaround.png",
-        "turntable_file": "public/tex/props/h3_cleaver_turntable.webp",
+        "turntable_file": "docs/props/weapon_cleaver/turntable.webp",
         "glb_file": "public/models/props/weapon_cleaver.glb",
         "build_cmd": "node scripts/build_weapon_cleaver.mjs",
         "prompt": "Heavy Victorian meat meat cleaver from Smithfield meat market, rectangular carbon steel blade with round hanging hole, brass-pinned walnut scales handle, isolated on solid white background.",
@@ -285,7 +288,7 @@ DEFAULT_QUEUE = [
         "scale_dimensions_cm": {"width": 18.0, "height": 42.0, "depth": 16.0},
         "alpha_file": "public/tex/props/flux3_piston_gauntlet_alpha.png",
         "turnaround_file": "public/tex/props/h3_piston_gauntlet_turnaround.png",
-        "turntable_file": "public/tex/props/h3_piston_gauntlet_turntable.webp",
+        "turntable_file": "docs/props/weapon_piston_gauntlet/turntable.webp",
         "glb_file": "public/models/props/weapon_piston_gauntlet.glb",
         "build_cmd": "node scripts/build_weapon_piston_gauntlet.mjs",
         "prompt": "Heavy steampunk steam gauntlet with spring-loaded steel ram over knuckles, miniature forearm boiler canister, brass exhaust pressure ports, leather strapping, isolated on solid white background.",
@@ -300,7 +303,7 @@ DEFAULT_QUEUE = [
         "scale_dimensions_cm": {"width": 10.0, "height": 180.0, "depth": 10.0},
         "alpha_file": "public/tex/props/flux3_lamplighter_pole_alpha.png",
         "turnaround_file": "public/tex/props/h3_lamplighter_pole_turnaround.png",
-        "turntable_file": "public/tex/props/h3_lamplighter_pole_turntable.webp",
+        "turntable_file": "docs/props/weapon_lamplighter_pole/turntable.webp",
         "glb_file": "public/models/props/weapon_lamplighter_pole.glb",
         "build_cmd": "node scripts/build_weapon_lamplighter_pole.mjs",
         "prompt": "Long brass-tipped Victorian street lamplighter pole, curved gas-cock shutoff hook at tip, brass oil lamp wick canister, dark ash wood shaft, isolated on solid white background.",
@@ -315,9 +318,10 @@ DEFAULT_QUEUE = [
         "scale_dimensions_cm": {"width": 46.0, "height": 88.0, "depth": 48.0},
         "alpha_file": "public/tex/props/flux3_chair_alpha.png",
         "turnaround_file": "public/tex/props/h3_chair_turnaround.png",
-        "turntable_file": "public/tex/props/h3_chair_turntable.webp",
+        "turntable_file": "docs/props/weapon_chair/turntable.webp",
         "glb_file": "public/models/props/weapon_chair.glb",
-        "build_cmd": "node scripts/build_weapon_chair.mjs",
+        "mesh": "pixal3d",
+        "symmetric": True,
         "prompt": "Ornate Victorian theatre private box salon chair, carved gilt gold leaf rococo wood frame, tufted crimson velvet upholstery seat and padded oval back, isolated on solid white background.",
     },
     {
@@ -330,7 +334,7 @@ DEFAULT_QUEUE = [
         "scale_dimensions_cm": {"width": 7.0, "height": 18.0, "depth": 7.0},
         "alpha_file": "public/tex/props/flux3_tonic_alpha.png",
         "turnaround_file": "public/tex/props/h3_tonic_turnaround.png",
-        "turntable_file": "public/tex/props/h3_tonic_turntable.webp",
+        "turntable_file": "docs/props/pickup_tonic/turntable.webp",
         "glb_file": "public/models/props/pickup_tonic.glb",
         "build_cmd": "node scripts/build_pickup_tonic.mjs",
         "prompt": "Victorian apothecary elixir bottle, ribbed emerald green glass, wax-sealed cork stopper, stained paper prescription label with engraved apothecary crest, glowing amber fluid inside, isolated on white background.",
@@ -347,6 +351,11 @@ def load_state():
             with open(STATE_FILE, "r", encoding="utf-8") as f:
                 state = json.load(f)
             log(f"Loaded existing state from {STATE_FILE} ({len(state.get('items', []))} tracked items)")
+            # the queue above says how each item is made; the state file only keeps its progress
+            queue = {item["id"]: item for item in DEFAULT_QUEUE}
+            for i, item in enumerate(state.get("items", [])):
+                if item["id"] in queue:
+                    state["items"][i] = {**queue[item["id"]], "stages": item["stages"]}
             return state
         except Exception as e:
             log(f"Warning: Corrupt state file ({e}), backing up and creating fresh queue.")
@@ -466,7 +475,9 @@ def run_stage_2_turnaround(item):
     ensure_comfyui()
     log(f"  [Stage 2 Turnaround] Generating MiniMax H3 turntable for {item['id']}...")
     h3_script = os.path.join(ROOT, "scripts", "run_minimax_h3_turnaround.py")
-    cmd = [sys.executable, h3_script, alpha_path, turnaround_path]
+    cmd = [sys.executable, h3_script, alpha_path, turnaround_path, "--preview", turntable_path]
+    if item.get("symmetric"):
+        cmd.append("--symmetric")
     subprocess.run(cmd, check=True)
     return os.path.exists(turnaround_path)
 
@@ -478,7 +489,11 @@ def run_stage_3_glb(item):
         return True
 
     log(f"  [Stage 3 GLB] Building {item['id']}.glb...")
+    # a new prop is reconstructed by Pixal3D; a build_cmd is a procedural build kept from before
     build_cmd = item.get("build_cmd")
+    if item.get("mesh", "pixal3d") == "pixal3d" and not build_cmd:
+        ensure_comfyui()
+        build_cmd = f'"{sys.executable}" scripts/run_pixal3d_mesh.py {item["id"]}'
     if build_cmd:
         res = subprocess.run(build_cmd, shell=True, cwd=ROOT)
         if res.returncode != 0:
@@ -495,16 +510,15 @@ def run_stage_4_validate(item):
     log(f"  [Stage 4 Validate] Running headless verification on {item['id']}...")
     validate_cmd = f"node scripts/capture_prop_renders.mjs {item['id']}"
     res = subprocess.run(validate_cmd, shell=True, cwd=ROOT)
-    
-    # Copy from test-output to docs
-    test_out = os.path.join(ROOT, "test-output", "props", item["id"])
-    docs_out = os.path.join(ROOT, "docs", "props", item["id"])
-    if os.path.exists(test_out):
-        os.makedirs(docs_out, exist_ok=True)
-        for f in os.listdir(test_out):
-            shutil.copyfile(os.path.join(test_out, f), os.path.join(docs_out, f))
-        log(f"  [Stage 4 Validate] Published verification renders to {docs_out}")
-    return res.returncode == 0
+    if res.returncode != 0:
+        raise RuntimeError(f"Validation failed for {item['id']}: see test-output/props/{item['id']}/report.json")
+
+    # the publish step resizes the renders to the size the docs promise
+    pub = subprocess.run(f"node scripts/publish_prop_renders.mjs {item['id']}", shell=True, cwd=ROOT)
+    if pub.returncode != 0:
+        raise RuntimeError(f"Publishing the renders failed for {item['id']}")
+    log(f"  [Stage 4 Validate] Published verification renders to docs/props/{item['id']}/")
+    return True
 
 # ---------------------------------------------------------------------------
 # Main Orchestrator Loop
