@@ -703,14 +703,14 @@
           {
             "label": "the lower half of the prop carries the prop's surface",
             "min_cm": [
-              2.2,
-              2.6,
-              -9.0
+              -5.2,
+              4.6,
+              -1.6
             ],
             "max_cm": [
-              4.5,
-              4.6,
-              9.0
+              -3.2,
+              2.6,
+              1.6
             ],
             "expect": "filled",
             "min_area_cm2": 4
@@ -718,14 +718,14 @@
           {
             "label": "the upper half of the prop carries the prop's surface",
             "min_cm": [
-              0.0,
-              6.9,
-              -9.0
+              -1.8,
+              10.4,
+              -1.6
             ],
             "max_cm": [
-              2.2,
-              8.9,
-              9.0
+              0.2,
+              8.4,
+              1.6
             ],
             "expect": "filled",
             "min_area_cm2": 4
@@ -733,14 +733,14 @@
           {
             "label": "the space beside the prop is clear",
             "min_cm": [
-              -9.0,
-              9.8,
-              -9.0
+              -6.7,
+              11.8,
+              -1.6
             ],
             "max_cm": [
-              -6.8,
-              11.5,
-              9.0
+              -4.8,
+              9.8,
+              1.6
             ],
             "expect": "empty",
             "max_area_cm2": 10
@@ -753,34 +753,34 @@
         ],
         "closeup_fit": 0.05,
         "closeup_label": "The crimson Geneva cross on the linen crown",
-        "view_fit": 0.14,
+        "view_fit": 0.089,
         "dimension_tolerance_pct": 5,
         "rim_mesh": ""
       },
-      "build": null,
+      "measured": {
+        "triangles": 16000,
+        "bbox_min_cm": [
+          -6.7,
+          0.0,
+          -1.6
+        ],
+        "bbox_max_cm": [
+          6.7,
+          11.5,
+          1.6
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 987304
+      },
+      "build": "python scripts/run_pixal3d_mesh.py prop_kilnworth_nursecap --faces 16000",
       "validate": "node scripts/capture_prop_renders.mjs prop_kilnworth_nursecap",
       "reference_concept": "public/tex/props/flux3_prop_kilnworth_nursecap_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_kilnworth_nursecap_alpha.png",
-      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
-      "stand_in_measured": {
-        "triangles": 100,
-        "bytes": 9756,
-        "bbox_min_cm": [
-          -9,
-          0,
-          -9
-        ],
-        "bbox_max_cm": [
-          9,
-          11.5,
-          9
-        ],
-        "meshes": 4,
-        "materials": 4,
-        "embedded_images": 0
-      },
       "turnaround_sheet": "public/tex/props/h3_kilnworth_nursecap_turnaround.png",
-      "turntable": "docs/props/prop_kilnworth_nursecap/turntable.webp"
+      "turntable": "docs/props/prop_kilnworth_nursecap/turntable.webp",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 16,000 triangles, 987,304 bytes, 17/21 capture checks. The checks that do not pass: width matches the spec (18 cm +/- 5%); depth matches the spec (18 cm +/- 5%); the lower half of the prop carries the prop's surface is there; the upper half of the prop carries the prop's surface is there. The mesh measures 13.3 x 11.5 x 3.1 cm against a spec of 18 x 11.5 x 18 cm. The finding is recorded in the manifest and the tolerance is left at 5%."
     },
     {
       "id": "prop_mule_championship_belt",
@@ -889,7 +889,9 @@
         "meshes": 2,
         "materials": 2,
         "embedded_images": 0
-      }
+      },
+      "turnaround_sheet": "public/tex/props/h3_mule_belt_turnaround.png",
+      "turntable": "docs/props/prop_mule_championship_belt/turntable.webp"
     },
     {
       "id": "prop_rook_souwester",
