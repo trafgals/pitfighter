@@ -639,7 +639,8 @@
         "closeup_fit": 0.06,
         "closeup_label": "The tweed crown and the copper brim wire",
         "view_fit": 0.206,
-        "dimension_tolerance_pct": 5
+        "dimension_tolerance_pct": 5,
+        "rim_mesh": ""
       },
       "build": null,
       "validate": "node scripts/capture_prop_renders.mjs prop_sluice_flatcap",
@@ -748,7 +749,8 @@
         "closeup_fit": 0.05,
         "closeup_label": "The crimson Geneva cross on the linen crown",
         "view_fit": 0.14,
-        "dimension_tolerance_pct": 5
+        "dimension_tolerance_pct": 5,
+        "rim_mesh": ""
       },
       "build": null,
       "validate": "node scripts/capture_prop_renders.mjs prop_kilnworth_nursecap",
@@ -966,7 +968,8 @@
         "closeup_fit": 0.08,
         "closeup_label": "The oilskin crown and the rear neck flap",
         "view_fit": 0.273,
-        "dimension_tolerance_pct": 5
+        "dimension_tolerance_pct": 5,
+        "rim_mesh": ""
       },
       "build": null,
       "validate": "node scripts/capture_prop_renders.mjs prop_rook_souwester",
