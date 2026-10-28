@@ -13,6 +13,10 @@ The way weapon_chair.glb was made, as a script:
   4. turn it to face +Z, scale it to the spec's height and stand it on the
      pivot, from the manifest entry's scale_dimensions_cm and validation.frame
 
+A prop whose approved art is drawn the other way up says so in
+validation.frame.upside_down, and the sheet is turned over before it is
+conditioned on, so the mesh and its baked textures both come out right way up.
+
 The asset's manifest entry (data/asset_manifest.json) names the sheet and the
 GLB. The raw ComfyUI GLB stays in ComfyUI's output folder.
 
@@ -28,7 +32,7 @@ import struct
 import argparse
 import urllib.request
 import uuid
-from PIL import Image
+from PIL import Image, ImageOps
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 MANIFEST = os.path.join(ROOT, "data", "asset_manifest.json")
@@ -113,11 +117,14 @@ def build_workflow(names, prefix, seed=None, faces=None):
     return wf
 
 
-def run(wf, deadline_s=3600):
+def run(wf, deadline_s=14400):
     """Queue a workflow and return its history entry once it has finished.
 
-    A reconstruction takes about 8 minutes; an hour without a result means
-    ComfyUI lost the prompt (a restart, say), so give up rather than wait forever.
+    A reconstruction takes about 8 minutes; four hours without a result means
+    ComfyUI lost the prompt (a restart, say), so give up rather than wait
+    forever. The wait is generous because ComfyUI is one GPU on a shared
+    queue: a reconstruction that waits behind a turnaround clip starts an hour
+    late and is still perfectly good.
     """
     req = urllib.request.Request(f"{COMFY_HOST}/prompt", data=json.dumps({"prompt": wf}).encode(),
                                  headers={"Content-Type": "application/json"})
@@ -174,7 +181,30 @@ def image_sizes(doc):
     return sizes
 
 
-def place(doc, views, height_cm, y_min_cm=0.0, centre_x_cm=0.0, centre_z_cm=0.0):
+def turn_matrix(turn_deg):
+    """The rotation that puts the reconstruction on the manifest's pivot.
+
+    Pixal3D builds the object facing -Z with the sheet's front view on the
+    image's right, so the sheet's right-hand direction ends up on +X once the
+    object is turned to face +Z. A prop whose pivot puts its length on Z
+    instead - a shoe last whose toe points forward - says so with a turn, and
+    is turned a quarter about Y before it is faced.
+
+    All three matrices are proper rotations, so the winding of the triangles
+    is untouched and the mesh stays outside-out.
+    """
+    import numpy as np
+    turn = int(turn_deg) % 360
+    if turn == 0:
+        return np.array([[-1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, -1.0]])
+    if turn == 90:
+        return np.array([[0.0, 0.0, 1.0], [0.0, 1.0, 0.0], [-1.0, 0.0, 0.0]])
+    if turn == 270:
+        return np.array([[0.0, 0.0, -1.0], [0.0, 1.0, 0.0], [1.0, 0.0, 0.0]])
+    raise ValueError(f"a prop's turn has to be 0, 90 or 270 degrees, not {turn_deg}")
+
+
+def place(doc, views, height_cm, y_min_cm=0.0, centre_x_cm=0.0, centre_z_cm=0.0, turn_deg=0):
     """Turn a reconstruction to face +Z, scale it to the spec's height and put its base on the pivot.
 
     Pixal3D builds the object facing -Z, about a metre tall, centred on the
@@ -183,7 +213,8 @@ def place(doc, views, height_cm, y_min_cm=0.0, centre_x_cm=0.0, centre_z_cm=0.0)
     gives them a tolerance.
     """
     import numpy as np
-    prims = [p for m in doc["meshes"] for p in m["primitives"]]
+    matrix = turn_matrix(turn_deg)
+    prims = [p for mesh in doc["meshes"] for p in mesh["primitives"]]
     def floats(acc_index):
         acc = doc["accessors"][acc_index]
         width = {"VEC3": 3, "VEC4": 4}[acc["type"]]
@@ -194,19 +225,23 @@ def place(doc, views, height_cm, y_min_cm=0.0, centre_x_cm=0.0, centre_z_cm=0.0)
     pos = [floats(p["attributes"]["POSITION"]) for p in prims]
     allp = np.concatenate([a for _, a in pos])
     scale = height_cm / 100.0 / (allp[:, 1].max() - allp[:, 1].min())
-    turned = allp * [-1, 1, -1] * scale
+    turned = allp @ matrix.T * scale
     shift = np.array([centre_x_cm / 100.0 - (turned[:, 0].max() + turned[:, 0].min()) / 2,
                       y_min_cm / 100.0 - turned[:, 1].min(),
                       centre_z_cm / 100.0 - (turned[:, 2].max() + turned[:, 2].min()) / 2])
     for p, (acc, a) in zip(prims, pos):
-        a = a * [-1, 1, -1] * scale + shift
+        a = a @ matrix.T * scale + shift
         views[acc["bufferView"]] = a.astype("<f4").tobytes()
         acc["min"], acc["max"] = a.min(axis=0).tolist(), a.max(axis=0).tolist()
         for name in ("NORMAL", "TANGENT"):
             if name in p["attributes"]:
                 nacc, n = floats(p["attributes"][name])
-                n[:, 0] *= -1
-                n[:, 2] *= -1
+                # a tangent carries its handedness in a fourth component, which
+                # the rotation does not touch
+                if n.shape[1] == 4:
+                    n[:, :3] = n[:, :3] @ matrix.T
+                else:
+                    n = n @ matrix.T
                 views[nacc["bufferView"]] = n.astype("<f4").tobytes()
     return scale
 
@@ -304,6 +339,7 @@ def fit_of(entry):
         "y_min_cm": frame["y_min_cm"],
         "centre_x_cm": frame.get("centre_x_cm", 0.0),
         "centre_z_cm": frame.get("centre_z_cm", 0.0),
+        "turn_deg": frame.get("turn_deg", 0),
     }
 
 
@@ -313,7 +349,18 @@ def reconstruct(asset_id, seed=None, faces=None, out=None):
     sheet = os.path.join(ROOT, entry["turnaround_sheet"])
     out_path = out or os.path.join(ROOT, entry["glb_output"])
 
-    names = {v: upload(img, f"{asset_id}_view_{v}.png") for v, img in cut_sheet(sheet).items()}
+    views = cut_sheet(sheet)
+    if entry.get("validation", {}).get("frame", {}).get("upside_down"):
+        # The prop's approved art is drawn the other way up - a swordstick
+        # hanging from its pommel, a bat with its handle in the air - while the
+        # pivot puts the grip at the origin and the working end above it.
+        # The sheet is turned over before it is conditioned on, so the mesh and
+        # the textures baked from these same views both come out the right way
+        # up; turning the mesh over afterwards would leave the bake upside down
+        # on the surface.
+        views = {v: ImageOps.flip(img) for v, img in views.items()}
+        print(f"[Pixal3D] {asset_id} is built upside down: the sheet is turned over first")
+    names = {v: upload(img, f"{asset_id}_view_{v}.png") for v, img in views.items()}
     print(f"[Pixal3D] Uploaded the {', '.join(names)} views of {entry['turnaround_sheet']}")
     prefix = f"3d/pixal3d_{asset_id}"
     started = time.time()
