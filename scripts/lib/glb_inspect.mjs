@@ -183,6 +183,91 @@ function transformPoint(m, x, y, z) {
   ];
 }
 
+/** World transform per node: walk the scene graph from the roots. */
+function worldMatrices(json, problems = []) {
+  const world = new Array((json.nodes ?? []).length).fill(null);
+  const roots = json.scenes?.[json.scene ?? 0]?.nodes ?? (json.nodes ?? []).map((_, i) => i);
+  const visit = (nodeIndex, parent) => {
+    const m = multiply(parent ?? [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1], nodeMatrix(json.nodes[nodeIndex], problems, json.nodes[nodeIndex].name ?? `node ${nodeIndex}`));
+    world[nodeIndex] = m;
+    for (const child of json.nodes[nodeIndex].children ?? []) visit(child, m);
+  };
+  for (const root of roots) visit(root, null);
+  return world;
+}
+
+/**
+ * Every triangle of a .glb in world space, as a flat array of 9 numbers per
+ * triangle. Triangles with a non-finite corner are left out; inspectGlb
+ * already reports those.
+ */
+export function readWorldTriangles(file) {
+  const { json, bin } = parseGlb(fs.readFileSync(file));
+  const world = worldMatrices(json);
+  const out = [];
+  (json.nodes ?? []).forEach((node, nodeIndex) => {
+    const mesh = node.mesh === undefined ? null : json.meshes?.[node.mesh];
+    if (!mesh || !world[nodeIndex]) return;
+    for (const primitive of mesh.primitives ?? []) {
+      if (primitive.attributes?.POSITION === undefined) continue;
+      if (primitive.mode !== undefined && primitive.mode !== MODE_TRIANGLES) continue;
+      const { values, count } = readPositions(json, bin, primitive.attributes.POSITION);
+      const indices = primitive.indices !== undefined ? readAccessor(json, bin, primitive.indices).values : null;
+      const corners = indices ? indices.length : count;
+      for (let i = 0; i + 2 < corners; i += 3) {
+        const tri = [];
+        for (let c = 0; c < 3; c++) {
+          const v = indices ? indices[i + c] : i + c;
+          tri.push(...transformPoint(world[nodeIndex], values[v * 3], values[v * 3 + 1], values[v * 3 + 2]));
+        }
+        if (tri.every(Number.isFinite)) out.push(...tri);
+      }
+    }
+  });
+  return Float64Array.from(out);
+}
+
+/**
+ * How much surface (m^2) lies inside an axis-aligned box. Each triangle is
+ * sampled on a barycentric grid fine enough to resolve about 5 mm, so a
+ * large procedural face that only crosses the box counts for the part inside
+ * it, not all or nothing on its centroid.
+ */
+export function surfaceAreaInBox(triangles, box) {
+  const [x0, y0, z0] = box.min;
+  const [x1, y1, z1] = box.max;
+  let area = 0;
+  for (let t = 0; t < triangles.length; t += 9) {
+    const a = triangles.subarray(t, t + 3);
+    const b = triangles.subarray(t + 3, t + 6);
+    const c = triangles.subarray(t + 6, t + 9);
+    const tMin = [0, 1, 2].map((k) => Math.min(a[k], b[k], c[k]));
+    const tMax = [0, 1, 2].map((k) => Math.max(a[k], b[k], c[k]));
+    if (tMax[0] < x0 || tMin[0] > x1 || tMax[1] < y0 || tMin[1] > y1 || tMax[2] < z0 || tMin[2] > z1) continue;
+    const u = [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
+    const v = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
+    const cross = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
+    const triArea = Math.hypot(...cross) / 2;
+    if (!triArea) continue;
+    const longest = Math.max(Math.hypot(...u), Math.hypot(...v), Math.hypot(c[0] - b[0], c[1] - b[1], c[2] - b[2]));
+    const n = Math.min(64, Math.max(1, Math.ceil(longest / 0.005)));
+    // n^2 equal sub-triangles; each is represented by its centroid.
+    let inside = 0;
+    for (let i = 0; i < n; i++) {
+      for (let j = 0; i + j < n; j++) {
+        for (const [s, r] of i + j < n - 1 ? [[i + 1 / 3, j + 1 / 3], [i + 2 / 3, j + 2 / 3]] : [[i + 1 / 3, j + 1 / 3]]) {
+          const p0 = a[0] + (u[0] * s + v[0] * r) / n;
+          const p1 = a[1] + (u[1] * s + v[1] * r) / n;
+          const p2 = a[2] + (u[2] * s + v[2] * r) / n;
+          if (p0 >= x0 && p0 <= x1 && p1 >= y0 && p1 <= y1 && p2 >= z0 && p2 <= z1) inside++;
+        }
+      }
+    }
+    area += (triArea * inside) / (n * n);
+  }
+  return area;
+}
+
 /**
  * Inspect a .glb file on disk.
  * Returns triangle counts, a world-space bounding box, per-mesh detail and the
