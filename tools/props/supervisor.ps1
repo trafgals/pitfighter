@@ -132,8 +132,8 @@ Note "the supervisor is up as process $PID"
 while ($true) {
   if (WorkFinished) { Stand-Down }
   $card = ComfyCard
-  if ($card -and $card -notlike '*9070*') {
-    Note "ComfyUI is on '$card' rather than the discrete card; it is moved"
+  if ($card -and $card -like '*Radeon(TM) Graphics*') {
+    Note "ComfyUI is on '$card', the integrated card rather than the discrete one; it is moved"
     Get-CimInstance Win32_Process -Filter "Name='python.exe'" -ErrorAction SilentlyContinue |
       Where-Object { $_.CommandLine -like '*ComfyUI*main.py*' } |
       ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
