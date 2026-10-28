@@ -136,11 +136,17 @@ let server = null;
 let browser = null;
 const teardown = (code) => {
   try {
-    // Close the browser by hand: puppeteer's own close() shells out to
-    // taskkill, which complains loudly on stderr about processes that have
-    // already gone.
+    // Chrome and its helpers go down as a tree, and taskkill is loud about
+    // the ones that have already gone: it writes an ERROR line for each of
+    // them to stderr, so a run that passed every check used to end in a
+    // block of red noise that reads like a failure. A caller that only
+    // wants the checks cannot tell the two apart.
+    //
+    // The kill is synchronous and its output is piped, which keeps it off the
+    // console: spawnSync collects what taskkill said and gives it back as
+    // buffers nobody reads, and the tree is gone before the process exits.
     const child = browser?.process?.();
-    if (child?.pid) spawn("taskkill", ["/pid", String(child.pid), "/T", "/F"], { stdio: "ignore" });
+    if (child?.pid) spawnSync("taskkill", ["/pid", String(child.pid), "/T", "/F"], { stdio: "pipe" });
   } catch {}
   try {
     if (server) server.kill();

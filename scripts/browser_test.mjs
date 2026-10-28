@@ -437,23 +437,53 @@ async function main() {
   }
   // and the CPUs cash juggles out with their style's air grab, named on the banner
   const ag = await withTimeout(
-    page.evaluate(() => {
+    page.evaluate(async () => {
       const g = window.__game;
+      // The banner is read as the HUD shouts it, not after the fact. The HUD
+      // shouts every big moment and the game's own animation loop keeps
+      // running while this test drives the sim by hand, so a later shout can
+      // replace the grab's line before anything reads it: the grab happened
+      // and its name was on the screen, but a read that missed that moment
+      // would call a working game broken. Every text the banner takes is
+      // recorded instead, so the check asks whether the grab was named.
+      const banner = document.querySelector(".banner");
+      const shouted = [];
+      if (banner) {
+        new MutationObserver((records) => {
+          for (const record of records) {
+            if (record.type === "characterData") {
+              const text = record.target.textContent ?? "";
+              if (text) shouted.push(text);
+            }
+            for (const node of record.addedNodes) {
+              const text = node.textContent ?? "";
+              if (text) shouted.push(text);
+            }
+          }
+        }).observe(banner, { childList: true, characterData: true, subtree: true });
+      }
       let e = null;
       for (let i = 0; i < 5400 && g.mode === "match" && !e; i++) {
         g.step(1);
         g.world.fighters.forEach((f) => (f.toilet = Math.min(f.toilet, 600))); // keep the match going: no throne win while we look
         e = g.world.s.events.find((q) => q.kind === "airgrab") ?? null;
       }
-      return { what: e?.what ?? null, played: g.sfx.played.airgrab ?? 0, frame: g.world.s.frame };
+      // A timer, not a bare await: the observer's records are delivered in a
+      // microtask, and a task boundary drains the microtask queue before the
+      // timer fires, so what the banner said is in hand before the result is
+      // read. A promise tick would do too, but the task makes it obvious that
+      // the wait is for the delivery and not for the game.
+      await new Promise((r) => setTimeout(r, 0));
+      return { what: e?.what ?? null, shouted, played: g.sfx.played.airgrab ?? 0, frame: g.world.s.frame };
     }),
     40_000,
     "wait for an air grab",
   );
-  await new Promise((r) => setTimeout(r, 120));
-  const agBanner = await page.evaluate(() => document.querySelector(".banner")?.textContent ?? "");
   if (ag.what) await page.screenshot({ path: path.join(OUT, "7_airgrab.png") });
-  check(!!ag.what && agBanner.includes(ag.what), `a CPU cashed a juggle out with an air grab, named on the banner (${ag.what} at frame ${ag.frame}; banner "${agBanner}")`);
+  check(
+    !!ag.what && ag.shouted.some((text) => text.includes(ag.what)),
+    `a CPU cashed a juggle out with an air grab, named on the banner (${ag.what} at frame ${ag.frame}; banner said ${JSON.stringify(ag.shouted.slice(-3))})`,
+  );
   check(launch.who >= 0 && launch.played > 0, `the CPUs' strings launched someone, with sound (fighter ${launch.who} at frame ${launch.frame})`);
 
   // the end of the match: the winning KO slows time nearly to a stop, and the camera closes in on the body
