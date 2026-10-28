@@ -27,8 +27,6 @@
       },
       "reference_concept": "public/tex/characters/obadiah_winch.jpg",
       "alpha_cutout": "public/tex/props/flux3_winch_custodian_prop_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_custodian_helmet_turnaround.png",
-      "turntable": "docs/props/prop_winch_custodian_helmet/turntable.webp",
       "glb_output": "public/models/props/prop_winch_custodian_helmet.glb",
       "validation": {
         "rim_mesh": "Crown_Opening_Rim",
@@ -82,8 +80,6 @@
       },
       "reference_concept": "public/tex/characters/hezekiah_smelt.jpg",
       "alpha_cutout": "public/tex/props/flux3_smelt_stovepipe_elongated_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_smelt_stovepipe_turnaround.png",
-      "turntable": "docs/props/prop_smelt_stovepipe/turntable.webp",
       "glb_output": "public/models/props/prop_smelt_stovepipe.glb",
       "validation": {
         "rim_mesh": "Crown_Opening_Rim",
@@ -140,8 +136,6 @@
       },
       "reference_concept": "public/tex/characters/tabitha_pegg.png",
       "alpha_cutout": "public/tex/props/flux3_pegg_shoelast_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_pegg_shoelast_turnaround.png",
-      "turntable": "docs/props/prop_pegg_cast_iron_last/turntable.webp",
       "glb_output": "public/models/props/prop_pegg_cast_iron_last.glb",
       "build": null,
       "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md."
@@ -176,8 +170,6 @@
       "validate": "node scripts/capture_prop_renders.mjs prop_crape_spiked_brolly",
       "reference_concept": "public/tex/props/flux3_prop_crape_spiked_brolly_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_crape_brolly_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_crape_brolly_turnaround.png",
-      "turntable": "docs/props/prop_crape_spiked_brolly/turntable.webp",
       "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
       "stand_in_measured": {
         "triangles": 6184,
@@ -235,8 +227,6 @@
       "validate": "node scripts/capture_prop_renders.mjs prop_eleanor_weeping_rapier",
       "reference_concept": "public/tex/props/flux3_prop_eleanor_weeping_rapier_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_eleanor_rapier_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_eleanor_rapier_turnaround.png",
-      "turntable": "docs/props/prop_eleanor_weeping_rapier/turntable.webp",
       "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
       "stand_in_measured": {
         "triangles": 888,
@@ -294,8 +284,6 @@
       "validate": "node scripts/capture_prop_renders.mjs prop_tilly_clinker_tongs",
       "reference_concept": "public/tex/props/flux3_prop_tilly_clinker_tongs_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_tilly_tongs_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_tilly_tongs_turnaround.png",
-      "turntable": "docs/props/prop_tilly_clinker_tongs/turntable.webp",
       "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
       "stand_in_measured": {
         "triangles": 416,
@@ -353,8 +341,6 @@
       "validate": "node scripts/capture_prop_renders.mjs prop_sluice_flatcap",
       "reference_concept": "public/tex/props/flux3_prop_sluice_flatcap_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_sluice_flatcap_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_sluice_flatcap_turnaround.png",
-      "turntable": "docs/props/prop_sluice_flatcap/turntable.webp",
       "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
       "stand_in_measured": {
         "triangles": 272,
@@ -412,8 +398,6 @@
       "validate": "node scripts/capture_prop_renders.mjs prop_kilnworth_nursecap",
       "reference_concept": "public/tex/props/flux3_prop_kilnworth_nursecap_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_kilnworth_nursecap_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_kilnworth_nursecap_turnaround.png",
-      "turntable": "docs/props/prop_kilnworth_nursecap/turntable.webp",
       "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
       "stand_in_measured": {
         "triangles": 100,
@@ -471,8 +455,6 @@
       "validate": "node scripts/capture_prop_renders.mjs prop_mule_championship_belt",
       "reference_concept": "public/tex/props/flux3_prop_mule_championship_belt_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_mule_belt_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_mule_belt_turnaround.png",
-      "turntable": "docs/props/prop_mule_championship_belt/turntable.webp",
       "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
       "stand_in_measured": {
         "triangles": 732,
@@ -530,8 +512,6 @@
       "validate": "node scripts/capture_prop_renders.mjs prop_rook_souwester",
       "reference_concept": "public/tex/props/flux3_prop_rook_souwester_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_rook_souwester_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_rook_souwester_turnaround.png",
-      "turntable": "docs/props/prop_rook_souwester/turntable.webp",
       "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
       "stand_in_measured": {
         "triangles": 856,
@@ -589,8 +569,6 @@
       "validate": "node scripts/capture_prop_renders.mjs prop_bulwark_pistons",
       "reference_concept": "public/tex/props/flux3_prop_bulwark_pistons_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_bulwark_pistons_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_bulwark_pistons_turnaround.png",
-      "turntable": "docs/props/prop_bulwark_pistons/turntable.webp",
       "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
       "stand_in_measured": {
         "triangles": 216,
@@ -648,8 +626,6 @@
       "validate": "node scripts/capture_prop_renders.mjs prop_crump_samovar",
       "reference_concept": "public/tex/props/flux3_prop_crump_samovar_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_crump_samovar_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_crump_samovar_turnaround.png",
-      "turntable": "docs/props/prop_crump_samovar/turntable.webp",
       "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
       "stand_in_measured": {
         "triangles": 192,
@@ -707,8 +683,6 @@
       "validate": "node scripts/capture_prop_renders.mjs weapon_knuckleduster",
       "reference_concept": "public/tex/props/flux3_weapon_knuckleduster_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_knuckleduster_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_knuckleduster_turnaround.png",
-      "turntable": "docs/props/weapon_knuckleduster/turntable.webp",
       "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
       "stand_in_measured": {
         "triangles": 1344,
@@ -766,8 +740,6 @@
       "validate": "node scripts/capture_prop_renders.mjs weapon_coal_shovel",
       "reference_concept": "public/tex/props/flux3_weapon_coal_shovel_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_coal_shovel_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_coal_shovel_turnaround.png",
-      "turntable": "docs/props/weapon_coal_shovel/turntable.webp",
       "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
       "stand_in_measured": {
         "triangles": 396,
@@ -825,8 +797,6 @@
       "validate": "node scripts/capture_prop_renders.mjs weapon_bone_saw",
       "reference_concept": "public/tex/props/flux3_weapon_bone_saw_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_bone_saw_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_bone_saw_turnaround.png",
-      "turntable": "docs/props/weapon_bone_saw/turntable.webp",
       "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
       "stand_in_measured": {
         "triangles": 88,
@@ -884,8 +854,6 @@
       "validate": "node scripts/capture_prop_renders.mjs weapon_nail_bat",
       "reference_concept": "public/tex/props/flux3_weapon_nail_bat_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_nail_bat_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_nail_bat_turnaround.png",
-      "turntable": "docs/props/weapon_nail_bat/turntable.webp",
       "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
       "stand_in_measured": {
         "triangles": 220,
@@ -943,8 +911,6 @@
       "validate": "node scripts/capture_prop_renders.mjs weapon_cleaver",
       "reference_concept": "public/tex/props/flux3_weapon_cleaver_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_cleaver_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_cleaver_turnaround.png",
-      "turntable": "docs/props/weapon_cleaver/turntable.webp",
       "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
       "stand_in_measured": {
         "triangles": 76,
@@ -1002,8 +968,6 @@
       "validate": "node scripts/capture_prop_renders.mjs weapon_piston_gauntlet",
       "reference_concept": "public/tex/props/flux3_weapon_piston_gauntlet_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_piston_gauntlet_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_piston_gauntlet_turnaround.png",
-      "turntable": "docs/props/weapon_piston_gauntlet/turntable.webp",
       "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
       "stand_in_measured": {
         "triangles": 156,
@@ -1061,8 +1025,6 @@
       "validate": "node scripts/capture_prop_renders.mjs weapon_lamplighter_pole",
       "reference_concept": "public/tex/props/flux3_weapon_lamplighter_pole_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_lamplighter_pole_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_lamplighter_pole_turnaround.png",
-      "turntable": "docs/props/weapon_lamplighter_pole/turntable.webp",
       "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
       "stand_in_measured": {
         "triangles": 384,
@@ -1230,8 +1192,6 @@
       "validate": "node scripts/capture_prop_renders.mjs pickup_tonic",
       "reference_concept": "public/tex/props/flux3_pickup_tonic_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_tonic_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_tonic_turnaround.png",
-      "turntable": "docs/props/pickup_tonic/turntable.webp",
       "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
       "stand_in_measured": {
         "triangles": 200,

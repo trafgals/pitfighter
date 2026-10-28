@@ -109,7 +109,7 @@ const closeupFocus = validation.closeup_focus
   : (closeupMeshName ?? "");
 
 const VIEWS = [
-  { name: "front", label: "Front (0deg, badge to camera)" },
+  { name: "front", label: "Front (0deg, +Z to camera)" },
   { name: "profile", label: "Profile (90deg, right side)" },
   { name: "badge", label: closeupLabel },
 ];

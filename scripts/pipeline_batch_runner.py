@@ -28,11 +28,13 @@ from PIL import Image
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 STATE_FILE = os.path.join(ROOT, "data", "pipeline_batch_state.json")
 LOG_FILE = os.path.join(ROOT, "logs", "pipeline_batch.log")
-COMFY_HOST = "http://127.0.0.1:8188"
-COMFY_INPUT = r"C:\Users\dimit\Documents\comfy\ComfyUI_windows_portable_amd\ComfyUI\input"
-COMFY_OUTPUT = r"C:\Users\dimit\Documents\comfy\ComfyUI_windows_portable_amd\ComfyUI\output"
-COMFY_PYTHON = r"C:\Users\dimit\Documents\comfy\ComfyUI_windows_portable_amd\python_embeded\python.exe"
-COMFY_MAIN = r"C:\Users\dimit\Documents\comfy\ComfyUI_windows_portable_amd\ComfyUI\main.py"
+# the ComfyUI install: set COMFY_ROOT (the portable folder) on a machine other than the one this was built on
+COMFY_HOST = os.environ.get("COMFY_HOST", "http://127.0.0.1:8188")
+COMFY_ROOT = os.environ.get("COMFY_ROOT", r"C:\Users\dimit\Documents\comfy\ComfyUI_windows_portable_amd")
+COMFY_INPUT = os.path.join(COMFY_ROOT, "ComfyUI", "input")
+COMFY_OUTPUT = os.path.join(COMFY_ROOT, "ComfyUI", "output")
+COMFY_PYTHON = os.path.join(COMFY_ROOT, "python_embeded", "python.exe")
+COMFY_MAIN = os.path.join(COMFY_ROOT, "ComfyUI", "main.py")
 
 os.makedirs(os.path.join(ROOT, "logs"), exist_ok=True)
 os.makedirs(os.path.join(ROOT, "public", "tex", "props"), exist_ok=True)
@@ -63,7 +65,6 @@ DEFAULT_QUEUE = [
         "turnaround_file": "public/tex/props/h3_pegg_shoelast_turnaround.png",
         "turntable_file": "docs/props/prop_pegg_cast_iron_last/turntable.webp",
         "glb_file": "public/models/props/prop_pegg_cast_iron_last.glb",
-        "build_cmd": "node scripts/build_prop_pegg_cast_iron_last.mjs",
         "prompt": "Authentic Victorian cobbler cast-iron foot shoe last bludgeon, calibrated brass rule plate with imperial markings, knurled thumbscrew, cordovan leather grip, isolated on white background.",
     },
     {
@@ -78,7 +79,6 @@ DEFAULT_QUEUE = [
         "turnaround_file": "public/tex/props/h3_crape_brolly_turnaround.png",
         "turntable_file": "docs/props/prop_crape_spiked_brolly/turntable.webp",
         "glb_file": "public/models/props/prop_crape_spiked_brolly.glb",
-        "build_cmd": "node scripts/build_prop_crape_spiked_brolly.mjs",
         "prompt": "Victorian gentleman's heavy mourning black silk umbrella, long sharpened steel mortuary ferrule spike, carved whalebone crook handle inlaid with faceted jet beads, brass ribs, isolated on solid white background.",
     },
     {
@@ -93,7 +93,6 @@ DEFAULT_QUEUE = [
         "turnaround_file": "public/tex/props/h3_eleanor_rapier_turnaround.png",
         "turntable_file": "docs/props/prop_eleanor_weeping_rapier/turntable.webp",
         "glb_file": "public/models/props/prop_eleanor_weeping_rapier.glb",
-        "build_cmd": "node scripts/build_prop_eleanor_weeping_rapier.mjs",
         "prompt": "Elegantly carved Victorian malacca walking cane swordstick, polished sterling silver crying maiden head pommel, concealed razor-sharp hollow-ground blued steel rapier blade, isolated on solid white background.",
     },
     {
@@ -108,7 +107,6 @@ DEFAULT_QUEUE = [
         "turnaround_file": "public/tex/props/h3_tilly_tongs_turnaround.png",
         "turntable_file": "docs/props/prop_tilly_clinker_tongs/turntable.webp",
         "glb_file": "public/models/props/prop_tilly_clinker_tongs.glb",
-        "build_cmd": "node scripts/build_prop_tilly_clinker_tongs.mjs",
         "prompt": "Heavy industrial boiler furnace clinker tongs, pitted blackened cast iron, double scissor pivot joint, clawed serrated clamping jaws, heat-wrapped asbestos grip, glowing coal ember flecks, isolated on solid white background.",
     },
     {
@@ -123,7 +121,6 @@ DEFAULT_QUEUE = [
         "turnaround_file": "public/tex/props/h3_sluice_flatcap_turnaround.png",
         "turntable_file": "docs/props/prop_sluice_flatcap/turntable.webp",
         "glb_file": "public/models/props/prop_sluice_flatcap.glb",
-        "build_cmd": "node scripts/build_prop_sluice_flatcap.mjs",
         "prompt": "Authentic waterlogged Victorian street mudlark tweed flatcap, coarse herringbone wool, stiff curved peak brim, tarnished copper wire brim repair, oilcloth lining, isolated on solid white background.",
     },
     {
@@ -138,7 +135,6 @@ DEFAULT_QUEUE = [
         "turnaround_file": "public/tex/props/h3_kilnworth_nursecap_turnaround.png",
         "turntable_file": "docs/props/prop_kilnworth_nursecap/turntable.webp",
         "glb_file": "public/models/props/prop_kilnworth_nursecap.glb",
-        "build_cmd": "node scripts/build_prop_kilnworth_nursecap.mjs",
         "prompt": "Severe Victorian starched white linen field nurse head bonnet cap, folded triangular crown, crimson embroidered Geneva cross emblem, bone sewing pins, clean stiff folds, isolated on solid white background.",
     },
     {
@@ -153,7 +149,6 @@ DEFAULT_QUEUE = [
         "turnaround_file": "public/tex/props/h3_mule_belt_turnaround.png",
         "turntable_file": "docs/props/prop_mule_championship_belt/turntable.webp",
         "glb_file": "public/models/props/prop_mule_championship_belt.glb",
-        "build_cmd": "node scripts/build_prop_mule_championship_belt.mjs",
         "prompt": "Massive Victorian bare-knuckle prize fighting championship belt, heavy oval embossed gold plate engraved with fighting bears and floral filigree, thick studded oxblood leather strap, brass buckles, isolated on solid white background.",
     },
     {
@@ -168,7 +163,6 @@ DEFAULT_QUEUE = [
         "turnaround_file": "public/tex/props/h3_rook_souwester_turnaround.png",
         "turntable_file": "docs/props/prop_rook_souwester/turntable.webp",
         "glb_file": "public/models/props/prop_rook_souwester.glb",
-        "build_cmd": "node scripts/build_prop_rook_souwester.mjs",
         "prompt": "Traditional 19th-century heavy tarpaulin oilskin sailor sou'wester hat, deep rear neck flap, upturned front brim, brass chin strap eyelets, salty sea-weathered patina, isolated on solid white background.",
     },
     {
@@ -183,7 +177,6 @@ DEFAULT_QUEUE = [
         "turnaround_file": "public/tex/props/h3_bulwark_pistons_turnaround.png",
         "turntable_file": "docs/props/prop_bulwark_pistons/turntable.webp",
         "glb_file": "public/models/props/prop_bulwark_pistons.glb",
-        "build_cmd": "node scripts/build_prop_bulwark_pistons.mjs",
         "prompt": "Victorian steampunk hydraulic forearm bracers, polished blued steel hydraulic rams, braided red rubber pressure hoses, miniature circular brass pressure gauge with needle, filigree mounting cuffs, isolated on solid white background.",
     },
     {
@@ -198,7 +191,6 @@ DEFAULT_QUEUE = [
         "turnaround_file": "public/tex/props/h3_crump_samovar_turnaround.png",
         "turntable_file": "docs/props/prop_crump_samovar/turntable.webp",
         "glb_file": "public/models/props/prop_crump_samovar.glb",
-        "build_cmd": "node scripts/build_prop_crump_samovar.mjs",
         "prompt": "Miniature Victorian brass Russian tea samovar back-boiler harness, polished copper urn boiler, twin brass spigots, steam safety whistle valve, leather shoulder straps, isolated on solid white background.",
     },
 
@@ -215,7 +207,6 @@ DEFAULT_QUEUE = [
         "turnaround_file": "public/tex/props/h3_knuckleduster_turnaround.png",
         "turntable_file": "docs/props/weapon_knuckleduster/turntable.webp",
         "glb_file": "public/models/props/weapon_knuckleduster.glb",
-        "build_cmd": "node scripts/build_weapon_knuckleduster.mjs",
         "prompt": "Heavy Victorian solid brass knuckleduster, four oval finger loops, curved palm grip engraved with coat of arms crest, polished brass with dark patina in grooves, isolated on white background.",
     },
     {
@@ -230,7 +221,6 @@ DEFAULT_QUEUE = [
         "turnaround_file": "public/tex/props/h3_coal_shovel_turnaround.png",
         "turntable_file": "docs/props/weapon_coal_shovel/turntable.webp",
         "glb_file": "public/models/props/weapon_coal_shovel.glb",
-        "build_cmd": "node scripts/build_weapon_coal_shovel.mjs",
         "prompt": "Long-handled heavy forged iron coal shovel, wide scoop blade worn sharp along lip, ash wood D-grip handle, heat-darkened metal with glowing coal dust flecks, isolated on white background.",
     },
     {
@@ -245,7 +235,6 @@ DEFAULT_QUEUE = [
         "turnaround_file": "public/tex/props/h3_bone_saw_turnaround.png",
         "turntable_file": "docs/props/weapon_bone_saw/turntable.webp",
         "glb_file": "public/models/props/weapon_bone_saw.glb",
-        "build_cmd": "node scripts/build_weapon_bone_saw.mjs",
         "prompt": "19th-century amputation bone saw, polished carved ivory pistol grip handle, nickel-plated steel frame, fine serrated cross-cut surgical blade, isolated on solid white background.",
     },
     {
@@ -260,7 +249,6 @@ DEFAULT_QUEUE = [
         "turnaround_file": "public/tex/props/h3_nail_bat_turnaround.png",
         "turntable_file": "docs/props/weapon_nail_bat/turntable.webp",
         "glb_file": "public/models/props/weapon_nail_bat.glb",
-        "build_cmd": "node scripts/build_weapon_nail_bat.mjs",
         "prompt": "Traditional English willow cricket bat driven through with rusty square iron horseshoe nails, cane handle wrapped in black cord, oiled wood grain, isolated on solid white background.",
     },
     {
@@ -275,7 +263,6 @@ DEFAULT_QUEUE = [
         "turnaround_file": "public/tex/props/h3_cleaver_turnaround.png",
         "turntable_file": "docs/props/weapon_cleaver/turntable.webp",
         "glb_file": "public/models/props/weapon_cleaver.glb",
-        "build_cmd": "node scripts/build_weapon_cleaver.mjs",
         "prompt": "Heavy Victorian meat meat cleaver from Smithfield meat market, rectangular carbon steel blade with round hanging hole, brass-pinned walnut scales handle, isolated on solid white background.",
     },
     {
@@ -290,7 +277,6 @@ DEFAULT_QUEUE = [
         "turnaround_file": "public/tex/props/h3_piston_gauntlet_turnaround.png",
         "turntable_file": "docs/props/weapon_piston_gauntlet/turntable.webp",
         "glb_file": "public/models/props/weapon_piston_gauntlet.glb",
-        "build_cmd": "node scripts/build_weapon_piston_gauntlet.mjs",
         "prompt": "Heavy steampunk steam gauntlet with spring-loaded steel ram over knuckles, miniature forearm boiler canister, brass exhaust pressure ports, leather strapping, isolated on solid white background.",
     },
     {
@@ -305,7 +291,6 @@ DEFAULT_QUEUE = [
         "turnaround_file": "public/tex/props/h3_lamplighter_pole_turnaround.png",
         "turntable_file": "docs/props/weapon_lamplighter_pole/turntable.webp",
         "glb_file": "public/models/props/weapon_lamplighter_pole.glb",
-        "build_cmd": "node scripts/build_weapon_lamplighter_pole.mjs",
         "prompt": "Long brass-tipped Victorian street lamplighter pole, curved gas-cock shutoff hook at tip, brass oil lamp wick canister, dark ash wood shaft, isolated on solid white background.",
     },
     {
@@ -336,7 +321,6 @@ DEFAULT_QUEUE = [
         "turnaround_file": "public/tex/props/h3_tonic_turnaround.png",
         "turntable_file": "docs/props/pickup_tonic/turntable.webp",
         "glb_file": "public/models/props/pickup_tonic.glb",
-        "build_cmd": "node scripts/build_pickup_tonic.mjs",
         "prompt": "Victorian apothecary elixir bottle, ribbed emerald green glass, wax-sealed cork stopper, stained paper prescription label with engraved apothecary crest, glowing amber fluid inside, isolated on white background.",
     },
 ]
@@ -344,6 +328,14 @@ DEFAULT_QUEUE = [
 # ---------------------------------------------------------------------------
 # State Management (Atomic & Resumable)
 # ---------------------------------------------------------------------------
+
+def fresh_stages(item):
+    return {
+        "stage_1_alpha": {"status": "pending", "output": item["alpha_file"]},
+        "stage_2_turnaround": {"status": "pending", "output": item["turnaround_file"]},
+        "stage_3_glb": {"status": "pending", "output": item["glb_file"]},
+        "stage_4_validate": {"status": "pending", "output": f"docs/props/{item['id']}/report.json"},
+    }
 
 def load_state():
     if os.path.exists(STATE_FILE):
@@ -356,6 +348,10 @@ def load_state():
             for i, item in enumerate(state.get("items", [])):
                 if item["id"] in queue:
                     state["items"][i] = {**queue[item["id"]], "stages": item["stages"]}
+            tracked = {item["id"] for item in state.get("items", [])}
+            for item in DEFAULT_QUEUE:
+                if item["id"] not in tracked:
+                    state["items"].append({**item, "stages": fresh_stages(item)})
             return state
         except Exception as e:
             log(f"Warning: Corrupt state file ({e}), backing up and creating fresh queue.")
@@ -372,12 +368,7 @@ def load_state():
     for item in DEFAULT_QUEUE:
         state["items"].append({
             **item,
-            "stages": {
-                "stage_1_alpha": {"status": "pending", "output": item["alpha_file"]},
-                "stage_2_turnaround": {"status": "pending", "output": item["turnaround_file"]},
-                "stage_3_glb": {"status": "pending", "output": item["glb_file"]},
-                "stage_4_validate": {"status": "pending", "output": f"docs/props/{item['id']}/report.json"},
-            }
+            "stages": fresh_stages(item),
         })
     save_state(state)
     return state
@@ -448,10 +439,11 @@ def run_stage_1_alpha(item):
         ensure_comfyui()
         log(f"  [Stage 1 Alpha] Generating {item['id']} via FLUX 3 on RX 9070 XT...")
         script = os.path.join(ROOT, ".agents", "skills", "character-3d-pipeline", "scripts", "generate_character_flux3.py")
-        if os.path.exists(script):
-            cmd = [sys.executable, script, item["prompt"], item["id"], os.path.join(ROOT, "public", "tex", "props")]
-            subprocess.run(cmd, check=True)
-            raw_img = next((f for f in raw_candidates if os.path.exists(f) and os.path.getsize(f) > 10000), None)
+        if not os.path.exists(script):
+            raise FileNotFoundError(f"No concept for {item['id']} and no generator at {script}")
+        cmd = [sys.executable, script, item["prompt"], item["id"], os.path.join(ROOT, "public", "tex", "props")]
+        subprocess.run(cmd, check=True)
+        raw_img = next((f for f in raw_candidates if os.path.exists(f) and os.path.getsize(f) > 10000), None)
 
     if raw_img and (not os.path.exists(alpha_path) or os.path.getsize(alpha_path) < 10000):
         log(f"  [Stage 1 Alpha] Running rembg background isolation on {raw_img} -> {alpha_path}...")
@@ -460,11 +452,20 @@ def run_stage_1_alpha(item):
 
     return os.path.exists(alpha_path)
 
+def sheet_ok(path):
+    """True for a readable four-view sheet: four square tiles side by side."""
+    try:
+        with Image.open(path) as im:
+            im.load()
+            return im.width == 4 * im.height
+    except Exception:
+        return False
+
 def run_stage_2_turnaround(item):
     """Generate MiniMax H3 4-view orthographic turnaround and turntable webp."""
     turnaround_path = os.path.join(ROOT, item["turnaround_file"])
     turntable_path = os.path.join(ROOT, item["turntable_file"])
-    if os.path.exists(turnaround_path) and os.path.exists(turntable_path):
+    if sheet_ok(turnaround_path) and os.path.exists(turntable_path):
         log(f"  [Stage 2 Turnaround] Already exists: {item['turnaround_file']}")
         return True
 
@@ -479,7 +480,7 @@ def run_stage_2_turnaround(item):
     if item.get("symmetric"):
         cmd.append("--symmetric")
     subprocess.run(cmd, check=True)
-    return os.path.exists(turnaround_path)
+    return sheet_ok(turnaround_path)
 
 def run_stage_3_glb(item):
     """Generate production 3D binary GLB mesh."""
@@ -502,11 +503,6 @@ def run_stage_3_glb(item):
 
 def run_stage_4_validate(item):
     """Execute headless Chrome validation and report generation."""
-    report_path = os.path.join(ROOT, f"docs/props/{item['id']}/report.json")
-    if os.path.exists(report_path):
-        log(f"  [Stage 4 Validate] Already validated: {report_path}")
-        return True
-
     log(f"  [Stage 4 Validate] Running headless verification on {item['id']}...")
     validate_cmd = f"node scripts/capture_prop_renders.mjs {item['id']}"
     res = subprocess.run(validate_cmd, shell=True, cwd=ROOT)
@@ -524,10 +520,19 @@ def run_stage_4_validate(item):
 # Main Orchestrator Loop
 # ---------------------------------------------------------------------------
 
+STAGES = [
+    ("stage_1_alpha", run_stage_1_alpha),
+    ("stage_2_turnaround", run_stage_2_turnaround),
+    ("stage_3_glb", run_stage_3_glb),
+    ("stage_4_validate", run_stage_4_validate),
+]
+
 def process_queue():
+    """Run every item's stages in order. Returns the ids of the items that failed."""
     state = load_state()
     total = len(state["items"])
     log(f"Starting execution of {total} queue items (resumable mode active)...")
+    failed = []
 
     for idx, item in enumerate(state["items"]):
         item_id = item["id"]
@@ -538,73 +543,33 @@ def process_queue():
         state["active_id"] = item_id
         save_state(state)
 
-        # Stage 1: Alpha Cutout
-        if stages["stage_1_alpha"]["status"] != "completed":
-            stages["stage_1_alpha"]["status"] = "running"
+        for name, run in STAGES:
+            stage = stages[name]
+            if stage["status"] == "completed":
+                continue
+            stage["status"] = "running"
+            stage.pop("error", None)
             save_state(state)
             try:
-                run_stage_1_alpha(item)
-                stages["stage_1_alpha"]["status"] = "completed"
-                stages["stage_1_alpha"]["completed_at"] = datetime.now().isoformat()
-                save_state(state)
+                if not run(item):
+                    raise RuntimeError(f"{name} finished without its output")
+                stage["status"] = "completed"
+                stage["completed_at"] = datetime.now().isoformat()
             except Exception as e:
-                stages["stage_1_alpha"]["status"] = "failed"
-                stages["stage_1_alpha"]["error"] = str(e)
-                save_state(state)
-                log(f"ERROR in Stage 1 for {item_id}: {e}")
-                continue
-
-        # Stage 2: MiniMax H3 Turnaround
-        if stages["stage_2_turnaround"]["status"] != "completed":
-            stages["stage_2_turnaround"]["status"] = "running"
+                stage["status"] = "failed"
+                stage["error"] = str(e)
+                log(f"ERROR in {name} for {item_id}: {e}")
             save_state(state)
-            try:
-                run_stage_2_turnaround(item)
-                stages["stage_2_turnaround"]["status"] = "completed"
-                stages["stage_2_turnaround"]["completed_at"] = datetime.now().isoformat()
-                save_state(state)
-            except Exception as e:
-                stages["stage_2_turnaround"]["status"] = "failed"
-                stages["stage_2_turnaround"]["error"] = str(e)
-                save_state(state)
-                log(f"ERROR in Stage 2 for {item_id}: {e}")
-                continue
-
-        # Stage 3: 3D GLB Synthesis
-        if stages["stage_3_glb"]["status"] != "completed":
-            stages["stage_3_glb"]["status"] = "running"
-            save_state(state)
-            try:
-                run_stage_3_glb(item)
-                stages["stage_3_glb"]["status"] = "completed"
-                stages["stage_3_glb"]["completed_at"] = datetime.now().isoformat()
-                save_state(state)
-            except Exception as e:
-                stages["stage_3_glb"]["status"] = "failed"
-                stages["stage_3_glb"]["error"] = str(e)
-                save_state(state)
-                log(f"ERROR in Stage 3 for {item_id}: {e}")
-                continue
-
-        # Stage 4: Headless Validation
-        if stages["stage_4_validate"]["status"] != "completed":
-            stages["stage_4_validate"]["status"] = "running"
-            save_state(state)
-            try:
-                run_stage_4_validate(item)
-                stages["stage_4_validate"]["status"] = "completed"
-                stages["stage_4_validate"]["completed_at"] = datetime.now().isoformat()
-                save_state(state)
-            except Exception as e:
-                stages["stage_4_validate"]["status"] = "failed"
-                stages["stage_4_validate"]["error"] = str(e)
-                save_state(state)
-                log(f"ERROR in Stage 4 for {item_id}: {e}")
-                continue
-
-        log(f"COMPLETED ALL 4 STAGES for: {item_id}")
+            if stage["status"] == "failed":
+                failed.append(item_id)
+                break
+        else:
+            log(f"COMPLETED ALL 4 STAGES for: {item_id}")
 
     log("\nMaster 3D Asset Batch Pipeline Run Finished!")
+    if failed:
+        log(f"{len(failed)} item(s) failed: {', '.join(failed)}")
+    return failed
 
 if __name__ == "__main__":
-    process_queue()
+    sys.exit(1 if process_queue() else 0)

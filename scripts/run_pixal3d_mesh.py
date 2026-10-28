@@ -113,15 +113,22 @@ def build_workflow(names, prefix, seed=None, faces=None):
     return wf
 
 
-def run(wf):
-    """Queue a workflow and return its history entry once it has finished."""
+def run(wf, deadline_s=3600):
+    """Queue a workflow and return its history entry once it has finished.
+
+    A reconstruction takes about 8 minutes; an hour without a result means
+    ComfyUI lost the prompt (a restart, say), so give up rather than wait forever.
+    """
     req = urllib.request.Request(f"{COMFY_HOST}/prompt", data=json.dumps({"prompt": wf}).encode(),
                                  headers={"Content-Type": "application/json"})
-    prompt_id = json.loads(urllib.request.urlopen(req).read())["prompt_id"]
+    prompt_id = json.loads(urllib.request.urlopen(req, timeout=60).read())["prompt_id"]
     print(f"[Pixal3D] Queued {prompt_id}")
+    give_up = time.time() + deadline_s
     while True:
+        if time.time() > give_up:
+            raise TimeoutError(f"ComfyUI gave no result for {prompt_id} in {deadline_s} s")
         time.sleep(4)
-        hist = json.loads(urllib.request.urlopen(f"{COMFY_HOST}/history/{prompt_id}").read())
+        hist = json.loads(urllib.request.urlopen(f"{COMFY_HOST}/history/{prompt_id}", timeout=60).read())
         if prompt_id in hist:
             entry = hist[prompt_id]
             if entry["status"].get("status_str") == "error":

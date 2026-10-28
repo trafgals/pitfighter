@@ -26,50 +26,35 @@ about 1 m tall, 12 MB, and fails most checks. The script does the placing.
 
 ComfyUI: `127.0.0.1:8188`, AMD RX 9070 XT, one GPU, so **one job at a time**.
 
-## Step 1: re-cut the sheets — no GPU needed
+## Step 1: render a fresh H3 clip and sheet per prop
 
-The 20 original H3 clips are still in ComfyUI's output folder, 124 frames
-each. Re-cut them instead of re-rendering (a new H3 clip costs about 20 min):
+The old sheets and turntables have been deleted: they were cut at the wrong
+angles, and several old clips turn only a quarter of the way round or break
+up past the side (bulwark pistons, knuckleduster, piston gauntlet). Each of
+the 20 props gets a new clip from its alpha cutout (about 20 minutes each):
 
 ```bash
-python scripts/run_minimax_h3_turnaround.py - <turnaround_sheet> --from-frames h3_turntable_frames_NNNNN_.png [--symmetric]
+python scripts/run_minimax_h3_turnaround.py <alpha_cutout> public/tex/props/h3_<name>_turnaround.png --preview docs/props/<id>/turntable.webp [--symmetric]
 ```
 
-| asset | first frame |
-|---|---|
-| prop_winch_custodian_helmet | 00001 |
-| prop_smelt_stovepipe | 00125 |
-| prop_pegg_cast_iron_last | 00249 |
-| prop_crape_spiked_brolly | 00373 |
-| prop_eleanor_weeping_rapier | 00497 |
-| prop_tilly_clinker_tongs | 00621 |
-| prop_sluice_flatcap | 00745 |
-| prop_kilnworth_nursecap | 00869 |
-| prop_mule_championship_belt | 00993 |
-| prop_rook_souwester | 01117 |
-| prop_bulwark_pistons | 01241 |
-| prop_crump_samovar | 01365 |
-| weapon_knuckleduster | 01489 |
-| weapon_coal_shovel | 01613 |
-| weapon_bone_saw | 01737 |
-| weapon_nail_bat | 01861 |
-| weapon_cleaver | 01985 |
-| weapon_piston_gauntlet | 02109 |
-| weapon_lamplighter_pole | 02233 |
-| weapon_chair (reference) | 02357 |
-| pickup_tonic | 02481 |
-
-**Check the first frame of each clip matches the prop before cutting** — the
-numbering is inferred from the order the batch ran in. If it doesn't, find
-the clip by eye; if a clip is missing, render a new one with the same script
-without `--from-frames`.
+Use the `turnaround_file` and `turntable_file` paths the prop has in
+`scripts/pipeline_batch_runner.py`'s queue, then set the manifest entry's
+`turnaround_sheet` and `turntable` to them (`run_pixal3d_mesh.py` reads the
+sheet from the manifest).
 
 `--symmetric`: pass it only when the prop's left and right are mirror images
 (helmet, caps, shovel, bat, pole, chair). H3 turns about 240° in 124 frames,
 so without it the right view is left out and Pixal3D works from three. The
-script refuses a clip that never reaches the back; re-render that one.
+script refuses a clip that never reaches the back; re-render that one with
+another `--seed`.
 
-Look at every sheet. Front, side, back, side, in that order, same object.
+**Look at every clip and sheet** before going on: front, side, back, side, in
+that order, the same object throughout, no speckle or see-through parts.
+Reject and re-render rather than build from a bad sheet.
+
+`--from-frames <first frame>` re-cuts a clip already in ComfyUI's output
+without the GPU, e.g. to try a different `--symmetric` choice on a new clip.
+Don't use it on the clips from before this hand-off.
 
 ## Step 2: give each asset a frame
 
