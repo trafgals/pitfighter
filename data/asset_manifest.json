@@ -129,7 +129,7 @@
         "height": 52,
         "depth": 51
       },
-      "status": "gate:2-review-turnaround",
+      "status": "gate:2-rebuild-pixal3d",
       "pivot": {
         "convention": "grip_normalized",
         "origin": "the handle grip: the origin sits at the centre of the cordovan leather-wrapped grip handle, on the grip's axis",
@@ -142,7 +142,9 @@
       "alpha_cutout": "public/tex/props/flux3_pegg_shoelast_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_pegg_shoelast_turnaround.png",
       "turntable": "docs/props/prop_pegg_cast_iron_last/turntable.webp",
-      "glb_output": "public/models/props/prop_pegg_cast_iron_last.glb"
+      "glb_output": "public/models/props/prop_pegg_cast_iron_last.glb",
+      "build": null,
+      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md."
     },
     {
       "id": "prop_crape_spiked_brolly",
@@ -157,7 +159,7 @@
         "height": 91.9,
         "depth": 11.9
       },
-      "status": "gate:3-review-ingame-3d",
+      "status": "gate:2-rebuild-pixal3d",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -170,7 +172,14 @@
         "rim_mesh": "Crown_Opening_Rim",
         "view_fit": 0.3
       },
-      "measured": {
+      "build": null,
+      "validate": "node scripts/capture_prop_renders.mjs prop_crape_spiked_brolly",
+      "reference_concept": "public/tex/props/flux3_prop_crape_spiked_brolly_00001_.png",
+      "alpha_cutout": "public/tex/props/flux3_crape_brolly_alpha.png",
+      "turnaround_sheet": "public/tex/props/h3_crape_brolly_turnaround.png",
+      "turntable": "docs/props/prop_crape_spiked_brolly/turntable.webp",
+      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
+      "stand_in_measured": {
         "triangles": 6184,
         "bytes": 346924,
         "bbox_min_cm": [
@@ -186,13 +195,7 @@
         "meshes": 15,
         "materials": 5,
         "embedded_images": 4
-      },
-      "build": "node scripts/build_prop_crape_spiked_brolly.mjs",
-      "validate": "node scripts/capture_prop_renders.mjs prop_crape_spiked_brolly",
-      "reference_concept": "public/tex/props/flux3_prop_crape_spiked_brolly_00001_.png",
-      "alpha_cutout": "public/tex/props/flux3_crape_brolly_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_crape_brolly_turnaround.png",
-      "turntable": "docs/props/prop_crape_spiked_brolly/turntable.webp"
+      }
     },
     {
       "id": "prop_eleanor_weeping_rapier",
@@ -207,7 +210,7 @@
         "height": 96.2,
         "depth": 4.4
       },
-      "status": "gate:3-review-ingame-3d",
+      "status": "gate:2-rebuild-pixal3d",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -228,7 +231,14 @@
         "closeup_label": "Silver maiden pommel close-up",
         "view_fit": 0.52
       },
-      "measured": {
+      "build": null,
+      "validate": "node scripts/capture_prop_renders.mjs prop_eleanor_weeping_rapier",
+      "reference_concept": "public/tex/props/flux3_prop_eleanor_weeping_rapier_00001_.png",
+      "alpha_cutout": "public/tex/props/flux3_eleanor_rapier_alpha.png",
+      "turnaround_sheet": "public/tex/props/h3_eleanor_rapier_turnaround.png",
+      "turntable": "docs/props/prop_eleanor_weeping_rapier/turntable.webp",
+      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
+      "stand_in_measured": {
         "triangles": 888,
         "bytes": 32412,
         "bbox_min_cm": [
@@ -244,13 +254,7 @@
         "meshes": 4,
         "materials": 4,
         "embedded_images": 0
-      },
-      "build": "node scripts/build_prop_eleanor_weeping_rapier.mjs",
-      "validate": "node scripts/capture_prop_renders.mjs prop_eleanor_weeping_rapier",
-      "reference_concept": "public/tex/props/flux3_prop_eleanor_weeping_rapier_00001_.png",
-      "alpha_cutout": "public/tex/props/flux3_eleanor_rapier_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_eleanor_rapier_turnaround.png",
-      "turntable": "docs/props/prop_eleanor_weeping_rapier/turntable.webp"
+      }
     },
     {
       "id": "prop_tilly_clinker_tongs",
@@ -265,7 +269,7 @@
         "height": 77.1,
         "depth": 3.2
       },
-      "status": "gate:3-review-ingame-3d",
+      "status": "gate:2-rebuild-pixal3d",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -286,7 +290,14 @@
         "closeup_label": "Center pivot rivet close-up",
         "view_fit": 0.45
       },
-      "measured": {
+      "build": null,
+      "validate": "node scripts/capture_prop_renders.mjs prop_tilly_clinker_tongs",
+      "reference_concept": "public/tex/props/flux3_prop_tilly_clinker_tongs_00001_.png",
+      "alpha_cutout": "public/tex/props/flux3_tilly_tongs_alpha.png",
+      "turnaround_sheet": "public/tex/props/h3_tilly_tongs_turnaround.png",
+      "turntable": "docs/props/prop_tilly_clinker_tongs/turntable.webp",
+      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
+      "stand_in_measured": {
         "triangles": 416,
         "bytes": 33364,
         "bbox_min_cm": [
@@ -302,13 +313,7 @@
         "meshes": 8,
         "materials": 8,
         "embedded_images": 0
-      },
-      "build": "node scripts/build_prop_tilly_clinker_tongs.mjs",
-      "validate": "node scripts/capture_prop_renders.mjs prop_tilly_clinker_tongs",
-      "reference_concept": "public/tex/props/flux3_prop_tilly_clinker_tongs_00001_.png",
-      "alpha_cutout": "public/tex/props/flux3_tilly_tongs_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_tilly_tongs_turnaround.png",
-      "turntable": "docs/props/prop_tilly_clinker_tongs/turntable.webp"
+      }
     },
     {
       "id": "prop_sluice_flatcap",
@@ -323,7 +328,7 @@
         "height": 9,
         "depth": 31.8
       },
-      "status": "gate:3-review-ingame-3d",
+      "status": "gate:2-rebuild-pixal3d",
       "pivot": {
         "convention": "head_socket_normalized",
         "origin": "the base opening: the crown's head-entry rim lies on the y=0 plane, centred on the hat's axis",
@@ -344,7 +349,14 @@
         "closeup_label": "Tweed cap brim close-up",
         "view_fit": 0.22
       },
-      "measured": {
+      "build": null,
+      "validate": "node scripts/capture_prop_renders.mjs prop_sluice_flatcap",
+      "reference_concept": "public/tex/props/flux3_prop_sluice_flatcap_00001_.png",
+      "alpha_cutout": "public/tex/props/flux3_sluice_flatcap_alpha.png",
+      "turnaround_sheet": "public/tex/props/h3_sluice_flatcap_turnaround.png",
+      "turntable": "docs/props/prop_sluice_flatcap/turntable.webp",
+      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
+      "stand_in_measured": {
         "triangles": 272,
         "bytes": 17724,
         "bbox_min_cm": [
@@ -360,13 +372,7 @@
         "meshes": 3,
         "materials": 3,
         "embedded_images": 0
-      },
-      "build": "node scripts/build_prop_sluice_flatcap.mjs",
-      "validate": "node scripts/capture_prop_renders.mjs prop_sluice_flatcap",
-      "reference_concept": "public/tex/props/flux3_prop_sluice_flatcap_00001_.png",
-      "alpha_cutout": "public/tex/props/flux3_sluice_flatcap_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_sluice_flatcap_turnaround.png",
-      "turntable": "docs/props/prop_sluice_flatcap/turntable.webp"
+      }
     },
     {
       "id": "prop_kilnworth_nursecap",
@@ -381,7 +387,7 @@
         "height": 11.5,
         "depth": 18
       },
-      "status": "gate:3-review-ingame-3d",
+      "status": "gate:2-rebuild-pixal3d",
       "pivot": {
         "convention": "head_socket_normalized",
         "origin": "the base opening: the crown's head-entry rim lies on the y=0 plane, centred on the hat's axis",
@@ -402,7 +408,14 @@
         "closeup_label": "Crimson Geneva cross close-up",
         "view_fit": 0.18
       },
-      "measured": {
+      "build": null,
+      "validate": "node scripts/capture_prop_renders.mjs prop_kilnworth_nursecap",
+      "reference_concept": "public/tex/props/flux3_prop_kilnworth_nursecap_00001_.png",
+      "alpha_cutout": "public/tex/props/flux3_kilnworth_nursecap_alpha.png",
+      "turnaround_sheet": "public/tex/props/h3_kilnworth_nursecap_turnaround.png",
+      "turntable": "docs/props/prop_kilnworth_nursecap/turntable.webp",
+      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
+      "stand_in_measured": {
         "triangles": 100,
         "bytes": 9756,
         "bbox_min_cm": [
@@ -418,13 +431,7 @@
         "meshes": 4,
         "materials": 4,
         "embedded_images": 0
-      },
-      "build": "node scripts/build_prop_kilnworth_nursecap.mjs",
-      "validate": "node scripts/capture_prop_renders.mjs prop_kilnworth_nursecap",
-      "reference_concept": "public/tex/props/flux3_prop_kilnworth_nursecap_00001_.png",
-      "alpha_cutout": "public/tex/props/flux3_kilnworth_nursecap_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_kilnworth_nursecap_turnaround.png",
-      "turntable": "docs/props/prop_kilnworth_nursecap/turntable.webp"
+      }
     },
     {
       "id": "prop_mule_championship_belt",
@@ -439,7 +446,7 @@
         "height": 18.4,
         "depth": 20
       },
-      "status": "gate:3-review-ingame-3d",
+      "status": "gate:2-rebuild-pixal3d",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -460,7 +467,14 @@
         "closeup_label": "Gold championship plate close-up",
         "view_fit": 0.32
       },
-      "measured": {
+      "build": null,
+      "validate": "node scripts/capture_prop_renders.mjs prop_mule_championship_belt",
+      "reference_concept": "public/tex/props/flux3_prop_mule_championship_belt_00001_.png",
+      "alpha_cutout": "public/tex/props/flux3_mule_belt_alpha.png",
+      "turnaround_sheet": "public/tex/props/h3_mule_belt_turnaround.png",
+      "turntable": "docs/props/prop_mule_championship_belt/turntable.webp",
+      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
+      "stand_in_measured": {
         "triangles": 732,
         "bytes": 20764,
         "bbox_min_cm": [
@@ -476,13 +490,7 @@
         "meshes": 2,
         "materials": 2,
         "embedded_images": 0
-      },
-      "build": "node scripts/build_prop_mule_championship_belt.mjs",
-      "validate": "node scripts/capture_prop_renders.mjs prop_mule_championship_belt",
-      "reference_concept": "public/tex/props/flux3_prop_mule_championship_belt_00001_.png",
-      "alpha_cutout": "public/tex/props/flux3_mule_belt_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_mule_belt_turnaround.png",
-      "turntable": "docs/props/prop_mule_championship_belt/turntable.webp"
+      }
     },
     {
       "id": "prop_rook_souwester",
@@ -497,7 +505,7 @@
         "height": 23.8,
         "depth": 36.9
       },
-      "status": "gate:3-review-ingame-3d",
+      "status": "gate:2-rebuild-pixal3d",
       "pivot": {
         "convention": "head_socket_normalized",
         "origin": "the base opening: the crown's head-entry rim lies on the y=0 plane, centred on the hat's axis",
@@ -518,7 +526,14 @@
         "closeup_label": "Storm neck flap close-up",
         "view_fit": 0.25
       },
-      "measured": {
+      "build": null,
+      "validate": "node scripts/capture_prop_renders.mjs prop_rook_souwester",
+      "reference_concept": "public/tex/props/flux3_prop_rook_souwester_00001_.png",
+      "alpha_cutout": "public/tex/props/flux3_rook_souwester_alpha.png",
+      "turnaround_sheet": "public/tex/props/h3_rook_souwester_turnaround.png",
+      "turntable": "docs/props/prop_rook_souwester/turntable.webp",
+      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
+      "stand_in_measured": {
         "triangles": 856,
         "bytes": 26244,
         "bbox_min_cm": [
@@ -534,13 +549,7 @@
         "meshes": 3,
         "materials": 3,
         "embedded_images": 0
-      },
-      "build": "node scripts/build_prop_rook_souwester.mjs",
-      "validate": "node scripts/capture_prop_renders.mjs prop_rook_souwester",
-      "reference_concept": "public/tex/props/flux3_prop_rook_souwester_00001_.png",
-      "alpha_cutout": "public/tex/props/flux3_rook_souwester_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_rook_souwester_turnaround.png",
-      "turntable": "docs/props/prop_rook_souwester/turntable.webp"
+      }
     },
     {
       "id": "prop_bulwark_pistons",
@@ -555,7 +564,7 @@
         "height": 33,
         "depth": 11.5
       },
-      "status": "gate:3-review-ingame-3d",
+      "status": "gate:2-rebuild-pixal3d",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -576,7 +585,14 @@
         "closeup_label": "Dial pressure gauge close-up",
         "view_fit": 0.25
       },
-      "measured": {
+      "build": null,
+      "validate": "node scripts/capture_prop_renders.mjs prop_bulwark_pistons",
+      "reference_concept": "public/tex/props/flux3_prop_bulwark_pistons_00001_.png",
+      "alpha_cutout": "public/tex/props/flux3_bulwark_pistons_alpha.png",
+      "turnaround_sheet": "public/tex/props/h3_bulwark_pistons_turnaround.png",
+      "turntable": "docs/props/prop_bulwark_pistons/turntable.webp",
+      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
+      "stand_in_measured": {
         "triangles": 216,
         "bytes": 15800,
         "bbox_min_cm": [
@@ -592,13 +608,7 @@
         "meshes": 3,
         "materials": 3,
         "embedded_images": 0
-      },
-      "build": "node scripts/build_prop_bulwark_pistons.mjs",
-      "validate": "node scripts/capture_prop_renders.mjs prop_bulwark_pistons",
-      "reference_concept": "public/tex/props/flux3_prop_bulwark_pistons_00001_.png",
-      "alpha_cutout": "public/tex/props/flux3_bulwark_pistons_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_bulwark_pistons_turnaround.png",
-      "turntable": "docs/props/prop_bulwark_pistons/turntable.webp"
+      }
     },
     {
       "id": "prop_crump_samovar",
@@ -613,7 +623,7 @@
         "height": 38.5,
         "depth": 24
       },
-      "status": "gate:3-review-ingame-3d",
+      "status": "gate:2-rebuild-pixal3d",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -634,7 +644,14 @@
         "closeup_label": "Ornate samovar lid close-up",
         "view_fit": 0.28
       },
-      "measured": {
+      "build": null,
+      "validate": "node scripts/capture_prop_renders.mjs prop_crump_samovar",
+      "reference_concept": "public/tex/props/flux3_prop_crump_samovar_00001_.png",
+      "alpha_cutout": "public/tex/props/flux3_crump_samovar_alpha.png",
+      "turnaround_sheet": "public/tex/props/h3_crump_samovar_turnaround.png",
+      "turntable": "docs/props/prop_crump_samovar/turntable.webp",
+      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
+      "stand_in_measured": {
         "triangles": 192,
         "bytes": 15252,
         "bbox_min_cm": [
@@ -650,13 +667,7 @@
         "meshes": 3,
         "materials": 3,
         "embedded_images": 0
-      },
-      "build": "node scripts/build_prop_crump_samovar.mjs",
-      "validate": "node scripts/capture_prop_renders.mjs prop_crump_samovar",
-      "reference_concept": "public/tex/props/flux3_prop_crump_samovar_00001_.png",
-      "alpha_cutout": "public/tex/props/flux3_crump_samovar_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_crump_samovar_turnaround.png",
-      "turntable": "docs/props/prop_crump_samovar/turntable.webp"
+      }
     },
     {
       "id": "weapon_knuckleduster",
@@ -671,7 +682,7 @@
         "height": 5.7,
         "depth": 3
       },
-      "status": "gate:3-review-ingame-3d",
+      "status": "gate:2-rebuild-pixal3d",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -692,7 +703,14 @@
         "closeup_label": "Knuckle finger ring close-up",
         "view_fit": 0.14
       },
-      "measured": {
+      "build": null,
+      "validate": "node scripts/capture_prop_renders.mjs weapon_knuckleduster",
+      "reference_concept": "public/tex/props/flux3_weapon_knuckleduster_00001_.png",
+      "alpha_cutout": "public/tex/props/flux3_knuckleduster_alpha.png",
+      "turnaround_sheet": "public/tex/props/h3_knuckleduster_turnaround.png",
+      "turntable": "docs/props/weapon_knuckleduster/turntable.webp",
+      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
+      "stand_in_measured": {
         "triangles": 1344,
         "bytes": 41480,
         "bbox_min_cm": [
@@ -708,13 +726,7 @@
         "meshes": 5,
         "materials": 5,
         "embedded_images": 0
-      },
-      "build": "node scripts/build_weapon_knuckleduster.mjs",
-      "validate": "node scripts/capture_prop_renders.mjs weapon_knuckleduster",
-      "reference_concept": "public/tex/props/flux3_weapon_knuckleduster_00001_.png",
-      "alpha_cutout": "public/tex/props/flux3_knuckleduster_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_knuckleduster_turnaround.png",
-      "turntable": "docs/props/weapon_knuckleduster/turntable.webp"
+      }
     },
     {
       "id": "weapon_coal_shovel",
@@ -729,7 +741,7 @@
         "height": 100.5,
         "depth": 4.5
       },
-      "status": "gate:3-review-ingame-3d",
+      "status": "gate:2-rebuild-pixal3d",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -750,7 +762,14 @@
         "closeup_label": "Forged coal shovel scoop close-up",
         "view_fit": 0.55
       },
-      "measured": {
+      "build": null,
+      "validate": "node scripts/capture_prop_renders.mjs weapon_coal_shovel",
+      "reference_concept": "public/tex/props/flux3_weapon_coal_shovel_00001_.png",
+      "alpha_cutout": "public/tex/props/flux3_coal_shovel_alpha.png",
+      "turnaround_sheet": "public/tex/props/h3_coal_shovel_turnaround.png",
+      "turntable": "docs/props/weapon_coal_shovel/turntable.webp",
+      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
+      "stand_in_measured": {
         "triangles": 396,
         "bytes": 15980,
         "bbox_min_cm": [
@@ -766,13 +785,7 @@
         "meshes": 3,
         "materials": 3,
         "embedded_images": 0
-      },
-      "build": "node scripts/build_weapon_coal_shovel.mjs",
-      "validate": "node scripts/capture_prop_renders.mjs weapon_coal_shovel",
-      "reference_concept": "public/tex/props/flux3_weapon_coal_shovel_00001_.png",
-      "alpha_cutout": "public/tex/props/flux3_coal_shovel_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_coal_shovel_turnaround.png",
-      "turntable": "docs/props/weapon_coal_shovel/turntable.webp"
+      }
     },
     {
       "id": "weapon_bone_saw",
@@ -787,7 +800,7 @@
         "height": 36,
         "depth": 5.2
       },
-      "status": "gate:3-review-ingame-3d",
+      "status": "gate:2-rebuild-pixal3d",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -808,7 +821,14 @@
         "closeup_label": "Surgical saw blade close-up",
         "view_fit": 0.25
       },
-      "measured": {
+      "build": null,
+      "validate": "node scripts/capture_prop_renders.mjs weapon_bone_saw",
+      "reference_concept": "public/tex/props/flux3_weapon_bone_saw_00001_.png",
+      "alpha_cutout": "public/tex/props/flux3_bone_saw_alpha.png",
+      "turnaround_sheet": "public/tex/props/h3_bone_saw_turnaround.png",
+      "turntable": "docs/props/weapon_bone_saw/turntable.webp",
+      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
+      "stand_in_measured": {
         "triangles": 88,
         "bytes": 8912,
         "bbox_min_cm": [
@@ -824,13 +844,7 @@
         "meshes": 3,
         "materials": 3,
         "embedded_images": 0
-      },
-      "build": "node scripts/build_weapon_bone_saw.mjs",
-      "validate": "node scripts/capture_prop_renders.mjs weapon_bone_saw",
-      "reference_concept": "public/tex/props/flux3_weapon_bone_saw_00001_.png",
-      "alpha_cutout": "public/tex/props/flux3_bone_saw_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_bone_saw_turnaround.png",
-      "turntable": "docs/props/weapon_bone_saw/turntable.webp"
+      }
     },
     {
       "id": "weapon_nail_bat",
@@ -845,7 +859,7 @@
         "height": 84,
         "depth": 5.9
       },
-      "status": "gate:3-review-ingame-3d",
+      "status": "gate:2-rebuild-pixal3d",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -866,7 +880,14 @@
         "closeup_label": "Nail-studded willow blade close-up",
         "view_fit": 0.48
       },
-      "measured": {
+      "build": null,
+      "validate": "node scripts/capture_prop_renders.mjs weapon_nail_bat",
+      "reference_concept": "public/tex/props/flux3_weapon_nail_bat_00001_.png",
+      "alpha_cutout": "public/tex/props/flux3_nail_bat_alpha.png",
+      "turnaround_sheet": "public/tex/props/h3_nail_bat_turnaround.png",
+      "turntable": "docs/props/weapon_nail_bat/turntable.webp",
+      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
+      "stand_in_measured": {
         "triangles": 220,
         "bytes": 33340,
         "bbox_min_cm": [
@@ -882,13 +903,7 @@
         "meshes": 14,
         "materials": 14,
         "embedded_images": 0
-      },
-      "build": "node scripts/build_weapon_nail_bat.mjs",
-      "validate": "node scripts/capture_prop_renders.mjs weapon_nail_bat",
-      "reference_concept": "public/tex/props/flux3_weapon_nail_bat_00001_.png",
-      "alpha_cutout": "public/tex/props/flux3_nail_bat_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_nail_bat_turnaround.png",
-      "turntable": "docs/props/weapon_nail_bat/turntable.webp"
+      }
     },
     {
       "id": "weapon_cleaver",
@@ -903,7 +918,7 @@
         "height": 36,
         "depth": 11.6
       },
-      "status": "gate:3-review-ingame-3d",
+      "status": "gate:2-rebuild-pixal3d",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -924,7 +939,14 @@
         "closeup_label": "Carbon steel meat cleaver blade close-up",
         "view_fit": 0.25
       },
-      "measured": {
+      "build": null,
+      "validate": "node scripts/capture_prop_renders.mjs weapon_cleaver",
+      "reference_concept": "public/tex/props/flux3_weapon_cleaver_00001_.png",
+      "alpha_cutout": "public/tex/props/flux3_cleaver_alpha.png",
+      "turnaround_sheet": "public/tex/props/h3_cleaver_turnaround.png",
+      "turntable": "docs/props/weapon_cleaver/turntable.webp",
+      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
+      "stand_in_measured": {
         "triangles": 76,
         "bytes": 6980,
         "bbox_min_cm": [
@@ -940,13 +962,7 @@
         "meshes": 2,
         "materials": 2,
         "embedded_images": 0
-      },
-      "build": "node scripts/build_weapon_cleaver.mjs",
-      "validate": "node scripts/capture_prop_renders.mjs weapon_cleaver",
-      "reference_concept": "public/tex/props/flux3_weapon_cleaver_00001_.png",
-      "alpha_cutout": "public/tex/props/flux3_cleaver_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_cleaver_turnaround.png",
-      "turntable": "docs/props/weapon_cleaver/turntable.webp"
+      }
     },
     {
       "id": "weapon_piston_gauntlet",
@@ -961,7 +977,7 @@
         "height": 33,
         "depth": 18.2
       },
-      "status": "gate:3-review-ingame-3d",
+      "status": "gate:2-rebuild-pixal3d",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -982,7 +998,14 @@
         "closeup_label": "Steam boiler canister close-up",
         "view_fit": 0.25
       },
-      "measured": {
+      "build": null,
+      "validate": "node scripts/capture_prop_renders.mjs weapon_piston_gauntlet",
+      "reference_concept": "public/tex/props/flux3_weapon_piston_gauntlet_00001_.png",
+      "alpha_cutout": "public/tex/props/flux3_piston_gauntlet_alpha.png",
+      "turnaround_sheet": "public/tex/props/h3_piston_gauntlet_turnaround.png",
+      "turntable": "docs/props/weapon_piston_gauntlet/turntable.webp",
+      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
+      "stand_in_measured": {
         "triangles": 156,
         "bytes": 12548,
         "bbox_min_cm": [
@@ -998,13 +1021,7 @@
         "meshes": 3,
         "materials": 3,
         "embedded_images": 0
-      },
-      "build": "node scripts/build_weapon_piston_gauntlet.mjs",
-      "validate": "node scripts/capture_prop_renders.mjs weapon_piston_gauntlet",
-      "reference_concept": "public/tex/props/flux3_weapon_piston_gauntlet_00001_.png",
-      "alpha_cutout": "public/tex/props/flux3_piston_gauntlet_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_piston_gauntlet_turnaround.png",
-      "turntable": "docs/props/weapon_piston_gauntlet/turntable.webp"
+      }
     },
     {
       "id": "weapon_lamplighter_pole",
@@ -1019,7 +1036,7 @@
         "height": 175,
         "depth": 4
       },
-      "status": "gate:3-review-ingame-3d",
+      "status": "gate:2-rebuild-pixal3d",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -1040,7 +1057,14 @@
         "closeup_label": "Gas-cock shutoff hook close-up",
         "view_fit": 0.95
       },
-      "measured": {
+      "build": null,
+      "validate": "node scripts/capture_prop_renders.mjs weapon_lamplighter_pole",
+      "reference_concept": "public/tex/props/flux3_weapon_lamplighter_pole_00001_.png",
+      "alpha_cutout": "public/tex/props/flux3_lamplighter_pole_alpha.png",
+      "turnaround_sheet": "public/tex/props/h3_lamplighter_pole_turnaround.png",
+      "turntable": "docs/props/weapon_lamplighter_pole/turntable.webp",
+      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
+      "stand_in_measured": {
         "triangles": 384,
         "bytes": 17264,
         "bbox_min_cm": [
@@ -1056,13 +1080,7 @@
         "meshes": 3,
         "materials": 3,
         "embedded_images": 0
-      },
-      "build": "node scripts/build_weapon_lamplighter_pole.mjs",
-      "validate": "node scripts/capture_prop_renders.mjs weapon_lamplighter_pole",
-      "reference_concept": "public/tex/props/flux3_weapon_lamplighter_pole_00001_.png",
-      "alpha_cutout": "public/tex/props/flux3_lamplighter_pole_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_lamplighter_pole_turnaround.png",
-      "turntable": "docs/props/weapon_lamplighter_pole/turntable.webp"
+      }
     },
     {
       "id": "weapon_chair",
@@ -1105,22 +1123,46 @@
         "regions": [
           {
             "label": "the seat",
-            "min_cm": [-15, -10, -9],
-            "max_cm": [15, 5, 18],
+            "min_cm": [
+              -15,
+              -10,
+              -9
+            ],
+            "max_cm": [
+              15,
+              5,
+              18
+            ],
             "expect": "filled",
             "min_area_cm2": 300
           },
           {
             "label": "the backrest, behind the seat (-Z)",
-            "min_cm": [-15, 20, -28],
-            "max_cm": [15, 40, -9],
+            "min_cm": [
+              -15,
+              20,
+              -28
+            ],
+            "max_cm": [
+              15,
+              40,
+              -9
+            ],
             "expect": "filled",
             "min_area_cm2": 300
           },
           {
             "label": "the space in front of the backrest (+Z)",
-            "min_cm": [-15, 15, 0],
-            "max_cm": [15, 40, 28],
+            "min_cm": [
+              -15,
+              15,
+              0
+            ],
+            "max_cm": [
+              15,
+              40,
+              28
+            ],
             "expect": "empty"
           }
         ]
@@ -1163,7 +1205,7 @@
         "height": 18.5,
         "depth": 6.4
       },
-      "status": "gate:3-review-ingame-3d",
+      "status": "gate:2-rebuild-pixal3d",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -1184,7 +1226,14 @@
         "closeup_label": "Wax-sealed apothecary cork close-up",
         "view_fit": 0.15
       },
-      "measured": {
+      "build": null,
+      "validate": "node scripts/capture_prop_renders.mjs pickup_tonic",
+      "reference_concept": "public/tex/props/flux3_pickup_tonic_00001_.png",
+      "alpha_cutout": "public/tex/props/flux3_tonic_alpha.png",
+      "turnaround_sheet": "public/tex/props/h3_tonic_turnaround.png",
+      "turntable": "docs/props/pickup_tonic/turntable.webp",
+      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
+      "stand_in_measured": {
         "triangles": 200,
         "bytes": 15344,
         "bbox_min_cm": [
@@ -1200,13 +1249,7 @@
         "meshes": 3,
         "materials": 3,
         "embedded_images": 0
-      },
-      "build": "node scripts/build_pickup_tonic.mjs",
-      "validate": "node scripts/capture_prop_renders.mjs pickup_tonic",
-      "reference_concept": "public/tex/props/flux3_pickup_tonic_00001_.png",
-      "alpha_cutout": "public/tex/props/flux3_tonic_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_tonic_turnaround.png",
-      "turntable": "docs/props/pickup_tonic/turntable.webp"
+      }
     }
   ]
 }

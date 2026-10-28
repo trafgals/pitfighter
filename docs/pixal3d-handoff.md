@@ -2,8 +2,11 @@
 
 Every prop except `weapon_chair` was made by the old pipeline. Its H3 sheets
 picked tiles at frames 0/31/62/93, which are really about 0/60/120/180°, not
-front/left/back/right, and its meshes are procedural scripts that never used
-the sheets. Treat all 20 as **to be rebuilt**. The chair is the reference: it
+front/left/back/right, and its meshes were primitive procedural stand-ins that
+never used the sheets. Those stand-ins have been deleted: the 18 props with
+status `gate:2-rebuild-pixal3d` have no GLB and `build: null`. The custodian
+helmet and Smelt stovepipe keep their older hand-built GLBs; rebuild them too
+if Pixal3D does better. The chair is the reference: it
 was rebuilt by the scripts below and passes 21/21 checks.
 
 ## The pipeline
@@ -75,8 +78,9 @@ Look at every sheet. Front, side, back, side, in that order, same object.
 chair's entry. The other props validate by named meshes (`origin_mesh`,
 `forward_mesh`, grip/head sockets) that a reconstruction doesn't have.
 
-- Take the frame from the procedural GLB's measured bounding box, so the
-  prop sits where the game already expects it (grip at the origin, etc.).
+- Take the frame from the entry's `stand_in_measured.bbox_*_cm` (the deleted
+  stand-in's bounding box), so the prop sits where the game expects it (grip
+  at the origin, etc.). Remove `stand_in_measured` and `rebuild_note` once built.
 - Convert the named-mesh checks to region checks, as the chair's were.
 - After the build, check width and depth against the spec too, not just
   height. Long thin props (rapier, pole, brolly, bone saw) are the likely
@@ -89,9 +93,9 @@ python scripts/run_pixal3d_mesh.py <asset_id>
 ```
 
 About 8 minutes each. Then capture and publish the renders, look at them,
-and change the entry's `build` to the command above (as the chair's is).
-Keep the `scripts/build_*.mjs` procedural scripts as a fallback; don't
-delete them. Don't change any `status` or approval gate — the user approves.
+and set the entry's `build` to the command above (as the chair's is) and its
+`status` to `gate:3-review-ingame-3d`. Don't approve any gate past that — the
+user approves.
 
 Before each commit: `npm test` (`tests/pixal3d.test.ts` checks every
 reconstructed asset's bounds, budgets, textures and indices).
