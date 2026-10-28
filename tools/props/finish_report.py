@@ -4,6 +4,10 @@ The note goes into the manifest entry, so it says what was built and what the
 finding is. The comment goes on the prop's issue, so it says the same thing to
 the director and asks for the decision the finding needs.
 
+The comment carries the renders as well, linked to the branch they are
+committed on: the review happens on the issue, so the asset has to be visible
+there and not only described.
+
 Usage: python finish_report.py <asset_id> [--comment <file.md>]
 """
 import json
@@ -12,6 +16,39 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 MANIFEST = os.path.join(ROOT, "data", "asset_manifest.json")
+
+# Where the renders are published, and the branch they are committed on. The
+# issue shows the pictures from the branch, so a reviewer opens them there.
+BRANCH = "feat/pixal3d-props-rebuild"
+REPO = "trafgals/pitfighter"
+
+
+def renders_block(asset_id, report):
+    """The capture's renders as a table of pictures, linked to the branch."""
+    renders = report.get("renders") or []
+    if not renders:
+        return ""
+    cells = []
+    headers = []
+    for render in renders:
+        view = render.get("view", "?")
+        label = render.get("label", view)
+        url = f"https://raw.githubusercontent.com/{REPO}/{BRANCH}/docs/props/{asset_id}/{view}.png"
+        headers.append(label)
+        cells.append(f"![{label}]({url})")
+    head = "| " + " | ".join(headers) + " |"
+    rule = "| " + " | ".join([":---:"] * len(renders)) + " |"
+    row = "| " + " | ".join(cells) + " |"
+    return (
+        "\n**The renders**\n\n"
+        + head
+        + "\n"
+        + rule
+        + "\n"
+        + row
+        + "\n\n"
+        f"The mesh is `public/models/props/{asset_id}.glb` on the branch `{BRANCH}`.\n"
+    )
 
 
 def main():
@@ -60,7 +97,7 @@ def main():
 * **Checks:** **{passed} / {len(checks)}** automated quality checks pass - the budgets, the frame and pivot placement, the surface regions, the textures and the rendering.
 * **Renders:** front, profile and detail close-up published to `docs/props/{asset_id}/` for review.
 * **Manifest:** moved to `gate:3-review-ingame-3d`.
-
+{renders_block(asset_id, report)}
 Ready for the human in-game review. Comment `/approve-3d` to approve."""
     else:
         dims = ", ".join(
@@ -113,7 +150,7 @@ The mesh is built and the pipeline is verified end to end. The prop does **not**
 {failed_list}
 
 The cause is the shape of the approved art, not the build: this entry's dimensions ({spec['width']} x {spec['height']} x {spec['depth']} cm) were measured off the deleted procedural stand-in, and a reconstruction reproduces the proportions of the art it is built from.
-
+{renders_block(asset_id, report)}
 **What is needed**
 
 A director's decision, one of:
@@ -137,7 +174,8 @@ The mesh is built and the pipeline is verified end to end. The prop does **not**
 
 {failed_list}
 
-The finding is recorded in the manifest's `rebuild_note` for this entry, and the {tol}% tolerance has not been widened. The gate stays at `gate:2-review-turnaround` until the check is settled."""
+The finding is recorded in the manifest's `rebuild_note` for this entry, and the {tol}% tolerance has not been widened. The gate stays at `gate:2-review-turnaround` until the check is settled.
+{renders_block(asset_id, report)}"""
 
     print("")
     print("NOTE:")

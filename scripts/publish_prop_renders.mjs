@@ -16,6 +16,7 @@
 // Options:
 //   --from <dir>   where the capture wrote its output (default test-output/props)
 //   --out <dir>    where the review renders go (default docs/props)
+//   --held         publish the renders of a capture that failed its checks
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -35,11 +36,15 @@ const positional = [];
 for (let i = 0; i < args.length; i++) {
   const arg = args[i];
   if (arg === "--help" || arg === "-h") {
-    console.log("usage: node scripts/publish_prop_renders.mjs <asset_id> [--from <dir>] [--out <dir>]");
+    console.log("usage: node scripts/publish_prop_renders.mjs <asset_id> [--from <dir>] [--out <dir>] [--held]");
     process.exit(0);
   }
   if (arg === "--from" || arg === "--out") {
     flags[arg.slice(2)] = args[++i];
+    continue;
+  }
+  if (arg === "--held") {
+    flags.held = true;
     continue;
   }
   positional.push(arg);
@@ -73,6 +78,11 @@ const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
 // fine - a wrong frame is a wrong frame, not a broken one - so publishing them
 // would put a rejected asset in front of a reviewer as if it had passed.
 //
+// A prop that is held at a gate is a different case: the reviewer has to see
+// it to settle it. Its renders are published with --held, and the README
+// written with them says the prop is held, which checks failed and why, so
+// nothing in the repository can be mistaken for an approved asset.
+//
 // A report that carries no checks at all is refused for the same reason: it
 // is no proof of anything, and treating it as a pass would publish an asset
 // nobody verified.
@@ -82,10 +92,16 @@ if (!Array.isArray(checks) || !checks.length) {
   process.exit(1);
 }
 const failed = checks.filter((check) => check.ok !== true);
-if (failed.length) {
+const held = Boolean(flags.held);
+if (failed.length && !held) {
   console.error(`the capture failed ${failed.length} check(s), so there is nothing to publish:`);
   for (const check of failed) console.error(`  - ${check.message}${check.detail ? ` (${check.detail})` : ""}`);
+  console.error("pass --held to publish them as a prop held at a gate");
   process.exit(1);
+}
+if (failed.length) {
+  console.log(`this asset is held: ${failed.length} check(s) did not pass, and the renders are published for review`);
+  for (const check of failed) console.log(`  - ${check.message}${check.detail ? ` (${check.detail})` : ""}`);
 }
 
 const renders = report.renders || [];
@@ -195,14 +211,29 @@ fs.rmSync(stagingDir, { recursive: true, force: true });
 // The README describes what each render shows, which only someone who built
 // the prop can say. A default is written when there is none, so a new asset
 // arrives with a complete directory, and an existing one is never overwritten.
+//
+// A held asset's README says so first: it is the thing a reviewer opens, and
+// an asset that is waiting for a decision must not read like one that passed.
 const readme = path.join(targetDir, "README.md");
-if (!fs.existsSync(readme)) {
+if (!fs.existsSync(readme) || held) {
   const labels = renders.map((render) => `- \`${render.view}.png\` - ${render.label}.`);
+  const heldNote = held
+    ? [
+        "",
+        "> **This asset is held at a gate.** The capture it came from did not pass",
+        "> every check, and the renders are here so the finding can be judged, not",
+        "> because the asset is approved. The checks that did not pass:",
+        "",
+        ...failed.map((check) => `> - ${check.message}${check.detail ? ` (${check.detail})` : ""}`),
+        "",
+      ]
+    : [];
   fs.writeFileSync(
     readme,
     [
       `# ${assetId}`,
       "",
+      ...heldNote,
       "The verification renders for this prop, produced by",
       "",
       "```",

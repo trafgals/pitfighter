@@ -81,6 +81,13 @@ if ($failed.Count) {
   $note = (& $PY "$SCRATCH\finish_report.py" $AssetId | Select-String -Pattern '^Pixal3D reconstruction built' | Select-Object -First 1)
   $note = "$note".Trim()
   & $PY "$SCRATCH\record_prop.py" $AssetId --blocked $note
+  # The renders are published for a held prop as well: the review happens on
+  # the issue, and the reviewer has to be able to see the asset to settle the
+  # finding. The README written with them says the prop is held.
+  Write-Output ""
+  Write-Output "=== PUBLISH (held) $AssetId ==="
+  node scripts/publish_prop_renders.mjs $AssetId --held 2>&1 | ForEach-Object { Write-Output $_ }
+  if ($LASTEXITCODE) { Write-Output "the publish step failed"; exit 1 }
 } else {
   Write-Output ""
   Write-Output "=== PUBLISH $AssetId ==="
@@ -126,8 +133,19 @@ if ($failed.Count) {
 }
 if ($LASTEXITCODE) { Write-Output "git commit failed"; exit 1 }
 
+# The review happens on the issue, and the issue links the renders on the
+# branch, so the branch has to carry the commit before the comment goes up.
+git push origin HEAD:feat/pixal3d-props-rebuild 2>&1 | ForEach-Object { Write-Output $_ }
+if ($LASTEXITCODE) { Write-Output "the push failed; the issue links will not resolve until it is pushed" }
+
 gh issue comment $Issue --body-file $commentPath
 if ($LASTEXITCODE) { Write-Output "gh issue comment failed"; exit 1 }
+
+# the issue's own 3D section says the prop is queued; it says what was built
+# from here on, so the issue is the whole story
+& $PY "$SCRATCH\update_issue.py" $AssetId $Issue 2>&1 | ForEach-Object { Write-Output $_ }
+if ($LASTEXITCODE) { Write-Output "the issue body could not be updated" }
+
 if (-not $failed.Count) {
   gh issue edit $Issue --remove-label "gate:2-review-turnaround" --add-label "gate:3-review-ingame-3d"
   if ($LASTEXITCODE) { Write-Output "gh issue edit failed"; exit 1 }

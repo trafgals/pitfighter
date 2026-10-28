@@ -1,0 +1,169 @@
+{
+  "asset": "prop_tilly_clinker_tongs",
+  "model": "public/models/props/prop_tilly_clinker_tongs.glb",
+  "capturedAt": "2026-10-28T20:14:28.080Z",
+  "budget": {
+    "triangles": 25000,
+    "bytes": 1572864,
+    "dimensionsCm": {
+      "width": 15,
+      "height": 77.1,
+      "depth": 3.2
+    }
+  },
+  "triangles": 19998,
+  "bytes": 1223692,
+  "dimensionsCm": {
+    "width": 89.1,
+    "height": 77.1,
+    "depth": 21.7
+  },
+  "bbox": {
+    "min": [
+      -0.44551411271095276,
+      -0.25999999046325684,
+      -0.10833801329135895
+    ],
+    "max": [
+      0.44551411271095276,
+      0.5109999775886536,
+      0.10833801329135895
+    ]
+  },
+  "meshes": [
+    {
+      "name": "mesh_0",
+      "triangles": 19998,
+      "material": 0
+    }
+  ],
+  "materials": [
+    "(unnamed)"
+  ],
+  "renders": [
+    {
+      "view": "front",
+      "label": "Front (0deg, +Z to camera)",
+      "file": "test-output/props/prop_tilly_clinker_tongs/front.png",
+      "bytes": 256343
+    },
+    {
+      "view": "profile",
+      "label": "Profile (90deg, right side)",
+      "file": "test-output/props/prop_tilly_clinker_tongs/profile.png",
+      "bytes": 100827
+    },
+    {
+      "view": "badge",
+      "label": "The serrated clamping jaws",
+      "file": "test-output/props/prop_tilly_clinker_tongs/badge.png",
+      "bytes": 402137
+    }
+  ],
+  "checks": [
+    {
+      "ok": true,
+      "message": "the model has triangles",
+      "detail": "19998"
+    },
+    {
+      "ok": true,
+      "message": "triangle count is under budget",
+      "detail": "19998 < 25000"
+    },
+    {
+      "ok": true,
+      "message": "file size is within budget",
+      "detail": "1.167 MB <= 1.5 MB"
+    },
+    {
+      "ok": true,
+      "message": "the mesh has no structural problems",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "no vertex position is NaN or infinite",
+      "detail": "0"
+    },
+    {
+      "ok": false,
+      "message": "width matches the spec (15 cm +/- 5%)",
+      "detail": "89.1 cm"
+    },
+    {
+      "ok": true,
+      "message": "height matches the spec (77.1 cm +/- 5%)",
+      "detail": "77.1 cm"
+    },
+    {
+      "ok": false,
+      "message": "depth matches the spec (3.2 cm +/- 5%)",
+      "detail": "21.7 cm"
+    },
+    {
+      "ok": true,
+      "message": "the base sits where the pivot puts it (-26 cm)",
+      "detail": "-26 cm"
+    },
+    {
+      "ok": true,
+      "message": "the top sits where the pivot puts it (51.1 cm)",
+      "detail": "51.1 cm"
+    },
+    {
+      "ok": true,
+      "message": "the asset is centred on X (0 cm)",
+      "detail": "0 cm"
+    },
+    {
+      "ok": true,
+      "message": "the asset is centred on Z (0 cm)",
+      "detail": "0 cm"
+    },
+    {
+      "ok": true,
+      "message": "the lower half of the prop carries the prop's surface is there",
+      "detail": "320 cm2 of surface >= 38"
+    },
+    {
+      "ok": true,
+      "message": "the upper half of the prop carries the prop's surface is there",
+      "detail": "360 cm2 of surface >= 38"
+    },
+    {
+      "ok": true,
+      "message": "the space beside the prop is clear is clear",
+      "detail": "0 cm2 of surface <= 10"
+    },
+    {
+      "ok": true,
+      "message": "every asset the page asked for was served",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the model loads in a WebGL renderer without errors",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the renderer reported no load errors",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the renderer sees the same triangle count as the file",
+      "detail": "19998 vs 19998"
+    },
+    {
+      "ok": true,
+      "message": "every verification render has real content"
+    },
+    {
+      "ok": true,
+      "message": "the front render is a real image",
+      "detail": "256343 bytes"
+    }
+  ]
+}
