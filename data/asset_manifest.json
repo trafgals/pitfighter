@@ -1467,7 +1467,7 @@
         "height": 36,
         "depth": 4.7
       },
-      "status": "gate:2-review-turnaround",
+      "status": "gate:3-review-ingame-3d",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -1541,30 +1541,30 @@
         "view_fit": 0.193,
         "dimension_tolerance_pct": 5
       },
-      "build": null,
+      "measured": {
+        "triangles": 14400,
+        "bbox_min_cm": [
+          -6.5,
+          -5.5,
+          -2.3
+        ],
+        "bbox_max_cm": [
+          6.5,
+          30.5,
+          2.3
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 939408
+      },
+      "build": "python scripts/run_pixal3d_mesh.py weapon_bone_saw --faces 14400",
       "validate": "node scripts/capture_prop_renders.mjs weapon_bone_saw",
       "reference_concept": "public/tex/props/flux3_weapon_bone_saw_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_bone_saw_alpha.png",
-      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.",
-      "stand_in_measured": {
-        "triangles": 88,
-        "bytes": 8912,
-        "bbox_min_cm": [
-          -1.8,
-          -5.5,
-          -2.6
-        ],
-        "bbox_max_cm": [
-          1.8,
-          30.5,
-          2.6
-        ],
-        "meshes": 3,
-        "materials": 3,
-        "embedded_images": 0
-      },
       "turnaround_sheet": "public/tex/props/h3_bone_saw_turnaround.png",
       "turntable": "docs/props/weapon_bone_saw/turntable.webp",
+      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.",
       "dimensions_note": "scale_dimensions_cm amended from 3.6 x 36 x 5.2 cm to 13 x 36 x 4.7 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit."
     },
     {
@@ -1655,7 +1655,6 @@
         "view_fit": 0.787,
         "dimension_tolerance_pct": 5
       },
-      "build": null,
       "validate": "node scripts/capture_prop_renders.mjs weapon_nail_bat",
       "reference_concept": "public/tex/props/flux3_weapon_nail_bat_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_nail_bat_alpha.png",
@@ -1689,7 +1688,8 @@
         "IC_kwDOVUJnUc8AAAABgqgssQ"
       ],
       "revision_note": "Revision requested on 2026-10-29T13:29:08+10:00: The bat's head reads as a rounded blob rather than the flat, squared-off hammer face in the turnaround sheet - the face should be flatter and its corners squarer. Can the reconstruction be rebuilt from the same approved sheet with a different seed so the face comes out right? The grip wrap also reads as one smooth band. In the art it is a wound cord, so a little surface break-up along the grip would help it read as cord at in-game distance.. The reconstruction is being rebuilt with seed 4242 from the same approved sheet.",
-      "revision_claimed_at": "2026-10-29T13:29:22+10:00"
+      "revision_claimed_at": "2026-10-29T13:29:22+10:00",
+      "revision_built_at": "2026-10-29T13:41:28+10:00"
     },
     {
       "id": "weapon_cleaver",
@@ -1909,7 +1909,9 @@
         "meshes": 3,
         "materials": 3,
         "embedded_images": 0
-      }
+      },
+      "turnaround_sheet": "public/tex/props/h3_piston_gauntlet_turnaround.png",
+      "turntable": "docs/props/weapon_piston_gauntlet/turntable.webp"
     },
     {
       "id": "weapon_lamplighter_pole",
