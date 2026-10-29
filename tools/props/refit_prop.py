@@ -140,7 +140,7 @@ def box_from(px, cell, frame, measured, to_cm, solid):
         lo_x, hi_x = mid - MIN_CM / 2, mid + MIN_CM / 2
     if hi_y - lo_y < MIN_CM:
         mid = (lo_y + hi_y) / 2
-        lo_y, hi_y = mid + MIN_CM / 2, mid - MIN_CM / 2
+        lo_y, hi_y = mid - MIN_CM / 2, mid + MIN_CM / 2
     left = frame["centre_x_cm"] - measured["width"] / 2
     right = frame["centre_x_cm"] + measured["width"] / 2
     lo_x, hi_x = max(lo_x, left), min(hi_x, right)

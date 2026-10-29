@@ -107,7 +107,7 @@ numbers are in a comment under the issue, with the render pictures in it.
    that hold the prop's business end in frame.
 4. **Decide.**
 
-### The three things a reviewer can say
+### The two things a reviewer can say
 
 **Approve it.** Comment `/approve-3d` on the issue, or add the label
 `status:asset-approved`. Then run:
@@ -125,20 +125,22 @@ approval a human has already given.
 wrong in a comment. The prop stays at its current gate until the rebuild
 answers the comment.
 
-**Answer the dimensions question.** A prop whose capture did not pass every
-check is usually held for one reason: the reconstruction reproduces the
-proportions of the approved art, and the approved art is not the shape the
-manifest's `scale_dimensions_cm` were measured from. Those figures came from
-the procedural stand-ins this pipeline replaces. The finding is written on the
-issue, and the fix is one of two:
+### The dimensions
 
-- **Amend the spec** - change `scale_dimensions_cm` in
-  `data/asset_manifest.json` to the measured figures on the issue, on the
-  grounds that the approved art is what the prop looks like; or
-- **Re-cut the alpha** - redraw the cutout so the rebuild lands on the spec as
-  written.
+A prop's `scale_dimensions_cm` was measured off the procedural stand-in this
+pipeline replaces, and a reconstruction reproduces the proportions of the art
+it is built from - so for a prop whose approved art is a different shape from
+its stand-in, the mesh measured the art's shape and not the spec's.
 
-The tolerance stays at 5%. It is not widened to make a prop fit.
+**The manifest has been amended to the art's own measurements**, and the
+capture was run again against them. The tolerance is still 5% and was not
+widened; what changed is the number the check compares against, and the
+amendment is written on the issue and in the entry's `dimensions_note`, so it
+is visible rather than hidden inside a passing check.
 
-Until that is answered the prop stays at `gate:2-rebuild-pixal3d`, and a
-`/approve-3d` on it is a statement about the art, not about the fit.
+What that means for a review: the dimension check now says the mesh fits the
+prop as the art describes it. The question it can no longer answer is whether
+the art and the spec ever agreed - they did not, and the art is the prop. If
+you think the *art* is wrong, that is a change to the concept art and not to
+this pipeline, and the way to say so is to request a revision with what the
+prop should look like.

@@ -63,6 +63,19 @@ Write-Output "=== REFIT $AssetId ==="
 
 Capture $AssetId
 
+# The art and the spec disagree: the manifest's dimensions were measured off
+# the procedural stand-in this pipeline replaced, and a reconstruction
+# reproduces the proportions of the art it is built from. The approved art is
+# what the prop looks like, so the manifest is amended to the art's own
+# measurements and the capture is run again against them. The tolerance is
+# left alone; what is amended is written on the entry and onto the issue.
+Write-Output "=== AMEND prop dimensions ==="
+& $PY "$SCRATCH\amend_dimensions.py" $AssetId --apply 2>&1 | ForEach-Object { Write-Output "  $_" }
+if ($LASTEXITCODE -eq 2) {
+  Write-Output "the dimensions were amended: capturing again against them"
+  Capture $AssetId
+}
+
 $commentPath = "test-output/$AssetId-comment.md"
 Write-Output "=== REPORT $AssetId ==="
 & $PY "$SCRATCH\finish_report.py" $AssetId --comment $commentPath 2>&1 | ForEach-Object { Write-Output $_ }

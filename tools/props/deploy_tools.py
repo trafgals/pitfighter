@@ -105,7 +105,15 @@ def main():
 
         dst = os.path.join(scratch, name)
         if not os.path.exists(dst):
-            print(f"missing in the scratch directory: {name}")
+            # a tool that is new to the repository is new to the scratch
+            # directory too: it is written there rather than skipped
+            if check:
+                print(f"missing in the scratch directory: {name}")
+                drifted.append(name)
+                continue
+            with open(dst, "w", encoding="utf-8", newline="\n") as f:
+                f.write(text)
+            print(f"deployed {name} (new)")
             continue
         with open(dst, encoding="utf-8") as f:
             current = f.read()

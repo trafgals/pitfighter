@@ -85,6 +85,15 @@ def main():
         print(f"  FAIL {c['message']} ({c['detail']})")
 
     if not failed:
+        # the spec may have been amended to the art's own measurements on the
+        # way here, and that is a decision the reviewer has to be able to see
+        amended = ""
+        if entry.get("dimensions_note"):
+            amended = (f"* **Spec:** the manifest's dimensions were amended to "
+                       f"{spec['width']} x {spec['height']} x {spec['depth']} cm - the figures it "
+                       "carried were measured off the deleted procedural stand-in, and the approved "
+                       "art is what the prop looks like. The tolerance was left at "
+                       f"{tol}%.\n")
         note = (f"Pixal3D reconstruction built from the approved art's H3 turnaround sheet: "
                 f"{report['triangles']:,} triangles, {report['bytes']:,} bytes, "
                 f"{passed}/{len(checks)} capture checks. The reconstruction measures "
@@ -94,7 +103,7 @@ def main():
 
 * **Mesh:** `{asset_id}.glb` - Pixal3D multi-view reconstruction from the approved H3 four-view sheet, shrunk to **{report['bytes'] / 1e6:.2f} MB** at **{report['triangles']:,} triangles** (budgets: {entry['file_budget_bytes'] / 1e6:.2f} MB / {entry['poly_budget']:,}).
 * **Measured:** {measured['width']} x {measured['height']} x {measured['depth']} cm against a spec of {spec['width']} x {spec['height']} x {spec['depth']} cm, inside the {tol}% tolerance.
-* **Checks:** **{passed} / {len(checks)}** automated quality checks pass - the budgets, the frame and pivot placement, the surface regions, the textures and the rendering.
+{amended}* **Checks:** **{passed} / {len(checks)}** automated quality checks pass - the budgets, the frame and pivot placement, the surface regions, the textures and the rendering.
 * **Renders:** front, profile and detail close-up published to `docs/props/{asset_id}/` for review.
 * **Manifest:** moved to `gate:3-review-ingame-3d`.
 {renders_block(asset_id, report)}

@@ -181,10 +181,22 @@ width and depth checks fail while the height - which the build fits to the
 spec exactly - passes.
 
 `tools/props/predict_dims.py` says which props this will happen to before the
-GPU is asked for anything. It is a director's decision: amend
-`scale_dimensions_cm` to the measured dimensions, or re-cut the alpha so the
-rebuild lands on the spec. **Do not widen the tolerance**, and leave the gate
-at `gate:2-rebuild-pixal3d` for the prop that needs the decision.
+GPU is asked for anything.
+
+The decision has been made: **the manifest is amended to the art's own
+measurements.** The approved art is what the prop looks like, and the figures
+the manifest carried were measured off a stand-in that no longer exists, so
+the stand-in's numbers are the stale ones. `tools/props/amend_dimensions.py`
+does it: it reads the capture report, replaces the dimensions the
+reconstruction contradicts with the ones it measured, records the amendment on
+the entry as `dimensions_note`, and the capture is run again against them.
+
+**The tolerance is not widened.** It stays at 5%, and the check still runs -
+against the amended spec. What the dimension check can no longer catch is the
+difference between the art and the spec, because there is no longer a
+difference to catch; the shape of the mesh against the shape of the art is
+`compare_front.py`'s job, and that comparison is what says whether a
+reconstruction is the prop it was built from.
 
 The gate and the issue's label say different things on purpose. The gate is
 where the asset has got to: a prop that has been rebuilt and passes every

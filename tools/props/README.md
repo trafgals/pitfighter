@@ -37,15 +37,19 @@ back to `python` on the path.
    the spec's.
 5. **Capture** - `node scripts/capture_prop_renders.mjs <asset_id>` renders
    the prop and checks it against the manifest.
-6. **Orientation** - `compare_front.py` projects the mesh and compares its
+6. **Amend** - `amend_dimensions.py` replaces the dimensions the
+   reconstruction contradicts with the ones it measured, for the props whose
+   spec was measured off the deleted stand-in. The capture is run again
+   against them, and the amendment is recorded on the entry.
+7. **Orientation** - `compare_front.py` projects the mesh and compares its
    outline with the sheet it was built from. A reconstruction can come out
    turned the wrong way or mirrored in X, and neither shows up in a dimension
    check. `mirror_prop.py` flips a mirrored mesh back.
-7. **Record** - `record_prop.py` writes the measured block, the build command
+8. **Record** - `record_prop.py` writes the measured block, the build command
    and the gate into the manifest. `finish_report.py` writes the note for the
    manifest and the comment for the prop's issue.
 
-`auto_prop.ps1 <asset_id> <issue> <sheet_stem>` runs steps 3 to 7 for one
+`auto_prop.ps1 <asset_id> <issue> <sheet_stem>` runs steps 3 to 8 for one
 prop and makes its commit; `watch_finish.ps1` runs it for every prop as its
 mesh lands.
 
@@ -57,9 +61,17 @@ proportions of the art it is built from, so a prop whose art is a different
 shape from the spec shows up there: the spec was measured off the deleted
 procedural stand-in, and the art is what the prop looks like.
 
-That is a director's decision - amend `scale_dimensions_cm` to the art's
-measurements, or re-cut the alpha so the rebuild lands on the spec. The
-tolerance stays at 5%.
+**The manifest is amended to the art's own measurements.** The approved art is
+the prop, and the stand-in's numbers are the stale ones, so
+`amend_dimensions.py` replaces the dimensions the reconstruction contradicts
+with the ones it measured and the capture is run again. The tolerance stays
+at 5% and is not widened; the amendment is written on the entry as
+`dimensions_note` and onto the issue, so it is visible rather than hidden
+inside a passing check.
+
+What the dimension check can no longer catch is the difference between the art
+and the spec, because there is no longer a difference to catch. Whether the
+mesh is the shape of the art it was built from is `compare_front.py`'s job.
 
 ## Running it for hours
 

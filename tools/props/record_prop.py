@@ -18,7 +18,7 @@ ORDER = [
     "id", "name", "character", "category", "slot", "poly_budget", "file_budget_bytes",
     "scale_dimensions_cm", "status", "pivot", "glb_output", "validation", "measured",
     "source", "build", "validate", "reference_concept", "alpha_cutout",
-    "turnaround_sheet", "turntable", "rebuild_note",
+    "turnaround_sheet", "turntable", "rebuild_note", "dimensions_note",
 ]
 
 
@@ -96,7 +96,11 @@ def main():
         entry["rebuild_note"] = blocked
     else:
         entry["status"] = "gate:3-review-ingame-3d"
-        entry.pop("rebuild_note", None)
+        # the note the build left is kept when the dimensions were amended: it
+        # says what the build found, and the amendment settles the finding
+        # rather than replacing it
+        if not entry.get("dimensions_note"):
+            entry.pop("rebuild_note", None)
 
     ranked = sorted(entry.items(),
                     key=lambda kv: (ORDER.index(kv[0]) if kv[0] in ORDER else len(ORDER), kv[0]))

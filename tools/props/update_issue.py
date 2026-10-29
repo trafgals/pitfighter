@@ -174,6 +174,12 @@ def status_section(asset_id, entry, report):
             "a director's decision - amend the spec or re-cut the alpha. The tolerance is left at "
             f"{tol}%."
         )
+    elif entry.get("dimensions_note"):
+        lines.append(
+            f"* **Spec:** the dimensions were amended to {spec['width']} x {spec['height']} x {spec['depth']} cm - "
+            "the figures the manifest carried were measured off the deleted procedural stand-in, and the approved "
+            f"art is what the prop looks like. The tolerance was left at {tol}%."
+        )
     lines.append(f"* **Checks:** **{passed} / {len(checks)}** automated quality checks pass.")
     table = render_table(asset_id)
     if table:
