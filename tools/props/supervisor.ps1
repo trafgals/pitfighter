@@ -104,6 +104,9 @@ function WorkFinished {
   foreach ($p in $props) {
     if (-not $entries.ContainsKey($p)) { return $false }
     if (-not (Test-Path (Join-Path $ROOT "public/models/props/$p.glb"))) { return $false }
+    # a prop a reviewer asked to revise carries its stand-in marker back, so
+    # the pipeline stays up for the rebuild rather than standing down with the
+    # revision unbuilt
     if ($entries[$p].PSObject.Properties.Name -contains 'stand_in_measured') { return $false }
   }
   return $true
@@ -122,6 +125,7 @@ $chains = @(
   @{ name = 'sheet';  script = Join-Path $PSScriptRoot 'chain_sheets.ps1'; needle = 'chain_sheets.ps1'; pid = 0 }
   @{ name = 'mesh';   script = Join-Path $PSScriptRoot 'chain_meshes.ps1'; needle = 'chain_meshes.ps1'; pid = 0 }
   @{ name = 'finish'; script = Join-Path $PSScriptRoot 'watch_finish.ps1'; needle = 'watch_finish.ps1'; pid = 0 }
+  @{ name = 'review'; script = Join-Path $PSScriptRoot 'watch_revisions.ps1'; needle = 'watch_revisions.ps1'; pid = 0 }
 )
 foreach ($c in $chains) {
   $c.pid = Find-Process $c.needle

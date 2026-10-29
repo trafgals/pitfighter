@@ -202,6 +202,10 @@ REVIEW_POINTER = (
     "> The rebuild is reviewed here: the renders and the checks are in the 3D\n"
     "> section above, and how to judge them and sign them off is written up in\n"
     "> `docs/props/README.md`.\n"
+    ">\n"
+    "> To ask for a change, comment `/revision` and say what is wrong: the prop\n"
+    "> goes back into the build queue with a new seed, and the new renders are\n"
+    "> published here when it lands. To approve it, comment `/approve-3d`.\n"
 )
 
 

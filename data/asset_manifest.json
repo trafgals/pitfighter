@@ -1688,7 +1688,8 @@
       "revision_handled": [
         "IC_kwDOVUJnUc8AAAABgqgssQ"
       ],
-      "revision_note": "Revision requested on 2026-10-29T13:29:08+10:00: The bat's head reads as a rounded blob rather than the flat, squared-off hammer face in the turnaround sheet - the face should be flatter and its corners squarer. Can the reconstruction be rebuilt from the same approved sheet with a different seed so the face comes out right? The grip wrap also reads as one smooth band. In the art it is a wound cord, so a little surface break-up along the grip would help it read as cord at in-game distance.. The reconstruction is being rebuilt with seed 4242 from the same approved sheet."
+      "revision_note": "Revision requested on 2026-10-29T13:29:08+10:00: The bat's head reads as a rounded blob rather than the flat, squared-off hammer face in the turnaround sheet - the face should be flatter and its corners squarer. Can the reconstruction be rebuilt from the same approved sheet with a different seed so the face comes out right? The grip wrap also reads as one smooth band. In the art it is a wound cord, so a little surface break-up along the grip would help it read as cord at in-game distance.. The reconstruction is being rebuilt with seed 4242 from the same approved sheet.",
+      "revision_claimed_at": "2026-10-29T13:29:22+10:00"
     },
     {
       "id": "weapon_cleaver",

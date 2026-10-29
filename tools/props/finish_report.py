@@ -107,7 +107,8 @@ def main():
 * **Renders:** front, profile and detail close-up published to `docs/props/{asset_id}/` for review.
 * **Manifest:** moved to `gate:3-review-ingame-3d`.
 {renders_block(asset_id, report)}
-Ready for the human in-game review. Comment `/approve-3d` to approve."""
+Ready for the human in-game review. Comment `/approve-3d` to approve.
+<!-- pixal3d-pipeline -->"""
     else:
         dims = ", ".join(
             f"{name} {measured[name]} cm against {spec[name]} cm ({off[name]:+.0f}%)"
@@ -167,7 +168,8 @@ A director's decision, one of:
 1. **Amend the spec** in `data/asset_manifest.json` to the measured **{measured['width']} x {measured['height']} x {measured['depth']} cm**, on the grounds that the approved art is what the prop looks like; or
 2. **Re-cut the alpha** so the rebuild lands on the spec as written.
 
-The mesh, the sheet and the measurement are on the branch `feat/pixal3d-props-rebuild` so the decision can be acted on either way. The {tol}% tolerance has not been widened, and the gate stays at `gate:2-rebuild-pixal3d`."""
+The mesh, the sheet and the measurement are on the branch `feat/pixal3d-props-rebuild` so the decision can be acted on either way. The {tol}% tolerance has not been widened, and the gate stays at `gate:2-rebuild-pixal3d`.
+<!-- pixal3d-pipeline -->"""
         else:
             body = f"""### Pixal3D Multi-View Reconstruction built - a check does not pass
 
@@ -184,7 +186,8 @@ The mesh is built and the pipeline is verified end to end. The prop does **not**
 {failed_list}
 
 The finding is recorded in the manifest's `rebuild_note` for this entry, and the {tol}% tolerance has not been widened. The gate stays at `gate:2-rebuild-pixal3d` until the check is settled.
-{renders_block(asset_id, report)}"""
+{renders_block(asset_id, report)}
+<!-- pixal3d-pipeline -->"""
 
     print("")
     print("NOTE:")

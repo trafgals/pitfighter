@@ -6,8 +6,13 @@
 # polls for a mesh that has appeared and runs the finish pipeline over it:
 # stand the prop up on its pivot, re-fit the validation boxes, capture it, flip
 # it if the reconstruction came out mirrored, record it, commit it, publish the
-# renders and comment on the issue. A prop whose manifest entry still has its
-# stand_in_measured has not been through the pipeline yet.
+# renders and comment on the issue.
+#
+# What to do with a prop is not worked out here: it is read from the manifest
+# through `prop_state.py`, under the manifest's lock. That is what keeps a prop
+# that a reviewer asked to revise from being published again while the rebuild
+# is still in flight - the mesh on disk is still the one the reviewer looked
+# at, and publishing it again would only republish what they have already seen.
 #
 # A prop whose run fails is left for a while and the queue moves on, so one
 # prop that will not settle cannot hold up the props behind it.
@@ -42,9 +47,13 @@ $queue = @(
   @{ id='pickup_tonic';                   issue=101; stem='h3_tonic_turnaround' }
 )
 
-function Finished($id) {
-  $out = & $PY -c "import json;d=json.load(open(r'$ROOT\data\asset_manifest.json',encoding='utf-8'));e=[a for a in d['assets'] if a['id']=='$id'][0];print('yes' if 'stand_in_measured' not in e else 'no')"
-  return ($out | Select-Object -Last 1).Trim() -eq 'yes'
+# Where every prop stands, read from the manifest under the manifest's lock.
+# One call for the whole set, so a round does not start a python process for
+# every prop in the queue.
+function States {
+  $out = & $PY "$SCRATCH\prop_state.py" --list 2>$null
+  if (-not $out) { return $null }
+  try { return ($out | ConvertFrom-Json) } catch { return $null }
 }
 
 # the props whose last run did not settle, and when to try them again
@@ -52,10 +61,18 @@ $backoff = @{}
 
 while ($true) {
   $worked = $false
+  $states = States
   foreach ($item in $queue) {
     $glb = "public/models/props/$($item.id).glb"
     if (-not (Test-Path $glb)) { continue }
-    if (Finished $item.id) { continue }
+    if (-not $states) { continue }
+    $state = $states.PSObject.Properties[$item.id].Value
+    if (-not $state) { continue }
+    if ($state -eq 'skip') { continue }
+    if ($state -eq 'wait') {
+      Write-Output "WAIT $($item.id): a revision has been asked for and the rebuilt mesh has not landed yet"
+      continue
+    }
     if ($backoff.ContainsKey($item.id) -and (Get-Date) -lt $backoff[$item.id]) { continue }
     Write-Output "=== FINISH $($item.id) at $(Get-Date -Format o) ==="
     & "$SCRATCH\auto_prop.ps1" $item.id $item.issue $item.stem 2>&1 | ForEach-Object { Write-Output $_ }

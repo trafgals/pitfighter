@@ -135,21 +135,19 @@ if ($DryRun) {
   exit 0
 }
 
-git add -- $paths
-if ($LASTEXITCODE) { Write-Output "git add failed"; exit 1 }
-
+# The commit names the files it takes rather than taking everything that
+# happens to be staged, and it takes the same lock the watcher on the issues
+# takes. A plain `git commit` would sweep whatever the watcher had staged, and
+# two commits at once fight over git's one index lock.
+$head = "feat(props): rebuild $AssetId with Pixal3D multi-view pipeline"
 if ($failed.Count) {
   $why = ($failed | ForEach-Object { $_.message }) -join '; '
-  git commit -m "feat(props): rebuild $AssetId with Pixal3D multi-view pipeline" -m "$passed of $total automated checks pass. The checks that do not pass: $why. The finding is recorded in the manifest, the tolerance is left at 5%, and issue $Issue carries the ways forward for the director."
+  $body = "$passed of $total automated checks pass. The checks that do not pass: $why. The finding is recorded in the manifest, the tolerance is left at 5%, and issue $Issue carries the ways forward for the director."
 } else {
-  git commit -m "feat(props): rebuild $AssetId with Pixal3D multi-view pipeline" -m "$passed of $total automated checks pass: the budgets, the frame and pivot placement, the surface regions and the rendering. The renders are published in docs/props/$AssetId for review."
+  $body = "$passed of $total automated checks pass: the budgets, the frame and pivot placement, the surface regions and the rendering. The renders are published in docs/props/$AssetId for review."
 }
+& $PY "$SCRATCH\git_io.py" commit $paths --message $head --message $body --push 2>&1 | ForEach-Object { Write-Output $_ }
 if ($LASTEXITCODE) { Write-Output "git commit failed"; exit 1 }
-
-# The review happens on the issue, and the issue links the renders on the
-# branch, so the branch has to carry the commit before the comment goes up.
-git push origin HEAD:feat/pixal3d-props-rebuild 2>&1 | ForEach-Object { Write-Output $_ }
-if ($LASTEXITCODE) { Write-Output "the push failed; the issue links will not resolve until it is pushed" }
 
 gh issue comment $Issue --body-file $commentPath
 if ($LASTEXITCODE) { Write-Output "gh issue comment failed"; exit 1 }

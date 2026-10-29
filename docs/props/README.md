@@ -69,6 +69,7 @@ The labels say where each prop is, so the list can be scanned:
 | `asset:3d-built` | the prop has been rebuilt - there is a 3D asset to review |
 | `held:finding` | and a check does not pass, so it needs a decision as well |
 | `gate:3-review-ingame-3d` | and it passes every check, so it is in the in-game review |
+| `status:revision-requested` | a reviewer has asked for the prop to be rebuilt |
 | `stage:h3-turnaround` | the turnaround sheet is still being generated |
 | `stage:pixal3d-mesh` | the sheet is done and the mesh is being generated |
 | `gate:2-review-turnaround` | the prop is still before its 3D gate |
@@ -109,21 +110,101 @@ numbers are in a comment under the issue, with the render pictures in it.
 
 ### The two things a reviewer can say
 
-**Approve it.** Comment `/approve-3d` on the issue, or add the label
-`status:asset-approved`. Then run:
+Both are said **on the prop's issue**, as a comment. The watcher on the issues
+polls them every two minutes and carries what it finds into the manifest and
+the labels.
 
-```bash
-python tools/props/apply_approvals.py --apply
+#### Approve it
+
+Comment this on the issue:
+
+```
+/approve-3d
 ```
 
-That carries the approval into `data/asset_manifest.json`, moves the issue's
-labels to match and commits it. Run it without `--apply` first to see what it
-would change. The pipeline never approves anything itself - it only records an
-approval a human has already given.
+or add the label `status:asset-approved` to the issue. Either one is an
+approval; they mean the same thing, and the label is easier to add from the
+issue list.
 
-**Send it back.** Add the label `status:revision-requested` and say what is
-wrong in a comment. The prop stays at its current gate until the rebuild
-answers the comment.
+What the pipeline does with it: the prop's status in `data/asset_manifest.json`
+becomes `status:asset-approved`, and the issue's labels follow - the pipeline's
+own labels (`asset:3d-built`, `gate:3-review-ingame-3d`) come off and
+`status:asset-approved` goes on.
+
+**Nothing is approved past `gate:3-review-ingame-3d`.** An approval given on a
+prop that is still queued, or that is held on a finding that has not been
+settled, is not applied - the pipeline says so on the issue rather than
+quietly doing it. Settle the finding first, or wait for the build.
+
+To do it by hand instead:
+
+```bash
+python tools/props/apply_approvals.py          # what it would change
+python tools/props/apply_approvals.py --apply  # do it
+```
+
+The pipeline never approves anything itself - it only records an approval a
+human has already given.
+
+#### Ask for a revision
+
+Comment this on the issue, and say what is wrong:
+
+```
+/revision the blade is the wrong shape - it should be a sawback, not a straight edge
+```
+
+What is rebuilt is the **mesh**. The approved art is the prop, and the art is
+not the pipeline's to change: if the art itself is wrong, say so in the
+comment and the prop waits for new art rather than being rebuilt from the same
+sheet.
+
+What happens next, in order:
+
+1. The watcher picks the request up (within about two minutes) and puts the
+   prop back into the build queue with a **new seed**. The reconstruction that
+   was reviewed is not reused - the same approved sheet is reconstructed again
+   with a different seed, so it is a different mesh rather than the same one.
+2. The issue is relabelled `stage:pixal3d-mesh`, and the pipeline replies on
+   the issue saying the revision is in the queue and which seed it is using.
+3. The mesh chain builds it. The seed is **claimed**, so the rebuild is built
+   exactly once even if two passes of the chain see it at the same time.
+4. Until the rebuilt mesh lands, the prop is left alone - the old mesh is the
+   one that was reviewed, and publishing it again would only republish what
+   the reviewer has already seen.
+5. The capture runs again against the new mesh, the renders are published to
+   `docs/props/<asset_id>/`, the prop is committed, and the new renders are
+   commented on the same issue with the checks it passed.
+
+The label `status:revision-requested` says the same thing to anyone scanning
+the list, and is put on when the request is picked up.
+
+To do the re-queue by hand instead:
+
+```bash
+python tools/props/request_revision.py          # what would be re-queued
+python tools/props/request_revision.py --apply  # re-queue it
+```
+
+#### How a command is read
+
+A command has to be **issued**, not mentioned. It is read when:
+
+- it starts a line of the comment - "Comment `/approve-3d` to approve" is
+  someone talking about it, not someone saying it
+- it is not inside a fenced code block - the example in this guide is an
+  example, and pasting it back must not start a rebuild
+- it is not on a quoted line (`> /approve-3d`) - that is someone repeating
+  something else
+- the comment is not the pipeline's own - every comment the pipeline leaves
+  carries an invisible marker and is never read as a command
+
+An invisible byte order mark at the start of a line does not stop a command
+from being read - a comment written from a Windows shell picks one up without
+anyone noticing, and a reviewer whose command was ignored would have no idea
+why.
+
+These rules are held down by `tests/prop_review.test.ts`.
 
 ### The dimensions
 

@@ -21,6 +21,10 @@ import sys
 import numpy as np
 from PIL import Image
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import manifest_io  # noqa: E402
+
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 MANIFEST = os.path.join(ROOT, "data", "asset_manifest.json")
 
@@ -67,8 +71,8 @@ def lean_of(mask):
 
 
 def main():
-    with open(MANIFEST, encoding="utf-8") as f:
-        manifest = json.load(f)
+    with manifest_io.locked(MANIFEST):
+        manifest = manifest_io.load(MANIFEST)
     by_id = {a["id"]: a for a in manifest["assets"]}
     for asset_id, (alpha_file, upside_down) in DIAGONAL.items():
         entry = by_id[asset_id]
@@ -82,9 +86,20 @@ def main():
         print(f"{asset_id}: the art leans {lean:+.1f} degrees"
               f"{' (and is drawn the other way up)' if upside_down else ''}"
               f" -> roll {frame['roll_deg']:+.1f} degrees")
-    with open(MANIFEST, "w", encoding="utf-8", newline="\n") as f:
-        json.dump(manifest, f, indent=2, ensure_ascii=False)
-        f.write("\n")
+
+    # The manifest is written back under its lock: the finish chain and the
+    # watcher on the issues both write this file.
+    def change(fresh):
+        for asset_id, (alpha_file, upside_down) in DIAGONAL.items():
+            entry = next(a for a in fresh["assets"] if a["id"] == asset_id)
+            lean = lean_of(mask_of(os.path.join(ROOT, "public", "tex", "props", alpha_file)))
+            roll = -lean if upside_down else lean
+            frame = entry["validation"]["frame"]
+            frame["roll_deg"] = round(roll, 1)
+            if upside_down:
+                frame["upside_down"] = True
+
+    manifest_io.update(MANIFEST, change)
 
 
 if __name__ == "__main__":

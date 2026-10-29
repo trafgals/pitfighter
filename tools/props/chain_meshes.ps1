@@ -9,6 +9,12 @@
 # moves on, so one prop that will not settle cannot hold up the props behind
 # it. A reconstruction that is already in ComfyUI's queue is left alone too: a
 # second one for the same prop would cost half an hour of GPU for nothing.
+#
+# A prop a reviewer asked to revise is rebuilt here, and the rebuild is a
+# fresh reconstruction with a new seed rather than the file the reviewer
+# looked at. The seed is *claimed* under the manifest's lock, so two passes
+# of this chain cannot both build it, and the claim is given back if the build
+# fails.
 $ErrorActionPreference = 'Continue'
 $ROOT = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 $PY = if ($env:PIXAL3D_PYTHON) { $env:PIXAL3D_PYTHON } else { 'python' }
@@ -63,14 +69,77 @@ function RawGlb($id) {
   return $null
 }
 
+# The props a reviewer asked to revise, and the seed each is waiting to be
+# built with. Read once per round, so the round does not start a python
+# process for every prop in the queue.
+function PendingRevisions {
+  $out = & $PY "$SCRATCH\claim_revision.py" --list 2>$null
+  if (-not $out) { return @() }
+  try {
+    return @($out | ConvertFrom-Json)
+  } catch {
+    return @()
+  }
+}
+
+# The seed for a prop, claimed. Only the pass that wins the claim is given
+# the seed, so a rebuild is built exactly once: two passes would cost two
+# hours of GPU for the same prop, and the second build would land on top of
+# the first.
+function RevisionSeed($id) {
+  $out = & $PY "$SCRATCH\claim_revision.py" $id 2>&1
+  $seed = ($out | Select-Object -Last 1)
+  if ($seed -and "$seed" -match '^\d+$') { return $seed }
+  return ''
+}
+
 while ($true) {
   $built = 0
+  $pending = PendingRevisions
   foreach ($item in $queue) {
     $id = $item.id
     $glb = Join-Path $ROOT "public/models/props/$id.glb"
-    if (Test-Path $glb) { continue }
     $sheetPath = Join-Path $ROOT "public/tex/props/$($item.sheet).png"
-    if (-not (Test-Path $sheetPath)) {
+    $hasSheet = Test-Path $sheetPath
+    $isBuilt = Test-Path $glb
+
+    # A prop a reviewer asked to revise is rebuilt whether or not it has been
+    # built before: the reviewer looked at something, and that something is
+    # being replaced.
+    $waiting = @($pending | Where-Object { $_.id -eq $id -and $_.seed })
+    if ($waiting.Count -and -not $waiting[0].claimed_at) {
+      if (-not $hasSheet) {
+        Write-Output "SKIP ${id}: a revision is waiting, but its sheet is not on disk yet"
+        continue
+      }
+      $revision = RevisionSeed $id
+      if (-not $revision) { continue }
+      if (JobMentions $id) {
+        Write-Output "SKIP ${id}: a reconstruction is already in ComfyUI's queue"
+        continue
+      }
+      # the reconstruction is a different one rather than the one that was
+      # reviewed: the same approved sheet, conditioned on with a new seed
+      Write-Output "=== REBUILD ${id} (seed $revision) at $(Get-Date -Format o) ==="
+      & $PY "$SCRATCH\set_sheet_ref.py" $id $item.sheet 2>&1 | ForEach-Object { Write-Output $_ }
+      & $PY scripts/run_pixal3d_mesh.py $id --faces $item.faces --seed $revision 2>&1 | ForEach-Object { Write-Output $_ }
+      $code = $LASTEXITCODE
+      Write-Output "=== END ${id} exit=$code at $(Get-Date -Format o) ==="
+      if ($code -eq 0) {
+        # the rebuilt mesh is on disk: the finish chain is told so, and it
+        # captures and publishes it again
+        & $PY "$SCRATCH\claim_revision.py" --built $id 2>&1 | ForEach-Object { Write-Output $_ }
+      } else {
+        # the build failed: the claim is given back, or the prop would never
+        # be rebuilt at all
+        & $PY "$SCRATCH\claim_revision.py" --release $id 2>&1 | ForEach-Object { Write-Output $_ }
+      }
+      $built++
+      continue
+    }
+
+    if ($isBuilt) { continue }
+    if (-not $hasSheet) {
       Write-Output "SKIP ${id}: its sheet is not on disk yet"
       continue
     }
@@ -97,8 +166,12 @@ while ($true) {
   }
   if ($built -eq 0) {
     $left = @($queue | Where-Object { -not (Test-Path (Join-Path $ROOT "public/models/props/$($_.id).glb")) })
-    if ($left.Count -eq 0) { Write-Output "=== EVERY MESH IS BUILT at $(Get-Date -Format o) ==="; exit 0 }
-    Write-Output "=== NOTHING TO DO YET, $($left.Count) to go ==="
+    $revisions = @($pending | Where-Object { $_.seed -and -not $_.built_at })
+    if ($left.Count -eq 0 -and $revisions.Count -eq 0) {
+      Write-Output "=== EVERY MESH IS BUILT at $(Get-Date -Format o) ==="
+      exit 0
+    }
+    Write-Output "=== NOTHING TO DO YET, $($left.Count) to go, $($revisions.Count) revision(s) waiting ==="
   }
   Start-Sleep -Seconds 30
 }

@@ -32,6 +32,9 @@ import sys
 
 import numpy as np
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import manifest_io  # noqa: E402
+
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 MANIFEST = os.path.join(ROOT, "data", "asset_manifest.json")
 COMFY_OUTPUT = r"C:\Users\dimit\Documents\comfy\ComfyUI_windows_portable_amd\ComfyUI\output"
@@ -165,10 +168,18 @@ def raw_glb_for(asset_id):
     return os.path.join(folder, found[-1])
 
 
-def write_manifest(manifest):
-    with open(MANIFEST, "w", encoding="utf-8", newline="\n") as f:
-        json.dump(manifest, f, indent=2, ensure_ascii=False)
-        f.write("\n")
+def set_roll(asset_id, roll):
+    """Write the roll back into the manifest, under its lock.
+
+    The finish chain and the watcher on the issues both write the manifest, and
+    a read-modify-write that is not locked loses whichever of the two changes
+    was made in between.
+    """
+    def change(manifest):
+        target = next(a for a in manifest["assets"] if a["id"] == asset_id)
+        target["validation"]["frame"]["roll_deg"] = round(roll, 1)
+
+    manifest_io.update(MANIFEST, change)
 
 
 def main():
@@ -176,8 +187,8 @@ def main():
     asset_id = args[0]
     fix = "--fix" in args
 
-    with open(MANIFEST, encoding="utf-8") as f:
-        manifest = json.load(f)
+    with manifest_io.locked(MANIFEST):
+        manifest = manifest_io.load(MANIFEST)
     entry = next(a for a in manifest["assets"] if a["id"] == asset_id)
     fit = fit_of(entry)
     current = float(entry["validation"]["frame"].get("roll_deg", 0.0) or 0.0)
@@ -234,8 +245,7 @@ def main():
               "roll is left alone and the pose stays a finding")
         return
 
-    entry["validation"]["frame"]["roll_deg"] = round(roll, 1)
-    write_manifest(manifest)
+    set_roll(asset_id, roll)
     print(f"the manifest now asks for a roll of {roll:+.1f}")
     out = os.path.join(ROOT, entry["glb_output"])
     result = subprocess.run([PYTHON, os.path.join(ROOT, "scripts", "run_pixal3d_mesh.py"),

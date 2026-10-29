@@ -30,6 +30,7 @@ import sys
 from PIL import Image
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import manifest_io  # noqa: E402
 import pose  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -152,8 +153,8 @@ def box_from(px, cell, frame, measured, to_cm, solid):
 
 def main():
     asset_id = sys.argv[1]
-    with open(MANIFEST, encoding="utf-8") as f:
-        manifest = json.load(f)
+    with manifest_io.locked(MANIFEST):
+        manifest = manifest_io.load(MANIFEST)
     entry = next(a for a in manifest["assets"] if a["id"] == asset_id)
 
     glb = os.path.join(ROOT, entry["glb_output"])
@@ -218,19 +219,23 @@ def main():
             "max_area_cm2": 10,
         })
 
-    validation = entry["validation"]
-    validation["regions"] = regions
-    radius = 0.5 * (measured["width"] ** 2 + measured["height"] ** 2 + measured["depth"] ** 2) ** 0.5 / 100.0
-    validation["view_fit"] = round(radius, 3)
-    if entry.get("pivot", {}).get("convention") == "head_socket_normalized":
-        # a reconstruction is one welded surface with no parts to name, so a
-        # head-socket prop has no crown opening rim to measure: the check is
-        # skipped rather than failed, the same way it is for a grip prop
-        validation["rim_mesh"] = ""
+    # The manifest is written under its lock, and the entry is re-read inside
+    # it: the finish chain and the watcher on the issues both write this file,
+    # and a read-modify-write that is not locked loses whichever change was
+    # made in between.
+    def refit(manifest):
+        target = next(a for a in manifest["assets"] if a["id"] == asset_id)
+        validation = target["validation"]
+        validation["regions"] = regions
+        radius = 0.5 * (measured["width"] ** 2 + measured["height"] ** 2 + measured["depth"] ** 2) ** 0.5 / 100.0
+        validation["view_fit"] = round(radius, 3)
+        if target.get("pivot", {}).get("convention") == "head_socket_normalized":
+            # a reconstruction is one welded surface with no parts to name, so a
+            # head-socket prop has no crown opening rim to measure: the check is
+            # skipped rather than failed, the same way it is for a grip prop
+            validation["rim_mesh"] = ""
 
-    with open(MANIFEST, "w", encoding="utf-8", newline="\n") as f:
-        json.dump(manifest, f, indent=2, ensure_ascii=False)
-        f.write("\n")
+    manifest_io.update(MANIFEST, refit)
 
     print(f"{asset_id}: measured {measured['width']} x {measured['height']} x {measured['depth']} cm, "
           f"view_fit {validation['view_fit']}")

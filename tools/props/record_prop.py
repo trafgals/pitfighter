@@ -11,6 +11,10 @@ import os
 import struct
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import manifest_io  # noqa: E402
+
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 MANIFEST = os.path.join(ROOT, "data", "asset_manifest.json")
 
@@ -19,6 +23,8 @@ ORDER = [
     "scale_dimensions_cm", "status", "pivot", "glb_output", "validation", "measured",
     "source", "build", "validate", "reference_concept", "alpha_cutout",
     "turnaround_sheet", "turntable", "rebuild_note", "dimensions_note",
+    "revision_requested_at", "revision_seed", "revision_claimed_at",
+    "revision_built_at", "revision_published_at", "revision_note",
 ]
 
 
@@ -70,10 +76,7 @@ def main():
     if "--blocked" in sys.argv:
         blocked = sys.argv[sys.argv.index("--blocked") + 1]
 
-    with open(MANIFEST, encoding="utf-8") as f:
-        manifest = json.load(f)
-    entry = next(a for a in manifest["assets"] if a["id"] == asset_id)
-    glb = os.path.join(ROOT, entry["glb_output"])
+    glb = os.path.join(ROOT, "public", "models", "props", f"{asset_id}.glb")
     if not os.path.exists(glb):
         raise SystemExit(f"{glb} does not exist yet")
 
@@ -81,35 +84,46 @@ def main():
     measured = measure(doc)
     measured["bytes"] = size
 
-    faces = faces_for(entry)
-    build = f"python scripts/run_pixal3d_mesh.py {asset_id}"
-    if faces != 20000:
-        build += f" --faces {faces}"
-    entry["build"] = build
-    entry["measured"] = measured
-    entry.pop("stand_in_measured", None)
+    with manifest_io.locked(MANIFEST):
+        manifest = manifest_io.load(MANIFEST)
+        entry = next(a for a in manifest["assets"] if a["id"] == asset_id)
+        faces = faces_for(entry)
+        build = f"python scripts/run_pixal3d_mesh.py {asset_id}"
+        if faces != 20000:
+            build += f" --faces {faces}"
+        entry["build"] = build
+        entry["measured"] = measured
+        entry.pop("stand_in_measured", None)
+        # the rebuild a reviewer asked for has landed; the seed it used is
+        # spent, and so is the claim on it
+        entry.pop("revision_seed", None)
+        entry.pop("revision_claimed_at", None)
+        # the rebuild has now been captured and published, so the cycle is
+        # closed: without this the prop would still read as "to be finished"
+        # and the finish chain would publish it again and again
+        if entry.get("revision_built_at"):
+            entry["revision_published_at"] = manifest_io.now()
+            entry.pop("revision_built_at", None)
 
-    if blocked:
-        # the capture did not pass: the gate stays where it is and the finding
-        # is recorded against the entry
-        entry["status"] = "gate:2-rebuild-pixal3d"
-        entry["rebuild_note"] = blocked
-    else:
-        entry["status"] = "gate:3-review-ingame-3d"
-        # the note the build left is kept when the dimensions were amended: it
-        # says what the build found, and the amendment settles the finding
-        # rather than replacing it
-        if not entry.get("dimensions_note"):
-            entry.pop("rebuild_note", None)
+        if blocked:
+            # the capture did not pass: the gate stays where it is and the finding
+            # is recorded against the entry
+            entry["status"] = "gate:2-rebuild-pixal3d"
+            entry["rebuild_note"] = blocked
+        else:
+            entry["status"] = "gate:3-review-ingame-3d"
+            # the note the build left is kept when the dimensions were amended: it
+            # says what the build found, and the amendment settles the finding
+            # rather than replacing it
+            if not entry.get("dimensions_note"):
+                entry.pop("rebuild_note", None)
 
-    ranked = sorted(entry.items(),
-                    key=lambda kv: (ORDER.index(kv[0]) if kv[0] in ORDER else len(ORDER), kv[0]))
-    entry.clear()
-    entry.update(ranked)
+        ranked = sorted(entry.items(),
+                        key=lambda kv: (ORDER.index(kv[0]) if kv[0] in ORDER else len(ORDER), kv[0]))
+        entry.clear()
+        entry.update(ranked)
 
-    with open(MANIFEST, "w", encoding="utf-8", newline="\n") as f:
-        json.dump(manifest, f, indent=2, ensure_ascii=False)
-        f.write("\n")
+        manifest_io.save(MANIFEST, manifest)
 
     print(f"{asset_id}: {measured['triangles']} triangles, {size:,} bytes, "
           f"bbox {measured['bbox_min_cm']}..{measured['bbox_max_cm']} cm, status {entry['status']}")

@@ -26,22 +26,29 @@ HERE = os.path.join(ROOT, "tools", "props")
 # The scripts the pipeline runs from the scratch directory. The ones that are
 # only run by hand from the repository are not deployed.
 FILES = [
+    "amend_dimensions.py",
     "apply_approvals.py",
     "auto_prop.ps1",
     "chain_meshes.ps1",
     "chain_sheets.ps1",
+    "claim_revision.py",
     "compare_front.py",
     "finish_report.py",
+    "git_io.py",
     "guardian.ps1",
+    "issues.py",
     "lean_fit.py",
+    "manifest_io.py",
     "manifest_pending.py",
     "measure_sheet.py",
     "mesh_each_sheet.ps1",
     "mirror_prop.py",
     "predict_dims.py",
+    "prop_state.py",
     "record_prop.py",
     "refit_prop.py",
     "reroll_clips.ps1",
+    "request_revision.py",
     "salvage_clip.ps1",
     "set_pose.py",
     "set_rim_skip.py",
@@ -51,6 +58,7 @@ FILES = [
     "update_issue.py",
     "wait_for_prop.ps1",
     "watch_finish.ps1",
+    "watch_revisions.ps1",
 ]
 
 PORTABLE_ROOT = 'ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))'

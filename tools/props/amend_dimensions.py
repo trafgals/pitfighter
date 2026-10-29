@@ -22,6 +22,10 @@ import json
 import os
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import manifest_io  # noqa: E402
+
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 MANIFEST = os.path.join(ROOT, "data", "asset_manifest.json")
 REPORT_DIR = os.path.join(ROOT, "test-output", "props")
@@ -30,8 +34,8 @@ TOLERANCE_CM = 0.1
 
 
 def entries():
-    with open(MANIFEST, encoding="utf-8") as f:
-        manifest = json.load(f)
+    with manifest_io.locked(MANIFEST):
+        manifest = manifest_io.load(MANIFEST)
     return manifest, next(a for a in manifest["assets"] if a["id"] == sys.argv[1])
 
 
@@ -85,20 +89,26 @@ def main():
         print("\nnothing was changed: run it again with --apply")
         return 0
 
-    entry["scale_dimensions_cm"] = amended
-    entry["dimensions_note"] = note
-    if entry.get("rebuild_note"):
-        # the note the build left says what it found - the pose a prop was
-        # turned to fix, the way a reconstruction came out mirrored - and that
-        # is worth keeping next to the amendment that settles it
-        entry["rebuild_note"] = (
-            entry["rebuild_note"].rstrip()
-            + "\n\nRESOLVED: the dimensions were amended to the art's own measurements and the "
-            "capture passes against them."
-        )
-    with open(MANIFEST, "w", encoding="utf-8", newline="\n") as f:
-        json.dump(manifest, f, indent=2, ensure_ascii=False)
-        f.write("\n")
+    # The manifest is read again under the lock and written back in one step:
+    # the finish chain and the watcher on the issues both write it, and a
+    # read-modify-write that is not locked loses whichever change was made in
+    # between. The amendment is made to the entry that is there now, not to
+    # the one that was read a moment ago.
+    def amend(manifest):
+        target = next(a for a in manifest["assets"] if a["id"] == asset_id)
+        target["scale_dimensions_cm"] = amended
+        target["dimensions_note"] = note
+        if target.get("rebuild_note"):
+            # the note the build left says what it found - the pose a prop was
+            # turned to fix, the way a reconstruction came out mirrored - and
+            # that is worth keeping next to the amendment that settles it
+            target["rebuild_note"] = (
+                target["rebuild_note"].rstrip()
+                + "\n\nRESOLVED: the dimensions were amended to the art's own measurements and the "
+                "capture passes against them."
+            )
+
+    manifest_io.update(MANIFEST, amend)
     print("  the manifest has been amended")
     # 2 tells the caller the capture has to be run again against the new spec
     return 2
