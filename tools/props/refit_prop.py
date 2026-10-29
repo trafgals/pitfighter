@@ -223,10 +223,33 @@ def main():
     # it: the finish chain and the watcher on the issues both write this file,
     # and a read-modify-write that is not locked loses whichever change was
     # made in between.
+    #
+    # What was written is kept, so it can be printed: the regions the manifest
+    # ends up with are not always the ones derived here - an asset can say
+    # where its clear space is.
+    written = {}
+
     def refit(manifest):
         target = next(a for a in manifest["assets"] if a["id"] == asset_id)
         validation = target["validation"]
-        validation["regions"] = regions
+        declared = validation.get("clear_region")
+        if declared:
+            # The asset says where its clear space is. The box cut from the
+            # art's own margin is mapped onto the model's measured box, and
+            # for a thin prop - a stick in a box the width of the stick -
+            # that margin lands on the prop's own surface, so the derived box
+            # asks the mesh to be clear where the mesh cannot be.
+            kept = [r for r in regions if r.get("expect") != "empty"]
+            kept.append({
+                "label": declared.get("label", "the space beside the prop is clear"),
+                "min_cm": declared["min_cm"],
+                "max_cm": declared["max_cm"],
+                "expect": "empty",
+                "max_area_cm2": declared.get("max_area_cm2", 10),
+            })
+            validation["regions"] = kept
+        else:
+            validation["regions"] = regions
         radius = 0.5 * (measured["width"] ** 2 + measured["height"] ** 2 + measured["depth"] ** 2) ** 0.5 / 100.0
         validation["view_fit"] = round(radius, 3)
         if target.get("pivot", {}).get("convention") == "head_socket_normalized":
@@ -234,12 +257,14 @@ def main():
             # head-socket prop has no crown opening rim to measure: the check is
             # skipped rather than failed, the same way it is for a grip prop
             validation["rim_mesh"] = ""
+        written["regions"] = validation["regions"]
+        written["view_fit"] = validation["view_fit"]
 
     manifest_io.update(MANIFEST, refit)
 
     print(f"{asset_id}: measured {measured['width']} x {measured['height']} x {measured['depth']} cm, "
-          f"view_fit {validation['view_fit']}")
-    for region in regions:
+          f"view_fit {written['view_fit']}")
+    for region in written["regions"]:
         limit = region.get("min_area_cm2", region.get("max_area_cm2"))
         print(f"  {region['expect']:>6}  {region['min_cm']}..{region['max_cm']}  limit {limit}")
 
