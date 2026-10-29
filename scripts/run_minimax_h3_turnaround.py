@@ -219,6 +219,24 @@ def peak_after_trough(scores, start, smooth=5):
     peak = trough + int(np.argmax(smoothed[trough:]))
     return start + peak, float(smoothed[peak] - smoothed[trough])
 
+
+def peak_before(scores, index, start, smooth=5):
+    """The peak before a given one, and its rise over the trough.
+
+    A clip that turns past a full circle comes round to the front again, and
+    the front matches its own mirror better than the back does, so the front
+    coming round can be the largest peak in the clip and the last frame of it.
+    The back is then the peak before it.
+    """
+    padded = np.pad(scores, smooth // 2, mode="edge")
+    smoothed = np.convolve(padded, np.ones(smooth) / smooth, mode="valid")
+    trough = int(np.argmin(smoothed))
+    limit = max(min(index - start, len(smoothed) - 1), trough + 1)
+    peaks = [i for i in range(trough + 1, limit)
+             if smoothed[i] >= smoothed[i - 1] and smoothed[i] > smoothed[i + 1]]
+    peak = peaks[-1] if peaks else trough + int(np.argmax(smoothed[trough:limit]))
+    return start + peak, float(smoothed[peak] - smoothed[trough])
+
 def pick_views(frames, symmetric=False, min_rise=0.15, min_colour_rise=0.06, smooth=5, max_tumble=0.30):
     """Frame indices of the front, left, back and right views, and whether right is the left mirrored.
 
@@ -274,6 +292,14 @@ def pick_views(frames, symmetric=False, min_rise=0.15, min_colour_rise=0.06, smo
             f"about its own axis, so it never shows a back view; its height changes by "
             f"{tumble:.0%} over the clip"
         )
+
+    if back >= len(frames) - smooth:
+        # the largest peak is in the last frames of the clip, which means it is
+        # the front coming round again rather than the back: the back is the
+        # peak before it
+        earlier, earlier_rise = peak_before(scores, back, start, smooth)
+        if earlier_rise >= threshold and earlier < len(frames) - smooth:
+            back, rise = earlier, earlier_rise
 
     if back >= len(frames) - smooth or rise < threshold:
         raise RuntimeError(
