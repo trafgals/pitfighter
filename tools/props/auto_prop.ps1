@@ -116,7 +116,11 @@ if ($failed.Count) {
   Write-Output "=== PUBLISH $AssetId ==="
   node scripts/publish_prop_renders.mjs $AssetId 2>&1 | ForEach-Object { Write-Output $_ }
   if ($LASTEXITCODE) { Write-Output "the publish step failed"; exit 1 }
-  & $PY "$SCRATCH\record_prop.py" $AssetId
+  # what this build found is written on the entry, so the note names this
+  # build and not an earlier one whose finding no longer holds
+  $note = (& $PY "$SCRATCH\finish_report.py" $AssetId | Select-String -Pattern '^Pixal3D reconstruction built' | Select-Object -First 1)
+  $note = "$note".Trim()
+  & $PY "$SCRATCH\record_prop.py" $AssetId --note $note
 }
 if ($LASTEXITCODE) { Write-Output "recording failed"; exit 1 }
 

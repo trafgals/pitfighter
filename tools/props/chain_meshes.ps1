@@ -41,7 +41,7 @@ $queue = @(
   @{ id='weapon_piston_gauntlet';         sheet='h3_piston_gauntlet_turnaround';  faces=20000 }
   @{ id='weapon_lamplighter_pole';        sheet='h3_lamplighter_pole_turnaround'; faces=16000 }
   @{ id='pickup_tonic';                   sheet='h3_tonic_turnaround';            faces=9600  }
-  @{ id='prop_winch_gold_nightstick';     sheet='h3_winch_gold_nightstick_turnaround'; faces=16000 }
+  @{ id='prop_winch_gold_nightstick';     sheet='h3_winch_gold_nightstick_turnaround'; faces=12800 }
 )
 
 function JobMentions($needle) {

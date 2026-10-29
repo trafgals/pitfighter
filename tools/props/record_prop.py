@@ -3,8 +3,9 @@
   python record_prop.py <asset_id>                  the capture passed: gate 3
   python record_prop.py <asset_id> --blocked "<why>"  it did not: the finding
                                                   is recorded and the gate stays
+  python record_prop.py <asset_id> --note "<what the build found>"
 
-Usage: python record_prop.py <asset_id> [--blocked "<reason>"]
+Usage: python record_prop.py <asset_id> [--blocked "<reason>"] [--note "<text>"]
 """
 import json
 import os
@@ -73,8 +74,11 @@ def faces_for(entry):
 def main():
     asset_id = sys.argv[1]
     blocked = None
+    note = None
     if "--blocked" in sys.argv:
         blocked = sys.argv[sys.argv.index("--blocked") + 1]
+    if "--note" in sys.argv:
+        note = sys.argv[sys.argv.index("--note") + 1]
 
     glb = os.path.join(ROOT, "public", "models", "props", f"{asset_id}.glb")
     if not os.path.exists(glb):
@@ -112,10 +116,15 @@ def main():
             entry["rebuild_note"] = blocked
         else:
             entry["status"] = "gate:3-review-ingame-3d"
-            # the note the build left is kept when the dimensions were amended: it
-            # says what the build found, and the amendment settles the finding
-            # rather than replacing it
-            if not entry.get("dimensions_note"):
+            if note:
+                # what this build found: it replaces the note of an earlier
+                # build, which would otherwise name a finding that no longer
+                # holds
+                entry["rebuild_note"] = note
+            # the note the build left is kept when the dimensions were amended:
+            # it says what the build found, and the amendment settles the
+            # finding rather than replacing it
+            elif not entry.get("dimensions_note"):
                 entry.pop("rebuild_note", None)
 
         ranked = sorted(entry.items(),

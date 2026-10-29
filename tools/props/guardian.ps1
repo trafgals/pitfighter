@@ -18,10 +18,9 @@ Set-Content -Path $guardianPid -Value $PID -NoNewline
 
 while ($true) {
   Start-Sleep -Seconds 60
-  if (Test-Path (Join-Path $ROOT 'test-output\pipeline.done')) {
-    Add-Content -Path $log -Value "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') the work is done; the guardian stands down"
-    exit 0
-  }
+  # The sentinel says the batch is finished, and the supervisor is then idle
+  # with the card free. The guardian still keeps it there: the review round is
+  # still to come, and a revision asked for in it has to be rebuilt.
   $alive = $false
   if (Test-Path $pidFile) {
     $sup = 0

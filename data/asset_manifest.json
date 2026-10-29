@@ -2549,7 +2549,7 @@
       "alpha_cutout": "public/tex/props/flux3_gold_nightstick_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_winch_gold_nightstick_turnaround.png",
       "turntable": "docs/props/prop_winch_gold_nightstick/turntable.webp",
-      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 12,798 triangles, 804,360 bytes, 20/21 capture checks. The checks that do not pass: the space beside the prop is clear is clear. The mesh measures 4.9 x 45 x 4.4 cm against a spec of 5.0 x 45.0 x 4.4 cm. The finding is recorded in the manifest and the tolerance is left at 5%.",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 12,798 triangles, 804,360 bytes, 21/21 capture checks. The reconstruction measures 4.9 x 45 x 4.4 cm, inside the 5% tolerance, and the gate moves to the in-game review.",
       "dimensions_note": "scale_dimensions_cm amended from 5.0 x 45.0 x 5.0 cm to 5.0 x 45.0 x 4.4 cm (depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
       "issue": 107
     }

@@ -87,7 +87,7 @@ $props = @(
   'prop_mule_championship_belt', 'prop_rook_souwester', 'prop_bulwark_pistons',
   'prop_crump_samovar', 'weapon_knuckleduster', 'weapon_coal_shovel',
   'weapon_bone_saw', 'weapon_nail_bat', 'weapon_cleaver', 'weapon_piston_gauntlet',
-  'weapon_lamplighter_pole', 'pickup_tonic'
+  'weapon_lamplighter_pole', 'pickup_tonic', 'prop_winch_gold_nightstick'
 )
 
 # Is the work done? Every prop has a mesh, and every prop has been through the
@@ -108,17 +108,31 @@ function WorkFinished {
     # the pipeline stays up for the rebuild rather than standing down with the
     # revision unbuilt
     if ($entries[$p].PSObject.Properties.Name -contains 'stand_in_measured') { return $false }
+    # a revision asked for and not yet built is work that is waiting: the
+    # pipeline stands up for it rather than standing down over it. A revision
+    # that has been built and published has closed its cycle, and the marker
+    # of the request stays on the entry.
+    $names = $entries[$p].PSObject.Properties.Name
+    if (($names -contains 'revision_requested_at') -and
+        -not ($names -contains 'revision_built_at') -and
+        -not ($names -contains 'revision_published_at')) {
+      return $false
+    }
   }
   return $true
 }
 
+# The work is done, so the card is let go of: a ComfyUI left running holds it.
+# The supervisor does not exit for it, because the review round is still to
+# come, and a revision asked for in that round has to be rebuilt: the sentinel
+# is marked, and the supervisor watches for the work to become unfinished
+# again.
 function Stand-Down {
-  Set-Content -Path (Join-Path $ROOT 'test-output\pipeline.done') -Value "$(Get-Date -Format o)"
-  Note "the work is done; the chains and ComfyUI are stopped"
+  Set-Content -Path (Join-Path $ROOT 'test-output\pipeline.done') -Value "done $(Get-Date -Format o)"
+  Note "the work is done; ComfyUI is stopped and the card is let go of"
   Get-CimInstance Win32_Process -Filter "Name='python.exe'" -ErrorAction SilentlyContinue |
     Where-Object { $_.CommandLine -like '*ComfyUI*main.py*' } |
     ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
-  exit 0
 }
 
 $chains = @(
@@ -134,7 +148,22 @@ foreach ($c in $chains) {
 
 Note "the supervisor is up as process $PID"
 while ($true) {
-  if (WorkFinished) { Stand-Down }
+  if (WorkFinished) {
+    # The batch is finished. ComfyUI is let go of, so the card is free, and the
+    # supervisor waits: the review round is still to come, and a revision asked
+    # for in it has to be rebuilt.
+    $sentinel = Join-Path $ROOT 'test-output\pipeline.done'
+    $marked = (Test-Path $sentinel) -and ((Get-Content $sentinel -Raw).Trim() -like 'done*')
+    if (-not $marked) { Stand-Down }
+    Start-Sleep -Seconds 60
+    continue
+  }
+  # The work is unfinished, so the sentinel is marked stale: it must not stand
+  # the guardian down over work that is still to be done.
+  $sentinel = Join-Path $ROOT 'test-output\pipeline.done'
+  if ((Test-Path $sentinel) -and ((Get-Content $sentinel -Raw).Trim() -like 'done*')) {
+    Set-Content -Path $sentinel -Value "not-done $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') the work is unfinished"
+  }
   $card = ComfyCard
   if ($card -and $card -like '*Radeon(TM) Graphics*') {
     Note "ComfyUI is on '$card', the integrated card rather than the discrete one; it is moved"
