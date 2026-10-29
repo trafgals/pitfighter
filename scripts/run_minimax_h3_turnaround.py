@@ -171,7 +171,55 @@ def iou(a, b):
     union = np.logical_or(a, b).sum()
     return float(np.logical_and(a, b).sum()) / union if union else 0.0
 
-def pick_views(frames, symmetric=False, min_rise=0.15, smooth=5):
+def greyscale(img, size=192):
+    """The frame in grey, at a small size."""
+    return np.asarray(img.convert("L").resize((size, size), Image.Resampling.BILINEAR)).astype(np.float64)
+
+def correlate(a, b):
+    """How alike two flat images are, in [-1, 1]."""
+    a = a - a.mean()
+    b = b - b.mean()
+    denom = np.sqrt((a * a).sum() * (b * b).sum())
+    return float((a * b).sum() / denom) if denom else 0.0
+
+def masked_correlate(a, b, mask):
+    """How alike two images are over the pixels the mask covers."""
+    av = a[mask]
+    bv = b[mask]
+    if av.size < 32:
+        return 0.0
+    av = av - av.mean()
+    bv = bv - bv.mean()
+    denom = np.sqrt((av * av).sum() * (bv * bv).sum())
+    return float((av * bv).sum() / denom) if denom else 0.0
+
+def height_spread(sils):
+    """How much the silhouette's height changes over the clip, as a fraction.
+
+    A body turning about its own vertical axis keeps its height: it stands as
+    tall at the back as it does at the front. A body tumbling in the image
+    plane does not - it lies down, stands up and lies down again - so its
+    height swings.
+    """
+    heights = []
+    for sil in sils:
+        rows = np.nonzero(sil.any(axis=1))[0]
+        heights.append(float(np.ptp(rows)) if len(rows) else 0.0)
+    heights = [h for h in heights if h > 0]
+    if len(heights) < 2:
+        return 0.0
+    return float((max(heights) - min(heights)) / (sum(heights) / len(heights)))
+
+def peak_after_trough(scores, start, smooth=5):
+    """The peak of the smoothed scores after their trough, and its rise."""
+    padded = np.pad(scores, smooth // 2, mode="edge")
+    smoothed = np.convolve(padded, np.ones(smooth) / smooth, mode="valid")
+    # the side views are the trough; the back is the peak after it
+    trough = int(np.argmin(smoothed))
+    peak = trough + int(np.argmax(smoothed[trough:]))
+    return start + peak, float(smoothed[peak] - smoothed[trough])
+
+def pick_views(frames, symmetric=False, min_rise=0.15, min_colour_rise=0.06, smooth=5, max_tumble=0.30):
     """Frame indices of the front, left, back and right views, and whether right is the left mirrored.
 
     Right is None when the clip ends before it and the prop is not symmetric:
@@ -180,21 +228,54 @@ def pick_views(frames, symmetric=False, min_rise=0.15, smooth=5):
     The back is the frame, past the first quarter of the clip, whose silhouette best
     matches the front's mirrored: a half turn mirrors the outline. Perspective
     keeps the match well short of perfect (0.7 for the chair), so what is asked
-    for is a peak that rises clear of the side views' trough and ends before the
-    clip does. The turn is taken to run at constant speed from there.
+    for is a peak that rises clear of the side views' trough.
+
+    Some props have no such peak. A bottle, a flatcap and a samovar keep the
+    same outline all the way round - their silhouette barely changes as they
+    turn - so the outline match has no peak to find, and a prop like that was
+    refused for a clip that was perfectly good. For those the colour is asked
+    instead, and only over the object's own pixels: the label, the crest and
+    the shading are not the same at the back as at the front, so the colour
+    match still finds the turn where the outline cannot.
+
+    The colour match is held to its own, lower bar, because the outline it
+    stands in for is a weaker signal: a bottle's own colour barely changes
+    over a half turn, and asking for as much rise as an outline would throw
+    away a perfectly good clip.
+
+    A clip that tumbles in the image plane is refused whatever its outline
+    does: the object lies down and stands up rather than turning about its own
+    axis, so it never shows a back view at all.
     """
     sil = [silhouette(f) for f in frames]
+    grey = [greyscale(f) for f in frames]
     mirrored_front = np.fliplr(sil[0])
+    mirrored_grey = np.fliplr(grey[0])
     start = len(frames) // 4
     scores = np.array([iou(s, mirrored_front) for s in sil[start:]])
-    padded = np.pad(scores, smooth // 2, mode="edge")
-    smoothed = np.convolve(padded, np.ones(smooth) / smooth, mode="valid")
-    # the side views are the trough; the back is the peak after it
-    trough = int(np.argmin(smoothed))
-    peak = trough + int(np.argmax(smoothed[trough:]))
-    back = start + peak
-    rise = smoothed[peak] - smoothed[trough]
-    if back >= len(frames) - smooth or rise < min_rise:
+    back, rise = peak_after_trough(scores, start, smooth)
+
+    # the object's own pixels, where the colour is worth reading
+    mask = sil[0] | sil[start]
+    colour_scores = np.array([masked_correlate(g, mirrored_grey, mask) for g in grey[start:]])
+    colour_back, colour_rise = peak_after_trough(colour_scores, start, smooth)
+
+    if rise < min_rise and colour_rise >= min_colour_rise and colour_rise > rise:
+        # the outline does not change as the prop turns: the colour is asked
+        back, rise = colour_back, colour_rise
+        threshold = min_colour_rise
+    else:
+        threshold = min_rise
+
+    tumble = height_spread(sil)
+    if tumble > max_tumble:
+        raise RuntimeError(
+            f"the clip tumbles: the object swings in the image plane rather than turning "
+            f"about its own axis, so it never shows a back view; its height changes by "
+            f"{tumble:.0%} over the clip"
+        )
+
+    if back >= len(frames) - smooth or rise < threshold:
         raise RuntimeError(
             f"the clip never shows the back: the best match to the mirrored front is frame {back} "
             f"of {len(frames)}, rising {rise:.2f} over the side views; make the clip longer"
