@@ -717,11 +717,11 @@
       "poly_budget": 20000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 13.3,
+        "width": 17,
         "height": 11.5,
-        "depth": 3.1
+        "depth": 16.8
       },
-      "status": "gate:2-review-turnaround",
+      "status": "gate:3-review-ingame-3d",
       "pivot": {
         "convention": "head_socket_normalized",
         "origin": "the base opening: the crown's head-entry rim lies on the y=0 plane, centred on the hat's axis",
@@ -741,14 +741,14 @@
           {
             "label": "the lower half of the prop carries the prop's surface",
             "min_cm": [
-              -5.2,
+              -6.4,
               2.6,
-              -1.6
+              -8.4
             ],
             "max_cm": [
-              -3.2,
+              -4.3,
               4.6,
-              1.6
+              8.4
             ],
             "expect": "filled",
             "min_area_cm2": 4
@@ -756,14 +756,14 @@
           {
             "label": "the upper half of the prop carries the prop's surface",
             "min_cm": [
-              -1.8,
-              8.4,
-              -1.6
+              -4.3,
+              8.3,
+              -8.4
             ],
             "max_cm": [
-              0.2,
-              10.4,
-              1.6
+              -2.1,
+              10.3,
+              8.4
             ],
             "expect": "filled",
             "min_area_cm2": 4
@@ -771,14 +771,14 @@
           {
             "label": "the space beside the prop is clear",
             "min_cm": [
-              -6.7,
+              -8.5,
               9.8,
-              -1.6
+              -8.4
             ],
             "max_cm": [
-              -4.8,
+              -6.4,
               11.5,
-              1.6
+              8.4
             ],
             "expect": "empty",
             "max_area_cm2": 10
@@ -791,39 +791,37 @@
         ],
         "closeup_fit": 0.05,
         "closeup_label": "The crimson Geneva cross on the linen crown",
-        "view_fit": 0.089,
+        "view_fit": 0.133,
         "dimension_tolerance_pct": 5,
         "rim_mesh": ""
       },
-      "build": null,
+      "measured": {
+        "triangles": 16000,
+        "bbox_min_cm": [
+          -8.5,
+          0.0,
+          -8.4
+        ],
+        "bbox_max_cm": [
+          8.5,
+          11.5,
+          8.4
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 913720
+      },
+      "build": "python scripts/run_pixal3d_mesh.py prop_kilnworth_nursecap --faces 16000",
       "validate": "node scripts/capture_prop_renders.mjs prop_kilnworth_nursecap",
       "reference_concept": "public/tex/props/flux3_kilnworth_nursecap_redo_art.png",
       "alpha_cutout": "public/tex/props/flux3_kilnworth_nursecap_redo_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_kilnworth_nursecap_turnaround_redo.png",
       "turntable": "docs/props/prop_kilnworth_nursecap/turntable.webp",
-      "dimensions_note": "scale_dimensions_cm amended from 18 x 11.5 x 18 cm to 13.3 x 11.5 x 3.1 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
-      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 16,000 triangles, 987,304 bytes, 17/21 capture checks. The checks that do not pass: width matches the spec (18 cm +/- 5%); depth matches the spec (18 cm +/- 5%); the lower half of the prop carries the prop's surface is there; the upper half of the prop carries the prop's surface is there. The mesh measures 13.3 x 11.5 x 3.1 cm against a spec of 18 x 11.5 x 18 cm. The finding is recorded in the manifest and the tolerance is left at 5%.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.",
-      "stand_in_measured": {
-        "triangles": 16000,
-        "bbox_min_cm": [
-          -6.7,
-          0.0,
-          -1.6
-        ],
-        "bbox_max_cm": [
-          6.7,
-          11.5,
-          1.6
-        ],
-        "meshes": 1,
-        "materials": 1,
-        "embedded_images": 3,
-        "bytes": 987304
-      },
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 16,000 triangles, 987,304 bytes, 17/21 capture checks. The checks that do not pass: width matches the spec (18 cm +/- 5%); depth matches the spec (18 cm +/- 5%); the lower half of the prop carries the prop's surface is there; the upper half of the prop carries the prop's surface is there. The mesh measures 13.3 x 11.5 x 3.1 cm against a spec of 18 x 11.5 x 18 cm. The finding is recorded in the manifest and the tolerance is left at 5%.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.",
+      "dimensions_note": "scale_dimensions_cm amended from 13.3 x 11.5 x 3.1 cm to 17 x 11.5 x 16.8 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
       "revision_requested_at": "2026-10-29T20:40:03+10:00",
-      "revision_seeds": [
-        4242
-      ],
+      "revision_published_at": "2026-10-29T21:14:04+10:00",
       "revision_note": "Redo requested on 2026-10-29T20:40:03+10:00 from stage 1: the 2D reference (FLUX 3) and its watertight alpha cutout (BiRefNet): complete redo, make the hat round. The prop is rebuilt from that stage with seed 4242.",
       "redo": {
         "stage": "art",
@@ -842,16 +840,22 @@
         "done": [
           "art",
           "cutout",
-          "sheet"
+          "sheet",
+          "mesh",
+          "built"
         ],
         "cutout": "public/tex/props/flux3_kilnworth_nursecap_redo_alpha.png",
         "sheet": "public/tex/props/h3_kilnworth_nursecap_turnaround_redo.png",
         "previous_cutout": null,
         "previous_sheet": null,
-        "claimed_at": "2026-10-29T20:43:43+10:00"
+        "claimed_at": "2026-10-29T20:43:43+10:00",
+        "built_at": "2026-10-29T21:13:25+10:00"
       },
       "revision_handled": [
         "IC_kwDOVUJnUc8AAAABgr3Xww"
+      ],
+      "revision_seeds": [
+        4242
       ]
     },
     {

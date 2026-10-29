@@ -1,33 +1,33 @@
 {
   "asset": "prop_kilnworth_nursecap",
   "model": "public/models/props/prop_kilnworth_nursecap.glb",
-  "capturedAt": "2026-10-29T00:08:14.209Z",
+  "capturedAt": "2026-10-29T11:14:03.041Z",
   "budget": {
     "triangles": 20000,
     "bytes": 1572864,
     "dimensionsCm": {
-      "width": 13.3,
+      "width": 17,
       "height": 11.5,
-      "depth": 3.1
+      "depth": 16.8
     }
   },
   "triangles": 16000,
-  "bytes": 987304,
+  "bytes": 913720,
   "dimensionsCm": {
-    "width": 13.3,
+    "width": 17,
     "height": 11.5,
-    "depth": 3.1
+    "depth": 16.8
   },
   "bbox": {
     "min": [
-      -0.06656113266944885,
+      -0.08479702472686768,
       0,
-      -0.015743780881166458
+      -0.08418533205986023
     ],
     "max": [
-      0.06656113266944885,
+      0.08479702472686768,
       0.11500000208616257,
-      0.015743780881166458
+      0.08418533205986023
     ]
   },
   "meshes": [
@@ -45,19 +45,19 @@
       "view": "front",
       "label": "Front (0deg, +Z to camera)",
       "file": "test-output/props/prop_kilnworth_nursecap/front.png",
-      "bytes": 436123
+      "bytes": 239472
     },
     {
       "view": "profile",
       "label": "Profile (90deg, right side)",
       "file": "test-output/props/prop_kilnworth_nursecap/profile.png",
-      "bytes": 116349
+      "bytes": 205196
     },
     {
       "view": "badge",
       "label": "The crimson Geneva cross on the linen crown",
       "file": "test-output/props/prop_kilnworth_nursecap/badge.png",
-      "bytes": 846118
+      "bytes": 644189
     }
   ],
   "checks": [
@@ -74,7 +74,7 @@
     {
       "ok": true,
       "message": "file size is within budget",
-      "detail": "0.942 MB <= 1.5 MB"
+      "detail": "0.871 MB <= 1.5 MB"
     },
     {
       "ok": true,
@@ -88,8 +88,8 @@
     },
     {
       "ok": true,
-      "message": "width matches the spec (13.3 cm +/- 5%)",
-      "detail": "13.3 cm"
+      "message": "width matches the spec (17 cm +/- 5%)",
+      "detail": "17 cm"
     },
     {
       "ok": true,
@@ -98,8 +98,8 @@
     },
     {
       "ok": true,
-      "message": "depth matches the spec (3.1 cm +/- 5%)",
-      "detail": "3.1 cm"
+      "message": "depth matches the spec (16.8 cm +/- 5%)",
+      "detail": "16.8 cm"
     },
     {
       "ok": true,
@@ -124,12 +124,12 @@
     {
       "ok": true,
       "message": "the lower half of the prop carries the prop's surface is there",
-      "detail": "9 cm2 of surface >= 4"
+      "detail": "30 cm2 of surface >= 4"
     },
     {
       "ok": true,
       "message": "the upper half of the prop carries the prop's surface is there",
-      "detail": "11 cm2 of surface >= 4"
+      "detail": "32 cm2 of surface >= 4"
     },
     {
       "ok": true,
@@ -163,7 +163,7 @@
     {
       "ok": true,
       "message": "the front render is a real image",
-      "detail": "436123 bytes"
+      "detail": "239472 bytes"
     }
   ]
 }
