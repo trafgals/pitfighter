@@ -98,7 +98,8 @@ TEXT_SIGNALS = [
     (CUTOUT, ("birefnet", "watertight alpha", "alpha cutout", "the cutout", "stage 1b")),
     (SHEET, ("orthographic turnaround", "turnaround sheet", "360", "gate 2", "stage 2",
              "turnaround", "the sheet", "initial view", "first view")),
-    (MESH, ("pixal3d", "reconstruction", "the mesh", "stage 3")),
+    (MESH, ("pixal3d", "reconstruction", "the mesh", "stage 3", "3d model", "the model",
+            "in the model")),
 ]
 
 # a request that says the whole thing is to be redone starts at the art: the

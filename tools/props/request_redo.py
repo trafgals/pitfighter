@@ -23,6 +23,15 @@ commit are the caller's to make, and the commands for them are printed.
 Usage:
     python tools/props/request_redo.py           # what would be re-queued
     python tools/props/request_redo.py --apply   # re-queue it
+
+A request the matcher cannot read is not queued by itself: it is reported, and
+nothing is rebuilt. A stage the pipeline can only be told by a person is given
+on the command, and the tool says so in its own output:
+
+    python tools/props/request_redo.py --apply --stage=weapon_knuckleduster:mesh
+
+The stage is then the one given, and the reason says it was decided rather
+than read.
 """
 import os
 import sys
@@ -32,12 +41,28 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import manifest_io  # noqa: E402
 from issues import ASSET_ISSUES, LABEL_REVISION_REQUESTED, read_issues  # noqa: E402
 from redo_stage import (  # noqa: E402
-    MESH, STAGES, apply_redo, redo_block, revision_stage, stage_from_text,
+    MESH, STAGES, apply_redo, parse_stage, redo_block, revision_stage, stage_from_text,
 )
 from request_revision import STAGE_LABELS, next_seed  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 MANIFEST = os.path.join(ROOT, "data", "asset_manifest.json")
+
+
+def stages_given(argv):
+    """The stages the caller decided, by asset id.
+
+    A reviewer who says "there are holes in it" has named a finding and not a
+    stage. The person triaging it knows which stage can answer it, and says
+    so here rather than leaving the finding unacted on.
+    """
+    out = {}
+    for arg in argv:
+        if not arg.startswith("--stage="):
+            continue
+        asset_id, _, stage = arg[len("--stage="):].partition(":")
+        out[asset_id.strip()] = stage.strip()
+    return out
 
 
 def find_request(issue, handled):
@@ -80,8 +105,11 @@ def find_request(issue, handled):
             continue
         found.append((STAGES.index(stage), stage, reason, comment))
     if not found:
+        # the request names no stage. The reviewer's words are still given
+        # back, because a person triaging it can say which stage answers it.
+        text = " / ".join(c["body"].strip() for c in comments)
         return {"error": "the request names no stage: it has to say what is rebuilt",
-                "ids": []}
+                "text": text, "ids": [c["id"] for c in comments]}
     found.sort(key=lambda hit: hit[0])
     _, stage, reason, comment = found[0]
     text = " / ".join(c["body"].strip() for c in comments)
@@ -91,6 +119,7 @@ def find_request(issue, handled):
 
 def main():
     apply = "--apply" in sys.argv
+    given_stages = stages_given(sys.argv)
     issues = read_issues()
     queued = []
 
@@ -110,7 +139,7 @@ def main():
             request = find_request(issue, handled)
             if request is None:
                 continue
-            if request.get("error"):
+            if request.get("error") and asset_id not in given_stages:
                 print(f"{asset_id} (issue #{number}): nothing was queued")
                 print(f"  {request['error']}")
                 continue
@@ -119,14 +148,28 @@ def main():
                 print(f"  {request['skip']}")
                 continue
 
-            stage = request["stage"]
+            stage = request.get("stage")
+            reason = request.get("reason", "")
+            given = given_stages.get(asset_id)
+            if given:
+                try:
+                    stage = parse_stage(given)
+                except ValueError as error:
+                    print(f"{asset_id} (issue #{number}): nothing was queued")
+                    print(f"  {error}")
+                    continue
+                reason = f"the stage was decided for this request: {stage}"
+            if stage is None:
+                print(f"{asset_id} (issue #{number}): nothing was queued")
+                print("  the request names no stage")
+                continue
             seed = next_seed(entry)
             stamp = manifest_io.now()
-            block = redo_block(stage, request["text"], request["reason"], number, seed, stamp)
+            block = redo_block(stage, request.get("text", ""), reason, number, seed, stamp)
 
             print(f"{asset_id} (issue #{number}): a redo is asked for from {stage}")
             print(f"  what was asked: {request['text'] or '(no detail given)'}")
-            print(f"  why that stage: {request['reason']}")
+            print(f"  why that stage: {reason}")
             print(f"  the prop will be rebuilt from {stage} with seed {seed}")
             if not apply:
                 continue
