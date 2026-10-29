@@ -604,11 +604,11 @@
       "poly_budget": 20000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 24.5,
+        "width": 14.5,
         "height": 9,
-        "depth": 31.8
+        "depth": 14.8
       },
-      "status": "gate:2-review-turnaround",
+      "status": "gate:3-review-ingame-3d",
       "pivot": {
         "convention": "head_socket_normalized",
         "origin": "the base opening: the crown's head-entry rim lies on the y=0 plane, centred on the hat's axis",
@@ -628,14 +628,14 @@
           {
             "label": "the lower half of the prop carries the prop's surface",
             "min_cm": [
-              3.3,
-              0.8,
-              -12.4
+              -3.5,
+              -0.3,
+              -3.9
             ],
             "max_cm": [
-              6.4,
-              2.8,
-              19.4
+              -1.5,
+              1.7,
+              10.9
             ],
             "expect": "filled",
             "min_area_cm2": 4
@@ -643,14 +643,14 @@
           {
             "label": "the upper half of the prop carries the prop's surface",
             "min_cm": [
-              0.2,
-              4.2,
-              -12.4
+              -1.7,
+              5.3,
+              -3.9
             ],
             "max_cm": [
-              3.3,
-              6.2,
-              19.4
+              0.3,
+              7.3,
+              10.9
             ],
             "expect": "filled",
             "min_area_cm2": 4
@@ -658,14 +658,14 @@
           {
             "label": "the space beside the prop is clear",
             "min_cm": [
-              -12.0,
+              -7.0,
               6.4,
-              -12.4
+              -3.9
             ],
             "max_cm": [
-              -8.9,
+              -5.1,
               8,
-              19.4
+              10.9
             ],
             "expect": "empty",
             "max_area_cm2": 10
@@ -678,34 +678,35 @@
         ],
         "closeup_fit": 0.06,
         "closeup_label": "The tweed crown and the copper brim wire",
-        "view_fit": 0.206,
+        "view_fit": 0.113,
         "dimension_tolerance_pct": 5,
         "rim_mesh": ""
       },
-      "build": null,
+      "measured": {
+        "triangles": 15998,
+        "bbox_min_cm": [
+          -7.0,
+          -1.0,
+          -3.9
+        ],
+        "bbox_max_cm": [
+          7.5,
+          8.0,
+          10.9
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 1194268
+      },
+      "build": "python scripts/run_pixal3d_mesh.py prop_sluice_flatcap --faces 16000",
       "validate": "node scripts/capture_prop_renders.mjs prop_sluice_flatcap",
       "reference_concept": "public/tex/props/flux3_prop_sluice_flatcap_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_sluice_flatcap_alpha.png",
-      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
-      "stand_in_measured": {
-        "triangles": 272,
-        "bytes": 17724,
-        "bbox_min_cm": [
-          -12,
-          -1,
-          -12.4
-        ],
-        "bbox_max_cm": [
-          12.5,
-          8,
-          19.4
-        ],
-        "meshes": 3,
-        "materials": 3,
-        "embedded_images": 0
-      },
       "turnaround_sheet": "public/tex/props/h3_sluice_flatcap_turnaround.png",
-      "turntable": "docs/props/prop_sluice_flatcap/turntable.webp"
+      "turntable": "docs/props/prop_sluice_flatcap/turntable.webp",
+      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.",
+      "dimensions_note": "scale_dimensions_cm amended from 24.5 x 9 x 31.8 cm to 14.5 x 9 x 14.8 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit."
     },
     {
       "id": "prop_kilnworth_nursecap",
@@ -1073,7 +1074,9 @@
         "meshes": 3,
         "materials": 3,
         "embedded_images": 0
-      }
+      },
+      "turnaround_sheet": "public/tex/props/h3_rook_souwester_turnaround.png",
+      "turntable": "docs/props/prop_rook_souwester/turntable.webp"
     },
     {
       "id": "prop_bulwark_pistons",
