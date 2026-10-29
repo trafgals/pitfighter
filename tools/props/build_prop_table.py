@@ -89,6 +89,12 @@ PLACEMENT = {
         # handles lie back along the arm
         "bone": "hand", "offset": [0, -0.3, 0], "turn": [0, 0, 1.5708], "scale": 1,
     },
+    "prop_winch_gold_nightstick": {
+        "kind": "wielded", "fighter": "constable-winch", "gear": "",
+        # the heavy head of the nightstick stands up out of the grip, and it
+        # points along the arm
+        "bone": "hand", "offset": [0, -0.3, 0], "turn": [3.1416, 0, 0], "scale": 1,
+    },
     "weapon_knuckleduster": {
         "kind": "gift", "fighter": "", "gear": "",
         "throw": "knuckleduster",

@@ -67,6 +67,8 @@ ASSET_ISSUES = {
     "weapon_nail_bat": 96,
     "weapon_cleaver": 97,
     "weapon_piston_gauntlet": 98,
+    # the constable's nightstick, asked for on issue 99
+    "prop_winch_gold_nightstick": 107,
     "weapon_lamplighter_pole": 99,
     "pickup_tonic": 101,
     "prop_winch_custodian_helmet": 81,

@@ -2417,6 +2417,60 @@
       "turntable": "docs/props/pickup_tonic/turntable.webp",
       "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.",
       "dimensions_note": "scale_dimensions_cm amended from 6.4 x 18.5 x 6.4 cm to 8.5 x 18.5 x 8.6 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit."
+    },
+    {
+      "id": "prop_winch_gold_nightstick",
+      "name": "Gold Engraved Mechanical Nightstick",
+      "character": "Obadiah Winch",
+      "category": "weapon",
+      "slot": "hand_socket",
+      "poly_budget": 16000,
+      "file_budget_bytes": 1572864,
+      "scale_dimensions_cm": {
+        "width": 5.0,
+        "height": 45.0,
+        "depth": 5.0
+      },
+      "status": "gate:2-review-turnaround",
+      "pivot": {
+        "convention": "grip_socket_normalized",
+        "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
+        "forward": "+Z",
+        "up": "+Y",
+        "units": "metres"
+      },
+      "glb_output": "public/models/props/prop_winch_gold_nightstick.glb",
+      "validation": {
+        "frame": {
+          "y_min_cm": -9.0,
+          "y_max_cm": 36.0,
+          "centre_x_cm": 0.0,
+          "centre_z_cm": 0.0
+        },
+        "regions": [],
+        "closeup_label": "The gold engraving and the click catch",
+        "dimension_tolerance_pct": 5
+      },
+      "stand_in_measured": {
+        "triangles": 0,
+        "bbox_min_cm": [
+          -2.5,
+          -9.0,
+          -2.5
+        ],
+        "bbox_max_cm": [
+          2.5,
+          36.0,
+          2.5
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 0
+      },
+      "build": null,
+      "issue": 107,
+      "rebuild_note": "A new asset, asked for on issue 99: the reviewer wrote that the constable should have a gold engraved mechanical nightstick instead. The lamplighter's pole is not touched - it stays Pegg's signature weapon and the Gallery's throw - and this is a weapon of the constable's own, held in his hand from the start. The art, the cutout, the turnaround sheet and the reconstruction are all still to be made."
     }
   ]
 }

@@ -136,11 +136,11 @@ REDO = {
             "background"
         ),
     },
-    # The reviewer sent the lamplighter's pole back as a different object
-    # altogether: the Gallery should carry a gold engraved mechanical
-    # nightstick instead. The art is asked for from scratch, because the shape
-    # of the prop is decided there.
-    "weapon_lamplighter_pole": {
+    # The reviewer asked, on the lamplighter's pole issue, for the constable to
+    # have a gold engraved mechanical nightstick instead. The pole itself is
+    # not touched: this is the constable's own weapon, and its shape is
+    # decided in the art.
+    "prop_winch_gold_nightstick": {
         "prompt": (
             "Victorian gold engraved mechanical nightstick baton, a short heavy "
             "brass club with a dark knurled leather grip, deep gold engraving "
