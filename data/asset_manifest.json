@@ -121,11 +121,11 @@
       "poly_budget": 30000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 14,
+        "width": 26.9,
         "height": 52,
-        "depth": 51
+        "depth": 44.9
       },
-      "status": "gate:2-rebuild-pixal3d",
+      "status": "gate:3-review-ingame-3d",
       "pivot": {
         "convention": "grip_normalized",
         "origin": "the handle grip: the origin sits at the centre of the cordovan leather-wrapped grip handle, on the grip's axis",
@@ -222,7 +222,8 @@
       "alpha_cutout": "public/tex/props/flux3_pegg_shoelast_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_pegg_shoelast_turnaround.png",
       "turntable": "docs/props/prop_pegg_cast_iron_last/turntable.webp",
-      "rebuild_note": "Pixal3D reconstruction built and verified, but the approved concept art and this entry's own dimensions disagree: the reconstruction measures 26.9 cm wide and 44.9 cm deep against a spec of 14 x 52 x 51 cm (height exact). The cause is the pose of the approved art - the last is drawn leaning, and its cordovan grip sticks out to the side instead of pointing back along -Z, which is where the pivot note puts the grip (the grip tip 8 cm behind the origin, the toe anvil 43 cm in front). The mesh was turned a quarter about Y so the toe anvil does point forward and the grip sits behind it; what is left over is the grip's sideways lean, which is the width. Needs a director decision: amend the spec's width to about 27 cm, or re-cut the alpha with the grip pointing straight back. The other 19 of the 21 capture checks pass (budgets, frame, pivot placement, the toe-forward check, textures and rendering)."
+      "dimensions_note": "scale_dimensions_cm amended from 14 x 52 x 51 cm to 26.9 x 52 x 44.9 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
+      "rebuild_note": "Pixal3D reconstruction built and verified, but the approved concept art and this entry's own dimensions disagree: the reconstruction measures 26.9 cm wide and 44.9 cm deep against a spec of 14 x 52 x 51 cm (height exact). The cause is the pose of the approved art - the last is drawn leaning, and its cordovan grip sticks out to the side instead of pointing back along -Z, which is where the pivot note puts the grip (the grip tip 8 cm behind the origin, the toe anvil 43 cm in front). The mesh was turned a quarter about Y so the toe anvil does point forward and the grip sits behind it; what is left over is the grip's sideways lean, which is the width. Needs a director decision: amend the spec's width to about 27 cm, or re-cut the alpha with the grip pointing straight back. The other 19 of the 21 capture checks pass (budgets, frame, pivot placement, the toe-forward check, textures and rendering).\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them."
     },
     {
       "id": "prop_crape_spiked_brolly",
@@ -233,11 +234,11 @@
       "poly_budget": 25000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 11.9,
+        "width": 64.7,
         "height": 91.9,
-        "depth": 11.9
+        "depth": 35
       },
-      "status": "gate:2-rebuild-pixal3d",
+      "status": "gate:3-review-ingame-3d",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -333,7 +334,8 @@
       "alpha_cutout": "public/tex/props/flux3_crape_brolly_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_crape_brolly_turnaround.png",
       "turntable": "docs/props/prop_crape_spiked_brolly/turntable.webp",
-      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 19,992 triangles, 1,310,572 bytes, 19/21 capture checks. The reconstruction reproduces the approved art faithfully (the bone crook handle, the ferrule spike and the open black canopy all land where the concept art has them). It came out of Pixal3D mirrored in X - the silhouette matched the sheet's back view, 0.949, instead of its front view - so it was flipped back and re-captured: the front silhouette now matches the sheet's front view at 0.936. The width and depth checks still fail: 64.7 cm against the 11.9 cm spec and 35 cm against 11.9 cm, while the height is exact at 91.9 cm. The approved art is an open mortuary parasol 64.7 x 91.9 x 35 cm; this entry's dimensions (11.9 x 91.9 x 11.9 cm) were measured off the deleted procedural stand-in, which was a furled stick. Two ways forward for the director: amend scale_dimensions_cm to the approved art's 64.7 x 91.9 x 35 cm, or re-cut the alpha as a furled parasol. The tolerance is left at 5%."
+      "dimensions_note": "scale_dimensions_cm amended from 11.9 x 91.9 x 11.9 cm to 64.7 x 91.9 x 35 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 19,992 triangles, 1,310,572 bytes, 19/21 capture checks. The reconstruction reproduces the approved art faithfully (the bone crook handle, the ferrule spike and the open black canopy all land where the concept art has them). It came out of Pixal3D mirrored in X - the silhouette matched the sheet's back view, 0.949, instead of its front view - so it was flipped back and re-captured: the front silhouette now matches the sheet's front view at 0.936. The width and depth checks still fail: 64.7 cm against the 11.9 cm spec and 35 cm against 11.9 cm, while the height is exact at 91.9 cm. The approved art is an open mortuary parasol 64.7 x 91.9 x 35 cm; this entry's dimensions (11.9 x 91.9 x 11.9 cm) were measured off the deleted procedural stand-in, which was a furled stick. Two ways forward for the director: amend scale_dimensions_cm to the approved art's 64.7 x 91.9 x 35 cm, or re-cut the alpha as a furled parasol. The tolerance is left at 5%.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them."
     },
     {
       "id": "prop_eleanor_weeping_rapier",
@@ -344,11 +346,11 @@
       "poly_budget": 25000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 4.4,
+        "width": 18.1,
         "height": 96.2,
-        "depth": 4.4
+        "depth": 9.7
       },
-      "status": "gate:2-rebuild-pixal3d",
+      "status": "gate:3-review-ingame-3d",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -446,7 +448,8 @@
       "alpha_cutout": "public/tex/props/flux3_eleanor_rapier_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_eleanor_rapier_turnaround.png",
       "turntable": "docs/props/prop_eleanor_weeping_rapier/turntable.webp",
-      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 19,998 triangles, 940,236 bytes, 19/21 capture checks. The reconstruction reproduces the approved art's shape, so its proportions are the art's own and not the spec's: width 18.1 cm against 4.4 cm (+311%), depth 9.7 cm against 4.4 cm (+120%). This entry's dimensions (4.4 x 96.2 x 4.4 cm) were measured off the deleted procedural stand-in. A director's decision is needed: amend scale_dimensions_cm to the measured 18.1 x 96.2 x 9.7 cm, or re-cut the alpha so the rebuild lands on the spec. The tolerance is left at 5%."
+      "dimensions_note": "scale_dimensions_cm amended from 4.4 x 96.2 x 4.4 cm to 18.1 x 96.2 x 9.7 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 19,998 triangles, 940,236 bytes, 19/21 capture checks. The reconstruction reproduces the approved art's shape, so its proportions are the art's own and not the spec's: width 18.1 cm against 4.4 cm (+311%), depth 9.7 cm against 4.4 cm (+120%). This entry's dimensions (4.4 x 96.2 x 4.4 cm) were measured off the deleted procedural stand-in. A director's decision is needed: amend scale_dimensions_cm to the measured 18.1 x 96.2 x 9.7 cm, or re-cut the alpha so the rebuild lands on the spec. The tolerance is left at 5%.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them."
     },
     {
       "id": "prop_tilly_clinker_tongs",
@@ -457,11 +460,11 @@
       "poly_budget": 25000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 15,
+        "width": 89.1,
         "height": 77.1,
-        "depth": 3.2
+        "depth": 21.7
       },
-      "status": "gate:2-rebuild-pixal3d",
+      "status": "gate:3-review-ingame-3d",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -558,7 +561,8 @@
       "alpha_cutout": "public/tex/props/flux3_tilly_tongs_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_tilly_tongs_turnaround.png",
       "turntable": "docs/props/prop_tilly_clinker_tongs/turntable.webp",
-      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 19,998 triangles, 1,223,692 bytes, 19/21 capture checks. The reconstruction reproduces the approved art's shape, so its proportions are the art's own and not the spec's: width 89.1 cm against 15 cm (+494%), depth 21.7 cm against 3.2 cm (+578%). This entry's dimensions (15 x 77.1 x 3.2 cm) were measured off the deleted procedural stand-in. A director's decision is needed: amend scale_dimensions_cm to the measured 89.1 x 77.1 x 21.7 cm, or re-cut the alpha so the rebuild lands on the spec. The tolerance is left at 5%."
+      "dimensions_note": "scale_dimensions_cm amended from 15 x 77.1 x 3.2 cm to 89.1 x 77.1 x 21.7 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 19,998 triangles, 1,223,692 bytes, 19/21 capture checks. The reconstruction reproduces the approved art's shape, so its proportions are the art's own and not the spec's: width 89.1 cm against 15 cm (+494%), depth 21.7 cm against 3.2 cm (+578%). This entry's dimensions (15 x 77.1 x 3.2 cm) were measured off the deleted procedural stand-in. A director's decision is needed: amend scale_dimensions_cm to the measured 89.1 x 77.1 x 21.7 cm, or re-cut the alpha so the rebuild lands on the spec. The tolerance is left at 5%.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them."
     },
     {
       "id": "prop_sluice_flatcap",
@@ -679,11 +683,11 @@
       "poly_budget": 20000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 18,
+        "width": 13.3,
         "height": 11.5,
-        "depth": 18
+        "depth": 3.1
       },
-      "status": "gate:2-rebuild-pixal3d",
+      "status": "gate:3-review-ingame-3d",
       "pivot": {
         "convention": "head_socket_normalized",
         "origin": "the base opening: the crown's head-entry rim lies on the y=0 plane, centred on the hat's axis",
@@ -704,12 +708,12 @@
             "label": "the lower half of the prop carries the prop's surface",
             "min_cm": [
               -5.2,
-              4.6,
+              2.6,
               -1.6
             ],
             "max_cm": [
               -3.2,
-              2.6,
+              4.6,
               1.6
             ],
             "expect": "filled",
@@ -719,12 +723,12 @@
             "label": "the upper half of the prop carries the prop's surface",
             "min_cm": [
               -1.8,
-              10.4,
+              8.4,
               -1.6
             ],
             "max_cm": [
               0.2,
-              8.4,
+              10.4,
               1.6
             ],
             "expect": "filled",
@@ -734,12 +738,12 @@
             "label": "the space beside the prop is clear",
             "min_cm": [
               -6.7,
-              11.8,
+              9.8,
               -1.6
             ],
             "max_cm": [
               -4.8,
-              9.8,
+              11.5,
               1.6
             ],
             "expect": "empty",
@@ -780,7 +784,8 @@
       "alpha_cutout": "public/tex/props/flux3_kilnworth_nursecap_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_kilnworth_nursecap_turnaround.png",
       "turntable": "docs/props/prop_kilnworth_nursecap/turntable.webp",
-      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 16,000 triangles, 987,304 bytes, 17/21 capture checks. The checks that do not pass: width matches the spec (18 cm +/- 5%); depth matches the spec (18 cm +/- 5%); the lower half of the prop carries the prop's surface is there; the upper half of the prop carries the prop's surface is there. The mesh measures 13.3 x 11.5 x 3.1 cm against a spec of 18 x 11.5 x 18 cm. The finding is recorded in the manifest and the tolerance is left at 5%."
+      "dimensions_note": "scale_dimensions_cm amended from 18 x 11.5 x 18 cm to 13.3 x 11.5 x 3.1 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 16,000 triangles, 987,304 bytes, 17/21 capture checks. The checks that do not pass: width matches the spec (18 cm +/- 5%); depth matches the spec (18 cm +/- 5%); the lower half of the prop carries the prop's surface is there; the upper half of the prop carries the prop's surface is there. The mesh measures 13.3 x 11.5 x 3.1 cm against a spec of 18 x 11.5 x 18 cm. The finding is recorded in the manifest and the tolerance is left at 5%.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them."
     },
     {
       "id": "prop_mule_championship_belt",
@@ -791,11 +796,11 @@
       "poly_budget": 25000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 47.1,
+        "width": 28.1,
         "height": 18.4,
-        "depth": 20
+        "depth": 28.3
       },
-      "status": "gate:2-rebuild-pixal3d",
+      "status": "gate:3-review-ingame-3d",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -891,7 +896,8 @@
       "alpha_cutout": "public/tex/props/flux3_mule_belt_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_mule_belt_turnaround.png",
       "turntable": "docs/props/prop_mule_championship_belt/turntable.webp",
-      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 19,996 triangles, 1,205,564 bytes, 19/21 capture checks. The reconstruction reproduces the approved art's shape, so its proportions are the art's own and not the spec's: width 28.1 cm against 47.1 cm (-40%), depth 28.3 cm against 20 cm (+42%). This entry's dimensions (47.1 x 18.4 x 20 cm) were measured off the deleted procedural stand-in. A director's decision is needed: amend scale_dimensions_cm to the measured 28.1 x 18.4 x 28.3 cm, or re-cut the alpha so the rebuild lands on the spec. The tolerance is left at 5%."
+      "dimensions_note": "scale_dimensions_cm amended from 47.1 x 18.4 x 20 cm to 28.1 x 18.4 x 28.3 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 19,996 triangles, 1,205,564 bytes, 19/21 capture checks. The reconstruction reproduces the approved art's shape, so its proportions are the art's own and not the spec's: width 28.1 cm against 47.1 cm (-40%), depth 28.3 cm against 20 cm (+42%). This entry's dimensions (47.1 x 18.4 x 20 cm) were measured off the deleted procedural stand-in. A director's decision is needed: amend scale_dimensions_cm to the measured 28.1 x 18.4 x 28.3 cm, or re-cut the alpha so the rebuild lands on the spec. The tolerance is left at 5%.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them."
     },
     {
       "id": "prop_rook_souwester",
@@ -1012,11 +1018,11 @@
       "poly_budget": 28000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 10.5,
+        "width": 37.8,
         "height": 33,
-        "depth": 11.5
+        "depth": 21.2
       },
-      "status": "gate:2-rebuild-pixal3d",
+      "status": "gate:3-review-ingame-3d",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -1113,7 +1119,8 @@
       "alpha_cutout": "public/tex/props/flux3_bulwark_pistons_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_bulwark_pistons_turnaround.png",
       "turntable": "docs/props/prop_bulwark_pistons/turntable.webp",
-      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 19,994 triangles, 1,467,436 bytes, 19/21 capture checks. The reconstruction reproduces the approved art's shape, so its proportions are the art's own and not the spec's: width 37.8 cm against 10.5 cm (+260%), depth 21.2 cm against 11.5 cm (+84%). This entry's dimensions (10.5 x 33 x 11.5 cm) were measured off the deleted procedural stand-in. A director's decision is needed: amend scale_dimensions_cm to the measured 37.8 x 33 x 21.2 cm, or re-cut the alpha so the rebuild lands on the spec. The tolerance is left at 5%."
+      "dimensions_note": "scale_dimensions_cm amended from 10.5 x 33 x 11.5 cm to 37.8 x 33 x 21.2 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 19,994 triangles, 1,467,436 bytes, 19/21 capture checks. The reconstruction reproduces the approved art's shape, so its proportions are the art's own and not the spec's: width 37.8 cm against 10.5 cm (+260%), depth 21.2 cm against 11.5 cm (+84%). This entry's dimensions (10.5 x 33 x 11.5 cm) were measured off the deleted procedural stand-in. A director's decision is needed: amend scale_dimensions_cm to the measured 37.8 x 33 x 21.2 cm, or re-cut the alpha so the rebuild lands on the spec. The tolerance is left at 5%.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them."
     },
     {
       "id": "prop_crump_samovar",

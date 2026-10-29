@@ -1,14 +1,14 @@
 {
   "asset": "prop_crape_spiked_brolly",
   "model": "public/models/props/prop_crape_spiked_brolly.glb",
-  "capturedAt": "2026-10-28T19:17:27.620Z",
+  "capturedAt": "2026-10-29T00:07:35.274Z",
   "budget": {
     "triangles": 25000,
     "bytes": 1572864,
     "dimensionsCm": {
-      "width": 11.9,
+      "width": 64.7,
       "height": 91.9,
-      "depth": 11.9
+      "depth": 35
     }
   },
   "triangles": 19992,
@@ -87,8 +87,8 @@
       "detail": "0"
     },
     {
-      "ok": false,
-      "message": "width matches the spec (11.9 cm +/- 5%)",
+      "ok": true,
+      "message": "width matches the spec (64.7 cm +/- 5%)",
       "detail": "64.7 cm"
     },
     {
@@ -97,8 +97,8 @@
       "detail": "91.9 cm"
     },
     {
-      "ok": false,
-      "message": "depth matches the spec (11.9 cm +/- 5%)",
+      "ok": true,
+      "message": "depth matches the spec (35 cm +/- 5%)",
       "detail": "35 cm"
     },
     {

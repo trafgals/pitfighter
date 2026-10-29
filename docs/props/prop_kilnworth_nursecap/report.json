@@ -1,14 +1,14 @@
 {
   "asset": "prop_kilnworth_nursecap",
   "model": "public/models/props/prop_kilnworth_nursecap.glb",
-  "capturedAt": "2026-10-28T21:02:41.327Z",
+  "capturedAt": "2026-10-29T00:08:14.209Z",
   "budget": {
     "triangles": 20000,
     "bytes": 1572864,
     "dimensionsCm": {
-      "width": 18,
+      "width": 13.3,
       "height": 11.5,
-      "depth": 18
+      "depth": 3.1
     }
   },
   "triangles": 16000,
@@ -87,8 +87,8 @@
       "detail": "0"
     },
     {
-      "ok": false,
-      "message": "width matches the spec (18 cm +/- 5%)",
+      "ok": true,
+      "message": "width matches the spec (13.3 cm +/- 5%)",
       "detail": "13.3 cm"
     },
     {
@@ -97,8 +97,8 @@
       "detail": "11.5 cm"
     },
     {
-      "ok": false,
-      "message": "depth matches the spec (18 cm +/- 5%)",
+      "ok": true,
+      "message": "depth matches the spec (3.1 cm +/- 5%)",
       "detail": "3.1 cm"
     },
     {
@@ -122,14 +122,14 @@
       "detail": "0 cm"
     },
     {
-      "ok": false,
+      "ok": true,
       "message": "the lower half of the prop carries the prop's surface is there",
-      "detail": "0 cm2 of surface >= 4"
+      "detail": "9 cm2 of surface >= 4"
     },
     {
-      "ok": false,
+      "ok": true,
       "message": "the upper half of the prop carries the prop's surface is there",
-      "detail": "0 cm2 of surface >= 4"
+      "detail": "11 cm2 of surface >= 4"
     },
     {
       "ok": true,

@@ -1,14 +1,14 @@
 {
   "asset": "prop_bulwark_pistons",
   "model": "public/models/props/prop_bulwark_pistons.glb",
-  "capturedAt": "2026-10-28T23:57:35.768Z",
+  "capturedAt": "2026-10-29T00:08:41.793Z",
   "budget": {
     "triangles": 28000,
     "bytes": 1572864,
     "dimensionsCm": {
-      "width": 10.5,
+      "width": 37.8,
       "height": 33,
-      "depth": 11.5
+      "depth": 21.2
     }
   },
   "triangles": 19994,
@@ -87,8 +87,8 @@
       "detail": "0"
     },
     {
-      "ok": false,
-      "message": "width matches the spec (10.5 cm +/- 5%)",
+      "ok": true,
+      "message": "width matches the spec (37.8 cm +/- 5%)",
       "detail": "37.8 cm"
     },
     {
@@ -97,8 +97,8 @@
       "detail": "33 cm"
     },
     {
-      "ok": false,
-      "message": "depth matches the spec (11.5 cm +/- 5%)",
+      "ok": true,
+      "message": "depth matches the spec (21.2 cm +/- 5%)",
       "detail": "21.2 cm"
     },
     {

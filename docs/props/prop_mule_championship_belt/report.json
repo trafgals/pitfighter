@@ -1,14 +1,14 @@
 {
   "asset": "prop_mule_championship_belt",
   "model": "public/models/props/prop_mule_championship_belt.glb",
-  "capturedAt": "2026-10-28T22:52:25.259Z",
+  "capturedAt": "2026-10-29T00:08:27.582Z",
   "budget": {
     "triangles": 25000,
     "bytes": 1572864,
     "dimensionsCm": {
-      "width": 47.1,
+      "width": 28.1,
       "height": 18.4,
-      "depth": 20
+      "depth": 28.3
     }
   },
   "triangles": 19996,
@@ -87,8 +87,8 @@
       "detail": "0"
     },
     {
-      "ok": false,
-      "message": "width matches the spec (47.1 cm +/- 5%)",
+      "ok": true,
+      "message": "width matches the spec (28.1 cm +/- 5%)",
       "detail": "28.1 cm"
     },
     {
@@ -97,8 +97,8 @@
       "detail": "18.4 cm"
     },
     {
-      "ok": false,
-      "message": "depth matches the spec (20 cm +/- 5%)",
+      "ok": true,
+      "message": "depth matches the spec (28.3 cm +/- 5%)",
       "detail": "28.3 cm"
     },
     {

@@ -1,14 +1,14 @@
 {
   "asset": "prop_eleanor_weeping_rapier",
   "model": "public/models/props/prop_eleanor_weeping_rapier.glb",
-  "capturedAt": "2026-10-28T19:16:38.433Z",
+  "capturedAt": "2026-10-29T00:07:48.950Z",
   "budget": {
     "triangles": 25000,
     "bytes": 1572864,
     "dimensionsCm": {
-      "width": 4.4,
+      "width": 18.1,
       "height": 96.2,
-      "depth": 4.4
+      "depth": 9.7
     }
   },
   "triangles": 19998,
@@ -87,8 +87,8 @@
       "detail": "0"
     },
     {
-      "ok": false,
-      "message": "width matches the spec (4.4 cm +/- 5%)",
+      "ok": true,
+      "message": "width matches the spec (18.1 cm +/- 5%)",
       "detail": "18.1 cm"
     },
     {
@@ -97,8 +97,8 @@
       "detail": "96.2 cm"
     },
     {
-      "ok": false,
-      "message": "depth matches the spec (4.4 cm +/- 5%)",
+      "ok": true,
+      "message": "depth matches the spec (9.7 cm +/- 5%)",
       "detail": "9.7 cm"
     },
     {

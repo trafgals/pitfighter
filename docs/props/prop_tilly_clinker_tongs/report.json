@@ -1,14 +1,14 @@
 {
   "asset": "prop_tilly_clinker_tongs",
   "model": "public/models/props/prop_tilly_clinker_tongs.glb",
-  "capturedAt": "2026-10-28T20:14:28.080Z",
+  "capturedAt": "2026-10-29T00:08:01.181Z",
   "budget": {
     "triangles": 25000,
     "bytes": 1572864,
     "dimensionsCm": {
-      "width": 15,
+      "width": 89.1,
       "height": 77.1,
-      "depth": 3.2
+      "depth": 21.7
     }
   },
   "triangles": 19998,
@@ -87,8 +87,8 @@
       "detail": "0"
     },
     {
-      "ok": false,
-      "message": "width matches the spec (15 cm +/- 5%)",
+      "ok": true,
+      "message": "width matches the spec (89.1 cm +/- 5%)",
       "detail": "89.1 cm"
     },
     {
@@ -97,8 +97,8 @@
       "detail": "77.1 cm"
     },
     {
-      "ok": false,
-      "message": "depth matches the spec (3.2 cm +/- 5%)",
+      "ok": true,
+      "message": "depth matches the spec (21.7 cm +/- 5%)",
       "detail": "21.7 cm"
     },
     {

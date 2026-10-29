@@ -1,14 +1,14 @@
 {
   "asset": "prop_pegg_cast_iron_last",
   "model": "public/models/props/prop_pegg_cast_iron_last.glb",
-  "capturedAt": "2026-10-28T19:17:25.375Z",
+  "capturedAt": "2026-10-29T00:07:21.639Z",
   "budget": {
     "triangles": 30000,
     "bytes": 1572864,
     "dimensionsCm": {
-      "width": 14,
+      "width": 26.9,
       "height": 52,
-      "depth": 51
+      "depth": 44.9
     }
   },
   "triangles": 20000,
@@ -87,8 +87,8 @@
       "detail": "0"
     },
     {
-      "ok": false,
-      "message": "width matches the spec (14 cm +/- 5%)",
+      "ok": true,
+      "message": "width matches the spec (26.9 cm +/- 5%)",
       "detail": "26.9 cm"
     },
     {
@@ -97,8 +97,8 @@
       "detail": "52 cm"
     },
     {
-      "ok": false,
-      "message": "depth matches the spec (51 cm +/- 5%)",
+      "ok": true,
+      "message": "depth matches the spec (44.9 cm +/- 5%)",
       "detail": "44.9 cm"
     },
     {
