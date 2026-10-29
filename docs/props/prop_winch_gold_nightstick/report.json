@@ -1,7 +1,7 @@
 {
   "asset": "prop_winch_gold_nightstick",
   "model": "public/models/props/prop_winch_gold_nightstick.glb",
-  "capturedAt": "2026-10-29T23:42:53.387Z",
+  "capturedAt": "2026-10-29T23:45:30.793Z",
   "budget": {
     "triangles": 16000,
     "bytes": 1572864,
@@ -132,9 +132,9 @@
       "detail": "35 cm2 of surface >= 4"
     },
     {
-      "ok": false,
-      "message": "the space beside the prop is clear is clear",
-      "detail": "12 cm2 of surface <= 10"
+      "ok": true,
+      "message": "the space in front of the prop is clear is clear",
+      "detail": "0 cm2 of surface <= 10"
     },
     {
       "ok": true,

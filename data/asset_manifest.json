@@ -2441,7 +2441,7 @@
         "height": 45.0,
         "depth": 4.4
       },
-      "status": "gate:2-rebuild-pixal3d",
+      "status": "gate:3-review-ingame-3d",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -2489,16 +2489,16 @@
             "min_area_cm2": 4
           },
           {
-            "label": "the space beside the prop is clear",
+            "label": "the space in front of the prop is clear",
             "min_cm": [
               -2.4,
-              19.2,
-              -2.2
+              -9.0,
+              2.7
             ],
             "max_cm": [
-              -1.2,
-              24.8,
-              2.2
+              2.4,
+              36.0,
+              12.2
             ],
             "expect": "empty",
             "max_area_cm2": 10
