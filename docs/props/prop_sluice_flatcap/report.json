@@ -1,7 +1,7 @@
 {
   "asset": "prop_sluice_flatcap",
   "model": "public/models/props/prop_sluice_flatcap.glb",
-  "capturedAt": "2026-10-29T10:56:42.201Z",
+  "capturedAt": "2026-10-29T12:34:27.782Z",
   "budget": {
     "triangles": 20000,
     "bytes": 1572864,
@@ -11,29 +11,29 @@
       "depth": 14.8
     }
   },
-  "triangles": 15998,
-  "bytes": 1194268,
+  "triangles": 16000,
+  "bytes": 1168804,
   "dimensionsCm": {
-    "width": 14.5,
+    "width": 14.6,
     "height": 9,
-    "depth": 14.8
+    "depth": 14.9
   },
   "bbox": {
     "min": [
-      -0.07012897729873657,
+      -0.07042017579078674,
       -0.009999999776482582,
-      -0.039122454822063446
+      -0.03925617039203644
     ],
     "max": [
-      0.07512897253036499,
+      0.07542017102241516,
       0.07999999821186066,
-      0.10912245512008667
+      0.10925617069005966
     ]
   },
   "meshes": [
     {
       "name": "mesh_0",
-      "triangles": 15998,
+      "triangles": 16000,
       "material": 0
     }
   ],
@@ -45,36 +45,36 @@
       "view": "front",
       "label": "Front (0deg, +Z to camera)",
       "file": "test-output/props/prop_sluice_flatcap/front.png",
-      "bytes": 301967
+      "bytes": 309739
     },
     {
       "view": "profile",
       "label": "Profile (90deg, right side)",
       "file": "test-output/props/prop_sluice_flatcap/profile.png",
-      "bytes": 258907
+      "bytes": 258276
     },
     {
       "view": "badge",
       "label": "The tweed crown and the copper brim wire",
       "file": "test-output/props/prop_sluice_flatcap/badge.png",
-      "bytes": 677598
+      "bytes": 698442
     }
   ],
   "checks": [
     {
       "ok": true,
       "message": "the model has triangles",
-      "detail": "15998"
+      "detail": "16000"
     },
     {
       "ok": true,
       "message": "triangle count is under budget",
-      "detail": "15998 < 20000"
+      "detail": "16000 < 20000"
     },
     {
       "ok": true,
       "message": "file size is within budget",
-      "detail": "1.139 MB <= 1.5 MB"
+      "detail": "1.115 MB <= 1.5 MB"
     },
     {
       "ok": true,
@@ -89,7 +89,7 @@
     {
       "ok": true,
       "message": "width matches the spec (14.5 cm +/- 5%)",
-      "detail": "14.5 cm"
+      "detail": "14.6 cm"
     },
     {
       "ok": true,
@@ -99,7 +99,7 @@
     {
       "ok": true,
       "message": "depth matches the spec (14.8 cm +/- 5%)",
-      "detail": "14.8 cm"
+      "detail": "14.9 cm"
     },
     {
       "ok": true,
@@ -124,7 +124,7 @@
     {
       "ok": true,
       "message": "the lower half of the prop carries the prop's surface is there",
-      "detail": "36 cm2 of surface >= 4"
+      "detail": "27 cm2 of surface >= 4"
     },
     {
       "ok": true,
@@ -154,7 +154,7 @@
     {
       "ok": true,
       "message": "the renderer sees the same triangle count as the file",
-      "detail": "15998 vs 15998"
+      "detail": "16000 vs 16000"
     },
     {
       "ok": true,
@@ -163,7 +163,7 @@
     {
       "ok": true,
       "message": "the front render is a real image",
-      "detail": "301967 bytes"
+      "detail": "309739 bytes"
     }
   ]
 }
