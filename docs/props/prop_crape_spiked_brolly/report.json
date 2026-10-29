@@ -1,39 +1,39 @@
 {
   "asset": "prop_crape_spiked_brolly",
   "model": "public/models/props/prop_crape_spiked_brolly.glb",
-  "capturedAt": "2026-10-29T00:07:35.274Z",
+  "capturedAt": "2026-10-29T22:13:30.668Z",
   "budget": {
     "triangles": 25000,
     "bytes": 1572864,
     "dimensionsCm": {
-      "width": 64.7,
+      "width": 74.7,
       "height": 91.9,
-      "depth": 35
+      "depth": 50.5
     }
   },
-  "triangles": 19992,
-  "bytes": 1310572,
+  "triangles": 19988,
+  "bytes": 1275896,
   "dimensionsCm": {
-    "width": 64.7,
+    "width": 74.7,
     "height": 91.9,
-    "depth": 35
+    "depth": 50.5
   },
   "bbox": {
     "min": [
-      -0.3232794404029846,
+      -0.3736543357372284,
       -0.11900000274181366,
-      -0.17504696547985077
+      -0.25240740180015564
     ],
     "max": [
-      0.3232794404029846,
+      0.3736543357372284,
       0.800000011920929,
-      0.17504696547985077
+      0.25240740180015564
     ]
   },
   "meshes": [
     {
       "name": "mesh_0",
-      "triangles": 19992,
+      "triangles": 19988,
       "material": 0
     }
   ],
@@ -45,36 +45,36 @@
       "view": "front",
       "label": "Front (0deg, +Z to camera)",
       "file": "test-output/props/prop_crape_spiked_brolly/front.png",
-      "bytes": 122401
+      "bytes": 242403
     },
     {
       "view": "profile",
       "label": "Profile (90deg, right side)",
       "file": "test-output/props/prop_crape_spiked_brolly/profile.png",
-      "bytes": 66505
+      "bytes": 111257
     },
     {
       "view": "badge",
       "label": "The crook handle and the ferrule spike",
       "file": "test-output/props/prop_crape_spiked_brolly/badge.png",
-      "bytes": 201575
+      "bytes": 323030
     }
   ],
   "checks": [
     {
       "ok": true,
       "message": "the model has triangles",
-      "detail": "19992"
+      "detail": "19988"
     },
     {
       "ok": true,
       "message": "triangle count is under budget",
-      "detail": "19992 < 25000"
+      "detail": "19988 < 25000"
     },
     {
       "ok": true,
       "message": "file size is within budget",
-      "detail": "1.250 MB <= 1.5 MB"
+      "detail": "1.217 MB <= 1.5 MB"
     },
     {
       "ok": true,
@@ -88,8 +88,8 @@
     },
     {
       "ok": true,
-      "message": "width matches the spec (64.7 cm +/- 5%)",
-      "detail": "64.7 cm"
+      "message": "width matches the spec (74.7 cm +/- 5%)",
+      "detail": "74.7 cm"
     },
     {
       "ok": true,
@@ -98,8 +98,8 @@
     },
     {
       "ok": true,
-      "message": "depth matches the spec (35 cm +/- 5%)",
-      "detail": "35 cm"
+      "message": "depth matches the spec (50.5 cm +/- 5%)",
+      "detail": "50.5 cm"
     },
     {
       "ok": true,
@@ -124,12 +124,12 @@
     {
       "ok": true,
       "message": "the lower half of the prop carries the prop's surface is there",
-      "detail": "220 cm2 of surface >= 33"
+      "detail": "266 cm2 of surface >= 38"
     },
     {
       "ok": true,
       "message": "the upper half of the prop carries the prop's surface is there",
-      "detail": "337 cm2 of surface >= 32"
+      "detail": "636 cm2 of surface >= 37"
     },
     {
       "ok": true,
@@ -154,7 +154,7 @@
     {
       "ok": true,
       "message": "the renderer sees the same triangle count as the file",
-      "detail": "19992 vs 19992"
+      "detail": "19988 vs 19988"
     },
     {
       "ok": true,
@@ -163,7 +163,7 @@
     {
       "ok": true,
       "message": "the front render is a real image",
-      "detail": "122401 bytes"
+      "detail": "242403 bytes"
     }
   ]
 }
