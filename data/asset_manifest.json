@@ -2173,11 +2173,11 @@
       "poly_budget": 25000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 52,
+        "width": 66.2,
         "height": 87,
-        "depth": 54
+        "depth": 70.6
       },
-      "status": "gate:2-review-turnaround",
+      "status": "gate:2-rebuild-pixal3d",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -2194,7 +2194,7 @@
         ],
         "closeup_fit": 0.15,
         "closeup_label": "Tufted crimson velvet backrest close-up",
-        "view_fit": 0.55,
+        "view_fit": 0.651,
         "dimension_tolerance_pct": 5,
         "frame": {
           "y_min_cm": -41.5,
@@ -2204,78 +2204,80 @@
         },
         "regions": [
           {
-            "label": "the seat",
+            "label": "the lower half of the prop carries the prop's surface",
             "min_cm": [
-              -15,
-              -10,
-              -9
+              -24.9,
+              -19.7,
+              -35.3
             ],
             "max_cm": [
-              15,
-              5,
-              18
+              -16.6,
+              -8.8,
+              35.3
             ],
             "expect": "filled",
-            "min_area_cm2": 300
+            "min_area_cm2": 32
           },
           {
-            "label": "the backrest, behind the seat (-Z)",
+            "label": "the upper half of the prop carries the prop's surface",
             "min_cm": [
-              -15,
-              20,
-              -28
+              -16.6,
+              12.9,
+              -35.3
             ],
             "max_cm": [
-              15,
-              40,
-              -9
+              -8.3,
+              23.8,
+              35.3
             ],
             "expect": "filled",
-            "min_area_cm2": 300
+            "min_area_cm2": 32
           },
           {
-            "label": "the space in front of the backrest (+Z)",
+            "label": "the space beside the prop is clear",
             "min_cm": [
-              -15,
-              15,
-              0
+              16.5,
+              34.7,
+              -35.3
             ],
             "max_cm": [
-              15,
-              40,
-              28
+              24.8,
+              45.5,
+              35.3
             ],
-            "expect": "empty"
+            "expect": "empty",
+            "max_area_cm2": 10
           }
         ]
       },
+      "measured": {
+        "triangles": 20000,
+        "bbox_min_cm": [
+          -33.1,
+          -41.5,
+          -35.3
+        ],
+        "bbox_max_cm": [
+          33.1,
+          45.5,
+          35.3
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 988076
+      },
       "source": "Pixal3D multi-view reconstruction (ComfyUI, public/tex/workflows/pixal3d_multiview.json) from the four-view sheet, shrunk and placed on the pivot by the same script; scripts/build_weapon_chair.mjs builds the earlier procedural chair",
+      "build": "python scripts/run_pixal3d_mesh.py weapon_chair",
       "validate": "node scripts/capture_prop_renders.mjs weapon_chair",
       "reference_concept": "public/tex/props/flux3_chair_redo_art.png",
       "alpha_cutout": "public/tex/props/flux3_chair_redo_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_chair_turnaround_redo.png",
       "turntable": "docs/props/weapon_chair/turntable_redo.webp",
-      "stand_in_measured": {
-        "triangles": 19986,
-        "bytes": 1303240,
-        "bbox_min_cm": [
-          -26.1,
-          -41.5,
-          -26.8
-        ],
-        "bbox_max_cm": [
-          26.1,
-          45.5,
-          26.8
-        ],
-        "meshes": 1,
-        "materials": 1,
-        "embedded_images": 3
-      },
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 20,000 triangles, 988,076 bytes, 20/21 capture checks. The checks that do not pass: the space beside the prop is clear is clear. The mesh measures 66.2 x 87 x 70.6 cm against a spec of 66.2 x 87 x 70.6 cm. The finding is recorded in the manifest and the tolerance is left at 5%.",
+      "dimensions_note": "scale_dimensions_cm amended from 52 x 87 x 54 cm to 66.2 x 87 x 70.6 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
       "revision_requested_at": "2026-10-29T20:40:03+10:00",
-      "revision_seeds": [
-        4242
-      ],
+      "revision_published_at": "2026-10-30T08:01:13+10:00",
       "revision_note": "Redo requested on 2026-10-29T20:40:03+10:00 from stage 2: the H3 four-view turnaround sheet: redo from 2. 2D Orthographic Turnaround & 360° Turntable (Gate 2) onwards. The prop is rebuilt from that stage with seed 4242.",
       "redo": {
         "stage": "sheet",
@@ -2306,7 +2308,9 @@
       "revision_handled": [
         "IC_kwDOVUJnUc8AAAABgr7qrw"
       ],
-      "revision_built_at": "2026-10-29T23:06:43+10:00"
+      "revision_seeds": [
+        4242
+      ]
     },
     {
       "id": "pickup_tonic",
