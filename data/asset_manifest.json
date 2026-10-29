@@ -125,7 +125,7 @@
         "height": 52,
         "depth": 44.9
       },
-      "status": "gate:3-review-ingame-3d",
+      "status": "status:asset-approved",
       "pivot": {
         "convention": "grip_normalized",
         "origin": "the handle grip: the origin sits at the centre of the cordovan leather-wrapped grip handle, on the grip's axis",
