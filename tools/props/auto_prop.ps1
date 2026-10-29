@@ -28,7 +28,17 @@ $PY = if ($env:PIXAL3D_PYTHON) { $env:PIXAL3D_PYTHON } else { 'python' }
 $SCRATCH = $PSScriptRoot
 Set-Location $ROOT
 
+# The sheet the mesh was built from. It is the manifest's, because a redo
+# points the entry at the sheet it rebuilt, and the mesh is compared with the
+# sheet it was built from - not with the one that was reviewed. The stem is
+# the fallback.
 $sheet = "public/tex/props/$H3Stem.png"
+try {
+  $manifest = Get-Content (Join-Path $ROOT 'data/asset_manifest.json') -Raw | ConvertFrom-Json
+  $entry = $manifest.assets | Where-Object { $_.id -eq $AssetId }
+  if ($entry -and $entry.turnaround_sheet) { $sheet = $entry.turnaround_sheet }
+} catch { Write-Output "the manifest could not be read; the sheet is $sheet" }
+$sheetStem = [System.IO.Path]::GetFileNameWithoutExtension($sheet)
 
 function Capture($id) {
   Write-Output "=== CAPTURE $id ==="

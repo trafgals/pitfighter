@@ -34,6 +34,17 @@ import time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+# The pipeline's own comments are marked, and are not a person's. The marker is
+# on the newer ones; the heading is on all of them, so an announcement from
+# before the marker was added is still recognised as the pipeline's and is not
+# read as a reviewer's request.
+PIPELINE_HEADINGS = (
+    "### 🚀",
+    "### The revision is in the queue",
+    "### The redo is in the queue",
+    "### The revision was not read",
+)
+
 # The props this pipeline rebuilds, and the issue each is tracked on. The
 # three that did not come from this pipeline are here too - the custodian
 # helmet, the stovepipe and the private box chair - because a human's
@@ -105,7 +116,22 @@ class Issue:
 
         The pipeline's own comments are marked, and are not a person's.
         """
-        return [c for c in self.comments if PIPELINE_MARKER not in c["body"]]
+        return [c for c in self.comments if not is_pipeline_comment(c["body"])]
+
+
+def is_pipeline_comment(body):
+    """Whether a comment is the pipeline's own rather than a person's.
+
+    The marker says so on the newer comments. The heading says so on all of
+    them, so that an announcement made before the marker was introduced is not
+    taken for a reviewer's request: the pipeline's own words must never be
+    read as what the human asked for.
+    """
+    if not body:
+        return True
+    if PIPELINE_MARKER in body:
+        return True
+    return any(body.lstrip().startswith(heading) for heading in PIPELINE_HEADINGS)
 
 
 def gh(*args):
