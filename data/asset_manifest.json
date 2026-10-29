@@ -1922,11 +1922,11 @@
       "poly_budget": 20000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 9.6,
+        "width": 118.8,
         "height": 175,
-        "depth": 4
+        "depth": 37.7
       },
-      "status": "gate:2-review-turnaround",
+      "status": "gate:3-review-ingame-3d",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -1946,44 +1946,44 @@
           {
             "label": "the lower half of the prop carries the prop's surface",
             "min_cm": [
-              2.4,
+              2.7,
               -38.8,
-              -2.0
+              -18.9
             ],
             "max_cm": [
-              4.4,
+              17.6,
               -16.9,
-              2.0
+              18.9
             ],
             "expect": "filled",
-            "min_area_cm2": 15
+            "min_area_cm2": 114
           },
           {
             "label": "the upper half of the prop carries the prop's surface",
             "min_cm": [
-              2.4,
+              2.7,
               26.9,
-              -2.0
+              -18.9
             ],
             "max_cm": [
-              4.4,
+              17.6,
               48.8,
-              2.0
+              18.9
             ],
             "expect": "filled",
-            "min_area_cm2": 15
+            "min_area_cm2": 114
           },
           {
             "label": "the space beside the prop is clear",
             "min_cm": [
-              -2.0,
-              5.0,
-              -2.0
+              17.6,
+              70.6,
+              -18.9
             ],
             "max_cm": [
-              -0.4,
-              26.9,
-              2.0
+              32.5,
+              92.5,
+              18.9
             ],
             "expect": "empty",
             "max_area_cm2": 10
@@ -1996,31 +1996,34 @@
         ],
         "closeup_fit": 0.12,
         "closeup_label": "The gas shutoff hook and the lamp fitting",
-        "view_fit": 0.877,
+        "view_fit": 1.074,
         "dimension_tolerance_pct": 5
       },
-      "build": null,
+      "measured": {
+        "triangles": 16000,
+        "bbox_min_cm": [
+          -56.6,
+          -82.5,
+          -18.9
+        ],
+        "bbox_max_cm": [
+          62.2,
+          92.5,
+          18.9
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 1015944
+      },
+      "build": "python scripts/run_pixal3d_mesh.py weapon_lamplighter_pole --faces 16000",
       "validate": "node scripts/capture_prop_renders.mjs weapon_lamplighter_pole",
       "reference_concept": "public/tex/props/flux3_weapon_lamplighter_pole_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_lamplighter_pole_alpha.png",
-      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
-      "stand_in_measured": {
-        "triangles": 384,
-        "bytes": 17264,
-        "bbox_min_cm": [
-          -2,
-          -82.5,
-          -2
-        ],
-        "bbox_max_cm": [
-          7.6,
-          92.5,
-          2
-        ],
-        "meshes": 3,
-        "materials": 3,
-        "embedded_images": 0
-      }
+      "turnaround_sheet": "public/tex/props/h3_lamplighter_pole_turnaround.png",
+      "turntable": "docs/props/weapon_lamplighter_pole/turntable.webp",
+      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.",
+      "dimensions_note": "scale_dimensions_cm amended from 9.6 x 175 x 4 cm to 118.8 x 175 x 37.7 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit."
     },
     {
       "id": "weapon_chair",
