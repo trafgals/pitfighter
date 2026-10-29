@@ -1,0 +1,169 @@
+{
+  "asset": "weapon_knuckleduster",
+  "model": "public/models/props/weapon_knuckleduster.glb",
+  "capturedAt": "2026-10-29T00:48:30.865Z",
+  "budget": {
+    "triangles": 15000,
+    "bytes": 1572864,
+    "dimensionsCm": {
+      "width": 6.9,
+      "height": 5.7,
+      "depth": 3.8
+    }
+  },
+  "triangles": 12000,
+  "bytes": 864272,
+  "dimensionsCm": {
+    "width": 6.9,
+    "height": 5.7,
+    "depth": 3.8
+  },
+  "bbox": {
+    "min": [
+      -0.03431122377514839,
+      -0.014999999664723873,
+      -0.019063767045736313
+    ],
+    "max": [
+      0.03431122377514839,
+      0.041999999433755875,
+      0.019063767045736313
+    ]
+  },
+  "meshes": [
+    {
+      "name": "mesh_0",
+      "triangles": 12000,
+      "material": 0
+    }
+  ],
+  "materials": [
+    "(unnamed)"
+  ],
+  "renders": [
+    {
+      "view": "front",
+      "label": "Front (0deg, +Z to camera)",
+      "file": "test-output/props/weapon_knuckleduster/front.png",
+      "bytes": 284509
+    },
+    {
+      "view": "profile",
+      "label": "Profile (90deg, right side)",
+      "file": "test-output/props/weapon_knuckleduster/profile.png",
+      "bytes": 158009
+    },
+    {
+      "view": "badge",
+      "label": "The brass knuckle plate and its studs",
+      "file": "test-output/props/weapon_knuckleduster/badge.png",
+      "bytes": 472718
+    }
+  ],
+  "checks": [
+    {
+      "ok": true,
+      "message": "the model has triangles",
+      "detail": "12000"
+    },
+    {
+      "ok": true,
+      "message": "triangle count is under budget",
+      "detail": "12000 < 15000"
+    },
+    {
+      "ok": true,
+      "message": "file size is within budget",
+      "detail": "0.824 MB <= 1.5 MB"
+    },
+    {
+      "ok": true,
+      "message": "the mesh has no structural problems",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "no vertex position is NaN or infinite",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "message": "width matches the spec (6.9 cm +/- 5%)",
+      "detail": "6.9 cm"
+    },
+    {
+      "ok": true,
+      "message": "height matches the spec (5.7 cm +/- 5%)",
+      "detail": "5.7 cm"
+    },
+    {
+      "ok": true,
+      "message": "depth matches the spec (3.8 cm +/- 5%)",
+      "detail": "3.8 cm"
+    },
+    {
+      "ok": true,
+      "message": "the base sits where the pivot puts it (-1.5 cm)",
+      "detail": "-1.5 cm"
+    },
+    {
+      "ok": true,
+      "message": "the top sits where the pivot puts it (4.2 cm)",
+      "detail": "4.2 cm"
+    },
+    {
+      "ok": true,
+      "message": "the asset is centred on X (0 cm)",
+      "detail": "0 cm"
+    },
+    {
+      "ok": true,
+      "message": "the asset is centred on Z (0 cm)",
+      "detail": "0 cm"
+    },
+    {
+      "ok": true,
+      "message": "the lower half of the prop carries the prop's surface is there",
+      "detail": "10 cm2 of surface >= 4"
+    },
+    {
+      "ok": true,
+      "message": "the upper half of the prop carries the prop's surface is there",
+      "detail": "7 cm2 of surface >= 4"
+    },
+    {
+      "ok": true,
+      "message": "the space beside the prop is clear is clear",
+      "detail": "2 cm2 of surface <= 10"
+    },
+    {
+      "ok": true,
+      "message": "every asset the page asked for was served",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the model loads in a WebGL renderer without errors",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the renderer reported no load errors",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the renderer sees the same triangle count as the file",
+      "detail": "12000 vs 12000"
+    },
+    {
+      "ok": true,
+      "message": "every verification render has real content"
+    },
+    {
+      "ok": true,
+      "message": "the front render is a real image",
+      "detail": "284509 bytes"
+    }
+  ]
+}
