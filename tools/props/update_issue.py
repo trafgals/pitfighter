@@ -197,12 +197,14 @@ def status_section(asset_id, entry, report):
 
 REVIEW_HEADING = "### Human-in-the-Loop Review Controls"
 
-REVIEW_POINTER = (
-    "\n\n"
+# The two things the pointer says, kept apart so each can be added on its own.
+REVIEW_GUIDE = (
     "> The rebuild is reviewed here: the renders and the checks are in the 3D\n"
     "> section above, and how to judge them and sign them off is written up in\n"
     "> `docs/props/README.md`.\n"
-    ">\n"
+)
+
+REVIEW_ACTIONS = (
     "> To ask for a change, comment `/revision` and say what is wrong: the prop\n"
     "> goes back into the build queue with a new seed, and the new renders are\n"
     "> published here when it lands. To approve it, comment `/approve-3d`.\n"
@@ -210,16 +212,24 @@ REVIEW_POINTER = (
 
 
 def add_review_pointer(body):
-    """Point the issue's own review controls at the review guide.
+    """Point the issue's own review controls at the review guide and the commands.
 
     The controls say how to approve, but not where to look - and a reviewer
     who opens the issue should not have to go looking for the guide.
+
+    The two halves are added one at a time. An issue written before the
+    revision command existed already carries the guide, and a check that says
+    "the guide is there, so there is nothing to do" would leave the commands
+    out of it for ever.
     """
-    if "docs/props/README.md" in body:
-        return body
     if REVIEW_HEADING not in body:
         return body
-    return body.replace(REVIEW_HEADING, REVIEW_HEADING + REVIEW_POINTER, 1)
+    if "/revision" in body:
+        return body
+    guide = REVIEW_GUIDE.strip()
+    if guide in body:
+        return body.replace(guide, REVIEW_GUIDE + REVIEW_ACTIONS, 1)
+    return body.replace(REVIEW_HEADING, REVIEW_HEADING + "\n\n" + REVIEW_GUIDE + REVIEW_ACTIONS, 1)
 
 
 def main():
