@@ -1,7 +1,7 @@
 {
   "asset": "prop_winch_gold_nightstick",
   "model": "public/models/props/prop_winch_gold_nightstick.glb",
-  "capturedAt": "2026-10-29T23:23:53.781Z",
+  "capturedAt": "2026-10-29T23:42:53.387Z",
   "budget": {
     "triangles": 16000,
     "bytes": 1572864,
@@ -11,8 +11,8 @@
       "depth": 4.4
     }
   },
-  "triangles": 16000,
-  "bytes": 892236,
+  "triangles": 12798,
+  "bytes": 804360,
   "dimensionsCm": {
     "width": 4.9,
     "height": 45,
@@ -20,20 +20,20 @@
   },
   "bbox": {
     "min": [
-      -0.02432123012840748,
+      -0.024361316114664078,
       -0.09000000357627869,
-      -0.022033998742699623
+      -0.022073853760957718
     ],
     "max": [
-      0.02432123012840748,
+      0.024361316114664078,
       0.36000001430511475,
-      0.022033998742699623
+      0.022073853760957718
     ]
   },
   "meshes": [
     {
       "name": "mesh_0",
-      "triangles": 16000,
+      "triangles": 12798,
       "material": 0
     }
   ],
@@ -45,36 +45,36 @@
       "view": "front",
       "label": "Front (0deg, +Z to camera)",
       "file": "test-output/props/prop_winch_gold_nightstick/front.png",
-      "bytes": 100258
+      "bytes": 100809
     },
     {
       "view": "profile",
       "label": "Profile (90deg, right side)",
       "file": "test-output/props/prop_winch_gold_nightstick/profile.png",
-      "bytes": 92218
+      "bytes": 91884
     },
     {
       "view": "badge",
       "label": "The gold engraving and the click catch",
       "file": "test-output/props/prop_winch_gold_nightstick/badge.png",
-      "bytes": 184887
+      "bytes": 305230
     }
   ],
   "checks": [
     {
       "ok": true,
       "message": "the model has triangles",
-      "detail": "16000"
+      "detail": "12798"
     },
     {
-      "ok": false,
+      "ok": true,
       "message": "triangle count is under budget",
-      "detail": "16000 < 16000"
+      "detail": "12798 < 16000"
     },
     {
       "ok": true,
       "message": "file size is within budget",
-      "detail": "0.851 MB <= 1.5 MB"
+      "detail": "0.767 MB <= 1.5 MB"
     },
     {
       "ok": true,
@@ -100,11 +100,6 @@
       "ok": true,
       "message": "depth matches the spec (4.4 cm +/- 5%)",
       "detail": "4.4 cm"
-    },
-    {
-      "ok": false,
-      "message": "the close-up is framed on a declared target",
-      "detail": "the manifest names no closeup_mesh, no closeup_focus and no front feature"
     },
     {
       "ok": true,
@@ -139,7 +134,7 @@
     {
       "ok": false,
       "message": "the space beside the prop is clear is clear",
-      "detail": "13 cm2 of surface <= 10"
+      "detail": "12 cm2 of surface <= 10"
     },
     {
       "ok": true,
@@ -159,7 +154,7 @@
     {
       "ok": true,
       "message": "the renderer sees the same triangle count as the file",
-      "detail": "16000 vs 16000"
+      "detail": "12798 vs 12798"
     },
     {
       "ok": true,
@@ -168,7 +163,7 @@
     {
       "ok": true,
       "message": "the front render is a real image",
-      "detail": "100258 bytes"
+      "detail": "100809 bytes"
     }
   ]
 }

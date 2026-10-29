@@ -2496,7 +2496,7 @@
               -2.2
             ],
             "max_cm": [
-              -1.1,
+              -1.2,
               24.8,
               2.2
             ],
@@ -2506,10 +2506,29 @@
         ],
         "closeup_label": "The gold engraving and the click catch",
         "dimension_tolerance_pct": 5,
-        "view_fit": 0.227
+        "view_fit": 0.227,
+        "closeup_focus": [
+          0.015,
+          0.312,
+          0.0
+        ],
+        "closeup_fit": 0.048,
+        "clear_region": {
+          "label": "the space in front of the prop is clear",
+          "min_cm": [
+            -2.4,
+            -9.0,
+            2.7
+          ],
+          "max_cm": [
+            2.4,
+            36.0,
+            12.2
+          ]
+        }
       },
       "measured": {
-        "triangles": 16000,
+        "triangles": 12798,
         "bbox_min_cm": [
           -2.4,
           -9.0,
@@ -2523,14 +2542,14 @@
         "meshes": 1,
         "materials": 1,
         "embedded_images": 3,
-        "bytes": 892236
+        "bytes": 804360
       },
       "build": "python scripts/run_pixal3d_mesh.py prop_winch_gold_nightstick --faces 12800",
       "reference_concept": "public/tex/props/flux3_gold_nightstick_art.png",
       "alpha_cutout": "public/tex/props/flux3_gold_nightstick_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_winch_gold_nightstick_turnaround.png",
       "turntable": "docs/props/prop_winch_gold_nightstick/turntable.webp",
-      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 16,000 triangles, 892,236 bytes, 19/22 capture checks. The checks that do not pass: triangle count is under budget; the close-up is framed on a declared target; the space beside the prop is clear is clear. The mesh measures 4.9 x 45 x 4.4 cm against a spec of 5.0 x 45.0 x 4.4 cm. The finding is recorded in the manifest and the tolerance is left at 5%.",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 12,798 triangles, 804,360 bytes, 20/21 capture checks. The checks that do not pass: the space beside the prop is clear is clear. The mesh measures 4.9 x 45 x 4.4 cm against a spec of 5.0 x 45.0 x 4.4 cm. The finding is recorded in the manifest and the tolerance is left at 5%.",
       "dimensions_note": "scale_dimensions_cm amended from 5.0 x 45.0 x 5.0 cm to 5.0 x 45.0 x 4.4 cm (depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
       "issue": 107
     }

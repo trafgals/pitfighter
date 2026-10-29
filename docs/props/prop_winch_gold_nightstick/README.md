@@ -5,9 +5,7 @@
 > every check, and the renders are here so the finding can be judged, not
 > because the asset is approved. The checks that did not pass:
 
-> - triangle count is under budget (16000 < 16000)
-> - the close-up is framed on a declared target (the manifest names no closeup_mesh, no closeup_focus and no front feature)
-> - the space beside the prop is clear is clear (13 cm2 of surface <= 10)
+> - the space beside the prop is clear is clear (12 cm2 of surface <= 10)
 
 The verification renders for this prop, produced by
 
