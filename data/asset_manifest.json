@@ -1022,7 +1022,7 @@
         "height": 33,
         "depth": 21.2
       },
-      "status": "gate:3-review-ingame-3d",
+      "status": "status:asset-approved",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -1813,7 +1813,7 @@
         "height": 33,
         "depth": 18.2
       },
-      "status": "gate:3-review-ingame-3d",
+      "status": "status:asset-approved",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
