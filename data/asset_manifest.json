@@ -979,11 +979,11 @@
       "poly_budget": 20000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 32.3,
+        "width": 34.7,
         "height": 23.8,
-        "depth": 36.9
+        "depth": 34.8
       },
-      "status": "gate:2-review-turnaround",
+      "status": "gate:3-review-ingame-3d",
       "pivot": {
         "convention": "head_socket_normalized",
         "origin": "the base opening: the crown's head-entry rim lies on the y=0 plane, centred on the hat's axis",
@@ -1003,29 +1003,29 @@
           {
             "label": "the lower half of the prop carries the prop's surface",
             "min_cm": [
-              4.0,
-              -3.5,
-              -22.0
+              -8.7,
+              -3.6,
+              -21.0
             ],
             "max_cm": [
-              8.1,
+              -4.3,
               -0.6,
-              14.9
+              13.9
             ],
             "expect": "filled",
-            "min_area_cm2": 4
+            "min_area_cm2": 5
           },
           {
             "label": "the upper half of the prop carries the prop's surface",
             "min_cm": [
-              4.0,
-              5.4,
-              -22.0
+              -8.7,
+              8.4,
+              -21.0
             ],
             "max_cm": [
-              8.1,
-              8.4,
-              14.9
+              -4.3,
+              11.3,
+              13.9
             ],
             "expect": "filled",
             "min_area_cm2": 4
@@ -1033,14 +1033,14 @@
           {
             "label": "the space beside the prop is clear",
             "min_cm": [
-              -16.1,
+              -17.4,
               11.3,
-              -22.0
+              -21.0
             ],
             "max_cm": [
-              -12.1,
+              -13.0,
               14.3,
-              14.9
+              13.9
             ],
             "expect": "empty",
             "max_area_cm2": 10
@@ -1057,30 +1057,31 @@
         "dimension_tolerance_pct": 5,
         "rim_mesh": ""
       },
-      "build": null,
+      "measured": {
+        "triangles": 16000,
+        "bbox_min_cm": [
+          -17.3,
+          -9.5,
+          -21.0
+        ],
+        "bbox_max_cm": [
+          17.3,
+          14.3,
+          13.9
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 1159860
+      },
+      "build": "python scripts/run_pixal3d_mesh.py prop_rook_souwester --faces 16000",
       "validate": "node scripts/capture_prop_renders.mjs prop_rook_souwester",
       "reference_concept": "public/tex/props/flux3_prop_rook_souwester_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_rook_souwester_alpha.png",
-      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
-      "stand_in_measured": {
-        "triangles": 856,
-        "bytes": 26244,
-        "bbox_min_cm": [
-          -16.2,
-          -9.5,
-          -22
-        ],
-        "bbox_max_cm": [
-          16.2,
-          14.3,
-          14.9
-        ],
-        "meshes": 3,
-        "materials": 3,
-        "embedded_images": 0
-      },
       "turnaround_sheet": "public/tex/props/h3_rook_souwester_turnaround.png",
-      "turntable": "docs/props/prop_rook_souwester/turntable.webp"
+      "turntable": "docs/props/prop_rook_souwester/turntable.webp",
+      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.",
+      "dimensions_note": "scale_dimensions_cm amended from 32.3 x 23.8 x 36.9 cm to 34.7 x 23.8 x 34.8 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit."
     },
     {
       "id": "prop_bulwark_pistons",
@@ -1302,7 +1303,9 @@
         "meshes": 3,
         "materials": 3,
         "embedded_images": 0
-      }
+      },
+      "turnaround_sheet": "public/tex/props/h3_crump_samovar_turnaround.png",
+      "turntable": "docs/props/prop_crump_samovar/turntable.webp"
     },
     {
       "id": "weapon_knuckleduster",
@@ -1732,8 +1735,8 @@
       "validate": "node scripts/capture_prop_renders.mjs weapon_nail_bat",
       "reference_concept": "public/tex/props/flux3_nail_bat_redo_art.png",
       "alpha_cutout": "public/tex/props/flux3_nail_bat_redo_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_nail_bat_turnaround.png",
-      "turntable": "docs/props/weapon_nail_bat/turntable.webp",
+      "turnaround_sheet": "public/tex/props/h3_nail_bat_turnaround_redo.png",
+      "turntable": "docs/props/weapon_nail_bat/turntable_redo.webp",
       "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.",
       "dimensions_note": "scale_dimensions_cm amended from 125.8 x 84 x 43.4 cm to 125.8 x 84 x 37.8 cm (depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
       "revision_requested_at": "2026-10-29T20:40:03+10:00",
@@ -1778,12 +1781,14 @@
         "length": 175,
         "done": [
           "art",
-          "cutout"
+          "cutout",
+          "sheet"
         ],
         "cutout": "public/tex/props/flux3_nail_bat_redo_alpha.png",
-        "sheet": null,
+        "sheet": "public/tex/props/h3_nail_bat_turnaround_redo.png",
         "previous_cutout": null,
-        "previous_sheet": null
+        "previous_sheet": null,
+        "claimed_at": "2026-10-29T21:35:26+10:00"
       }
     },
     {
