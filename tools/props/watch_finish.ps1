@@ -44,7 +44,9 @@ $queue = @(
   @{ id='weapon_cleaver';                 issue=97;  stem='h3_cleaver_turnaround' }
   @{ id='weapon_piston_gauntlet';         issue=98;  stem='h3_piston_gauntlet_turnaround' }
   @{ id='weapon_lamplighter_pole';        issue=99;  stem='h3_lamplighter_pole_turnaround' }
+  @{ id='weapon_chair';                   issue=100; stem='h3_chair_turnaround' }
   @{ id='pickup_tonic';                   issue=101; stem='h3_tonic_turnaround' }
+  @{ id='prop_winch_gold_nightstick';     issue=107; stem='h3_winch_gold_nightstick_turnaround' }
 )
 
 # Where every prop stands, read from the manifest under the manifest's lock.
