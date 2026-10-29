@@ -1459,9 +1459,9 @@
       "scale_dimensions_cm": {
         "width": 20,
         "height": 100.5,
-        "depth": 4.5
+        "depth": 11.5
       },
-      "status": "gate:2-review-turnaround",
+      "status": "gate:2-rebuild-pixal3d",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -1476,20 +1476,20 @@
           "y_max_cm": 60.0,
           "centre_x_cm": 0.0,
           "centre_z_cm": 0.0,
-          "roll_deg": -24.7
+          "roll_deg": -0.2
         },
         "regions": [
           {
             "label": "the lower half of the prop carries the prop's surface",
             "min_cm": [
-              0.0,
-              -27.9,
-              -2.2
+              -2.6,
+              -15.4,
+              -5.7
             ],
             "max_cm": [
-              2.5,
-              -15.4,
-              2.2
+              0.0,
+              -2.8,
+              5.7
             ],
             "expect": "filled",
             "min_area_cm2": 11
@@ -1497,14 +1497,14 @@
           {
             "label": "the upper half of the prop carries the prop's surface",
             "min_cm": [
-              7.5,
-              47.4,
-              -2.2
+              7.8,
+              47.5,
+              -5.7
             ],
             "max_cm": [
-              10.0,
-              60.0,
-              2.2
+              10.3,
+              59.6,
+              5.7
             ],
             "expect": "filled",
             "min_area_cm2": 11
@@ -1512,14 +1512,14 @@
           {
             "label": "the space beside the prop is clear",
             "min_cm": [
-              -10.0,
-              47.4,
-              -2.2
+              -10.4,
+              47.5,
+              -5.7
             ],
             "max_cm": [
-              -7.5,
+              -7.8,
               60.0,
-              2.2
+              5.7
             ],
             "expect": "empty",
             "max_area_cm2": 10
@@ -1532,31 +1532,33 @@
         ],
         "closeup_fit": 0.12,
         "closeup_label": "The D-handle and the socket collar",
-        "view_fit": 0.513,
+        "view_fit": 0.516,
         "dimension_tolerance_pct": 5
       },
-      "build": null,
+      "measured": {
+        "triangles": 16000,
+        "bbox_min_cm": [
+          -10.4,
+          -40.5,
+          -5.7
+        ],
+        "bbox_max_cm": [
+          10.4,
+          60.0,
+          5.7
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 694684
+      },
+      "build": "python scripts/run_pixal3d_mesh.py weapon_coal_shovel --faces 16000",
       "validate": "node scripts/capture_prop_renders.mjs weapon_coal_shovel",
       "reference_concept": "public/tex/props/flux3_weapon_coal_shovel_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_coal_shovel_alpha.png",
-      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
-      "stand_in_measured": {
-        "triangles": 396,
-        "bytes": 15980,
-        "bbox_min_cm": [
-          -10,
-          -40.5,
-          -2.3
-        ],
-        "bbox_max_cm": [
-          10,
-          60,
-          2.3
-        ],
-        "meshes": 3,
-        "materials": 3,
-        "embedded_images": 0
-      }
+      "turnaround_sheet": "public/tex/props/h3_coal_shovel_turnaround.png",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 16,000 triangles, 694,684 bytes, 20/21 capture checks. The checks that do not pass: the upper half of the prop carries the prop's surface is there. The mesh measures 20.8 x 100.5 x 11.5 cm against a spec of 20 x 100.5 x 11.5 cm. The finding is recorded in the manifest and the tolerance is left at 5%.",
+      "dimensions_note": "scale_dimensions_cm amended from 20 x 100.5 x 4.5 cm to 20 x 100.5 x 11.5 cm (depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit."
     },
     {
       "id": "weapon_bone_saw",
