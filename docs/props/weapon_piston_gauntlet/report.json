@@ -1,0 +1,169 @@
+{
+  "asset": "weapon_piston_gauntlet",
+  "model": "public/models/props/weapon_piston_gauntlet.glb",
+  "capturedAt": "2026-10-29T04:08:41.279Z",
+  "budget": {
+    "triangles": 25000,
+    "bytes": 1572864,
+    "dimensionsCm": {
+      "width": 34.4,
+      "height": 33,
+      "depth": 18.2
+    }
+  },
+  "triangles": 19990,
+  "bytes": 1474344,
+  "dimensionsCm": {
+    "width": 34.4,
+    "height": 33,
+    "depth": 17.6
+  },
+  "bbox": {
+    "min": [
+      -0.17197038233280182,
+      -0.14000000059604645,
+      -0.07206867635250092
+    ],
+    "max": [
+      0.17197038233280182,
+      0.1899999976158142,
+      0.10406867414712906
+    ]
+  },
+  "meshes": [
+    {
+      "name": "mesh_0",
+      "triangles": 19990,
+      "material": 0
+    }
+  ],
+  "materials": [
+    "(unnamed)"
+  ],
+  "renders": [
+    {
+      "view": "front",
+      "label": "Front (0deg, +Z to camera)",
+      "file": "test-output/props/weapon_piston_gauntlet/front.png",
+      "bytes": 238518
+    },
+    {
+      "view": "profile",
+      "label": "Profile (90deg, right side)",
+      "file": "test-output/props/weapon_piston_gauntlet/profile.png",
+      "bytes": 146765
+    },
+    {
+      "view": "badge",
+      "label": "The piston stack and its valve gear",
+      "file": "test-output/props/weapon_piston_gauntlet/badge.png",
+      "bytes": 487097
+    }
+  ],
+  "checks": [
+    {
+      "ok": true,
+      "message": "the model has triangles",
+      "detail": "19990"
+    },
+    {
+      "ok": true,
+      "message": "triangle count is under budget",
+      "detail": "19990 < 25000"
+    },
+    {
+      "ok": true,
+      "message": "file size is within budget",
+      "detail": "1.406 MB <= 1.5 MB"
+    },
+    {
+      "ok": true,
+      "message": "the mesh has no structural problems",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "no vertex position is NaN or infinite",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "message": "width matches the spec (34.4 cm +/- 5%)",
+      "detail": "34.4 cm"
+    },
+    {
+      "ok": true,
+      "message": "height matches the spec (33 cm +/- 5%)",
+      "detail": "33 cm"
+    },
+    {
+      "ok": true,
+      "message": "depth matches the spec (18.2 cm +/- 5%)",
+      "detail": "17.6 cm"
+    },
+    {
+      "ok": true,
+      "message": "the base sits where the pivot puts it (-14 cm)",
+      "detail": "-14 cm"
+    },
+    {
+      "ok": true,
+      "message": "the top sits where the pivot puts it (19 cm)",
+      "detail": "19 cm"
+    },
+    {
+      "ok": true,
+      "message": "the asset is centred on X (0 cm)",
+      "detail": "0 cm"
+    },
+    {
+      "ok": true,
+      "message": "the asset is centred on Z (1.6 cm)",
+      "detail": "1.6 cm"
+    },
+    {
+      "ok": true,
+      "message": "the lower half of the prop carries the prop's surface is there",
+      "detail": "80 cm2 of surface >= 6"
+    },
+    {
+      "ok": true,
+      "message": "the upper half of the prop carries the prop's surface is there",
+      "detail": "89 cm2 of surface >= 6"
+    },
+    {
+      "ok": true,
+      "message": "the space beside the prop is clear is clear",
+      "detail": "0 cm2 of surface <= 10"
+    },
+    {
+      "ok": true,
+      "message": "every asset the page asked for was served",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the model loads in a WebGL renderer without errors",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the renderer reported no load errors",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the renderer sees the same triangle count as the file",
+      "detail": "19990 vs 19990"
+    },
+    {
+      "ok": true,
+      "message": "every verification render has real content"
+    },
+    {
+      "ok": true,
+      "message": "the front render is a real image",
+      "detail": "238518 bytes"
+    }
+  ]
+}
