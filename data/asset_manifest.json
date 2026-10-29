@@ -1768,7 +1768,7 @@
         "request": "redo from BiRefNet Watertight Alpha Cutout onwards\nensure the initial view captures the whole bat",
         "reason": "the request names 'alpha cutout', which is the watertight alpha cutout (BiRefNet), over the art that is already there",
         "seed": 7777,
-        "length": null,
+        "length": 175,
         "done": [
           "art",
           "cutout"
@@ -2239,7 +2239,7 @@
         "request": "redo from 2. 2D Orthographic Turnaround & 360° Turntable (Gate 2) onwards",
         "reason": "the request names '360', which is stage 2: the H3 four-view turnaround sheet",
         "seed": 4242,
-        "length": null,
+        "length": 175,
         "done": [
           "art",
           "cutout"
