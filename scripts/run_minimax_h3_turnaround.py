@@ -237,6 +237,32 @@ def peak_before(scores, index, start, smooth=5):
     peak = peaks[-1] if peaks else trough + int(np.argmax(smoothed[trough:limit]))
     return start + peak, float(smoothed[peak] - smoothed[trough])
 
+def highest_peak_before_trough(scores, start, smooth=5):
+    """The strongest peak before the curve's trough, and its rise.
+
+    The rise is measured over the valley just before the peak - the side view
+    the peak stands over - rather than over the trough, which in a clip that
+    turns a full circle is the *other* side view and lies after the back.
+    """
+    padded = np.pad(scores, smooth // 2, mode="edge")
+    smoothed = np.convolve(padded, np.ones(smooth) / smooth, mode="valid")
+    trough = int(np.argmin(smoothed))
+    best = None
+    for i in range(1, trough):
+        if smoothed[i] >= smoothed[i - 1] and smoothed[i] > smoothed[i + 1]:
+            valley = 0
+            for j in range(i - 1, 0, -1):
+                if smoothed[j] <= smoothed[j - 1] and smoothed[j] < smoothed[j + 1]:
+                    valley = j
+                    break
+            rise = float(smoothed[i] - smoothed[valley])
+            if best is None or rise > best[1]:
+                best = (start + i, rise)
+    if best is None:
+        return start + trough, 0.0
+    return best
+
+
 def pick_views(frames, symmetric=False, min_rise=0.15, min_colour_rise=0.06, smooth=5, max_tumble=0.30):
     """Frame indices of the front, left, back and right views, and whether right is the left mirrored.
 
@@ -264,6 +290,13 @@ def pick_views(frames, symmetric=False, min_rise=0.15, min_colour_rise=0.06, smo
     A clip that tumbles in the image plane is refused whatever its outline
     does: the object lies down and stands up rather than turning about its own
     axis, so it never shows a back view at all.
+
+    A clip that turns a full circle comes round to the front again, and the
+    front matches its own mirror better than the back does, so the largest
+    peak can be the last frame of the clip. The back is then an earlier peak:
+    the peak before it, or - when the curve's own trough is late in the clip
+    and there is no peak to be had before the tail - the strongest peak before
+    that trough.
     """
     sil = [silhouette(f) for f in frames]
     grey = [greyscale(f) for f in frames]
@@ -272,6 +305,7 @@ def pick_views(frames, symmetric=False, min_rise=0.15, min_colour_rise=0.06, smo
     start = len(frames) // 4
     scores = np.array([iou(s, mirrored_front) for s in sil[start:]])
     back, rise = peak_after_trough(scores, start, smooth)
+    chosen = scores
 
     # the object's own pixels, where the colour is worth reading
     mask = sil[0] | sil[start]
@@ -282,6 +316,7 @@ def pick_views(frames, symmetric=False, min_rise=0.15, min_colour_rise=0.06, smo
         # the outline does not change as the prop turns: the colour is asked
         back, rise = colour_back, colour_rise
         threshold = min_colour_rise
+        chosen = colour_scores
     else:
         threshold = min_rise
 
@@ -300,6 +335,19 @@ def pick_views(frames, symmetric=False, min_rise=0.15, min_colour_rise=0.06, smo
         earlier, earlier_rise = peak_before(scores, back, start, smooth)
         if earlier_rise >= threshold and earlier < len(frames) - smooth:
             back, rise = earlier, earlier_rise
+        else:
+            # the outline has no peak to offer, so the colour is asked
+            earlier, earlier_rise = peak_before(colour_scores, back, start, smooth)
+            if earlier_rise >= threshold and earlier < len(frames) - smooth:
+                back, rise = earlier, earlier_rise
+            else:
+                # neither curve has a peak before the tail. That happens when
+                # the curve's own trough is late in the clip - the sides are
+                # then the valley before the back, and the back is the
+                # strongest peak before that trough.
+                earlier, earlier_rise = highest_peak_before_trough(chosen, start, smooth)
+                if earlier_rise >= threshold and earlier < len(frames) - smooth:
+                    back, rise = earlier, earlier_rise
 
     if back >= len(frames) - smooth or rise < threshold:
         raise RuntimeError(
