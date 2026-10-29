@@ -122,6 +122,9 @@ export const SPEED = { walk: 0.05, run: 0.1, hop: 0.045, bounce: 0.03 };
 export const DASH = { dur: 20, move: 12, speed: 0.13, strikeFrom: 4 };
 export const EVADE = { dur: 34, move: 14, speed: 0.075, invuln: 15 };
 export const TAUNT = { dur: 70, fury: 25 };
+// The Gallery's gift: thrown from the boxes into the pit, and picked up with
+// L1 (BTN.USE) by anyone standing near it.
+export const GIFT = { range: 1.2, gravity: 0.008, bounce: 0.3, drop: 0.4 };
 // one leg: hop, moving only in the air; no legs: bounce along on the torso, the same way but slower
 export const HOP_CYCLE = 24;
 export const HOP_AIR = 14;

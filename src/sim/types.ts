@@ -131,6 +131,8 @@ export interface Fighter {
   hopPhase: number;
   reattachPart: PartId | null;
   reattachPickup: number;
+  /** the prop they are holding, if any ("" for empty hands) */
+  weapon: string;
   prevButtons: number;
   pressed: number[]; // frame each button was last pressed (input buffer)
   toilet: number; // objective progress in frames (seated on the toilet, holding the banner), kept between turns
@@ -162,6 +164,42 @@ export interface Pickup {
 
 /** what the arena throws at the fighters: it warns, then strikes (see HAZARDS) */
 export type HazardKind = "geyser" | "beam" | "boulder" | "arrows";
+
+/**
+ * Something lying on the floor of an arena.
+ *
+ * A severed limb and one of the Gallery's gifts are both things that lie on
+ * the floor and are bounded by the arena the same way, so the arena's rules
+ * are written against this and not against either of them.
+ */
+export interface OnFloor {
+  id: number;
+  owner: number;
+  x: number;
+  y: number;
+  z: number;
+  vx: number;
+  vy: number;
+  vz: number;
+  /** frames of going away left; 0 while it is still there */
+  burning: number;
+}
+
+/**
+ * A gift the Gallery has thrown into the pit.
+ *
+ * The Gallery is the crowd: a fighter who does something grand appeals to it
+ * and it answers with a weapon, thrown from the boxes into the pit for
+ * anyone to pick up. The gift is a prop on the floor until a fighter takes
+ * it, and a weapon in their hand after that.
+ */
+export interface Gift extends OnFloor {
+  /** the prop that shows it */
+  prop: string;
+  /** the Gallery's throw it is */
+  throw: string;
+  spin: number;
+}
 
 export interface Geyser {
   kind: HazardKind;
@@ -234,6 +272,7 @@ export interface GameEvent {
     | "launch" // a launcher sends a fighter up
     | "bounce" // a juggled body bounces off the floor
     | "airgrab" // caught out of the air (what: the grab's name)
+    | "gift" // the Gallery threw a gift, or a fighter took one (what: the throw's id)
     | "crunch"; // a flying body hits a wall, a prop or another fighter
   a: number; // actor
   b?: number; // other party
@@ -252,6 +291,9 @@ export interface WorldState {
   fighters: Fighter[];
   pickups: Pickup[];
   nextPickupId: number;
+  /** the gifts the Gallery has thrown into the pit, lying on the floor */
+  gifts: Gift[];
+  nextGiftId: number;
   geysers: Geyser[]; // the arena's hazards (geysers, falling beams, boulders, arrow volleys)
   nextGeyser: number; // frame of the next hazard
   toiletOccupant: number; // the fighter holding the objective (toilet, banner), -1 none

@@ -11,11 +11,14 @@ import {
   type Fighter,
   type FighterState,
   type GameEvent,
+  type Gift,
   type Height,
   type PartId,
   type PlayerInput,
   type WorldState,
 } from "./types";
+import { CHARACTERS, THROW_BY_ID } from "../data/characters";
+import { GIFT_PROPS, PROP_BY_ID, wieldedPropFor, type PropSpec } from "../data/props";
 import {
   AIR,
   BUFFER,
@@ -43,6 +46,7 @@ import {
   DASH,
   EVADE,
   FURY,
+  GIFT,
   HITSTOP,
   hitstopFor,
   SPECIAL_CHORD,
@@ -196,6 +200,9 @@ export class World {
         hopPhase: 0,
         reattachPart: null,
         reattachPickup: -1,
+        // a fighter whose own weapon has been built and approved starts with
+        // it in their hand
+        weapon: wieldedPropFor(CHARACTERS[style].id)?.id ?? "",
         prevButtons: 0,
         pressed: BUTTONS.map(() => -1000),
         toilet: 0,
@@ -208,6 +215,8 @@ export class World {
       })),
       pickups: [],
       nextPickupId: 1,
+      gifts: [],
+      nextGiftId: 1,
       geysers: [],
       nextGeyser: 300,
       toiletOccupant: -1,
@@ -244,6 +253,7 @@ export class World {
     for (const f of fs) if (!this.frozen[f.id]) this.resolveThrown(f);
     this.physics();
     this.updatePickups();
+    this.updateGifts();
     this.arena.update(this);
     if (this.practice) this.refill();
     if (!this.arena.respawn && !this.practice && s.winner < 0) {
@@ -556,6 +566,8 @@ export class World {
         break;
       case "taunt":
         this.addFury(f, TAUNT.fury);
+        // the appeal: the Gallery answers and throws a gift into the pit
+        this.throwGift(f);
         this.setState(f, "idle");
         break;
       case "airslammed":
@@ -884,6 +896,13 @@ export class World {
     const s = this.s;
     if (this.takeLimb(f, false)) return true;
     if (this.arena.use(this, f)) return true;
+    // a gift the Gallery threw: it is for anyone, so any fighter may take it
+    for (const g of s.gifts) {
+      if (g.z > 0.25) continue;
+      if (Math.hypot(g.x - f.x, g.y - f.y) >= GIFT.range) continue;
+      this.takeGift(f, g);
+      return true;
+    }
     for (const p of s.pickups) {
       if (p.owner === f.id || p.burning > 0 || p.z > 0.25) continue;
       if (Math.hypot(p.x - f.x, p.y - f.y) < REATTACH.range) {
@@ -895,6 +914,112 @@ export class World {
       }
     }
     return false;
+  }
+
+  /**
+   * The Gallery's answer to an appeal: a gift thrown from the boxes into the
+   * pit, for anyone to pick up.
+   *
+   * Which gift is the fighter's own: the Gallery throws what their weapon
+   * affinity suits, and what they favour most of all. A fighter whose
+   * affinity suits nothing the Gallery has gets whatever it has.
+   */
+  private throwGift(f: Fighter): void {
+    const gift = this.giftFor(f);
+    if (!gift) return;
+    const s = this.s;
+    const a = this.rng.range(0, Math.PI * 2);
+    // the gift comes down out of the boxes and lands beside the fighter who
+    // appealed. It has to land where it can be picked up: the fire round the
+    // edge of the pit and the gaps in the ground are not places a gift stays,
+    // so the landing spot is pulled in towards the fighter until the arena
+    // says it is good.
+    let r = this.rng.range(0.6, 2.4);
+    let x = f.x;
+    let y = f.y;
+    for (let i = 0; i < 8; i++) {
+      x = f.x + Math.cos(a) * r;
+      y = f.y + Math.sin(a) * r;
+      if (this.arena.canLand(this, x, y)) break;
+      r *= 0.6;
+      if (r < 0.2) {
+        x = f.x;
+        y = f.y;
+        break;
+      }
+    }
+    s.gifts.push({
+      id: s.nextGiftId++,
+      prop: gift.id,
+      throw: gift.throw,
+      owner: f.id,
+      x,
+      y,
+      z: 2.4, // it comes down out of the boxes
+      vx: 0,
+      vy: 0,
+      vz: 0,
+      burning: 0,
+      spin: this.rng.range(-0.09, 0.09),
+    });
+    this.ev({ kind: "gift", a: f.id, what: gift.throw, x, y });
+  }
+
+  /** The gift the Gallery would throw this fighter: none, if it has none. */
+  private giftFor(f: Fighter): PropSpec | null {
+    const pool = GIFT_PROPS;
+    if (!pool.length) return null;
+    const fighter = CHARACTERS[f.style];
+    const affinity = fighter.moves.weapons.affinity;
+    const signature = fighter.moves.weapons.signature;
+    const suits = pool.filter((p) => {
+      const t = THROW_BY_ID[p.throw];
+      return t ? affinity.includes(t.class) : false;
+    });
+    const candidates = suits.length ? suits : pool;
+    const weights = candidates.map((p) => {
+      const favour = Math.max(1, THROW_BY_ID[p.throw]?.favour ?? 1);
+      // the fighter's own signature is what they would most like to be handed
+      return favour * (p.throw === signature ? 4 : 1);
+    });
+    let roll = this.rng.range(0, weights.reduce((a, b) => a + b, 0));
+    for (let i = 0; i < candidates.length; i++) {
+      roll -= weights[i];
+      if (roll <= 0) return candidates[i];
+    }
+    return candidates[candidates.length - 1];
+  }
+
+  /** A fighter takes a gift off the floor. */
+  private takeGift(f: Fighter, g: Gift): void {
+    const s = this.s;
+    s.gifts = s.gifts.filter((x) => x.id !== g.id);
+    // the weapon they were holding goes back on the floor: the Gallery's gift
+    // is the better one, and the old one is still a weapon
+    if (f.weapon) this.dropWeapon(f, f.weapon);
+    f.weapon = g.prop;
+    this.ev({ kind: "gift", a: f.id, what: g.throw, x: g.x, y: g.y });
+  }
+
+  /** A fighter lets go of what they are holding, and it lands on the floor. */
+  private dropWeapon(f: Fighter, prop: string): void {
+    const s = this.s;
+    const spec = PROP_BY_ID[prop];
+    s.gifts.push({
+      id: s.nextGiftId++,
+      prop,
+      throw: spec?.throw ?? "",
+      owner: f.id,
+      x: f.x,
+      y: f.y,
+      z: GIFT.drop,
+      vx: Math.cos(f.facing) * 0.06,
+      vy: Math.sin(f.facing) * 0.06,
+      vz: 0.04,
+      burning: 0,
+      spin: this.rng.range(-0.2, 0.2),
+    });
+    f.weapon = "";
   }
 
   // ---------------------------------------------------------------- combat
@@ -1157,6 +1282,8 @@ export class World {
   private ko(d: Fighter, by: number, fell = false): void {
     if (d.state === "holding" || d.state === "held") this.release(d);
     if (d.state === "reattach") this.dropReattach(d);
+    // whatever they were holding falls out of their hands and stays in the pit
+    if (d.weapon) this.dropWeapon(d, d.weapon);
     this.arena.onKo(this, d);
     d.parts.torso.hp = 0;
     d.fury = 0;
@@ -1441,6 +1568,32 @@ export class World {
     }
     f.juggle = 0;
     this.setState(f, "down", DOWN.dur);
+  }
+
+  private updateGifts(): void {
+    const s = this.s;
+    for (const g of s.gifts) {
+      if (g.burning > 0) {
+        // a gift that has gone off the edge is sinking away
+        g.burning--;
+        g.z -= 0.01;
+        continue;
+      }
+      g.x += g.vx;
+      g.y += g.vy;
+      g.z += g.vz;
+      g.vz -= GIFT.gravity;
+      if (g.z <= 0) {
+        g.z = 0;
+        g.vz = Math.abs(g.vz) > 0.03 ? -g.vz * GIFT.bounce : 0;
+        g.vx *= 0.8;
+        g.vy *= 0.8;
+        g.spin *= 0.8;
+      }
+      // a gift that lands out of the pit is gone for good
+      this.arena.boundPickup(this, g);
+    }
+    s.gifts = s.gifts.filter((g) => g.burning !== 1);
   }
 
   private updatePickups(): void {

@@ -34,7 +34,11 @@ import time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# the props this pipeline rebuilds, and the issue each is tracked on
+# The props this pipeline rebuilds, and the issue each is tracked on. The
+# three that did not come from this pipeline are here too - the custodian
+# helmet, the stovepipe and the private box chair - because a human's
+# approval is a label on an issue, and the manifest has to follow it whoever
+# built the asset.
 ASSET_ISSUES = {
     "prop_pegg_cast_iron_last": 83,
     "prop_crape_spiked_brolly": 84,
@@ -54,6 +58,9 @@ ASSET_ISSUES = {
     "weapon_piston_gauntlet": 98,
     "weapon_lamplighter_pole": 99,
     "pickup_tonic": 101,
+    "prop_winch_custodian_helmet": 81,
+    "prop_smelt_stovepipe": 82,
+    "weapon_chair": 100,
 }
 
 # the marker the pipeline's own comments carry. A comment that carries it is

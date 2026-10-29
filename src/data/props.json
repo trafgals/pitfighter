@@ -1,0 +1,214 @@
+{
+  "props": [
+    {
+      "id": "prop_bulwark_pistons",
+      "name": "Hydraulic Arm Rams & Gauges",
+      "kind": "gear",
+      "fighter": "lady-bulwark",
+      "gear": "pistons",
+      "throw": "",
+      "url": "/public/models/props/prop_bulwark_pistons.glb",
+      "bone": "forearms",
+      "offset": [
+        0,
+        -0.135,
+        0
+      ],
+      "turn": [
+        0,
+        0,
+        0
+      ],
+      "scale": 1
+    },
+    {
+      "id": "prop_eleanor_weeping_rapier",
+      "name": "Weeping Rapier Swordstick",
+      "kind": "wielded",
+      "fighter": "lady-eleanor",
+      "gear": "",
+      "throw": "swordstick",
+      "url": "/public/models/props/prop_eleanor_weeping_rapier.glb",
+      "bone": "hand",
+      "offset": [
+        0,
+        -0.3,
+        0
+      ],
+      "turn": [
+        3.1416,
+        0,
+        0
+      ],
+      "scale": 1
+    },
+    {
+      "id": "prop_mule_championship_belt",
+      "name": "Engraved Gilt Championship Belt",
+      "kind": "gear",
+      "fighter": "bartholomew-mule",
+      "gear": "title",
+      "throw": "",
+      "url": "/public/models/props/prop_mule_championship_belt.glb",
+      "bone": "spine",
+      "offset": [
+        0,
+        0.08,
+        0
+      ],
+      "turn": [
+        0,
+        0,
+        0
+      ],
+      "scale": 1.3
+    },
+    {
+      "id": "prop_pegg_cast_iron_last",
+      "name": "Calibrated Cast-Iron Shoe Last",
+      "kind": "wielded",
+      "fighter": "tabitha-pegg",
+      "gear": "",
+      "throw": "",
+      "url": "/public/models/props/prop_pegg_cast_iron_last.glb",
+      "bone": "hand",
+      "offset": [
+        0,
+        -0.3,
+        0
+      ],
+      "turn": [
+        0,
+        0,
+        1.5708
+      ],
+      "scale": 1
+    },
+    {
+      "id": "prop_smelt_stovepipe",
+      "name": "Ironmaster Elongated Stovepipe Hat",
+      "kind": "gear",
+      "fighter": "hezekiah-smelt",
+      "gear": "stovepipe",
+      "throw": "",
+      "url": "/public/models/props/prop_smelt_stovepipe.glb",
+      "bone": "head",
+      "offset": [
+        0,
+        0.28,
+        0
+      ],
+      "turn": [
+        0,
+        0,
+        0
+      ],
+      "scale": 1.25
+    },
+    {
+      "id": "prop_tilly_clinker_tongs",
+      "name": "Cast-Iron Sump Clinker-Tongs",
+      "kind": "wielded",
+      "fighter": "tilly-tongs",
+      "gear": "",
+      "throw": "",
+      "url": "/public/models/props/prop_tilly_clinker_tongs.glb",
+      "bone": "hand",
+      "offset": [
+        0,
+        -0.3,
+        0
+      ],
+      "turn": [
+        0,
+        0,
+        1.5708
+      ],
+      "scale": 1
+    },
+    {
+      "id": "prop_winch_custodian_helmet",
+      "name": "Victorian Custodian Bobby Helmet",
+      "kind": "gear",
+      "fighter": "constable-winch",
+      "gear": "custodian",
+      "throw": "",
+      "url": "/public/models/props/prop_winch_custodian_helmet.glb",
+      "bone": "head",
+      "offset": [
+        0,
+        0.26,
+        0
+      ],
+      "turn": [
+        0,
+        0,
+        0
+      ],
+      "scale": 1.55
+    },
+    {
+      "id": "weapon_bone_saw",
+      "name": "Surgeon's Bone Saw",
+      "kind": "gift",
+      "fighter": "",
+      "gear": "",
+      "throw": "bone-saw",
+      "url": "/public/models/props/weapon_bone_saw.glb",
+      "bone": "hand",
+      "offset": [
+        0,
+        -0.3,
+        0
+      ],
+      "turn": [
+        3.1416,
+        0,
+        0
+      ],
+      "scale": 1
+    },
+    {
+      "id": "weapon_knuckleduster",
+      "name": "Brass Knuckleduster",
+      "kind": "gift",
+      "fighter": "",
+      "gear": "",
+      "throw": "knuckleduster",
+      "url": "/public/models/props/weapon_knuckleduster.glb",
+      "bone": "hand",
+      "offset": [
+        0,
+        -0.35,
+        0
+      ],
+      "turn": [
+        0,
+        0,
+        -1.5708
+      ],
+      "scale": 1
+    },
+    {
+      "id": "weapon_piston_gauntlet",
+      "name": "Piston Gauntlet",
+      "kind": "gift",
+      "fighter": "",
+      "gear": "",
+      "throw": "piston-gauntlet",
+      "url": "/public/models/props/weapon_piston_gauntlet.glb",
+      "bone": "hand",
+      "offset": [
+        0,
+        -0.26,
+        0
+      ],
+      "turn": [
+        0,
+        0,
+        2.3562
+      ],
+      "scale": 1
+    }
+  ]
+}

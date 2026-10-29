@@ -256,6 +256,8 @@ export interface Body {
   /** the raw end left at a shoulder or a hip when the limb is torn off, shown only then */
   stumps: Record<"armL" | "armR" | "legL" | "legR", THREE.Mesh>;
   joints: { elbowL: THREE.Bone; elbowR: THREE.Bone; kneeL: THREE.Bone; kneeR: THREE.Bone };
+  /** each hand, at the wrist: scaled down when the fighter holds something */
+  hands: { L: THREE.Group; R: THREE.Group };
   ankles: { L: THREE.Group; R: THREE.Group };
   /** where each foot is on the floor (world space) while it carries weight, and how far the leg IK has it (animate.ts) */
   feet: { L: Foot; R: Foot };
@@ -291,7 +293,7 @@ const newFoot = (): Foot => ({ down: false, at: new THREE.Vector3(), swing: null
 /** Bone lengths and the ankle's height over the floor standing straight (body units, before the style's scale). */
 export const LEG = { thigh: THIGH, shin: SHIN, hipY: HIP_Y, ankle: HIP_Y - THIGH - SHIN, footX: 0.11 };
 
-export function buildBody(f: Fighter): Body {
+export function buildBody(f: Fighter, skipGear?: ReadonlySet<string>): Body {
   const st = STYLES[f.style];
   // pores and mottling on the skin, a woven fabric on the shorts, wraps and boots
   const skin = new THREE.MeshStandardMaterial({ color: st.color, roughness: 0.62, emissive: 0x000000, ...surface("skin", 2, 1), bumpScale: 0.7 });
@@ -485,6 +487,7 @@ export function buildBody(f: Fighter): Body {
 
   // the deltoids cap the shoulders; the elbows and knees keep their volume when they bend
   const hands = { L: accent.clone(), R: accent.clone() };
+  const fists = {} as Record<"L" | "R", THREE.Group>;
   for (const [side, sh, el] of [
     [-1, armL, elbowL],
     [1, armR, elbowR],
@@ -494,14 +497,19 @@ export function buildBody(f: Fighter): Body {
     delt.scale.set(1.08, 0.95, 1);
     sh.add(delt);
     el.add(mesh(new THREE.SphereGeometry(0.05, 12, 10), skin));
-    // a wrapped fist: a squared-off knuckle ball with a thumb
+    // a wrapped fist: a squared-off knuckle ball with a thumb. The fist is its
+    // own group at the wrist, so a fighter holding something can close the
+    // hand around it instead of wearing a fist-sized ball.
+    const grip = new THREE.Group();
+    grip.position.y = -FORE - 0.03;
     const fist = mesh(new THREE.SphereGeometry(0.066, 16, 12), hand);
     fist.scale.set(0.9, 0.95, 1.15);
-    fist.position.y = -FORE - 0.03;
     const thumb = mesh(new THREE.CapsuleGeometry(0.018, 0.03, 4, 8), hand);
-    thumb.position.set(-side * 0.045, -FORE - 0.02, 0.03);
+    thumb.position.set(-side * 0.045, 0.01, 0.03);
     thumb.rotation.z = side * 0.6;
-    el.add(fist, thumb);
+    grip.add(fist, thumb);
+    el.add(grip);
+    fists[side < 0 ? "L" : "R"] = grip;
   }
   // the feet hang on ankles at the end of the shins, so a planted foot can lie flat on the floor
   const ankles = { L: new THREE.Group(), R: new THREE.Group() };
@@ -526,7 +534,7 @@ export function buildBody(f: Fighter): Body {
   head.add(buildHorns(kit.horns, accent));
   const tail = buildTail(kit.tail, accent);
   hips.add(tail);
-  buildGear(kit.gear, { head, spine, armL, armR, elbowL, elbowR, fore: FORE }, { accent, accentColour: st.accent });
+  buildGear(kit.gear, { head, spine, armL, armR, elbowL, elbowR, fore: FORE }, { accent, accentColour: st.accent }, skipGear);
 
   const limbs = { armL, armR, legL, legR, head, torso: spine } as Record<PartId, THREE.Object3D>;
   // where a limb is torn off: wet red meat round a white knob of bone, on the shoulder or hip it came from
@@ -562,6 +570,7 @@ export function buildBody(f: Fighter): Body {
     wounds,
     stumps,
     joints: { elbowL, elbowR, kneeL, kneeR },
+    hands: fists,
     ankles,
     feet: { L: newFoot(), R: newFoot() },
     gait: { phase: 0, prev: null, speed: 0, on: false },
