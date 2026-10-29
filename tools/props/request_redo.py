@@ -34,7 +34,7 @@ from issues import ASSET_ISSUES, LABEL_REVISION_REQUESTED, read_issues  # noqa: 
 from redo_stage import (  # noqa: E402
     MESH, STAGES, apply_redo, redo_block, revision_stage, stage_from_text,
 )
-from request_revision import next_seed  # noqa: E402
+from request_revision import STAGE_LABELS, next_seed  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 MANIFEST = os.path.join(ROOT, "data", "asset_manifest.json")
@@ -149,7 +149,7 @@ def main():
     for asset_id, number, stage, text, seed in queued:
         print(f"\n{asset_id}: re-queued from {stage} with seed {seed}")
         print(f"  gh issue edit {number} --remove-label {LABEL_REVISION_REQUESTED} "
-              f"--add-label stage:pixal3d-mesh")
+              f"--add-label {STAGE_LABELS[stage]}")
         print(f"  python tools/props/redo_prop.py {asset_id}")
         print(f"  python tools/props/git_io.py commit data/asset_manifest.json "
               f"--message 'chore(assets): put {asset_id} back in the queue for a redo from {stage}'")

@@ -311,6 +311,11 @@ def step_sheet(entry, redo, dry_run):
     preview = free_path(previews) if previews else ""
     command = [PYTHON, os.path.join("scripts", "run_minimax_h3_turnaround.py"),
                cutout, sheet, "--seed", str(redo.get("seed"))]
+    length = redo.get("length")
+    if length:
+        # a clip that was too short to turn far enough to show the prop's back
+        # is turned again with more frames
+        command += ["--length", str(length)]
     if preview:
         command += ["--preview", preview]
     if symmetric_of(entry):

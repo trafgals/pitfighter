@@ -241,11 +241,14 @@ def stage_from_text(text):
     return stage, f"the request names '{phrase}', which is {STAGE_LABELS[stage]}"
 
 
-def redo_block(stage, request, reason, issue, seed, stamp):
+def redo_block(stage, request, reason, issue, seed, stamp, length=None):
     """The redo a prop's manifest entry carries.
 
     The block is the whole of the redo: which stage it starts from, what was
     asked for, the seed it is built with, and the stages that have been done.
+
+    `length` is the number of frames the turnaround clip is to be, for a prop
+    whose clip was too short to turn far enough to show its back.
     """
     return {
         "stage": stage,
@@ -255,6 +258,7 @@ def redo_block(stage, request, reason, issue, seed, stamp):
         "request": request,
         "reason": reason,
         "seed": seed,
+        "length": length,
         "done": [],
         "cutout": None,
         "sheet": None,
