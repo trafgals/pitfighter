@@ -362,8 +362,7 @@
         "cutout": "public/tex/props/flux3_crape_spiked_brolly_redo_alpha.png",
         "sheet": null,
         "previous_cutout": null,
-        "previous_sheet": null,
-        "claimed_at": "2026-10-29T23:06:43+10:00"
+        "previous_sheet": null
       },
       "revision_handled": [
         "IC_kwDOVUJnUc8AAAABgr1xzA"
@@ -1833,11 +1832,11 @@
       "poly_budget": 16000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 3.2,
+        "width": 34.2,
         "height": 36,
-        "depth": 11.6
+        "depth": 9
       },
-      "status": "gate:2-review-turnaround",
+      "status": "gate:2-rebuild-pixal3d",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -1858,44 +1857,44 @@
           {
             "label": "the lower half of the prop carries the prop's surface",
             "min_cm": [
-              0.4,
-              -7.0,
-              -1.6
+              -4.3,
+              -2.5,
+              -0.3
             ],
             "max_cm": [
-              1.6,
-              -2.5,
-              10.0
+              0.0,
+              2.1,
+              8.7
             ],
             "expect": "filled",
-            "min_area_cm2": 4
+            "min_area_cm2": 7
           },
           {
             "label": "the upper half of the prop carries the prop's surface",
             "min_cm": [
-              -1.6,
-              15.5,
-              -1.6
+              -4.3,
+              15.6,
+              -0.3
             ],
             "max_cm": [
-              0.4,
+              0.0,
               20.0,
-              10.0
+              8.7
             ],
             "expect": "filled",
-            "min_area_cm2": 4
+            "min_area_cm2": 7
           },
           {
             "label": "the space beside the prop is clear",
             "min_cm": [
-              -1.6,
-              11.0,
-              -1.6
+              -4.3,
+              24.6,
+              -0.3
             ],
             "max_cm": [
-              -0.4,
-              15.5,
-              10.0
+              0.0,
+              29.0,
+              8.7
             ],
             "expect": "empty",
             "max_area_cm2": 10
@@ -1908,32 +1907,33 @@
         ],
         "closeup_fit": 0.08,
         "closeup_label": "The blade's belly and the handle's brass rivets",
-        "view_fit": 0.19,
+        "view_fit": 0.252,
         "dimension_tolerance_pct": 5
       },
-      "build": null,
+      "measured": {
+        "triangles": 12800,
+        "bbox_min_cm": [
+          -17.1,
+          -7.0,
+          -0.3
+        ],
+        "bbox_max_cm": [
+          17.1,
+          29.0,
+          8.7
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 678620
+      },
+      "build": "python scripts/run_pixal3d_mesh.py weapon_cleaver --faces 12800",
       "validate": "node scripts/capture_prop_renders.mjs weapon_cleaver",
       "reference_concept": "public/tex/props/flux3_weapon_cleaver_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_cleaver_alpha.png",
-      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
-      "stand_in_measured": {
-        "triangles": 76,
-        "bytes": 6980,
-        "bbox_min_cm": [
-          -1.6,
-          -7,
-          -1.6
-        ],
-        "bbox_max_cm": [
-          1.6,
-          29,
-          10
-        ],
-        "meshes": 2,
-        "materials": 2,
-        "embedded_images": 0
-      },
-      "turnaround_sheet": "public/tex/props/h3_cleaver_turnaround.png"
+      "turnaround_sheet": "public/tex/props/h3_cleaver_turnaround.png",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 12,800 triangles, 678,620 bytes, 20/21 capture checks. The checks that do not pass: the lower half of the prop carries the prop's surface is there. The mesh measures 34.2 x 36 x 9 cm against a spec of 34.2 x 36 x 9 cm. The finding is recorded in the manifest and the tolerance is left at 5%.",
+      "dimensions_note": "scale_dimensions_cm amended from 3.2 x 36 x 11.6 cm to 34.2 x 36 x 9 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit."
     },
     {
       "id": "weapon_piston_gauntlet",
