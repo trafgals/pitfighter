@@ -62,9 +62,13 @@ def main():
     print("| :--- | ---: | ---: | :--- | :--- | :--- | :--- |")
     for entry in manifest["assets"]:
         asset_id = entry["id"]
-        if asset_id not in ISSUES or "stand_in_measured" in entry:
+        if asset_id not in ISSUES:
             continue
         report = report_of(asset_id)
+        if report is None and "stand_in_measured" in entry:
+            # the prop has never been through the pipeline: it is not on the
+            # table at all
+            continue
         spec = entry["scale_dimensions_cm"]
         got = measured_of(entry, report)
         checks = ""
@@ -74,8 +78,13 @@ def main():
             checks = f"{passed}/{total}"
         spec_text = f"{spec['width']} x {spec['height']} x {spec['depth']}"
         got_text = " x ".join(str(v) for v in got)
+        gate = entry.get("status")
+        if entry.get("revision_requested_at") and not entry.get("revision_published_at"):
+            # a reviewer has asked for this one to be rebuilt: the mesh on disk
+            # is the one that was reviewed, and the new one is on its way
+            gate = f"{gate} (rebuilding)"
         print(f"| `{asset_id}` | {ISSUES[asset_id]} | {(entry.get('measured') or {}).get('triangles', 0):,} "
-              f"| {spec_text} | {got_text} | {checks} | {entry.get('status')} |")
+              f"| {spec_text} | {got_text} | {checks} | {gate} |")
 
 
 if __name__ == "__main__":
