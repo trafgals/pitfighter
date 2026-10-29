@@ -1668,11 +1668,11 @@
       "poly_budget": 20000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 125.8,
+        "width": 15.1,
         "height": 84,
-        "depth": 37.8
+        "depth": 7.1
       },
-      "status": "gate:2-review-turnaround",
+      "status": "gate:3-review-ingame-3d",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -1687,51 +1687,51 @@
           "y_max_cm": 71,
           "centre_x_cm": 0.0,
           "centre_z_cm": 1.05,
-          "roll_deg": 28.9,
+          "roll_deg": -0.1,
           "upside_down": true
         },
         "regions": [
           {
             "label": "the lower half of the prop carries the prop's surface",
             "min_cm": [
-              15.5,
-              8.1,
-              -17.9
+              -2.0,
+              8.0,
+              -2.5
             ],
             "max_cm": [
-              31.0,
-              18.6,
-              20.0
+              0.0,
+              18.5,
+              4.6
             ],
             "expect": "filled",
-            "min_area_cm2": 57
+            "min_area_cm2": 7
           },
           {
             "label": "the upper half of the prop carries the prop's surface",
             "min_cm": [
-              -31.0,
-              50.1,
-              -17.9
+              -5.8,
+              50.0,
+              -2.5
             ],
             "max_cm": [
-              -15.5,
-              60.6,
-              20.0
+              -3.8,
+              60.5,
+              4.6
             ],
             "expect": "filled",
-            "min_area_cm2": 57
+            "min_area_cm2": 7
           },
           {
             "label": "the space beside the prop is clear",
             "min_cm": [
-              -62.0,
-              60.6,
-              -17.9
+              -7.5,
+              -2.5,
+              -2.5
             ],
             "max_cm": [
-              -46.5,
-              71.0,
-              20.0
+              -5.6,
+              8.0,
+              4.6
             ],
             "expect": "empty",
             "max_area_cm2": 10
@@ -1744,44 +1744,37 @@
         ],
         "closeup_fit": 0.1,
         "closeup_label": "The iron nails in the bat's face",
-        "view_fit": 0.772,
+        "view_fit": 0.428,
         "dimension_tolerance_pct": 5
       },
-      "build": null,
+      "measured": {
+        "triangles": 16000,
+        "bbox_min_cm": [
+          -7.5,
+          -13.0,
+          -2.5
+        ],
+        "bbox_max_cm": [
+          7.5,
+          71.0,
+          4.6
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 930152
+      },
+      "build": "python scripts/run_pixal3d_mesh.py weapon_nail_bat --faces 16000",
       "validate": "node scripts/capture_prop_renders.mjs weapon_nail_bat",
       "reference_concept": "public/tex/props/flux3_nail_bat_redo_art.png",
       "alpha_cutout": "public/tex/props/flux3_nail_bat_redo_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_nail_bat_turnaround_redo.png",
       "turntable": "docs/props/weapon_nail_bat/turntable_redo.webp",
-      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.",
-      "dimensions_note": "scale_dimensions_cm amended from 125.8 x 84 x 43.4 cm to 125.8 x 84 x 37.8 cm (depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
+      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.",
+      "dimensions_note": "scale_dimensions_cm amended from 125.8 x 84 x 37.8 cm to 15.1 x 84 x 7.1 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
       "revision_requested_at": "2026-10-29T20:40:03+10:00",
+      "revision_published_at": "2026-10-29T22:15:46+10:00",
       "revision_note": "Redo requested on 2026-10-29T20:40:03+10:00 from the watertight alpha cutout (BiRefNet), over the art that is already there: redo from BiRefNet Watertight Alpha Cutout onwards\nensure the initial view captures the whole bat. The prop is rebuilt from that stage with seed 7777.",
-      "revision_handled": [
-        "IC_kwDOVUJnUc8AAAABgqgssQ",
-        "IC_kwDOVUJnUc8AAAABgr79dg"
-      ],
-      "revision_seeds": [
-        4242,
-        7777
-      ],
-      "stand_in_measured": {
-        "triangles": 16000,
-        "bbox_min_cm": [
-          -62.0,
-          -13.0,
-          -17.9
-        ],
-        "bbox_max_cm": [
-          62.0,
-          71.0,
-          20.0
-        ],
-        "meshes": 1,
-        "materials": 1,
-        "embedded_images": 3,
-        "bytes": 1000864
-      },
       "redo": {
         "stage": "cutout",
         "plan": [
@@ -1798,14 +1791,25 @@
         "done": [
           "art",
           "cutout",
-          "sheet"
+          "sheet",
+          "mesh",
+          "built"
         ],
         "cutout": "public/tex/props/flux3_nail_bat_redo_alpha.png",
         "sheet": "public/tex/props/h3_nail_bat_turnaround_redo.png",
         "previous_cutout": null,
         "previous_sheet": null,
-        "claimed_at": "2026-10-29T21:35:26+10:00"
-      }
+        "claimed_at": "2026-10-29T21:35:26+10:00",
+        "built_at": "2026-10-29T22:15:09+10:00"
+      },
+      "revision_handled": [
+        "IC_kwDOVUJnUc8AAAABgqgssQ",
+        "IC_kwDOVUJnUc8AAAABgr79dg"
+      ],
+      "revision_seeds": [
+        4242,
+        7777
+      ]
     },
     {
       "id": "weapon_cleaver",
@@ -2232,8 +2236,8 @@
       "validate": "node scripts/capture_prop_renders.mjs weapon_chair",
       "reference_concept": "public/tex/props/flux3_chair_redo_art.png",
       "alpha_cutout": "public/tex/props/flux3_chair_redo_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_chair_turnaround.png",
-      "turntable": "docs/props/weapon_chair/turntable.webp",
+      "turnaround_sheet": "public/tex/props/h3_chair_turnaround_redo.png",
+      "turntable": "docs/props/weapon_chair/turntable_redo.webp",
       "stand_in_measured": {
         "triangles": 19986,
         "bytes": 1303240,
@@ -2270,12 +2274,14 @@
         "length": 175,
         "done": [
           "art",
-          "cutout"
+          "cutout",
+          "sheet"
         ],
         "cutout": "public/tex/props/flux3_chair_redo_alpha.png",
-        "sheet": null,
+        "sheet": "public/tex/props/h3_chair_turnaround_redo.png",
         "previous_cutout": null,
-        "previous_sheet": null
+        "previous_sheet": null,
+        "claimed_at": "2026-10-29T22:15:09+10:00"
       },
       "revision_handled": [
         "IC_kwDOVUJnUc8AAAABgr7qrw"
