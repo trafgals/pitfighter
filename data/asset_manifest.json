@@ -1463,9 +1463,9 @@
       "poly_budget": 18000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 3.6,
+        "width": 13,
         "height": 36,
-        "depth": 5.2
+        "depth": 4.7
       },
       "status": "gate:2-review-turnaround",
       "pivot": {
@@ -1482,20 +1482,20 @@
           "y_max_cm": 30.5,
           "centre_x_cm": 0.0,
           "centre_z_cm": 0.0,
-          "roll_deg": 36.7
+          "roll_deg": -37.3
         },
         "regions": [
           {
             "label": "the lower half of the prop carries the prop's surface",
             "min_cm": [
-              0.6,
-              -1.0,
-              -2.6
+              -0.2,
+              3.5,
+              -2.3
             ],
             "max_cm": [
               1.8,
-              3.5,
-              2.6
+              8.0,
+              2.3
             ],
             "expect": "filled",
             "min_area_cm2": 4
@@ -1503,14 +1503,14 @@
           {
             "label": "the upper half of the prop carries the prop's surface",
             "min_cm": [
-              -1.8,
-              26.0,
-              -2.6
+              -3.5,
+              21.5,
+              -2.3
             ],
             "max_cm": [
-              -0.1,
-              30.5,
-              2.6
+              -1.5,
+              26.0,
+              2.3
             ],
             "expect": "filled",
             "min_area_cm2": 4
@@ -1518,14 +1518,14 @@
           {
             "label": "the space beside the prop is clear",
             "min_cm": [
-              -1.8,
-              17.0,
-              -2.6
+              -6.5,
+              26.0,
+              -2.3
             ],
             "max_cm": [
-              -0.6,
-              21.5,
-              2.6
+              -4.7,
+              30.5,
+              2.3
             ],
             "expect": "empty",
             "max_area_cm2": 10
@@ -1538,14 +1538,14 @@
         ],
         "closeup_fit": 0.08,
         "closeup_label": "The turned handle and its brass ferrule",
-        "view_fit": 0.183,
+        "view_fit": 0.193,
         "dimension_tolerance_pct": 5
       },
       "build": null,
       "validate": "node scripts/capture_prop_renders.mjs weapon_bone_saw",
       "reference_concept": "public/tex/props/flux3_weapon_bone_saw_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_bone_saw_alpha.png",
-      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
+      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.",
       "stand_in_measured": {
         "triangles": 88,
         "bytes": 8912,
@@ -1562,7 +1562,10 @@
         "meshes": 3,
         "materials": 3,
         "embedded_images": 0
-      }
+      },
+      "turnaround_sheet": "public/tex/props/h3_bone_saw_turnaround.png",
+      "turntable": "docs/props/weapon_bone_saw/turntable.webp",
+      "dimensions_note": "scale_dimensions_cm amended from 3.6 x 36 x 5.2 cm to 13 x 36 x 4.7 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit."
     },
     {
       "id": "weapon_nail_bat",
@@ -1577,7 +1580,7 @@
         "height": 84,
         "depth": 43.4
       },
-      "status": "gate:3-review-ingame-3d",
+      "status": "gate:2-review-turnaround",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -1652,7 +1655,15 @@
         "view_fit": 0.787,
         "dimension_tolerance_pct": 5
       },
-      "measured": {
+      "build": null,
+      "validate": "node scripts/capture_prop_renders.mjs weapon_nail_bat",
+      "reference_concept": "public/tex/props/flux3_weapon_nail_bat_00001_.png",
+      "alpha_cutout": "public/tex/props/flux3_nail_bat_alpha.png",
+      "turnaround_sheet": "public/tex/props/h3_nail_bat_turnaround.png",
+      "turntable": "docs/props/weapon_nail_bat/turntable.webp",
+      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.",
+      "dimensions_note": "scale_dimensions_cm amended from 9.5 x 84 x 5.9 cm to 125.8 x 84 x 43.4 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
+      "stand_in_measured": {
         "triangles": 16000,
         "bbox_min_cm": [
           -62.9,
@@ -1669,14 +1680,15 @@
         "embedded_images": 3,
         "bytes": 1001816
       },
-      "build": "python scripts/run_pixal3d_mesh.py weapon_nail_bat --faces 16000",
-      "validate": "node scripts/capture_prop_renders.mjs weapon_nail_bat",
-      "reference_concept": "public/tex/props/flux3_weapon_nail_bat_00001_.png",
-      "alpha_cutout": "public/tex/props/flux3_nail_bat_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_nail_bat_turnaround.png",
-      "turntable": "docs/props/weapon_nail_bat/turntable.webp",
-      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.",
-      "dimensions_note": "scale_dimensions_cm amended from 9.5 x 84 x 5.9 cm to 125.8 x 84 x 43.4 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit."
+      "revision_seed": 4242,
+      "revision_requested_at": "2026-10-29T13:29:08+10:00",
+      "revision_seeds": [
+        4242
+      ],
+      "revision_handled": [
+        "IC_kwDOVUJnUc8AAAABgqgssQ"
+      ],
+      "revision_note": "Revision requested on 2026-10-29T13:29:08+10:00: The bat's head reads as a rounded blob rather than the flat, squared-off hammer face in the turnaround sheet - the face should be flatter and its corners squarer. Can the reconstruction be rebuilt from the same approved sheet with a different seed so the face comes out right? The grip wrap also reads as one smooth band. In the art it is a wound cord, so a little surface break-up along the grip would help it read as cord at in-game distance.. The reconstruction is being rebuilt with seed 4242 from the same approved sheet."
     },
     {
       "id": "weapon_cleaver",
