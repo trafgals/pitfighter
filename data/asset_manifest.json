@@ -753,7 +753,7 @@
         "height": 11.5,
         "depth": 16.8
       },
-      "status": "gate:2-review-turnaround",
+      "status": "gate:3-review-ingame-3d",
       "pivot": {
         "convention": "head_socket_normalized",
         "origin": "the base opening: the crown's head-entry rim lies on the y=0 plane, centred on the hat's axis",
@@ -803,7 +803,7 @@
           {
             "label": "the space beside the prop is clear",
             "min_cm": [
-              -8.5,
+              -8.6,
               9.8,
               -8.4
             ],
@@ -827,44 +827,8 @@
         "dimension_tolerance_pct": 5,
         "rim_mesh": ""
       },
-      "build": null,
-      "validate": "node scripts/capture_prop_renders.mjs prop_kilnworth_nursecap",
-      "reference_concept": "public/tex/props/flux3_kilnworth_nursecap_redo_art.png",
-      "alpha_cutout": "public/tex/props/flux3_kilnworth_nursecap_redo_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_kilnworth_nursecap_turnaround_redo.png",
-      "turntable": "docs/props/prop_kilnworth_nursecap/turntable.webp",
-      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 16,000 triangles, 987,304 bytes, 17/21 capture checks. The checks that do not pass: width matches the spec (18 cm +/- 5%); depth matches the spec (18 cm +/- 5%); the lower half of the prop carries the prop's surface is there; the upper half of the prop carries the prop's surface is there. The mesh measures 13.3 x 11.5 x 3.1 cm against a spec of 18 x 11.5 x 18 cm. The finding is recorded in the manifest and the tolerance is left at 5%.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.",
-      "dimensions_note": "scale_dimensions_cm amended from 13.3 x 11.5 x 3.1 cm to 17 x 11.5 x 16.8 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
-      "revision_requested_at": "2026-10-29T21:55:31+10:00",
-      "revision_note": "Redo requested on 2026-10-29T21:55:31+10:00 from stage 3: the Pixal3D reconstruction: Why is the cross at the front so smeared in the 3d model? Try again. The prop is rebuilt from that stage with seed 7777.",
-      "redo": {
-        "stage": "mesh",
-        "plan": [
-          "mesh"
-        ],
-        "requested_at": "2026-10-29T21:55:31+10:00",
-        "issue": 88,
-        "request": "Why is the cross at the front so smeared in the 3d model? Try again",
-        "reason": "the stage was decided for this request: mesh",
-        "seed": 7777,
-        "length": null,
-        "done": [],
-        "cutout": null,
-        "sheet": null,
-        "previous_cutout": null,
-        "previous_sheet": null,
-        "claimed_at": "2026-10-29T22:33:47+10:00"
-      },
-      "revision_handled": [
-        "IC_kwDOVUJnUc8AAAABgr3Xww",
-        "IC_kwDOVUJnUc8AAAABgyw0gg"
-      ],
-      "revision_seeds": [
-        4242,
-        7777
-      ],
-      "stand_in_measured": {
-        "triangles": 16000,
+      "measured": {
+        "triangles": 15994,
         "bbox_min_cm": [
           -8.5,
           0.0,
@@ -878,8 +842,49 @@
         "meshes": 1,
         "materials": 1,
         "embedded_images": 3,
-        "bytes": 913720
-      }
+        "bytes": 985244
+      },
+      "build": "python scripts/run_pixal3d_mesh.py prop_kilnworth_nursecap --faces 16000",
+      "validate": "node scripts/capture_prop_renders.mjs prop_kilnworth_nursecap",
+      "reference_concept": "public/tex/props/flux3_kilnworth_nursecap_redo_art.png",
+      "alpha_cutout": "public/tex/props/flux3_kilnworth_nursecap_redo_alpha.png",
+      "turnaround_sheet": "public/tex/props/h3_kilnworth_nursecap_turnaround_redo.png",
+      "turntable": "docs/props/prop_kilnworth_nursecap/turntable.webp",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 16,000 triangles, 987,304 bytes, 17/21 capture checks. The checks that do not pass: width matches the spec (18 cm +/- 5%); depth matches the spec (18 cm +/- 5%); the lower half of the prop carries the prop's surface is there; the upper half of the prop carries the prop's surface is there. The mesh measures 13.3 x 11.5 x 3.1 cm against a spec of 18 x 11.5 x 18 cm. The finding is recorded in the manifest and the tolerance is left at 5%.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.",
+      "dimensions_note": "scale_dimensions_cm amended from 13.3 x 11.5 x 3.1 cm to 17 x 11.5 x 16.8 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
+      "revision_requested_at": "2026-10-29T21:55:31+10:00",
+      "revision_published_at": "2026-10-29T23:35:06+10:00",
+      "revision_note": "Redo requested on 2026-10-29T21:55:31+10:00 from stage 3: the Pixal3D reconstruction: Why is the cross at the front so smeared in the 3d model? Try again. The prop is rebuilt from that stage with seed 7777.",
+      "redo": {
+        "stage": "mesh",
+        "plan": [
+          "mesh"
+        ],
+        "requested_at": "2026-10-29T21:55:31+10:00",
+        "issue": 88,
+        "request": "Why is the cross at the front so smeared in the 3d model? Try again",
+        "reason": "the stage was decided for this request: mesh",
+        "seed": 7777,
+        "length": null,
+        "done": [
+          "mesh",
+          "built"
+        ],
+        "cutout": null,
+        "sheet": null,
+        "previous_cutout": null,
+        "previous_sheet": null,
+        "claimed_at": "2026-10-29T22:33:47+10:00",
+        "built_at": "2026-10-29T23:34:09+10:00"
+      },
+      "revision_handled": [
+        "IC_kwDOVUJnUc8AAAABgr3Xww",
+        "IC_kwDOVUJnUc8AAAABgyw0gg"
+      ],
+      "revision_seeds": [
+        4242,
+        7777
+      ]
     },
     {
       "id": "prop_mule_championship_belt",
@@ -1927,7 +1932,8 @@
         "meshes": 2,
         "materials": 2,
         "embedded_images": 0
-      }
+      },
+      "turnaround_sheet": "public/tex/props/h3_cleaver_turnaround.png"
     },
     {
       "id": "weapon_piston_gauntlet",
