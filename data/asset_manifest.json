@@ -362,7 +362,8 @@
         "cutout": "public/tex/props/flux3_crape_spiked_brolly_redo_alpha.png",
         "sheet": null,
         "previous_cutout": null,
-        "previous_sheet": null
+        "previous_sheet": null,
+        "claimed_at": "2026-10-29T23:06:43+10:00"
       },
       "revision_handled": [
         "IC_kwDOVUJnUc8AAAABgr1xzA"
@@ -2239,7 +2240,6 @@
         ]
       },
       "source": "Pixal3D multi-view reconstruction (ComfyUI, public/tex/workflows/pixal3d_multiview.json) from the four-view sheet, shrunk and placed on the pivot by the same script; scripts/build_weapon_chair.mjs builds the earlier procedural chair",
-      "build": null,
       "validate": "node scripts/capture_prop_renders.mjs weapon_chair",
       "reference_concept": "public/tex/props/flux3_chair_redo_art.png",
       "alpha_cutout": "public/tex/props/flux3_chair_redo_alpha.png",
@@ -2282,17 +2282,21 @@
         "done": [
           "art",
           "cutout",
-          "sheet"
+          "sheet",
+          "mesh",
+          "built"
         ],
         "cutout": "public/tex/props/flux3_chair_redo_alpha.png",
         "sheet": "public/tex/props/h3_chair_turnaround_redo.png",
         "previous_cutout": null,
         "previous_sheet": null,
-        "claimed_at": "2026-10-29T22:15:09+10:00"
+        "claimed_at": "2026-10-29T22:15:09+10:00",
+        "built_at": "2026-10-29T23:06:43+10:00"
       },
       "revision_handled": [
         "IC_kwDOVUJnUc8AAAABgr7qrw"
-      ]
+      ],
+      "revision_built_at": "2026-10-29T23:06:43+10:00"
     },
     {
       "id": "pickup_tonic",
@@ -2303,11 +2307,11 @@
       "poly_budget": 12000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 6.4,
+        "width": 8.5,
         "height": 18.5,
-        "depth": 6.4
+        "depth": 8.6
       },
-      "status": "gate:2-review-turnaround",
+      "status": "gate:3-review-ingame-3d",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -2327,14 +2331,14 @@
           {
             "label": "the lower half of the prop carries the prop's surface",
             "min_cm": [
-              0.2,
+              -1.5,
               -1.9,
-              -3.2
+              -4.3
             ],
             "max_cm": [
-              2.2,
-              0.4,
-              3.2
+              0.5,
+              0.5,
+              4.3
             ],
             "expect": "filled",
             "min_area_cm2": 4
@@ -2342,14 +2346,14 @@
           {
             "label": "the upper half of the prop carries the prop's surface",
             "min_cm": [
-              -0.6,
+              -1.5,
               5.1,
-              -3.2
+              -4.3
             ],
             "max_cm": [
-              1.4,
+              0.5,
               7.4,
-              3.2
+              4.3
             ],
             "expect": "filled",
             "min_area_cm2": 4
@@ -2357,14 +2361,14 @@
           {
             "label": "the space beside the prop is clear",
             "min_cm": [
-              -3.2,
+              -4.3,
               9.7,
-              -3.2
+              -4.3
             ],
             "max_cm": [
-              -1.8,
+              -2.7,
               12.0,
-              3.2
+              4.3
             ],
             "expect": "empty",
             "max_area_cm2": 10
@@ -2377,33 +2381,34 @@
         ],
         "closeup_fit": 0.03,
         "closeup_label": "The tincture bottle's label and cork",
-        "view_fit": 0.103,
+        "view_fit": 0.111,
         "dimension_tolerance_pct": 5
       },
-      "build": null,
+      "measured": {
+        "triangles": 9598,
+        "bbox_min_cm": [
+          -4.3,
+          -6.5,
+          -4.3
+        ],
+        "bbox_max_cm": [
+          4.3,
+          12.0,
+          4.3
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 769092
+      },
+      "build": "python scripts/run_pixal3d_mesh.py pickup_tonic --faces 9600",
       "validate": "node scripts/capture_prop_renders.mjs pickup_tonic",
       "reference_concept": "public/tex/props/flux3_pickup_tonic_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_tonic_alpha.png",
-      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
-      "stand_in_measured": {
-        "triangles": 200,
-        "bytes": 15344,
-        "bbox_min_cm": [
-          -3.2,
-          -6.5,
-          -3.2
-        ],
-        "bbox_max_cm": [
-          3.2,
-          12,
-          3.2
-        ],
-        "meshes": 3,
-        "materials": 3,
-        "embedded_images": 0
-      },
       "turnaround_sheet": "public/tex/props/h3_tonic_turnaround.png",
-      "turntable": "docs/props/pickup_tonic/turntable.webp"
+      "turntable": "docs/props/pickup_tonic/turntable.webp",
+      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.",
+      "dimensions_note": "scale_dimensions_cm amended from 6.4 x 18.5 x 6.4 cm to 8.5 x 18.5 x 8.6 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit."
     }
   ]
 }
