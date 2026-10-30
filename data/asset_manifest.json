@@ -616,7 +616,7 @@
         "height": 9,
         "depth": 14.8
       },
-      "status": "gate:3-review-ingame-3d",
+      "status": "status:asset-approved",
       "pivot": {
         "convention": "head_socket_normalized",
         "origin": "the base opening: the crown's head-entry rim lies on the y=0 plane, centred on the hat's axis",
@@ -748,7 +748,8 @@
         4242,
         7777
       ],
-      "approval_notice": "voided:2026-10-30T14:20:23+10:00"
+      "approval_notice": "voided:2026-10-30T14:20:23+10:00",
+      "approved_for_revision": "2026-10-30T14:20:23+10:00"
     },
     {
       "id": "prop_kilnworth_nursecap",
@@ -1258,7 +1259,7 @@
         "height": 38.5,
         "depth": 30.6
       },
-      "status": "gate:3-review-ingame-3d",
+      "status": "status:asset-approved",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -1365,7 +1366,8 @@
       "revision_seeds": [
         4242
       ],
-      "approval_notice": "voided:2026-10-30T14:22:59+10:00"
+      "approval_notice": "voided:2026-10-30T14:22:59+10:00",
+      "approved_for_revision": "2026-10-30T14:22:59+10:00"
     },
     {
       "id": "weapon_knuckleduster",
@@ -1718,7 +1720,7 @@
         "height": 84,
         "depth": 28.2
       },
-      "status": "gate:3-review-ingame-3d",
+      "status": "status:asset-approved",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -1858,7 +1860,8 @@
         7777,
         31337
       ],
-      "approval_notice": "voided:2026-10-30T14:22:59+10:00"
+      "approval_notice": "voided:2026-10-30T14:22:59+10:00",
+      "approved_for_revision": "2026-10-30T14:22:59+10:00"
     },
     {
       "id": "weapon_cleaver",
