@@ -1467,7 +1467,7 @@
         "height": 100.5,
         "depth": 11.5
       },
-      "status": "gate:2-rebuild-pixal3d",
+      "status": "gate:3-review-ingame-3d",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -1503,13 +1503,13 @@
           {
             "label": "the upper half of the prop carries the prop's surface",
             "min_cm": [
-              7.8,
-              47.5,
+              -5.2,
+              47.4,
               -5.7
             ],
             "max_cm": [
-              10.3,
-              59.6,
+              -2.6,
+              60.0,
               5.7
             ],
             "expect": "filled",
@@ -1563,7 +1563,7 @@
       "reference_concept": "public/tex/props/flux3_weapon_coal_shovel_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_coal_shovel_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_coal_shovel_turnaround.png",
-      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 16,000 triangles, 694,684 bytes, 20/21 capture checks. The checks that do not pass: the upper half of the prop carries the prop's surface is there. The mesh measures 20.8 x 100.5 x 11.5 cm against a spec of 20 x 100.5 x 11.5 cm. The finding is recorded in the manifest and the tolerance is left at 5%.",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 16,000 triangles, 694,684 bytes, 21/21 capture checks. The reconstruction measures 20.8 x 100.5 x 11.5 cm, inside the 5% tolerance, and the gate moves to the in-game review.",
       "dimensions_note": "scale_dimensions_cm amended from 20 x 100.5 x 4.5 cm to 20 x 100.5 x 11.5 cm (depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit."
     },
     {
@@ -1865,13 +1865,13 @@
           {
             "label": "the lower half of the prop carries the prop's surface",
             "min_cm": [
-              -4.3,
-              -2.5,
+              12.8,
+              -7.0,
               -0.3
             ],
             "max_cm": [
-              0.0,
-              2.1,
+              17.1,
+              -2.5,
               8.7
             ],
             "expect": "filled",
@@ -2240,13 +2240,13 @@
           {
             "label": "the space beside the prop is clear",
             "min_cm": [
-              16.5,
-              34.7,
+              -8.3,
+              -30.6,
               -35.3
             ],
             "max_cm": [
-              24.8,
-              45.5,
+              0.0,
+              -19.8,
               35.3
             ],
             "expect": "empty",

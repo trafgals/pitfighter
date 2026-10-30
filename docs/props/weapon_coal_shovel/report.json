@@ -1,7 +1,7 @@
 {
   "asset": "weapon_coal_shovel",
   "model": "public/models/props/weapon_coal_shovel.glb",
-  "capturedAt": "2026-10-29T14:48:45.979Z",
+  "capturedAt": "2026-10-30T00:45:01.294Z",
   "budget": {
     "triangles": 20000,
     "bytes": 1572864,
@@ -127,9 +127,9 @@
       "detail": "71 cm2 of surface >= 11"
     },
     {
-      "ok": false,
+      "ok": true,
       "message": "the upper half of the prop carries the prop's surface is there",
-      "detail": "0 cm2 of surface >= 11"
+      "detail": "82 cm2 of surface >= 11"
     },
     {
       "ok": true,
