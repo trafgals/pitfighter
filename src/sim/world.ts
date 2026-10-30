@@ -44,6 +44,7 @@ import {
   EVADE,
   FURY,
   HITSTOP,
+  KNOCK,
   hitstopFor,
   SPECIAL_CHORD,
   SPEED,
@@ -985,8 +986,8 @@ export class World {
       }
     } else if (d.state !== "dizzy") {
       this.setState(d, "hitstun", m.hitstun);
-      d.slideX = (dx * m.push) / 8;
-      d.slideY = (dy * m.push) / 8;
+      d.slideX = (dx * m.push) / KNOCK.hitstun;
+      d.slideY = (dy * m.push) / KNOCK.hitstun;
     }
   }
 
@@ -1025,8 +1026,8 @@ export class World {
   knockDown(d: Fighter, dx: number, dy: number, push: number): void {
     if (d.state === "holding" || d.state === "held") this.release(d);
     this.setState(d, "down", DOWN.dur);
-    d.slideX = (dx * push) / 12;
-    d.slideY = (dy * push) / 12;
+    d.slideX = (dx * push) / KNOCK.down;
+    d.slideY = (dy * push) / KNOCK.down;
   }
 
   /** t has already advanced this frame, so t - 1 is the reversal's motion frame (0 on the press frame). */
@@ -1354,7 +1355,7 @@ export class World {
       f.x += f.slideX;
       f.y += f.slideY;
       if (f.state === "air" || (f.z > 0 && f.state !== "airslammed")) this.fly(f);
-      const decay = f.state === "thrown" ? 1 : f.state === "air" ? AIR.drag : 0.85;
+      const decay = f.state === "thrown" ? 1 : f.state === "air" ? AIR.drag : KNOCK.friction;
       f.slideX *= decay;
       f.slideY *= decay;
       if (Math.abs(f.slideX) < 1e-4) f.slideX = 0;

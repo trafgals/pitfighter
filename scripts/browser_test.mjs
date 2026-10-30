@@ -680,6 +680,33 @@ async function main() {
   await page.screenshot({ path: path.join(OUT, "9_practice.png") });
   check(errors.length === 0, `practice: no page errors${errors.length ? ": " + errors.slice(0, 3).join(" | ") : ""}`);
 
+  // ?lab=1: the feel lab's dials, and a take recorded and replayed
+  await withTimeout(page.goto(`${SITE}/?auto=1&fighters=2&seed=5&practice=1&lab=1`, { waitUntil: "load" }), 20_000, "load lab");
+  await withTimeout(page.waitForFunction(() => window.__game.mode === "match", { timeout: 15_000 }), 16_000, "lab match starts");
+  const dials = await page.evaluate(() => document.querySelectorAll("#lab .dial").length);
+  check(dials >= 30, `lab: the panel shows its dials (${dials})`);
+  await page.keyboard.press("Digit1");
+  await withTimeout(page.evaluate(() => window.__game.step(90)), 15_000, "lab take 90 frames");
+  await page.keyboard.press("Digit1");
+  await withTimeout(page.waitForFunction(() => /take ready/.test(document.querySelector("#lab .status").textContent), { timeout: 5_000 }), 6_000, "lab take ready");
+  const ready = await page.evaluate(() => document.querySelector("#lab .status").textContent);
+  await page.keyboard.press("Digit2");
+  await withTimeout(page.evaluate(() => window.__game.step(30)), 15_000, "lab replay 30 frames");
+  const replaying = await page.evaluate(() => ({ status: document.querySelector("#lab .status").textContent, frame: window.__game.world.s.frame }));
+  check(/take ready: \d/.test(ready) && replaying.frame < 80, `lab: a take records and replays from its start (${ready}; then frame ${replaying.frame})`);
+  const pitch = await page.evaluate(() => {
+    const r = [...document.querySelectorAll("#lab .dial")].find((d) => d.title.startsWith("camera.pitch"));
+    const input = r.querySelector("input");
+    input.value = "55";
+    input.dispatchEvent(new Event("input"));
+    const shown = r.querySelector("output").textContent;
+    document.querySelector('#lab [data-a="reset"]').click();
+    return { shown, back: r.querySelector("output").textContent };
+  });
+  check(pitch.shown === "55" && pitch.back === "32", `lab: a dial turns and resets (${JSON.stringify(pitch)})`);
+  await page.screenshot({ path: path.join(OUT, "10_lab.png") });
+  check(errors.length === 0, `lab: no page errors${errors.length ? ": " + errors.slice(0, 3).join(" | ") : ""}`);
+
   // frame time: 8 fighters' animation (springs, IK, ragdoll: the scene's sync) must fit easily in a 60 fps frame.
   // Headless Chrome draws on the CPU (SwiftShader), so the whole frame is reported, but only the animation is held to a budget.
   await withTimeout(page.goto(`${SITE}/?auto=1&fighters=8&seed=7`, { waitUntil: "load" }), 20_000, "load frame-time match");

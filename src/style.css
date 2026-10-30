@@ -626,3 +626,75 @@ body.playing #hud {
   max-width: calc(100vw - 16px);
   overflow: hidden;
 }
+
+/* ------------------------------------------------------------ feel lab (?lab=1) */
+#lab {
+  position: fixed;
+  top: 8px;
+  right: 8px;
+  z-index: 5;
+  width: min(330px, calc(100vw - 16px));
+  max-height: calc(100vh - 16px);
+  overflow: auto;
+  padding: 8px 10px;
+  background: rgba(14, 4, 2, 0.86);
+  border: 1px solid rgba(255, 194, 58, 0.35);
+  border-radius: 6px;
+  font-size: 12px;
+}
+#lab.hidden {
+  display: none;
+}
+#lab header {
+  color: var(--gold);
+  margin-bottom: 6px;
+}
+#lab .keys {
+  opacity: 0.6;
+  font-size: 11px;
+}
+#lab button {
+  font: inherit;
+  color: var(--ink);
+  background: #3a1408;
+  border: 1px solid #7a3414;
+  border-radius: 4px;
+  padding: 3px 7px;
+  margin: 0 4px 4px 0;
+  cursor: pointer;
+}
+#lab button.on {
+  background: #b0200c;
+}
+#lab .status,
+#lab .abinfo {
+  min-height: 1.3em;
+  opacity: 0.8;
+  margin-bottom: 4px;
+}
+#lab summary {
+  cursor: pointer;
+  color: var(--gold);
+  margin-top: 6px;
+}
+#lab summary i {
+  opacity: 0.6;
+  font-weight: normal;
+}
+#lab .dial {
+  display: grid;
+  grid-template-columns: 1fr 96px 48px;
+  gap: 6px;
+  align-items: center;
+}
+#lab .dial input {
+  width: 100%;
+}
+#lab .dial output {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+#lab .dial.changed .name,
+#lab .dial.changed output {
+  color: var(--fire);
+}

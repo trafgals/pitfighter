@@ -144,4 +144,9 @@ export const BUFFER = 8; // input buffer for presses, frames
 export const AIR = { launch: 0.062, pop: 0.034, maxPops: 8, g: 0.0018, steer: 0.0011, steerMax: 0.0066, flee: 0.012, drag: 0.96, high: 1.9, low: 0.75, bounce: 0.32, bounceMin: 0.035 };
 // A body flying fast into a wall, a prop or a fighter: `speed` m/frame or more crunches,
 // for `dmg` per m/frame on a limb (and the usual share on the torso); it rebounds at `rebound`.
+// Knockback on the floor: a blow sets the victim sliding at its push over
+// `hitstun` (a staggered body) or `down` (a knocked-down one) metres a frame,
+// and a sliding body keeps `friction` of its speed every frame, so it travels
+// about push / (divisor * (1 - friction)) in all.
+export const KNOCK = { hitstun: 8, down: 12, friction: 0.85 };
 export const CRUNCH = { speed: 0.05, dmg: 90, rebound: 0.45, knock: 0.06 };
