@@ -1257,7 +1257,7 @@
         "height": 38.5,
         "depth": 30.6
       },
-      "status": "gate:2-review-turnaround",
+      "status": "gate:2-rebuild-pixal3d",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -1279,12 +1279,12 @@
             "min_cm": [
               -3.5,
               -6.4,
-              -14.3
+              -14.7
             ],
             "max_cm": [
               0.0,
               -1.6,
-              16.3
+              16.7
             ],
             "expect": "filled",
             "min_area_cm2": 6
@@ -1294,12 +1294,12 @@
             "min_cm": [
               -7.0,
               8.1,
-              -14.3
+              -14.7
             ],
             "max_cm": [
               -3.5,
               12.9,
-              16.3
+              16.7
             ],
             "expect": "filled",
             "min_area_cm2": 6
@@ -1309,12 +1309,12 @@
             "min_cm": [
               -13.9,
               17.7,
-              -14.3
+              -14.7
             ],
             "max_cm": [
               -10.4,
               22.5,
-              16.3
+              16.7
             ],
             "expect": "empty",
             "max_area_cm2": 10
@@ -1327,44 +1327,43 @@
         ],
         "closeup_fit": 0.08,
         "closeup_label": "The brass spigot and the steam whistle",
-        "view_fit": 0.282,
+        "view_fit": 0.285,
         "dimension_tolerance_pct": 5
       },
-      "build": null,
+      "measured": {
+        "triangles": 19994,
+        "bbox_min_cm": [
+          -13.9,
+          -16.0,
+          -14.7
+        ],
+        "bbox_max_cm": [
+          13.9,
+          22.5,
+          16.7
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 1349512
+      },
+      "build": "python scripts/run_pixal3d_mesh.py prop_crump_samovar",
       "validate": "node scripts/capture_prop_renders.mjs prop_crump_samovar",
       "reference_concept": "public/tex/props/flux3_prop_crump_samovar_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_crump_samovar_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_crump_samovar_turnaround.png",
       "turntable": "docs/props/prop_crump_samovar/turntable.webp",
-      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 19,994 triangles, 1,349,512 bytes, 22/24 capture checks. The checks that do not pass: the mesh is one surface, not a pile of shards; the mesh's seams are closed. The mesh measures 27.8 x 38.5 x 31.4 cm against a spec of 27.8 x 38.5 x 30.6 cm. The finding is recorded in the manifest and the tolerance is left at 5%.",
       "dimensions_note": "scale_dimensions_cm amended from 22 x 38.5 x 24 cm to 27.8 x 38.5 x 30.6 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
-      "stand_in_measured": {
-        "triangles": 19996,
-        "bbox_min_cm": [
-          -13.9,
-          -16.0,
-          -14.3
-        ],
-        "bbox_max_cm": [
-          13.9,
-          22.5,
-          16.3
-        ],
-        "meshes": 1,
-        "materials": 1,
-        "embedded_images": 3,
-        "bytes": 1359000
-      },
-      "revision_seed": 4242,
       "revision_requested_at": "2026-10-30T14:22:59+10:00",
-      "revision_seeds": [
-        4242
-      ],
+      "revision_published_at": "2026-10-30T15:08:49+10:00",
       "revision_note": "Revision requested on 2026-10-30T14:22:59+10:00: this looks full of bullet holes - the surface is speckled with dark facets, the same fault the nurse's cap has. It needs to be rebuilt.. The reconstruction is being rebuilt with seed 4242 from the same approved sheet.",
       "revision_handled": [
         "IC_kwDOVUJnUc8AAAABhFG9cQ"
       ],
-      "revision_claimed_at": "2026-10-30T14:59:16+10:00"
+      "revision_seeds": [
+        4242
+      ]
     },
     {
       "id": "weapon_knuckleduster",
@@ -1796,8 +1795,8 @@
       "validate": "node scripts/capture_prop_renders.mjs weapon_nail_bat",
       "reference_concept": "public/tex/props/flux3_nail_bat_redo_art.png",
       "alpha_cutout": "public/tex/props/flux3_nail_bat_redo_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_nail_bat_turnaround_redo.png",
-      "turntable": "docs/props/weapon_nail_bat/turntable_redo.webp",
+      "turnaround_sheet": "public/tex/props/h3_nail_bat_turnaround.png",
+      "turntable": "docs/props/weapon_nail_bat/turntable.webp",
       "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.",
       "dimensions_note": "scale_dimensions_cm amended from 125.8 x 84 x 37.8 cm to 15.1 x 84 x 7.1 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
       "revision_requested_at": "2026-10-30T14:22:59+10:00",
@@ -1856,7 +1855,8 @@
         "embedded_images": 3,
         "bytes": 930152
       },
-      "revision_seed": 31337
+      "revision_seed": 31337,
+      "revision_claimed_at": "2026-10-30T15:08:31+10:00"
     },
     {
       "id": "weapon_cleaver",

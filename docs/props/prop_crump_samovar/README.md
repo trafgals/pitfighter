@@ -1,5 +1,13 @@
 # prop_crump_samovar
 
+
+> **This asset is held at a gate.** The capture it came from did not pass
+> every check, and the renders are here so the finding can be judged, not
+> because the asset is approved. The checks that did not pass:
+
+> - the mesh is one surface, not a pile of shards (7333 of 17194 vertices are duplicates of another vertex (42.6%))
+> - the mesh's seams are closed (13240 of 36611 edges are used by only one triangle (36.2%))
+
 The verification renders for this prop, produced by
 
 ```
