@@ -13,6 +13,10 @@ The way weapon_chair.glb was made, as a script:
   4. turn it to face +Z, scale it to the spec's height and stand it on the
      pivot, from the manifest entry's scale_dimensions_cm and validation.frame
 
+A prop whose approved art is drawn the other way up says so in
+validation.frame.upside_down, and the sheet is turned over before it is
+conditioned on, so the mesh and its baked textures both come out right way up.
+
 The asset's manifest entry (data/asset_manifest.json) names the sheet and the
 GLB. The raw ComfyUI GLB stays in ComfyUI's output folder.
 
@@ -28,7 +32,7 @@ import struct
 import argparse
 import urllib.request
 import uuid
-from PIL import Image
+from PIL import Image, ImageOps
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 MANIFEST = os.path.join(ROOT, "data", "asset_manifest.json")
@@ -113,11 +117,14 @@ def build_workflow(names, prefix, seed=None, faces=None):
     return wf
 
 
-def run(wf, deadline_s=3600):
+def run(wf, deadline_s=28800):
     """Queue a workflow and return its history entry once it has finished.
 
-    A reconstruction takes about 8 minutes; an hour without a result means
-    ComfyUI lost the prompt (a restart, say), so give up rather than wait forever.
+    A reconstruction takes about 8 minutes; eight hours without a result means
+    ComfyUI lost the prompt (a restart, say), so give up rather than wait
+    forever. The wait is generous because ComfyUI is one GPU on a shared
+    queue: a reconstruction that waits behind a turnaround clip starts an hour
+    late and is still perfectly good.
     """
     req = urllib.request.Request(f"{COMFY_HOST}/prompt", data=json.dumps({"prompt": wf}).encode(),
                                  headers={"Content-Type": "application/json"})
@@ -156,7 +163,7 @@ def write_glb(doc, blob):
             + struct.pack("<II", len(blob), 0x004E4942) + blob)
 
 
-def image_sizes(doc):
+def image_sizes(doc, colour_px=COLOUR_PX, orm_px=ORM_PX, normal_px=NORMAL_PX):
     """The pixel size each image is shipped at, from the material slots that read it."""
     sizes = {}
     def want(tex, px):
@@ -166,15 +173,62 @@ def image_sizes(doc):
         sizes[src] = max(sizes.get(src, 0), px)
     for m in doc.get("materials", []):
         pbr = m.get("pbrMetallicRoughness", {})
-        want(pbr.get("baseColorTexture"), COLOUR_PX)
-        want(pbr.get("metallicRoughnessTexture"), ORM_PX)
-        want(m.get("occlusionTexture"), ORM_PX)
-        want(m.get("emissiveTexture"), COLOUR_PX)
-        want(m.get("normalTexture"), NORMAL_PX)
+        want(pbr.get("baseColorTexture"), colour_px)
+        want(pbr.get("metallicRoughnessTexture"), orm_px)
+        want(m.get("occlusionTexture"), orm_px)
+        want(m.get("emissiveTexture"), colour_px)
+        want(m.get("normalTexture"), normal_px)
     return sizes
 
 
-def place(doc, views, height_cm, y_min_cm=0.0, centre_x_cm=0.0, centre_z_cm=0.0):
+def turn_matrix(turn_deg):
+    """The rotation that puts the reconstruction on the manifest's pivot.
+
+    Pixal3D builds the object facing -Z with the sheet's front view on the
+    image's right, so the sheet's right-hand direction ends up on +X once the
+    object is turned to face +Z. A prop whose pivot puts its length on Z
+    instead - a shoe last whose toe points forward - says so with a turn, and
+    is turned a quarter about Y before it is faced.
+
+    All three matrices are proper rotations, so the winding of the triangles
+    is untouched and the mesh stays outside-out.
+    """
+    import numpy as np
+    turn = int(turn_deg) % 360
+    if turn == 0:
+        return np.array([[-1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, -1.0]])
+    if turn == 90:
+        return np.array([[0.0, 0.0, 1.0], [0.0, 1.0, 0.0], [-1.0, 0.0, 0.0]])
+    if turn == 270:
+        return np.array([[0.0, 0.0, -1.0], [0.0, 1.0, 0.0], [1.0, 0.0, 0.0]])
+    raise ValueError(f"a prop's turn has to be 0, 90 or 270 degrees, not {turn_deg}")
+
+
+def roll_matrix(roll_deg):
+    """The rotation that stands a reconstruction up on its pivot.
+
+    Some props are approved art drawn leaning: a rapier drawn at an angle
+    across the frame, a tool drawn on the diagonal. The drawing's angle is a
+    pose, not a shape, and the pivot asks for the prop to stand along its own
+    axis, so the reconstruction is rolled back the way the art leans before it
+    is turned onto the pivot.
+
+    The roll is about the camera's axis, which is the axis the sheet's front
+    view is drawn in, and it happens before the turn so that the turn still
+    decides which way the prop faces.
+
+    It is a proper rotation, so the winding of the triangles is untouched and
+    the mesh stays outside-out.
+    """
+    import math
+    import numpy as np
+    angle = math.radians(float(roll_deg))
+    cos, sin = math.cos(angle), math.sin(angle)
+    return np.array([[cos, -sin, 0.0], [sin, cos, 0.0], [0.0, 0.0, 1.0]])
+
+
+def place(doc, views, height_cm, y_min_cm=0.0, centre_x_cm=0.0, centre_z_cm=0.0, turn_deg=0,
+          roll_deg=0.0):
     """Turn a reconstruction to face +Z, scale it to the spec's height and put its base on the pivot.
 
     Pixal3D builds the object facing -Z, about a metre tall, centred on the
@@ -183,7 +237,8 @@ def place(doc, views, height_cm, y_min_cm=0.0, centre_x_cm=0.0, centre_z_cm=0.0)
     gives them a tolerance.
     """
     import numpy as np
-    prims = [p for m in doc["meshes"] for p in m["primitives"]]
+    matrix = turn_matrix(turn_deg) @ roll_matrix(roll_deg)
+    prims = [p for mesh in doc["meshes"] for p in mesh["primitives"]]
     def floats(acc_index):
         acc = doc["accessors"][acc_index]
         width = {"VEC3": 3, "VEC4": 4}[acc["type"]]
@@ -193,42 +248,87 @@ def place(doc, views, height_cm, y_min_cm=0.0, centre_x_cm=0.0, centre_z_cm=0.0)
         return acc, np.frombuffer(views[acc["bufferView"]], dtype="<f4", count=acc["count"] * width).reshape(-1, width).copy()
     pos = [floats(p["attributes"]["POSITION"]) for p in prims]
     allp = np.concatenate([a for _, a in pos])
-    scale = height_cm / 100.0 / (allp[:, 1].max() - allp[:, 1].min())
-    turned = allp * [-1, 1, -1] * scale
+    # the roll happens before the turn, and the height is fitted to the rolled
+    # mesh: a prop that is stood up is taller than it was drawn
+    rolled = allp @ roll_matrix(roll_deg).T
+    scale = height_cm / 100.0 / (rolled[:, 1].max() - rolled[:, 1].min())
+    turned = rolled @ turn_matrix(turn_deg).T * scale
     shift = np.array([centre_x_cm / 100.0 - (turned[:, 0].max() + turned[:, 0].min()) / 2,
                       y_min_cm / 100.0 - turned[:, 1].min(),
                       centre_z_cm / 100.0 - (turned[:, 2].max() + turned[:, 2].min()) / 2])
     for p, (acc, a) in zip(prims, pos):
-        a = a * [-1, 1, -1] * scale + shift
+        a = a @ matrix.T * scale + shift
         views[acc["bufferView"]] = a.astype("<f4").tobytes()
         acc["min"], acc["max"] = a.min(axis=0).tolist(), a.max(axis=0).tolist()
         for name in ("NORMAL", "TANGENT"):
             if name in p["attributes"]:
                 nacc, n = floats(p["attributes"][name])
-                n[:, 0] *= -1
-                n[:, 2] *= -1
+                # a tangent carries its handedness in a fourth component, which
+                # the rotation does not touch
+                if n.shape[1] == 4:
+                    n[:, :3] = n[:, :3] @ matrix.T
+                else:
+                    n = n @ matrix.T
                 views[nacc["bufferView"]] = n.astype("<f4").tobytes()
     return scale
 
 
-def shrink_glb(data, fit=None):
+def shrink_glb(data, fit=None, budget=None):
     """Smaller textures as JPEG, 16-bit indices where they fit, and no tangents.
 
     fit, when given, is place()'s keyword arguments: the reconstruction is turned,
     scaled and moved onto the asset's pivot first.
+
+    budget, when given, is the byte budget the asset has to ship inside. The
+    textures are stepped down until the file fits: a mesh that ships over its
+    budget is a defect, and the budget is the one number in the manifest that
+    is ours to meet rather than the art's to answer for.
     """
+    best = None
+    for colour_px, orm_px, normal_px, quality in size_ladder(budget):
+        out = shrink_once(data, fit, colour_px, orm_px, normal_px, quality)
+        best = out
+        if budget is None or len(out) <= budget:
+            return out
+    return best
+
+
+def size_ladder(budget):
+    """The texture sizes and JPEG quality to try, in order.
+
+    The first entry is what the chair shipped with. The rest give up texture
+    detail a step at a time, so a prop that comes out over budget loses a
+    little quality rather than failing to ship.
+    """
+    ladder = [
+        (COLOUR_PX, ORM_PX, NORMAL_PX, JPEG_QUALITY),
+        (COLOUR_PX, ORM_PX, NORMAL_PX, 85),
+        (COLOUR_PX, ORM_PX, NORMAL_PX, 80),
+        (COLOUR_PX, ORM_PX, NORMAL_PX, 75),
+        (768, 768, NORMAL_PX, 85),
+        (768, 768, 384, 85),
+        (768, 768, 384, 75),
+        (512, 512, 256, 80),
+        (512, 512, 256, 70),
+        (256, 256, 256, 65),
+    ]
+    return ladder if budget else ladder[:1]
+
+
+def shrink_once(data, fit, colour_px, orm_px, normal_px, quality):
+    """One pass of the shrink, at a given texture size and JPEG quality."""
     doc, blob = read_glb(data)
     views = [bytes(blob[v.get("byteOffset", 0):v.get("byteOffset", 0) + v["byteLength"]]) for v in doc["bufferViews"]]
     if fit:
         place(doc, views, **fit)
 
-    for i, px in image_sizes(doc).items():
+    for i, px in image_sizes(doc, colour_px, orm_px, normal_px).items():
         img = doc["images"][i]
         im = Image.open(io.BytesIO(views[img["bufferView"]])).convert("RGB")
         if im.width > px:
             im = im.resize((px, px), Image.Resampling.LANCZOS)
         out = io.BytesIO()
-        im.save(out, format="JPEG", quality=JPEG_QUALITY, optimize=True)
+        im.save(out, format="JPEG", quality=quality, optimize=True)
         views[img["bufferView"]] = out.getvalue()
         img["mimeType"] = "image/jpeg"
 
@@ -304,6 +404,8 @@ def fit_of(entry):
         "y_min_cm": frame["y_min_cm"],
         "centre_x_cm": frame.get("centre_x_cm", 0.0),
         "centre_z_cm": frame.get("centre_z_cm", 0.0),
+        "turn_deg": frame.get("turn_deg", 0),
+        "roll_deg": frame.get("roll_deg", 0.0),
     }
 
 
@@ -313,7 +415,24 @@ def reconstruct(asset_id, seed=None, faces=None, out=None):
     sheet = os.path.join(ROOT, entry["turnaround_sheet"])
     out_path = out or os.path.join(ROOT, entry["glb_output"])
 
-    names = {v: upload(img, f"{asset_id}_view_{v}.png") for v, img in cut_sheet(sheet).items()}
+    views = cut_sheet(sheet)
+    if entry.get("validation", {}).get("frame", {}).get("upside_down"):
+        # The prop's approved art is drawn the other way up - a swordstick
+        # hanging from its pommel, a bat with its handle in the air - while the
+        # pivot puts the grip at the origin and the working end above it.
+        # The sheet is turned over before it is conditioned on, so the mesh and
+        # the textures baked from these same views both come out the right way
+        # up; turning the mesh over afterwards would leave the bake upside down
+        # on the surface.
+        #
+        # Turning the object over is a half turn about the front view's
+        # horizontal axis, so the two broadside views are turned over the other
+        # way and the two side views are turned over sideways: each tile is
+        # flipped about the axis the object's turn runs along in that view.
+        views = {v: (ImageOps.flip(img) if v in ("front", "back") else ImageOps.mirror(img))
+                 for v, img in views.items()}
+        print(f"[Pixal3D] {asset_id} is built upside down: the sheet is turned over first")
+    names = {v: upload(img, f"{asset_id}_view_{v}.png") for v, img in views.items()}
     print(f"[Pixal3D] Uploaded the {', '.join(names)} views of {entry['turnaround_sheet']}")
     prefix = f"3d/pixal3d_{asset_id}"
     started = time.time()
@@ -333,10 +452,12 @@ def reconstruct(asset_id, seed=None, faces=None, out=None):
     else:
         raw = os.path.join(COMFY_OUTPUT, glbs[0].get("subfolder", ""), glbs[0]["filename"])
     with open(raw, "rb") as f:
-        data = shrink_glb(f.read(), fit)
+        data = shrink_glb(f.read(), fit, entry.get("file_budget_bytes"))
     with open(out_path, "wb") as f:
         f.write(data)
-    print(f"[Pixal3D] {os.path.getsize(raw):,} bytes from {raw} shrunk to {len(data):,} in {out_path}")
+    budget = entry.get("file_budget_bytes")
+    print(f"[Pixal3D] {os.path.getsize(raw):,} bytes from {raw} shrunk to {len(data):,} in {out_path}"
+          + (f" (budget {budget:,})" if budget else ""))
     return out_path
 
 
@@ -348,10 +469,15 @@ if __name__ == "__main__":
     ap.add_argument("--out", help="write the GLB here instead of the manifest's glb_output")
     ap.add_argument("--shrink", nargs=2, metavar=("IN", "OUT"),
                     help="shrink a GLB ComfyUI already made; with an asset, place it on that asset's pivot too")
+    ap.add_argument("--budget", type=int,
+                    help="the byte budget to fit inside when shrinking; without one the textures "
+                         "are left at the size they are already at")
     a = ap.parse_args()
     if a.shrink:
+        entry = manifest_entry(a.asset) if a.asset else None
         with open(a.shrink[0], "rb") as f:
-            data = shrink_glb(f.read(), fit_of(manifest_entry(a.asset)) if a.asset else None)
+            data = shrink_glb(f.read(), fit_of(entry) if entry else None,
+                              a.budget or (entry.get("file_budget_bytes") if entry else None))
         with open(a.shrink[1], "wb") as f:
             f.write(data)
         print(f"{a.shrink[1]}: {len(data):,} bytes")

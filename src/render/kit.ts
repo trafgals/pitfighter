@@ -134,8 +134,19 @@ export interface GearBones {
   fore: number;
 }
 
-/** Put the kit's gear on the bones; it returns what it added (named, for the tests). */
-export function buildGear(gear: Gear[], b: GearBones, mats: { accent: THREE.Material; accentColour: number }): THREE.Object3D[] {
+/**
+ * Put the kit's gear on the bones; it returns what it added (named, for the tests).
+ *
+ * `skip` names the pieces of gear that a 3D prop is standing in for: the
+ * approved asset is the real thing, so the game's own drawing of it is left
+ * off rather than worn underneath.
+ */
+export function buildGear(
+  gear: Gear[],
+  b: GearBones,
+  mats: { accent: THREE.Material; accentColour: number },
+  skip: ReadonlySet<string> = new Set(),
+): THREE.Object3D[] {
   const out: THREE.Object3D[] = [];
   const std = (color: number, rough = 0.7, metal = 0) => new THREE.MeshStandardMaterial({ color, roughness: rough, metalness: metal });
   const put = (parent: THREE.Object3D, name: string, ...parts: THREE.Object3D[]) => {
@@ -161,6 +172,7 @@ export function buildGear(gear: Gear[], b: GearBones, mats: { accent: THREE.Mate
   const trimColour = new THREE.Color(mats.accentColour).getHSL({ h: 0, s: 0, l: 0 }).l > 0.45 ? 0x1a1010 : 0xe8dcc0;
   const trim = std(trimColour, 0.6);
   for (const k of gear) {
+    if (skip.has(k)) continue;
     switch (k) {
       case "mohawk": {
         const fins = [];

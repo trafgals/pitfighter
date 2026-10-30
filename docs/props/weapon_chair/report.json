@@ -1,39 +1,39 @@
 {
   "asset": "weapon_chair",
   "model": "public/models/props/weapon_chair.glb",
-  "capturedAt": "2026-10-28T04:25:21.966Z",
+  "capturedAt": "2026-10-30T02:28:45.482Z",
   "budget": {
     "triangles": 25000,
     "bytes": 1572864,
     "dimensionsCm": {
-      "width": 52,
+      "width": 66.2,
       "height": 87,
-      "depth": 54
+      "depth": 70.6
     }
   },
-  "triangles": 19986,
-  "bytes": 1303240,
+  "triangles": 20000,
+  "bytes": 988224,
   "dimensionsCm": {
-    "width": 52.1,
+    "width": 66.2,
     "height": 87,
-    "depth": 53.7
+    "depth": 70.6
   },
   "bbox": {
     "min": [
-      -0.2606511116027832,
+      -0.33086809515953064,
       -0.41499999165534973,
-      -0.26846203207969666
+      -0.35287898778915405
     ],
     "max": [
-      0.2606511116027832,
+      0.33086809515953064,
       0.45500001311302185,
-      0.26846203207969666
+      0.35287898778915405
     ]
   },
   "meshes": [
     {
       "name": "mesh_0",
-      "triangles": 19986,
+      "triangles": 20000,
       "material": 0
     }
   ],
@@ -43,38 +43,38 @@
   "renders": [
     {
       "view": "front",
-      "label": "Front (0deg, badge to camera)",
+      "label": "Front (0deg, +Z to camera)",
       "file": "test-output/props/weapon_chair/front.png",
-      "bytes": 304434
+      "bytes": 215617
     },
     {
       "view": "profile",
       "label": "Profile (90deg, right side)",
       "file": "test-output/props/weapon_chair/profile.png",
-      "bytes": 211408
+      "bytes": 163900
     },
     {
       "view": "badge",
-      "label": "Tufted crimson velvet backrest close-up",
+      "label": "The buttoned leather backrest close-up",
       "file": "test-output/props/weapon_chair/badge.png",
-      "bytes": 722447
+      "bytes": 474096
     }
   ],
   "checks": [
     {
       "ok": true,
       "message": "the model has triangles",
-      "detail": "19986"
+      "detail": "20000"
     },
     {
       "ok": true,
       "message": "triangle count is under budget",
-      "detail": "19986 < 25000"
+      "detail": "20000 < 25000"
     },
     {
       "ok": true,
       "message": "file size is within budget",
-      "detail": "1.243 MB <= 1.5 MB"
+      "detail": "0.942 MB <= 1.5 MB"
     },
     {
       "ok": true,
@@ -88,8 +88,8 @@
     },
     {
       "ok": true,
-      "message": "width matches the spec (52 cm +/- 5%)",
-      "detail": "52.1 cm"
+      "message": "width matches the spec (66.2 cm +/- 5%)",
+      "detail": "66.2 cm"
     },
     {
       "ok": true,
@@ -98,8 +98,8 @@
     },
     {
       "ok": true,
-      "message": "depth matches the spec (54 cm +/- 5%)",
-      "detail": "53.7 cm"
+      "message": "depth matches the spec (70.6 cm +/- 5%)",
+      "detail": "70.6 cm"
     },
     {
       "ok": true,
@@ -123,18 +123,18 @@
     },
     {
       "ok": true,
-      "message": "the seat is there",
-      "detail": "1757 cm2 of surface >= 300"
+      "message": "the lower half of the prop carries the prop's surface is there",
+      "detail": "817 cm2 of surface >= 32"
     },
     {
       "ok": true,
-      "message": "the backrest, behind the seat (-Z) is there",
-      "detail": "1585 cm2 of surface >= 300"
+      "message": "the upper half of the prop carries the prop's surface is there",
+      "detail": "220 cm2 of surface >= 32"
     },
     {
       "ok": true,
-      "message": "the space in front of the backrest (+Z) is clear",
-      "detail": "0 cm2 of surface <= 5"
+      "message": "the space beside the prop is clear is clear",
+      "detail": "0 cm2 of surface <= 10"
     },
     {
       "ok": true,
@@ -154,7 +154,12 @@
     {
       "ok": true,
       "message": "the renderer sees the same triangle count as the file",
-      "detail": "19986 vs 19986"
+      "detail": "20000 vs 20000"
+    },
+    {
+      "ok": true,
+      "message": "the published render still matches the approved art",
+      "detail": "IoU 0.883 against the sheet's front view, 0.536 the wrong way up"
     },
     {
       "ok": true,
@@ -163,7 +168,7 @@
     {
       "ok": true,
       "message": "the front render is a real image",
-      "detail": "304434 bytes"
+      "detail": "215617 bytes"
     }
   ]
 }

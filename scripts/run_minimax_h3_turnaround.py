@@ -38,8 +38,14 @@ COMFY_OUTPUT = r"C:\Users\dimit\Documents\comfy\ComfyUI_windows_portable_amd\Com
 LENGTH = 124
 VIEWS = ["front", "left", "back", "right"]
 
-def prepare_input_image(alpha_image_path, target_size=(768, 768), bg_color=(255, 255, 255)):
-    """Composite RGBA alpha image over clean solid background and center it."""
+def prepare_input_image(alpha_image_path, target_size=(768, 768), bg_color=(255, 255, 255), name=None):
+    """Composite RGBA alpha image over clean solid background and center it.
+
+    The name matters: ComfyUI's LoadImage node reads the file when the job
+    runs, not when it is queued, so a clip that waits behind another one reads
+    whatever the last prop wrote under a shared name. Every prop gets its own
+    anchor file, so a queued clip always conditions on its own artwork.
+    """
     im = Image.open(alpha_image_path)
     if im.mode != "RGBA":
         im = im.convert("RGBA")
@@ -62,7 +68,7 @@ def prepare_input_image(alpha_image_path, target_size=(768, 768), bg_color=(255,
     canvas.paste(im_resized, (offset_x, offset_y), im_resized)
 
     final_rgb = canvas.convert("RGB")
-    out_filename = "h3_turntable_anchor.png"
+    out_filename = name or "h3_turntable_anchor.png"
     target_path = os.path.join(COMFY_INPUT, out_filename)
     final_rgb.save(target_path, quality=95)
     print(f"[MiniMax H3] Prepared anchor image: {target_path} ({target_size[0]}x{target_size[1]})")
@@ -165,7 +171,99 @@ def iou(a, b):
     union = np.logical_or(a, b).sum()
     return float(np.logical_and(a, b).sum()) / union if union else 0.0
 
-def pick_views(frames, symmetric=False, min_rise=0.15, smooth=5):
+def greyscale(img, size=192):
+    """The frame in grey, at a small size."""
+    return np.asarray(img.convert("L").resize((size, size), Image.Resampling.BILINEAR)).astype(np.float64)
+
+def correlate(a, b):
+    """How alike two flat images are, in [-1, 1]."""
+    a = a - a.mean()
+    b = b - b.mean()
+    denom = np.sqrt((a * a).sum() * (b * b).sum())
+    return float((a * b).sum() / denom) if denom else 0.0
+
+def masked_correlate(a, b, mask):
+    """How alike two images are over the pixels the mask covers."""
+    av = a[mask]
+    bv = b[mask]
+    if av.size < 32:
+        return 0.0
+    av = av - av.mean()
+    bv = bv - bv.mean()
+    denom = np.sqrt((av * av).sum() * (bv * bv).sum())
+    return float((av * bv).sum() / denom) if denom else 0.0
+
+def height_spread(sils):
+    """How much the silhouette's height changes over the clip, as a fraction.
+
+    A body turning about its own vertical axis keeps its height: it stands as
+    tall at the back as it does at the front. A body tumbling in the image
+    plane does not - it lies down, stands up and lies down again - so its
+    height swings.
+    """
+    heights = []
+    for sil in sils:
+        rows = np.nonzero(sil.any(axis=1))[0]
+        heights.append(float(np.ptp(rows)) if len(rows) else 0.0)
+    heights = [h for h in heights if h > 0]
+    if len(heights) < 2:
+        return 0.0
+    return float((max(heights) - min(heights)) / (sum(heights) / len(heights)))
+
+def peak_after_trough(scores, start, smooth=5):
+    """The peak of the smoothed scores after their trough, and its rise."""
+    padded = np.pad(scores, smooth // 2, mode="edge")
+    smoothed = np.convolve(padded, np.ones(smooth) / smooth, mode="valid")
+    # the side views are the trough; the back is the peak after it
+    trough = int(np.argmin(smoothed))
+    peak = trough + int(np.argmax(smoothed[trough:]))
+    return start + peak, float(smoothed[peak] - smoothed[trough])
+
+
+def peak_before(scores, index, start, smooth=5):
+    """The peak before a given one, and its rise over the trough.
+
+    A clip that turns past a full circle comes round to the front again, and
+    the front matches its own mirror better than the back does, so the front
+    coming round can be the largest peak in the clip and the last frame of it.
+    The back is then the peak before it.
+    """
+    padded = np.pad(scores, smooth // 2, mode="edge")
+    smoothed = np.convolve(padded, np.ones(smooth) / smooth, mode="valid")
+    trough = int(np.argmin(smoothed))
+    limit = max(min(index - start, len(smoothed) - 1), trough + 1)
+    peaks = [i for i in range(trough + 1, limit)
+             if smoothed[i] >= smoothed[i - 1] and smoothed[i] > smoothed[i + 1]]
+    peak = peaks[-1] if peaks else trough + int(np.argmax(smoothed[trough:limit]))
+    return start + peak, float(smoothed[peak] - smoothed[trough])
+
+def highest_peak_before_trough(scores, start, smooth=5):
+    """The strongest peak before the curve's trough, and its rise.
+
+    The rise is measured over the valley just before the peak - the side view
+    the peak stands over - rather than over the trough, which in a clip that
+    turns a full circle is the *other* side view and lies after the back.
+    """
+    padded = np.pad(scores, smooth // 2, mode="edge")
+    smoothed = np.convolve(padded, np.ones(smooth) / smooth, mode="valid")
+    trough = int(np.argmin(smoothed))
+    best = None
+    for i in range(1, trough):
+        if smoothed[i] >= smoothed[i - 1] and smoothed[i] > smoothed[i + 1]:
+            valley = 0
+            for j in range(i - 1, 0, -1):
+                if smoothed[j] <= smoothed[j - 1] and smoothed[j] < smoothed[j + 1]:
+                    valley = j
+                    break
+            rise = float(smoothed[i] - smoothed[valley])
+            if best is None or rise > best[1]:
+                best = (start + i, rise)
+    if best is None:
+        return start + trough, 0.0
+    return best
+
+
+def pick_views(frames, symmetric=False, min_rise=0.15, min_colour_rise=0.06, smooth=5, max_tumble=0.30):
     """Frame indices of the front, left, back and right views, and whether right is the left mirrored.
 
     Right is None when the clip ends before it and the prop is not symmetric:
@@ -174,21 +272,84 @@ def pick_views(frames, symmetric=False, min_rise=0.15, smooth=5):
     The back is the frame, past the first quarter of the clip, whose silhouette best
     matches the front's mirrored: a half turn mirrors the outline. Perspective
     keeps the match well short of perfect (0.7 for the chair), so what is asked
-    for is a peak that rises clear of the side views' trough and ends before the
-    clip does. The turn is taken to run at constant speed from there.
+    for is a peak that rises clear of the side views' trough.
+
+    Some props have no such peak. A bottle, a flatcap and a samovar keep the
+    same outline all the way round - their silhouette barely changes as they
+    turn - so the outline match has no peak to find, and a prop like that was
+    refused for a clip that was perfectly good. For those the colour is asked
+    instead, and only over the object's own pixels: the label, the crest and
+    the shading are not the same at the back as at the front, so the colour
+    match still finds the turn where the outline cannot.
+
+    The colour match is held to its own, lower bar, because the outline it
+    stands in for is a weaker signal: a bottle's own colour barely changes
+    over a half turn, and asking for as much rise as an outline would throw
+    away a perfectly good clip.
+
+    A clip that tumbles in the image plane is refused whatever its outline
+    does: the object lies down and stands up rather than turning about its own
+    axis, so it never shows a back view at all.
+
+    A clip that turns a full circle comes round to the front again, and the
+    front matches its own mirror better than the back does, so the largest
+    peak can be the last frame of the clip. The back is then an earlier peak:
+    the peak before it, or - when the curve's own trough is late in the clip
+    and there is no peak to be had before the tail - the strongest peak before
+    that trough.
     """
     sil = [silhouette(f) for f in frames]
+    grey = [greyscale(f) for f in frames]
     mirrored_front = np.fliplr(sil[0])
+    mirrored_grey = np.fliplr(grey[0])
     start = len(frames) // 4
     scores = np.array([iou(s, mirrored_front) for s in sil[start:]])
-    padded = np.pad(scores, smooth // 2, mode="edge")
-    smoothed = np.convolve(padded, np.ones(smooth) / smooth, mode="valid")
-    # the side views are the trough; the back is the peak after it
-    trough = int(np.argmin(smoothed))
-    peak = trough + int(np.argmax(smoothed[trough:]))
-    back = start + peak
-    rise = smoothed[peak] - smoothed[trough]
-    if back >= len(frames) - smooth or rise < min_rise:
+    back, rise = peak_after_trough(scores, start, smooth)
+    chosen = scores
+
+    # the object's own pixels, where the colour is worth reading
+    mask = sil[0] | sil[start]
+    colour_scores = np.array([masked_correlate(g, mirrored_grey, mask) for g in grey[start:]])
+    colour_back, colour_rise = peak_after_trough(colour_scores, start, smooth)
+
+    if rise < min_rise and colour_rise >= min_colour_rise and colour_rise > rise:
+        # the outline does not change as the prop turns: the colour is asked
+        back, rise = colour_back, colour_rise
+        threshold = min_colour_rise
+        chosen = colour_scores
+    else:
+        threshold = min_rise
+
+    tumble = height_spread(sil)
+    if tumble > max_tumble:
+        raise RuntimeError(
+            f"the clip tumbles: the object swings in the image plane rather than turning "
+            f"about its own axis, so it never shows a back view; its height changes by "
+            f"{tumble:.0%} over the clip"
+        )
+
+    if back >= len(frames) - smooth:
+        # the largest peak is in the last frames of the clip, which means it is
+        # the front coming round again rather than the back: the back is the
+        # peak before it
+        earlier, earlier_rise = peak_before(scores, back, start, smooth)
+        if earlier_rise >= threshold and earlier < len(frames) - smooth:
+            back, rise = earlier, earlier_rise
+        else:
+            # the outline has no peak to offer, so the colour is asked
+            earlier, earlier_rise = peak_before(colour_scores, back, start, smooth)
+            if earlier_rise >= threshold and earlier < len(frames) - smooth:
+                back, rise = earlier, earlier_rise
+            else:
+                # neither curve has a peak before the tail. That happens when
+                # the curve's own trough is late in the clip - the sides are
+                # then the valley before the back, and the back is the
+                # strongest peak before that trough.
+                earlier, earlier_rise = highest_peak_before_trough(chosen, start, smooth)
+                if earlier_rise >= threshold and earlier < len(frames) - smooth:
+                    back, rise = earlier, earlier_rise
+
+    if back >= len(frames) - smooth or rise < threshold:
         raise RuntimeError(
             f"the clip never shows the back: the best match to the mirrored front is frame {back} "
             f"of {len(frames)}, rising {rise:.2f} over the side views; make the clip longer"
@@ -211,7 +372,9 @@ def run_h3_turntable(input_alpha_path, output_sheet_path, prompt=None, preview_p
         )
 
     print(f"[MiniMax H3] Starting turnaround generation from {input_alpha_path}...")
-    anchor_file = prepare_input_image(input_alpha_path, target_size=(768, 768))
+    stem = os.path.splitext(os.path.basename(output_sheet_path))[0]
+    anchor_file = prepare_input_image(input_alpha_path, target_size=(768, 768),
+                                      name=f"anchor_{stem}.png")
 
     workflow = build_workflow(anchor_file, prompt, width=768, height=768, length=length, seed=seed, steps=steps)
 

@@ -1,0 +1,174 @@
+{
+  "asset": "weapon_lamplighter_pole",
+  "model": "public/models/props/weapon_lamplighter_pole.glb",
+  "capturedAt": "2026-10-30T02:21:23.347Z",
+  "budget": {
+    "triangles": 20000,
+    "bytes": 1572864,
+    "dimensionsCm": {
+      "width": 118.8,
+      "height": 175,
+      "depth": 37.7
+    }
+  },
+  "triangles": 16000,
+  "bytes": 1015944,
+  "dimensionsCm": {
+    "width": 118.8,
+    "height": 175,
+    "depth": 37.7
+  },
+  "bbox": {
+    "min": [
+      -0.5661013126373291,
+      -0.824999988079071,
+      -0.18862184882164001
+    ],
+    "max": [
+      0.6221013069152832,
+      0.925000011920929,
+      0.18862184882164001
+    ]
+  },
+  "meshes": [
+    {
+      "name": "mesh_0",
+      "triangles": 16000,
+      "material": 0
+    }
+  ],
+  "materials": [
+    "(unnamed)"
+  ],
+  "renders": [
+    {
+      "view": "front",
+      "label": "Front (0deg, +Z to camera)",
+      "file": "test-output/props/weapon_lamplighter_pole/front.png",
+      "bytes": 121545
+    },
+    {
+      "view": "profile",
+      "label": "Profile (90deg, right side)",
+      "file": "test-output/props/weapon_lamplighter_pole/profile.png",
+      "bytes": 79677
+    },
+    {
+      "view": "badge",
+      "label": "The gas shutoff hook and the lamp fitting",
+      "file": "test-output/props/weapon_lamplighter_pole/badge.png",
+      "bytes": 208986
+    }
+  ],
+  "checks": [
+    {
+      "ok": true,
+      "message": "the model has triangles",
+      "detail": "16000"
+    },
+    {
+      "ok": true,
+      "message": "triangle count is under budget",
+      "detail": "16000 < 20000"
+    },
+    {
+      "ok": true,
+      "message": "file size is within budget",
+      "detail": "0.969 MB <= 1.5 MB"
+    },
+    {
+      "ok": true,
+      "message": "the mesh has no structural problems",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "no vertex position is NaN or infinite",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "message": "width matches the spec (118.8 cm +/- 5%)",
+      "detail": "118.8 cm"
+    },
+    {
+      "ok": true,
+      "message": "height matches the spec (175 cm +/- 5%)",
+      "detail": "175 cm"
+    },
+    {
+      "ok": true,
+      "message": "depth matches the spec (37.7 cm +/- 5%)",
+      "detail": "37.7 cm"
+    },
+    {
+      "ok": true,
+      "message": "the base sits where the pivot puts it (-82.5 cm)",
+      "detail": "-82.5 cm"
+    },
+    {
+      "ok": true,
+      "message": "the top sits where the pivot puts it (92.5 cm)",
+      "detail": "92.5 cm"
+    },
+    {
+      "ok": true,
+      "message": "the asset is centred on X (2.8 cm)",
+      "detail": "2.8 cm"
+    },
+    {
+      "ok": true,
+      "message": "the asset is centred on Z (0 cm)",
+      "detail": "0 cm"
+    },
+    {
+      "ok": true,
+      "message": "the lower half of the prop carries the prop's surface is there",
+      "detail": "808 cm2 of surface >= 114"
+    },
+    {
+      "ok": true,
+      "message": "the upper half of the prop carries the prop's surface is there",
+      "detail": "851 cm2 of surface >= 114"
+    },
+    {
+      "ok": true,
+      "message": "the space beside the prop is clear is clear",
+      "detail": "0 cm2 of surface <= 10"
+    },
+    {
+      "ok": true,
+      "message": "every asset the page asked for was served",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the model loads in a WebGL renderer without errors",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the renderer reported no load errors",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the renderer sees the same triangle count as the file",
+      "detail": "16000 vs 16000"
+    },
+    {
+      "ok": true,
+      "message": "the published render still matches the approved art",
+      "detail": "IoU 0.816 against the sheet's front view, 0.508 the wrong way up"
+    },
+    {
+      "ok": true,
+      "message": "every verification render has real content"
+    },
+    {
+      "ok": true,
+      "message": "the front render is a real image",
+      "detail": "121545 bytes"
+    }
+  ]
+}

@@ -8,7 +8,7 @@
 //
 // See docs/characters.md.
 import charactersJson from "./characters.json";
-import type { Character, Family, Kit, Special, SpecialId, Style } from "./types";
+import type { Character, Family, GalleryThrow, Kit, Special, SpecialId, Style } from "./types";
 
 // The compiler cannot check a JSON import, so the schema is enforced by
 // tests/characters.test.ts instead: it fails when a field is missing, when a
@@ -17,6 +17,7 @@ import type { Character, Family, Kit, Special, SpecialId, Style } from "./types"
 const raw = charactersJson as unknown as {
   characters: Character[];
   specials: Record<SpecialId, Special>;
+  theme: { gallery: { throws: GalleryThrow[] } };
 };
 
 /** Every fighter, in the order the game has always used them. The order is
@@ -25,6 +26,14 @@ export const CHARACTERS: Character[] = raw.characters;
 
 /** The six specials: their frame data and the name the HUD shouts. */
 export const SPECIALS: Record<SpecialId, Special> = raw.specials;
+
+/** The Gallery's throws: the weapons it can toss into the pit. */
+export const GALLERY_THROWS: GalleryThrow[] = raw.theme.gallery.throws;
+
+/** A throw of the Gallery's, by its id. */
+export const THROW_BY_ID: Record<string, GalleryThrow> = Object.fromEntries(
+  GALLERY_THROWS.map((t) => [t.id, t]),
+);
 
 /** A special's display name, by id. */
 export const SPECIAL_NAMES: Record<SpecialId, string> = Object.fromEntries(

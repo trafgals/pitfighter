@@ -1,0 +1,192 @@
+{
+  "asset": "prop_rook_souwester",
+  "model": "public/models/props/prop_rook_souwester.glb",
+  "capturedAt": "2026-10-30T04:59:32.656Z",
+  "budget": {
+    "triangles": 20000,
+    "bytes": 1572864,
+    "dimensionsCm": {
+      "width": 34.7,
+      "height": 23.8,
+      "depth": 34.8
+    }
+  },
+  "triangles": 15996,
+  "bytes": 1158944,
+  "dimensionsCm": {
+    "width": 33.7,
+    "height": 23.8,
+    "depth": 34.2
+  },
+  "bbox": {
+    "min": [
+      -0.16825582087039948,
+      -0.0949999988079071,
+      -0.20632053911685944
+    ],
+    "max": [
+      0.16825582087039948,
+      0.14300000667572021,
+      0.1353205442428589
+    ]
+  },
+  "meshes": [
+    {
+      "name": "mesh_0",
+      "triangles": 15996,
+      "material": 0
+    }
+  ],
+  "materials": [
+    "(unnamed)"
+  ],
+  "topology": {
+    "vertices": 13404,
+    "faces": 15996,
+    "duplicateVertices": 5681,
+    "boundaryEdges": 10082,
+    "edges": 29035,
+    "invertedFaces": 247
+  },
+  "renders": [
+    {
+      "view": "front",
+      "label": "Front (0deg, +Z to camera)",
+      "file": "test-output/props/prop_rook_souwester/front.png",
+      "bytes": 244484
+    },
+    {
+      "view": "profile",
+      "label": "Profile (90deg, right side)",
+      "file": "test-output/props/prop_rook_souwester/profile.png",
+      "bytes": 213945
+    },
+    {
+      "view": "badge",
+      "label": "The oilskin crown and the rear neck flap",
+      "file": "test-output/props/prop_rook_souwester/badge.png",
+      "bytes": 648283
+    }
+  ],
+  "checks": [
+    {
+      "ok": true,
+      "message": "the model has triangles",
+      "detail": "15996"
+    },
+    {
+      "ok": true,
+      "message": "triangle count is under budget",
+      "detail": "15996 < 20000"
+    },
+    {
+      "ok": true,
+      "message": "file size is within budget",
+      "detail": "1.105 MB <= 1.5 MB"
+    },
+    {
+      "ok": true,
+      "message": "the mesh has no structural problems",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "no vertex position is NaN or infinite",
+      "detail": "0"
+    },
+    {
+      "ok": false,
+      "message": "the mesh is one surface, not a pile of shards",
+      "detail": "5681 of 13404 vertices are duplicates of another vertex (42.4%)"
+    },
+    {
+      "ok": false,
+      "message": "the mesh's seams are closed",
+      "detail": "10082 of 29035 edges are used by only one triangle (34.7%)"
+    },
+    {
+      "ok": true,
+      "message": "width matches the spec (34.7 cm +/- 5%)",
+      "detail": "33.7 cm"
+    },
+    {
+      "ok": true,
+      "message": "height matches the spec (23.8 cm +/- 5%)",
+      "detail": "23.8 cm"
+    },
+    {
+      "ok": true,
+      "message": "depth matches the spec (34.8 cm +/- 5%)",
+      "detail": "34.2 cm"
+    },
+    {
+      "ok": true,
+      "message": "the base sits where the pivot puts it (-9.5 cm)",
+      "detail": "-9.5 cm"
+    },
+    {
+      "ok": true,
+      "message": "the top sits where the pivot puts it (14.3 cm)",
+      "detail": "14.3 cm"
+    },
+    {
+      "ok": true,
+      "message": "the asset is centred on X (0 cm)",
+      "detail": "0 cm"
+    },
+    {
+      "ok": true,
+      "message": "the asset is centred on Z (-3.55 cm)",
+      "detail": "-3.5 cm"
+    },
+    {
+      "ok": true,
+      "message": "the lower half of the prop carries the prop's surface is there",
+      "detail": "139 cm2 of surface >= 4"
+    },
+    {
+      "ok": true,
+      "message": "the upper half of the prop carries the prop's surface is there",
+      "detail": "100 cm2 of surface >= 4"
+    },
+    {
+      "ok": true,
+      "message": "the space beside the prop is clear is clear",
+      "detail": "0 cm2 of surface <= 10"
+    },
+    {
+      "ok": true,
+      "message": "every asset the page asked for was served",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the model loads in a WebGL renderer without errors",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the renderer reported no load errors",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the renderer sees the same triangle count as the file",
+      "detail": "15996 vs 15996"
+    },
+    {
+      "ok": true,
+      "message": "the published render still matches the approved art",
+      "detail": "IoU 0.901 against the sheet's front view, 0.743 the wrong way up"
+    },
+    {
+      "ok": true,
+      "message": "every verification render has real content"
+    },
+    {
+      "ok": true,
+      "message": "the front render is a real image",
+      "detail": "244484 bytes"
+    }
+  ]
+}

@@ -434,3 +434,149 @@ export function inspectGlb(file) {
 
 /** Format a metre value as centimetres, for readable budget reports. */
 export const cm = (metres) => (metres * 100).toFixed(2);
+
+/**
+ * How fragmented a mesh is allowed to be.
+ *
+ * A mesh assembled out of pieces - a voxel remesh, or anything that carries
+ * per-face vertices - writes the same point down once for every face that
+ * touches it. The two hand-built props in the game are whole surfaces and
+ * sit under 5% duplicate vertices and 7% open edges. Every reconstruction
+ * the Pixal3D pipeline made sat between 17% and 48% duplicate vertices and
+ * between 13% and 41% open edges, and rendered as a pile of shards with dark
+ * seams across it.
+ *
+ * These are the numbers a mesh has to be under to count as one surface.
+ */
+export const MESH_LIMITS = {
+  duplicateVertexPct: 10,
+  boundaryEdgePct: 10,
+};
+
+/**
+ * The mesh's topology, in the terms a reviewer would recognise.
+ *
+ * A reconstruction that comes back fragmented - every piece of the surface
+ * carrying its own copy of the vertices it touches - is geometrically the
+ * same object but topologically a pile of shards. Two things go wrong with
+ * it, and both are invisible in a triangle count:
+ *
+ *   - the vertices along a seam carry normals averaged over one side only,
+ *     so the seam renders as a hard, often black, edge; and
+ *   - an unwrap over a fragmented mesh lays out hundreds of overlapping
+ *     charts, so the baked texture is a patchwork and the normal map is
+ *     garbage - which is what puts dark shards across the surface.
+ *
+ * So the mesh is measured three ways: how many vertices are duplicates of
+ * another vertex's position, how many edges only one triangle uses (a seam
+ * that should be shared by two), and how many faces whose own normal points
+ * the opposite way to the face they belong to.
+ *
+ * Returns { vertices, faces, duplicateVertices, boundaryEdges, edges,
+ * invertedFaces, shell }.
+ */
+export function readTopology(file) {
+  const { json, bin } = parseGlb(fs.readFileSync(file));
+
+  // Positions are quantised to a grid a thousandth of the mesh's own size,
+  // so two vertices that are the same point land in the same cell however
+  // they were written down.
+  let scale = 1;
+  {
+    let min = [Infinity, Infinity, Infinity];
+    let max = [-Infinity, -Infinity, -Infinity];
+    for (const mesh of json.meshes ?? []) {
+      for (const primitive of mesh.primitives ?? []) {
+        if (primitive.attributes?.POSITION === undefined) continue;
+        const { values } = readAccessor(json, bin, primitive.attributes.POSITION);
+        for (let i = 0; i < values.length; i += 3) {
+          for (let k = 0; k < 3; k++) {
+            if (values[i + k] < min[k]) min[k] = values[i + k];
+            if (values[i + k] > max[k]) max[k] = values[i + k];
+          }
+        }
+      }
+    }
+    const diagonal = Math.hypot(max[0] - min[0], max[1] - min[1], max[2] - min[2]);
+    scale = diagonal > 0 ? diagonal / 1000 : 1;
+  }
+
+  let vertices = 0;
+  let faces = 0;
+  let duplicateVertices = 0;
+  let boundaryEdges = 0;
+  let edges = 0;
+  let invertedFaces = 0;
+
+  for (const mesh of json.meshes ?? []) {
+    for (const primitive of mesh.primitives ?? []) {
+      if (primitive.attributes?.POSITION === undefined) continue;
+      const pos = readAccessor(json, bin, primitive.attributes.POSITION);
+      const nor = primitive.attributes.NORMAL !== undefined
+        ? readAccessor(json, bin, primitive.attributes.NORMAL)
+        : null;
+      const idx = primitive.indices !== undefined
+        ? readAccessor(json, bin, primitive.indices).values
+        : null;
+      const count = idx ? idx.length : pos.count;
+      vertices += pos.count;
+
+      // Duplicate positions: the same point written down twice.
+      const cells = new Map();
+      for (let i = 0; i < pos.count; i++) {
+        const key = `${Math.round(pos.values[i * 3] / scale)},${Math.round(pos.values[i * 3 + 1] / scale)},${Math.round(pos.values[i * 3 + 2] / scale)}`;
+        cells.set(key, (cells.get(key) ?? 0) + 1);
+      }
+      for (const n of cells.values()) duplicateVertices += n - 1;
+
+      // Edge use counts. An edge two triangles share is a seam that is
+      // closed; an edge only one triangle uses is a crack.
+      const uses = new Map();
+      const key = (a, b) => (a < b ? `${a}|${b}` : `${b}|${a}`);
+      for (let i = 0; i + 2 < count; i += 3) {
+        const v = idx ? [idx[i], idx[i + 1], idx[i + 2]] : [i, i + 1, i + 2];
+        faces++;
+        for (let e = 0; e < 3; e++) {
+          const k = key(v[e], v[(e + 1) % 3]);
+          uses.set(k, (uses.get(k) ?? 0) + 1);
+        }
+        // A face whose normal points the other way from the face's own
+        // winding is lit from behind and renders as a dark shard.
+        if (nor) {
+          const p = v.map((k) => [pos.values[k * 3], pos.values[k * 3 + 1], pos.values[k * 3 + 2]]);
+          const u = [p[1][0] - p[0][0], p[1][1] - p[0][1], p[1][2] - p[0][2]];
+          const w = [p[2][0] - p[0][0], p[2][1] - p[0][1], p[2][2] - p[0][2]];
+          const cross = [
+            u[1] * w[2] - u[2] * w[1],
+            u[2] * w[0] - u[0] * w[2],
+            u[0] * w[1] - u[1] * w[0],
+          ];
+          const length = Math.hypot(...cross);
+          if (length > 0) {
+            let nx = 0, ny = 0, nz = 0;
+            for (let c = 0; c < 3; c++) {
+              nx += nor.values[v[c] * 3];
+              ny += nor.values[v[c] * 3 + 1];
+              nz += nor.values[v[c] * 3 + 2];
+            }
+            if ((cross[0] * nx + cross[1] * ny + cross[2] * nz) / length < 0) invertedFaces++;
+          }
+        }
+      }
+      for (const n of uses.values()) {
+        edges++;
+        if (n === 1) boundaryEdges++;
+      }
+    }
+  }
+
+  return {
+    vertices,
+    faces,
+    duplicateVertices,
+    boundaryEdges,
+    edges,
+    invertedFaces,
+    shell: edges ? boundaryEdges / edges : 0,
+  };
+}

@@ -17,6 +17,9 @@ import { HAZARDS } from "../sim/arena";
 import type { StageId } from "../sim/stages";
 import { STYLES } from "../sim/styles";
 import { alive, type World } from "../sim/world";
+import { CHARACTERS } from "../data/characters";
+import { PROP_BY_ID, gearPropsFor } from "../data/props";
+import { loadProp, layProp, placeProp, splitByX } from "./props";
 import { PLAYER_COLORS, buildBody, limbGeometry, paintWounds, syncLimbs, type Body, type Target } from "./body";
 import { animate, onHit } from "./animate";
 import type { Cue } from "./cues";
@@ -46,6 +49,9 @@ interface FighterView extends Body {
   spurts: { part: "armL" | "armR" | "legL" | "legR"; t: number }[];
   /** seconds until the pool spreads under a knocked-out body, or -1 */
   pool: number;
+  /** the 3D prop they are holding, and the prop's id */
+  held: THREE.Group | null;
+  heldProp: string;
 }
 
 /** How long (s) a stump pumps blood after the limb comes off, and its heartbeat (beats/s). */
@@ -90,6 +96,7 @@ export class Scene {
   private bloom: UnrealBloomPass | null = null;
   private fighters: FighterView[] = [];
   private pickups = new Map<number, THREE.Group>();
+  private gifts = new Map<number, THREE.Group>();
   private hazards: { kind: HazardKind; g: THREE.Group }[] = [];
   private view!: StageView;
   private camTarget = new THREE.Vector3(0, 0, 0);
@@ -183,7 +190,11 @@ export class Scene {
 
   // ---------------------------------------------------------------- fighters
   private buildFighter(f: Fighter): FighterView {
-    const b = buildBody(f);
+    const fighterId = CHARACTERS[f.style].id;
+    // the approved props this fighter wears: they stand in for the game's own
+    // drawing of that piece of kit
+    const gear = gearPropsFor(fighterId);
+    const b = buildBody(f, new Set(gear.map((p) => p.gear)));
     const pc = PLAYER_COLORS[f.id % PLAYER_COLORS.length];
     const ring = new THREE.Mesh(new THREE.RingGeometry(0.38, 0.48, 32), new THREE.MeshBasicMaterial({ color: pc, transparent: true, opacity: 0.85 }));
     ring.rotation.x = -Math.PI / 2;
@@ -243,7 +254,51 @@ export class Scene {
       this.scene.add(marker);
     }
     this.scene.add(b.root);
-    return { ...b, ring, fury, label, beacon, stars, aura, marker, fell: false, spurts: [], pool: -1 };
+    // the 3D props go on as their models arrive; until then the fighter wears
+    // the game's own drawing of that piece of kit
+    for (const spec of gear) {
+      loadProp(spec, (model) => {
+        if (spec.bone === "forearms") {
+          // a matched pair in one mesh: one half on each arm
+          const [left, right] = splitByX(model);
+          placeProp(spec, b.joints.elbowL, left);
+          placeProp(spec, b.joints.elbowR, right);
+        } else if (spec.bone === "spine") {
+          placeProp(spec, b.spine, model);
+        } else {
+          placeProp(spec, b.head, model);
+        }
+      });
+    }
+    const view: FighterView = { ...b, ring, fury, label, beacon, stars, aura, marker, fell: false, spurts: [], pool: -1, held: null, heldProp: "" };
+    this.holdWeapon(view, f);
+    return view;
+  }
+
+  /**
+   * Put the prop the fighter is holding in their hand, and take away the one
+   * they are not.
+   *
+   * The hand is the end of the forearm bone, so the prop rides on that bone
+   * and follows the arm as it moves. The hand closes a little around what it
+   * holds, so a weapon is not swallowed by a fist-sized ball.
+   */
+  private holdWeapon(v: FighterView, f: Fighter): void {
+    if (v.heldProp === f.weapon) return;
+    if (v.held) {
+      v.held.parent?.remove(v.held);
+      v.held = null;
+    }
+    v.heldProp = f.weapon;
+    v.hands.R.scale.setScalar(f.weapon ? 0.75 : 1);
+    if (!f.weapon) return;
+    const spec = PROP_BY_ID[f.weapon];
+    if (!spec) return;
+    loadProp(spec, (model) => {
+      // they may have dropped it, or taken another, while it was loading
+      if (v.heldProp !== f.weapon) return;
+      v.held = placeProp(spec, v.joints.elbowR, model);
+    });
   }
 
   attach(world: World): void {
@@ -252,10 +307,12 @@ export class Scene {
       if (v.marker) this.scene.remove(v.marker);
     }
     for (const p of this.pickups.values()) this.scene.remove(p);
+    for (const g of this.gifts.values()) this.scene.remove(g);
     for (const h of this.hazards) this.scene.remove(h.g);
     this.setStage(world.s.stage);
     this.fighters = world.fighters.map((f) => this.buildFighter(f));
     this.pickups.clear();
+    this.gifts.clear();
     this.hazards = [];
     this.fx.clear();
     this.impact.reset();
@@ -576,6 +633,8 @@ export class Scene {
       const v = this.fighters[i];
       v.root.position.copy(toV(f.x, f.y, f.z)); // up in a juggle
       v.root.rotation.y = yaw(f.facing);
+      // the prop in their hand: they may have picked one up or let one go
+      this.holdWeapon(v, f);
       const car = f.state === "driving" ? s.arena.vehicles[f.vehicle] : undefined;
       if (car) {
         const st = this.view.seat(car);
@@ -661,6 +720,34 @@ export class Scene {
       if (!seen.has(id)) {
         this.scene.remove(g);
         this.pickups.delete(id);
+      }
+    }
+
+    // the gifts the Gallery has thrown into the pit, lying where they landed
+    const seenGifts = new Set<number>();
+    for (const g of s.gifts) {
+      seenGifts.add(g.id);
+      let gm = this.gifts.get(g.id);
+      if (!gm) {
+        gm = new THREE.Group();
+        this.gifts.set(g.id, gm);
+        this.scene.add(gm);
+        const spec = PROP_BY_ID[g.prop];
+        if (spec) {
+          loadProp(spec, (model) => {
+            // it may have been picked up while the model was loading
+            if (!this.gifts.has(g.id)) return;
+            gm!.add(layProp(model));
+          });
+        }
+      }
+      gm.position.copy(toV(g.x, g.y, g.z + 0.09));
+      gm.rotation.y += g.spin;
+    }
+    for (const [id, gm] of this.gifts) {
+      if (!seenGifts.has(id)) {
+        this.scene.remove(gm);
+        this.gifts.delete(id);
       }
     }
 

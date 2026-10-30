@@ -1,12 +1,19 @@
 # weapon_chair
 
+
+> **This asset is held at a gate.** The capture it came from did not pass
+> every check, and the renders are here so the finding can be judged, not
+> because the asset is approved. The checks that did not pass:
+
+> - the space beside the prop is clear is clear (221 cm2 of surface <= 10)
+
 The verification renders for this prop, produced by
 
 ```
 node scripts/capture_prop_renders.mjs weapon_chair --publish
 ```
 
-- `front.png` - Front (0deg, badge to camera).
+- `front.png` - Front (0deg, +Z to camera).
 - `profile.png` - Profile (90deg, right side).
 - `badge.png` - Tufted crimson velvet backrest close-up.
 - `report.json` - the capture report: the budgets, the bounding box and the

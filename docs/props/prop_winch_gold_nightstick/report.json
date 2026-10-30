@@ -1,0 +1,174 @@
+{
+  "asset": "prop_winch_gold_nightstick",
+  "model": "public/models/props/prop_winch_gold_nightstick.glb",
+  "capturedAt": "2026-10-30T02:22:03.941Z",
+  "budget": {
+    "triangles": 16000,
+    "bytes": 1572864,
+    "dimensionsCm": {
+      "width": 5,
+      "height": 45,
+      "depth": 4.4
+    }
+  },
+  "triangles": 12798,
+  "bytes": 804360,
+  "dimensionsCm": {
+    "width": 4.9,
+    "height": 45,
+    "depth": 4.4
+  },
+  "bbox": {
+    "min": [
+      -0.024361316114664078,
+      -0.09000000357627869,
+      -0.022073853760957718
+    ],
+    "max": [
+      0.024361316114664078,
+      0.36000001430511475,
+      0.022073853760957718
+    ]
+  },
+  "meshes": [
+    {
+      "name": "mesh_0",
+      "triangles": 12798,
+      "material": 0
+    }
+  ],
+  "materials": [
+    "(unnamed)"
+  ],
+  "renders": [
+    {
+      "view": "front",
+      "label": "Front (0deg, +Z to camera)",
+      "file": "test-output/props/prop_winch_gold_nightstick/front.png",
+      "bytes": 100809
+    },
+    {
+      "view": "profile",
+      "label": "Profile (90deg, right side)",
+      "file": "test-output/props/prop_winch_gold_nightstick/profile.png",
+      "bytes": 91884
+    },
+    {
+      "view": "badge",
+      "label": "The gold engraving and the click catch",
+      "file": "test-output/props/prop_winch_gold_nightstick/badge.png",
+      "bytes": 305230
+    }
+  ],
+  "checks": [
+    {
+      "ok": true,
+      "message": "the model has triangles",
+      "detail": "12798"
+    },
+    {
+      "ok": true,
+      "message": "triangle count is under budget",
+      "detail": "12798 < 16000"
+    },
+    {
+      "ok": true,
+      "message": "file size is within budget",
+      "detail": "0.767 MB <= 1.5 MB"
+    },
+    {
+      "ok": true,
+      "message": "the mesh has no structural problems",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "no vertex position is NaN or infinite",
+      "detail": "0"
+    },
+    {
+      "ok": true,
+      "message": "width matches the spec (5 cm +/- 5%)",
+      "detail": "4.9 cm"
+    },
+    {
+      "ok": true,
+      "message": "height matches the spec (45 cm +/- 5%)",
+      "detail": "45 cm"
+    },
+    {
+      "ok": true,
+      "message": "depth matches the spec (4.4 cm +/- 5%)",
+      "detail": "4.4 cm"
+    },
+    {
+      "ok": true,
+      "message": "the base sits where the pivot puts it (-9 cm)",
+      "detail": "-9 cm"
+    },
+    {
+      "ok": true,
+      "message": "the top sits where the pivot puts it (36 cm)",
+      "detail": "36 cm"
+    },
+    {
+      "ok": true,
+      "message": "the asset is centred on X (0 cm)",
+      "detail": "0 cm"
+    },
+    {
+      "ok": true,
+      "message": "the asset is centred on Z (0 cm)",
+      "detail": "0 cm"
+    },
+    {
+      "ok": true,
+      "message": "the lower half of the prop carries the prop's surface is there",
+      "detail": "32 cm2 of surface >= 4"
+    },
+    {
+      "ok": true,
+      "message": "the upper half of the prop carries the prop's surface is there",
+      "detail": "35 cm2 of surface >= 4"
+    },
+    {
+      "ok": true,
+      "message": "the space in front of the prop is clear is clear",
+      "detail": "0 cm2 of surface <= 10"
+    },
+    {
+      "ok": true,
+      "message": "every asset the page asked for was served",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the model loads in a WebGL renderer without errors",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the renderer reported no load errors",
+      "detail": ""
+    },
+    {
+      "ok": true,
+      "message": "the renderer sees the same triangle count as the file",
+      "detail": "12798 vs 12798"
+    },
+    {
+      "ok": true,
+      "message": "the published render still matches the approved art",
+      "detail": "IoU 0.921 against the sheet's front view, 0.783 the wrong way up"
+    },
+    {
+      "ok": true,
+      "message": "every verification render has real content"
+    },
+    {
+      "ok": true,
+      "message": "the front render is a real image",
+      "detail": "100809 bytes"
+    }
+  ]
+}

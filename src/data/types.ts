@@ -213,6 +213,19 @@ export interface Moveset {
   appeal: { anim: string; line: string; gift: string };
 }
 
+/** One of the Gallery's throws: a weapon it can toss into the pit. */
+export interface GalleryThrow {
+  id: string;
+  name: string;
+  /** the kind of weapon it is: what a fighter's affinity is matched against */
+  class: string;
+  hands: number;
+  look: string;
+  sound: string;
+  /** how much the Gallery favours throwing it; -1 is never thrown */
+  favour: number;
+}
+
 /** A colour, named. */
 export interface Swatch {
   hex: string;

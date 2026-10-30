@@ -283,7 +283,7 @@
     "class_type": "DecimateMesh",
     "inputs": {
       "mesh": [
-        "241",
+        "900",
         0
       ],
       "target_face_count": 20000,
@@ -687,6 +687,17 @@
         0
       ],
       "filename_prefix": "{prefix}"
+    }
+  },
+  "900": {
+    "class_type": "WeldVertices",
+    "inputs": {
+      "mesh": [
+        "241",
+        0
+      ],
+      "epsilon_rel": 1e-05,
+      "epsilon_abs": 0.0
     }
   }
 }

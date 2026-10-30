@@ -13,6 +13,15 @@
 //   render() - draws one frame and resolves when the frame is on screen
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+// Does the model still look like the approved art? The turnaround sheet's
+// front tile is the prop seen from the front, so the model's silhouette is
+// compared with it: a prop that has drifted away from its art - a bat that
+// came back the wrong way up, a chair that lost its arms - scores badly, and
+// the score is in the capture's report. The comparison is about the shape
+// only: a model's material is lit and the art is painted, so their colours
+// cannot be compared to a number, and a check that cried wolf over that
+// would be turned off.
+import { normalise, score } from "./fidelity.mjs";
 
 const params = new URLSearchParams(window.location.search);
 const modelUrl = params.get("model") || "";
@@ -27,6 +36,24 @@ const closeupFit = Number(params.get("closeupFit") || 0.048);
 // The close-up's target is either a point in the model's own space
 // ("x,y,z") or the name of a mesh to centre on.
 const closeupTarget = params.get("closeup") || "";
+// The prop's frame, relative to the approved art.
+//
+// A reconstruction is turned over before it is conditioned on, so some meshes
+// are stored the other way up from the art they were built from. The manifest
+// says so, and the render has to say it back: a reviewer who opens the issue
+// and sees the bat upside down concludes that the model has abandoned the
+// concept art, when the model is in fact a faithful copy of it.
+//
+// The turn is undone here rather than in the mesh, because the mesh's own
+// frame is the one the game places the prop by: the placement table rolls
+// these props a half turn about x, so the model the game shows is already the
+// art the right way up. It is only the review render that was showing the
+// other one.
+const flip = params.get("flip") === "1";
+const roll = Number(params.get("roll") || 0);
+// The turnaround sheet the prop was built from. Its front tile is the prop
+// seen from the front, which is what the render is compared against.
+const sheetUrl = params.get("sheet") || "";
 // A comma-separated list of mesh names to leave out of the shot. It is how a
 // single layer of a prop gets looked at on its own.
 const hide = (params.get("hide") || "")
@@ -92,10 +119,24 @@ const state = {
   ready: false,
   model: null,
   bounds: new THREE.Box3(),
+  modelBounds: new THREE.Box3(),
   badge: new THREE.Vector3(),
   stats: null,
   errors: [],
+  fidelity: null,
 };
+
+// The prop is turned back into the approved art's frame.
+//
+// The turn is done with two nested groups so the order is explicit: the mesh
+// is first unrolled about its own axis and then set the right way up. The
+// prop's pivot is its origin, so the turn happens about the origin - which is
+// where the game puts the prop in the hand.
+const pivot = new THREE.Group();
+const holder = new THREE.Group();
+pivot.rotation.z = THREE.MathUtils.degToRad(-roll);
+if (flip) holder.rotation.x = Math.PI;
+holder.add(pivot);
 
 const VIEWS = {
   // fit is the radius, in metres, the view has to contain; margin is how much
@@ -154,12 +195,102 @@ function renderOnce() {
   });
 }
 
+// --- does the model still look like the approved art? ------------------------
+//
+// The silhouette is taken from a flat white render on a black background with
+// the floor hidden: what is compared is the shape of the prop, not its
+// material and not the shadow it casts.
+
+function loadImage(url) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error(`the sheet ${url} could not be loaded`));
+    image.src = url;
+  });
+}
+
+// The object's outline in the rendered frame.
+function silhouetteFromCanvas() {
+  const scratch = document.createElement("canvas");
+  scratch.width = width;
+  scratch.height = height;
+  const ctx = scratch.getContext("2d", { willReadFrequently: true });
+  ctx.drawImage(canvas, 0, 0);
+  const { data } = ctx.getImageData(0, 0, width, height);
+  const mask = new Uint8Array(width * height);
+  for (let i = 0; i < width * height; i++) {
+    mask[i] = data[i * 4] + data[i * 4 + 1] + data[i * 4 + 2] > 90 ? 1 : 0;
+  }
+  return { mask, w: width, h: height };
+}
+
+// The object's outline in the sheet's front tile, whose background is white.
+async function sheetSilhouette(url) {
+  const image = await loadImage(url);
+  const side = image.height; // the sheet is a strip of square tiles
+  const scratch = document.createElement("canvas");
+  scratch.width = side;
+  scratch.height = side;
+  const ctx = scratch.getContext("2d", { willReadFrequently: true });
+  ctx.drawImage(image, 0, 0, side, side, 0, 0, side, side);
+  const { data } = ctx.getImageData(0, 0, side, side);
+  const mask = new Uint8Array(side * side);
+  for (let i = 0; i < side * side; i++) {
+    mask[i] = Math.min(data[i * 4], data[i * 4 + 1], data[i * 4 + 2]) < 235 ? 1 : 0;
+  }
+  return { mask, w: side, h: side };
+}
+
+// A mask cropped to its object and stretched to a square, so two silhouettes
+// can be compared whatever their size and aspect.
+async function fidelity() {
+  if (!sheetUrl) return;
+  // The prop is rendered flat white on black, with the floor put away so the
+  // shadow it casts is not part of the shape.
+  const flat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+  const swapped = [];
+  const clear = renderer.getClearColor(new THREE.Color());
+  const clearAlpha = renderer.getClearAlpha();
+  const floorWas = floor.visible;
+  let shot;
+  try {
+    state.model.traverse((child) => {
+      if (!child.isMesh) return;
+      swapped.push([child, child.material]);
+      child.material = flat;
+    });
+    floor.visible = false;
+    renderer.setClearColor(0x000000, 1);
+    renderView("front");
+    shot = silhouetteFromCanvas();
+  } finally {
+    for (const [child, material] of swapped) child.material = material;
+    floor.visible = floorWas;
+    renderer.setClearColor(clear, clearAlpha);
+    renderView("front");
+  }
+
+  const tile = await sheetSilhouette(sheetUrl);
+  const model = normalise(shot.mask, shot.w, shot.h);
+  const art = normalise(tile.mask, tile.w, tile.h);
+  // the render as it is published against the sheet's front view, and the
+  // same render against the sheet turned over
+  state.fidelity = score(model, art);
+}
+
 loader.load(
   modelUrl,
   (gltf) => {
     const model = gltf.scene;
     model.updateMatrixWorld(true);
-    scene.add(model);
+    // The model's own bounds are the mesh as the file holds it, and they are
+    // what the manifest's frame numbers describe. The bounds of the turned
+    // prop are what the camera frames.
+    state.modelBounds.setFromObject(model);
+    pivot.add(model);
+    scene.add(holder);
+    holder.updateMatrixWorld(true);
     // Clay mode swaps every material for one matte grey. It is how the form
     // is judged on its own: a step that only shows up once the material is
     // taken away is a geometry fault, not a lighting one.
@@ -181,7 +312,7 @@ loader.load(
       child.receiveShadow = true;
     });
     state.model = model;
-    state.bounds.setFromObject(model);
+    state.bounds.setFromObject(holder);
 
     // Where the close-up is framed. The target is either a point given in
     // the model's own space or the centre of a named mesh, so the shot does
@@ -198,11 +329,16 @@ loader.load(
       const point = parts.map(Number);
       // A focus point outside the model frames empty space, and the render
       // still looks like a render, so it has to be refused here.
-      const inside = new THREE.Box3().copy(state.bounds).expandByScalar(0.0005);
+      //
+      // The point is in the model's own space, so it is measured against the
+      // model's own bounds and then turned with the model.
+      const inside = new THREE.Box3().copy(state.modelBounds).expandByScalar(0.0005);
       if (!inside.containsPoint(new THREE.Vector3(point[0], point[1], point[2]))) {
         state.errors.push(`the close-up focus ${closeupTarget} is outside the model`);
       } else {
-        state.badge.set(point[0], point[1], point[2]);
+        state.badge
+          .set(point[0], point[1], point[2])
+          .applyMatrix4(holder.matrixWorld);
       }
     } else if (closeupTarget) {
       // The mesh the close-up is framed on is found by name.
@@ -261,15 +397,24 @@ loader.load(
     state.stats = {
       triangles,
       meshes,
+      // The mesh's own bounds, as the file holds it: these are the numbers
+      // the manifest's frame is written against, and the turn the prop is
+      // shown in does not change the file.
       bbox: {
-        min: state.bounds.min.toArray(),
-        max: state.bounds.max.toArray(),
-        size: state.bounds.getSize(new THREE.Vector3()).toArray(),
+        min: state.modelBounds.min.toArray(),
+        max: state.modelBounds.max.toArray(),
+        size: state.modelBounds.getSize(new THREE.Vector3()).toArray(),
       },
       badge: state.badge.toArray(),
     };
-    state.ready = true;
     renderView("front");
+    // The fidelity pass runs before the page says it is ready, so the capture
+    // script cannot take the renders and leave before the comparison is done.
+    fidelity()
+      .catch((error) => state.errors.push(`the fidelity check failed: ${error?.message || error}`))
+      .finally(() => {
+        state.ready = true;
+      });
   },
   undefined,
   (error) => {
@@ -287,6 +432,9 @@ window.__propCapture = {
   },
   get errors() {
     return state.errors;
+  },
+  get fidelity() {
+    return state.fidelity;
   },
   setView(name) {
     renderView(name);

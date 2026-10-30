@@ -72,3 +72,30 @@ export declare function readAccessor(
 
 /** Format a metre value as centimetres, for readable budget reports. */
 export declare function cm(metres: number): string;
+
+/**
+ * How fragmented a mesh is allowed to be, as percentages of the mesh's own
+ * vertices and edges.
+ */
+export declare const MESH_LIMITS: {
+  duplicateVertexPct: number;
+  boundaryEdgePct: number;
+};
+
+/** The mesh's topology, in the terms a reviewer would recognise. */
+export interface GlbTopology {
+  vertices: number;
+  faces: number;
+  /** Vertices that are at the same point as another vertex. */
+  duplicateVertices: number;
+  /** Edges only one triangle uses: a seam that should be shared by two. */
+  boundaryEdges: number;
+  edges: number;
+  /** Faces whose normals point the opposite way to the face they belong to. */
+  invertedFaces: number;
+  /** boundaryEdges as a fraction of edges. */
+  shell: number;
+}
+
+/** Read a .glb's topology: is it one surface, or a pile of shards? */
+export declare function readTopology(file: string): GlbTopology;

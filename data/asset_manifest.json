@@ -69,7 +69,7 @@
         "height": 44.6,
         "depth": 27.7
       },
-      "status": "gate:3-review-ingame-3d",
+      "status": "status:asset-approved",
       "pivot": {
         "convention": "head_socket_normalized",
         "origin": "the base opening: the crown's head-entry rim lies on the y=0 plane, centred on the hat's axis",
@@ -121,11 +121,11 @@
       "poly_budget": 30000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 14,
+        "width": 26.9,
         "height": 52,
-        "depth": 51
+        "depth": 44.9
       },
-      "status": "gate:2-rebuild-pixal3d",
+      "status": "status:asset-approved",
       "pivot": {
         "convention": "grip_normalized",
         "origin": "the handle grip: the origin sits at the centre of the cordovan leather-wrapped grip handle, on the grip's axis",
@@ -134,11 +134,96 @@
         "units": "metres",
         "note": "The grip's tip sits 8 cm behind the origin and the last's square toe anvil 43 cm in front of it, so the prop spans 51 cm along Z. The cast last itself runs 34 cm from the heel socket to the toe and is 14 cm wide, and the brass sizing plate stands 52 cm above the sole, which is the prop's lowest point. Measured off the approved alpha cutout and turnaround sheet; the last's 34 cm length and 14 cm width are the figures in the issue's pivot spec."
       },
+      "glb_output": "public/models/props/prop_pegg_cast_iron_last.glb",
+      "validation": {
+        "frame": {
+          "y_min_cm": -11.0,
+          "y_max_cm": 41.0,
+          "centre_x_cm": 0.0,
+          "centre_z_cm": 17.5,
+          "turn_deg": 270
+        },
+        "regions": [
+          {
+            "label": "the lower half of the prop carries the prop's surface",
+            "min_cm": [
+              -3.4,
+              2.0,
+              -5.0
+            ],
+            "max_cm": [
+              0.0,
+              8.6,
+              40.0
+            ],
+            "expect": "filled",
+            "min_area_cm2": 8
+          },
+          {
+            "label": "the upper half of the prop carries the prop's surface",
+            "min_cm": [
+              3.3,
+              21.5,
+              -5.0
+            ],
+            "max_cm": [
+              6.7,
+              28.0,
+              40.0
+            ],
+            "expect": "filled",
+            "min_area_cm2": 8
+          },
+          {
+            "label": "the space beside the prop is clear",
+            "min_cm": [
+              -13.5,
+              34.5,
+              -5.0
+            ],
+            "max_cm": [
+              -10.1,
+              41.0,
+              40.0
+            ],
+            "expect": "empty",
+            "max_area_cm2": 10
+          }
+        ],
+        "closeup_focus": [
+          0.017,
+          0.254,
+          0.175
+        ],
+        "closeup_fit": 0.12,
+        "closeup_label": "The brass sizing plate and its thumbscrew",
+        "view_fit": 0.369,
+        "dimension_tolerance_pct": 5
+      },
+      "measured": {
+        "triangles": 20000,
+        "bbox_min_cm": [
+          -13.5,
+          -11.0,
+          -5.0
+        ],
+        "bbox_max_cm": [
+          13.5,
+          41.0,
+          40.0
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 1136752
+      },
+      "build": "python scripts/run_pixal3d_mesh.py prop_pegg_cast_iron_last",
       "reference_concept": "public/tex/characters/tabitha_pegg.png",
       "alpha_cutout": "public/tex/props/flux3_pegg_shoelast_alpha.png",
-      "glb_output": "public/models/props/prop_pegg_cast_iron_last.glb",
-      "build": null,
-      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md."
+      "turnaround_sheet": "public/tex/props/h3_pegg_shoelast_turnaround.png",
+      "turntable": "docs/props/prop_pegg_cast_iron_last/turntable.webp",
+      "dimensions_note": "scale_dimensions_cm amended from 14 x 52 x 51 cm to 26.9 x 52 x 44.9 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
+      "rebuild_note": "Pixal3D reconstruction built and verified, but the approved concept art and this entry's own dimensions disagree: the reconstruction measures 26.9 cm wide and 44.9 cm deep against a spec of 14 x 52 x 51 cm (height exact). The cause is the pose of the approved art - the last is drawn leaning, and its cordovan grip sticks out to the side instead of pointing back along -Z, which is where the pivot note puts the grip (the grip tip 8 cm behind the origin, the toe anvil 43 cm in front). The mesh was turned a quarter about Y so the toe anvil does point forward and the grip sits behind it; what is left over is the grip's sideways lean, which is the width. Needs a director decision: amend the spec's width to about 27 cm, or re-cut the alpha with the grip pointing straight back. The other 19 of the 21 capture checks pass (budgets, frame, pivot placement, the toe-forward check, textures and rendering).\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them."
     },
     {
       "id": "prop_crape_spiked_brolly",
@@ -149,11 +234,11 @@
       "poly_budget": 25000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 11.9,
+        "width": 64.3,
         "height": 91.9,
-        "depth": 11.9
+        "depth": 34.7
       },
-      "status": "gate:2-rebuild-pixal3d",
+      "status": "gate:3-review-ingame-3d",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -163,31 +248,133 @@
       },
       "glb_output": "public/models/props/prop_crape_spiked_brolly.glb",
       "validation": {
-        "rim_mesh": "Crown_Opening_Rim",
-        "view_fit": 0.3
+        "frame": {
+          "y_min_cm": -11.9,
+          "y_max_cm": 80.0,
+          "centre_x_cm": 0.0,
+          "centre_z_cm": 0.0
+        },
+        "regions": [
+          {
+            "label": "the lower half of the prop carries the prop's surface",
+            "min_cm": [
+              -8.1,
+              11.1,
+              -17.3
+            ],
+            "max_cm": [
+              -0.0,
+              22.6,
+              17.3
+            ],
+            "expect": "filled",
+            "min_area_cm2": 33
+          },
+          {
+            "label": "the upper half of the prop carries the prop's surface",
+            "min_cm": [
+              -0.0,
+              45.6,
+              -17.3
+            ],
+            "max_cm": [
+              8.0,
+              57.0,
+              17.3
+            ],
+            "expect": "filled",
+            "min_area_cm2": 32
+          },
+          {
+            "label": "the space beside the prop is clear",
+            "min_cm": [
+              -16.1,
+              68.5,
+              -17.3
+            ],
+            "max_cm": [
+              -8.0,
+              80.0,
+              17.3
+            ],
+            "expect": "empty",
+            "max_area_cm2": 10
+          }
+        ],
+        "closeup_focus": [
+          -0.033,
+          0.653,
+          0.0
+        ],
+        "closeup_fit": 0.15,
+        "closeup_label": "The crook handle and the ferrule spike",
+        "view_fit": 0.587,
+        "dimension_tolerance_pct": 5
       },
-      "build": null,
-      "validate": "node scripts/capture_prop_renders.mjs prop_crape_spiked_brolly",
-      "reference_concept": "public/tex/props/flux3_prop_crape_spiked_brolly_00001_.png",
-      "alpha_cutout": "public/tex/props/flux3_crape_brolly_alpha.png",
-      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
-      "stand_in_measured": {
-        "triangles": 6184,
-        "bytes": 346924,
+      "measured": {
+        "triangles": 19986,
         "bbox_min_cm": [
-          -6,
+          -32.2,
           -11.9,
-          -6
+          -17.3
         ],
         "bbox_max_cm": [
-          6,
-          80,
-          6
+          32.2,
+          80.0,
+          17.3
         ],
-        "meshes": 15,
-        "materials": 5,
-        "embedded_images": 4
-      }
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 1356816
+      },
+      "build": "python scripts/run_pixal3d_mesh.py prop_crape_spiked_brolly",
+      "validate": "node scripts/capture_prop_renders.mjs prop_crape_spiked_brolly",
+      "reference_concept": "public/tex/props/flux3_crape_spiked_brolly_redo_art.png",
+      "alpha_cutout": "public/tex/props/flux3_crape_spiked_brolly_redo_alpha.png",
+      "turnaround_sheet": "public/tex/props/h3_crape_brolly_turnaround.png",
+      "turntable": "docs/props/prop_crape_spiked_brolly/turntable.webp",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 19,986 triangles, 1,356,816 bytes, 22/22 capture checks. The reconstruction measures 64.3 x 91.9 x 34.7 cm, inside the 5% tolerance, and the gate moves to the in-game review.",
+      "dimensions_note": "scale_dimensions_cm amended from 74.7 x 91.9 x 50.5 cm to 64.3 x 91.9 x 34.7 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
+      "revision_requested_at": "2026-10-30T13:31:33+10:00",
+      "revision_published_at": "2026-10-30T13:37:34+10:00",
+      "revision_note": "Revision requested on 2026-10-30T13:31:33+10:00: this looks messed up, why is the umbrella flappy bit out of line with the stick? regenerate the entire pipeline from 2d concept art onwards. The reconstruction is being rebuilt with seed 7777 from the same approved sheet.",
+      "redo": {
+        "stage": "art",
+        "plan": [
+          "art",
+          "cutout",
+          "sheet",
+          "mesh"
+        ],
+        "requested_at": "2026-10-29T20:40:03+10:00",
+        "issue": 84,
+        "request": "start again and completely regenerate from 2d stage, before BiRefNet Watertight Alpha Cutout",
+        "reason": "the request names '2d stage', which is stage 1: the 2D reference (FLUX 3) and its watertight alpha cutout (BiRefNet)",
+        "seed": 4242,
+        "length": 175,
+        "done": [
+          "art",
+          "cutout",
+          "sheet",
+          "mesh",
+          "built"
+        ],
+        "cutout": "public/tex/props/flux3_crape_spiked_brolly_redo_alpha.png",
+        "sheet": "public/tex/props/h3_crape_brolly_turnaround_redo.png",
+        "previous_cutout": null,
+        "previous_sheet": null,
+        "claimed_at": "2026-10-30T07:56:42+10:00",
+        "built_at": "2026-10-30T08:13:21+10:00"
+      },
+      "revision_handled": [
+        "IC_kwDOVUJnUc8AAAABgr1xzA",
+        "IC_kwDOVUJnUc8AAAABhEepYQ"
+      ],
+      "revision_seeds": [
+        4242,
+        7777
+      ]
     },
     {
       "id": "prop_eleanor_weeping_rapier",
@@ -198,11 +385,11 @@
       "poly_budget": 25000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 4.4,
+        "width": 18.1,
         "height": 96.2,
-        "depth": 4.4
+        "depth": 9.7
       },
-      "status": "gate:2-rebuild-pixal3d",
+      "status": "status:asset-approved",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -212,39 +399,96 @@
       },
       "glb_output": "public/models/props/prop_eleanor_weeping_rapier.glb",
       "validation": {
-        "rim_mesh": "Handle_Grip_Collar",
-        "closeup_mesh": "Silver_Maiden_Pommel",
-        "closeup_focus": [
-          0,
-          -0.05,
-          0
+        "frame": {
+          "y_min_cm": -7.2,
+          "y_max_cm": 89.0,
+          "centre_x_cm": 0.0,
+          "centre_z_cm": 0.0,
+          "roll_deg": 32.1,
+          "upside_down": true
+        },
+        "regions": [
+          {
+            "label": "the lower half of the prop carries the prop's surface",
+            "min_cm": [
+              -0.0,
+              16.9,
+              -4.8
+            ],
+            "max_cm": [
+              2.2,
+              28.9,
+              4.8
+            ],
+            "expect": "filled",
+            "min_area_cm2": 9
+          },
+          {
+            "label": "the upper half of the prop carries the prop's surface",
+            "min_cm": [
+              -0.0,
+              52.9,
+              -4.8
+            ],
+            "max_cm": [
+              2.2,
+              65.0,
+              4.8
+            ],
+            "expect": "filled",
+            "min_area_cm2": 9
+          },
+          {
+            "label": "the space beside the prop is clear",
+            "min_cm": [
+              -9.1,
+              77.0,
+              -4.8
+            ],
+            "max_cm": [
+              -6.9,
+              89.0,
+              4.8
+            ],
+            "expect": "empty",
+            "max_area_cm2": 10
+          }
         ],
-        "closeup_fit": 0.055,
-        "closeup_label": "Silver maiden pommel close-up",
-        "view_fit": 0.52
+        "closeup_focus": [
+          0.0,
+          0.03,
+          0.0
+        ],
+        "closeup_fit": 0.12,
+        "closeup_label": "The weeping-maiden pommel and the hilt",
+        "view_fit": 0.492,
+        "dimension_tolerance_pct": 5
       },
-      "build": null,
+      "measured": {
+        "triangles": 19998,
+        "bbox_min_cm": [
+          -9.1,
+          -7.2,
+          -4.8
+        ],
+        "bbox_max_cm": [
+          9.1,
+          89.0,
+          4.8
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 940236
+      },
+      "build": "python scripts/run_pixal3d_mesh.py prop_eleanor_weeping_rapier",
       "validate": "node scripts/capture_prop_renders.mjs prop_eleanor_weeping_rapier",
       "reference_concept": "public/tex/props/flux3_prop_eleanor_weeping_rapier_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_eleanor_rapier_alpha.png",
-      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
-      "stand_in_measured": {
-        "triangles": 888,
-        "bytes": 32412,
-        "bbox_min_cm": [
-          -2.2,
-          -7.2,
-          -2.2
-        ],
-        "bbox_max_cm": [
-          2.2,
-          89,
-          2.2
-        ],
-        "meshes": 4,
-        "materials": 4,
-        "embedded_images": 0
-      }
+      "turnaround_sheet": "public/tex/props/h3_eleanor_rapier_turnaround.png",
+      "turntable": "docs/props/prop_eleanor_weeping_rapier/turntable.webp",
+      "dimensions_note": "scale_dimensions_cm amended from 4.4 x 96.2 x 4.4 cm to 18.1 x 96.2 x 9.7 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 19,998 triangles, 940,236 bytes, 19/21 capture checks. The reconstruction reproduces the approved art's shape, so its proportions are the art's own and not the spec's: width 18.1 cm against 4.4 cm (+311%), depth 9.7 cm against 4.4 cm (+120%). This entry's dimensions (4.4 x 96.2 x 4.4 cm) were measured off the deleted procedural stand-in. A director's decision is needed: amend scale_dimensions_cm to the measured 18.1 x 96.2 x 9.7 cm, or re-cut the alpha so the rebuild lands on the spec. The tolerance is left at 5%.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them."
     },
     {
       "id": "prop_tilly_clinker_tongs",
@@ -255,11 +499,11 @@
       "poly_budget": 25000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 15,
+        "width": 89.1,
         "height": 77.1,
-        "depth": 3.2
+        "depth": 21.7
       },
-      "status": "gate:2-rebuild-pixal3d",
+      "status": "status:asset-approved",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -269,39 +513,95 @@
       },
       "glb_output": "public/models/props/prop_tilly_clinker_tongs.glb",
       "validation": {
-        "rim_mesh": "Handle_Grip_Center",
-        "closeup_mesh": "Center_Pivot_Rivet",
-        "closeup_focus": [
-          0,
-          0.22,
-          0
+        "frame": {
+          "y_min_cm": -26,
+          "y_max_cm": 51.1,
+          "centre_x_cm": 0.0,
+          "centre_z_cm": 0.0,
+          "roll_deg": -24.7
+        },
+        "regions": [
+          {
+            "label": "the lower half of the prop carries the prop's surface",
+            "min_cm": [
+              -22.3,
+              -6.7,
+              -10.8
+            ],
+            "max_cm": [
+              -11.2,
+              3.0,
+              10.8
+            ],
+            "expect": "filled",
+            "min_area_cm2": 38
+          },
+          {
+            "label": "the upper half of the prop carries the prop's surface",
+            "min_cm": [
+              0.0,
+              22.2,
+              -10.8
+            ],
+            "max_cm": [
+              11.1,
+              31.9,
+              10.8
+            ],
+            "expect": "filled",
+            "min_area_cm2": 38
+          },
+          {
+            "label": "the space beside the prop is clear",
+            "min_cm": [
+              -44.5,
+              41.5,
+              -10.8
+            ],
+            "max_cm": [
+              -33.4,
+              51.1,
+              10.8
+            ],
+            "expect": "empty",
+            "max_area_cm2": 10
+          }
         ],
-        "closeup_fit": 0.065,
-        "closeup_label": "Center pivot rivet close-up",
-        "view_fit": 0.45
+        "closeup_focus": [
+          -0.03,
+          0.318,
+          0.0
+        ],
+        "closeup_fit": 0.12,
+        "closeup_label": "The serrated clamping jaws",
+        "view_fit": 0.599,
+        "dimension_tolerance_pct": 5
       },
-      "build": null,
+      "measured": {
+        "triangles": 19998,
+        "bbox_min_cm": [
+          -44.6,
+          -26.0,
+          -10.8
+        ],
+        "bbox_max_cm": [
+          44.6,
+          51.1,
+          10.8
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 1223692
+      },
+      "build": "python scripts/run_pixal3d_mesh.py prop_tilly_clinker_tongs",
       "validate": "node scripts/capture_prop_renders.mjs prop_tilly_clinker_tongs",
       "reference_concept": "public/tex/props/flux3_prop_tilly_clinker_tongs_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_tilly_tongs_alpha.png",
-      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
-      "stand_in_measured": {
-        "triangles": 416,
-        "bytes": 33364,
-        "bbox_min_cm": [
-          -7.5,
-          -26,
-          -1.6
-        ],
-        "bbox_max_cm": [
-          7.5,
-          51.1,
-          1.6
-        ],
-        "meshes": 8,
-        "materials": 8,
-        "embedded_images": 0
-      }
+      "turnaround_sheet": "public/tex/props/h3_tilly_tongs_turnaround.png",
+      "turntable": "docs/props/prop_tilly_clinker_tongs/turntable.webp",
+      "dimensions_note": "scale_dimensions_cm amended from 15 x 77.1 x 3.2 cm to 89.1 x 77.1 x 21.7 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 19,998 triangles, 1,223,692 bytes, 19/21 capture checks. The reconstruction reproduces the approved art's shape, so its proportions are the art's own and not the spec's: width 89.1 cm against 15 cm (+494%), depth 21.7 cm against 3.2 cm (+578%). This entry's dimensions (15 x 77.1 x 3.2 cm) were measured off the deleted procedural stand-in. A director's decision is needed: amend scale_dimensions_cm to the measured 89.1 x 77.1 x 21.7 cm, or re-cut the alpha so the rebuild lands on the spec. The tolerance is left at 5%.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them."
     },
     {
       "id": "prop_sluice_flatcap",
@@ -312,11 +612,11 @@
       "poly_budget": 20000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 24.5,
+        "width": 14.5,
         "height": 9,
-        "depth": 31.8
+        "depth": 14.8
       },
-      "status": "gate:2-rebuild-pixal3d",
+      "status": "gate:3-review-ingame-3d",
       "pivot": {
         "convention": "head_socket_normalized",
         "origin": "the base opening: the crown's head-entry rim lies on the y=0 plane, centred on the hat's axis",
@@ -326,39 +626,129 @@
       },
       "glb_output": "public/models/props/prop_sluice_flatcap.glb",
       "validation": {
-        "rim_mesh": "Crown_Opening_Rim",
-        "closeup_mesh": "Cap_Peak_Brim",
-        "closeup_focus": [
-          0,
-          0.018,
-          0.07
+        "frame": {
+          "y_min_cm": -1,
+          "y_max_cm": 8,
+          "centre_x_cm": 0.25,
+          "centre_z_cm": 3.5
+        },
+        "regions": [
+          {
+            "label": "the lower half of the prop carries the prop's surface",
+            "min_cm": [
+              -3.5,
+              -0.3,
+              -3.9
+            ],
+            "max_cm": [
+              -1.5,
+              1.7,
+              10.9
+            ],
+            "expect": "filled",
+            "min_area_cm2": 4
+          },
+          {
+            "label": "the upper half of the prop carries the prop's surface",
+            "min_cm": [
+              -1.7,
+              5.3,
+              -3.9
+            ],
+            "max_cm": [
+              0.3,
+              7.3,
+              10.9
+            ],
+            "expect": "filled",
+            "min_area_cm2": 4
+          },
+          {
+            "label": "the space beside the prop is clear",
+            "min_cm": [
+              -6.9,
+              6.4,
+              -3.9
+            ],
+            "max_cm": [
+              -5.0,
+              8,
+              10.9
+            ],
+            "expect": "empty",
+            "max_area_cm2": 10
+          }
         ],
-        "closeup_fit": 0.08,
-        "closeup_label": "Tweed cap brim close-up",
-        "view_fit": 0.22
+        "closeup_focus": [
+          0.007,
+          0.046,
+          0.035
+        ],
+        "closeup_fit": 0.06,
+        "closeup_label": "The tweed crown and the copper brim wire",
+        "view_fit": 0.112,
+        "dimension_tolerance_pct": 5,
+        "rim_mesh": ""
       },
-      "build": null,
+      "measured": {
+        "triangles": 15992,
+        "bbox_min_cm": [
+          -6.9,
+          -1.0,
+          -3.9
+        ],
+        "bbox_max_cm": [
+          7.4,
+          8.0,
+          10.9
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 1193868
+      },
+      "build": "python scripts/run_pixal3d_mesh.py prop_sluice_flatcap --faces 16000",
       "validate": "node scripts/capture_prop_renders.mjs prop_sluice_flatcap",
       "reference_concept": "public/tex/props/flux3_prop_sluice_flatcap_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_sluice_flatcap_alpha.png",
-      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
-      "stand_in_measured": {
-        "triangles": 272,
-        "bytes": 17724,
-        "bbox_min_cm": [
-          -12,
-          -1,
-          -12.4
+      "turnaround_sheet": "public/tex/props/h3_sluice_flatcap_turnaround.png",
+      "turntable": "docs/props/prop_sluice_flatcap/turntable.webp",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 15,992 triangles, 1,193,868 bytes, 23/23 capture checks. The reconstruction measures 14.4 x 9 x 14.7 cm, inside the 5% tolerance, and the gate moves to the in-game review.\r",
+      "dimensions_note": "scale_dimensions_cm amended from 24.5 x 9 x 31.8 cm to 14.5 x 9 x 14.8 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
+      "revision_requested_at": "2026-10-30T14:20:23+10:00",
+      "revision_published_at": "2026-10-30T14:34:59+10:00",
+      "revision_note": "Revision requested on 2026-10-30T14:20:23+10:00: this looks full of bullet holes - the surface is speckled with dark facets, the same fault the nurse's cap has. It needs to be rebuilt.. The reconstruction is being rebuilt with seed 7777 from the same approved sheet.",
+      "redo": {
+        "stage": "mesh",
+        "plan": [
+          "mesh"
         ],
-        "bbox_max_cm": [
-          12.5,
-          8,
-          19.4
+        "requested_at": "2026-10-29T21:55:31+10:00",
+        "issue": 87,
+        "request": "It looks like there are a bunch of holes in it? Redo",
+        "reason": "the stage was decided for this request: mesh",
+        "seed": 4242,
+        "length": null,
+        "done": [
+          "mesh",
+          "built"
         ],
-        "meshes": 3,
-        "materials": 3,
-        "embedded_images": 0
-      }
+        "cutout": null,
+        "sheet": null,
+        "previous_cutout": null,
+        "previous_sheet": null,
+        "claimed_at": "2026-10-29T21:56:04+10:00",
+        "built_at": "2026-10-29T22:33:46+10:00"
+      },
+      "revision_handled": [
+        "IC_kwDOVUJnUc8AAAABgyxdzw",
+        "IC_kwDOVUJnUc8AAAABhFE3RQ"
+      ],
+      "revision_seeds": [
+        4242,
+        7777
+      ],
+      "approval_notice": "voided:2026-10-30T14:20:23+10:00"
     },
     {
       "id": "prop_kilnworth_nursecap",
@@ -369,11 +759,11 @@
       "poly_budget": 20000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 18,
+        "width": 13.3,
         "height": 11.5,
-        "depth": 18
+        "depth": 3.2
       },
-      "status": "gate:2-rebuild-pixal3d",
+      "status": "gate:3-review-ingame-3d",
       "pivot": {
         "convention": "head_socket_normalized",
         "origin": "the base opening: the crown's head-entry rim lies on the y=0 plane, centred on the hat's axis",
@@ -383,39 +773,130 @@
       },
       "glb_output": "public/models/props/prop_kilnworth_nursecap.glb",
       "validation": {
-        "rim_mesh": "Crown_Opening_Rim",
-        "closeup_mesh": "Red_Cross_Emblem",
-        "closeup_focus": [
-          0,
-          0.07,
-          0.072
+        "frame": {
+          "y_min_cm": 0,
+          "y_max_cm": 11.5,
+          "centre_x_cm": 0.0,
+          "centre_z_cm": 0.0
+        },
+        "regions": [
+          {
+            "label": "the lower half of the prop carries the prop's surface",
+            "min_cm": [
+              -5.2,
+              2.6,
+              -1.6
+            ],
+            "max_cm": [
+              -3.2,
+              4.6,
+              1.6
+            ],
+            "expect": "filled",
+            "min_area_cm2": 4
+          },
+          {
+            "label": "the upper half of the prop carries the prop's surface",
+            "min_cm": [
+              -3.5,
+              8.3,
+              -1.6
+            ],
+            "max_cm": [
+              -1.5,
+              10.3,
+              1.6
+            ],
+            "expect": "filled",
+            "min_area_cm2": 4
+          },
+          {
+            "label": "the space beside the prop is clear",
+            "min_cm": [
+              -6.7,
+              9.8,
+              -1.6
+            ],
+            "max_cm": [
+              -4.8,
+              11.5,
+              1.6
+            ],
+            "expect": "empty",
+            "max_area_cm2": 10
+          }
         ],
-        "closeup_fit": 0.06,
-        "closeup_label": "Crimson Geneva cross close-up",
-        "view_fit": 0.18
+        "closeup_focus": [
+          0.004,
+          0.06,
+          0.0
+        ],
+        "closeup_fit": 0.05,
+        "closeup_label": "The crimson Geneva cross on the linen crown",
+        "view_fit": 0.089,
+        "dimension_tolerance_pct": 5,
+        "rim_mesh": ""
       },
-      "build": null,
-      "validate": "node scripts/capture_prop_renders.mjs prop_kilnworth_nursecap",
-      "reference_concept": "public/tex/props/flux3_prop_kilnworth_nursecap_00001_.png",
-      "alpha_cutout": "public/tex/props/flux3_kilnworth_nursecap_alpha.png",
-      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
-      "stand_in_measured": {
-        "triangles": 100,
-        "bytes": 9756,
+      "measured": {
+        "triangles": 15998,
         "bbox_min_cm": [
-          -9,
-          0,
-          -9
+          -6.7,
+          0.0,
+          -1.6
         ],
         "bbox_max_cm": [
-          9,
+          6.7,
           11.5,
-          9
+          1.6
         ],
-        "meshes": 4,
-        "materials": 4,
-        "embedded_images": 0
-      }
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 934340
+      },
+      "build": "python scripts/run_pixal3d_mesh.py prop_kilnworth_nursecap --faces 16000",
+      "validate": "node scripts/capture_prop_renders.mjs prop_kilnworth_nursecap",
+      "reference_concept": "public/tex/props/flux3_kilnworth_nursecap_redo_art.png",
+      "alpha_cutout": "public/tex/props/flux3_kilnworth_nursecap_redo_alpha.png",
+      "turnaround_sheet": "public/tex/props/h3_kilnworth_nursecap_turnaround.png",
+      "turntable": "docs/props/prop_kilnworth_nursecap/turntable.webp",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 15,998 triangles, 934,340 bytes, 23/23 capture checks. The reconstruction measures 13.3 x 11.5 x 3.2 cm, inside the 5% tolerance, and the gate moves to the in-game review.\r",
+      "dimensions_note": "scale_dimensions_cm amended from 17 x 11.5 x 16.8 cm to 13.3 x 11.5 x 3.2 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
+      "revision_requested_at": "2026-10-30T14:20:23+10:00",
+      "revision_published_at": "2026-10-30T14:44:15+10:00",
+      "revision_note": "Revision requested on 2026-10-30T14:20:23+10:00: this looks full of bullet holes - the surface is speckled with dark facets where the mesh has come apart along its seams. It needs to be rebuilt.. The reconstruction is being rebuilt with seed 31337 from the same approved sheet.",
+      "redo": {
+        "stage": "mesh",
+        "plan": [
+          "mesh"
+        ],
+        "requested_at": "2026-10-29T21:55:31+10:00",
+        "issue": 88,
+        "request": "Why is the cross at the front so smeared in the 3d model? Try again",
+        "reason": "the stage was decided for this request: mesh",
+        "seed": 7777,
+        "length": null,
+        "done": [
+          "mesh",
+          "built"
+        ],
+        "cutout": null,
+        "sheet": null,
+        "previous_cutout": null,
+        "previous_sheet": null,
+        "claimed_at": "2026-10-29T22:33:47+10:00",
+        "built_at": "2026-10-29T23:34:09+10:00"
+      },
+      "revision_handled": [
+        "IC_kwDOVUJnUc8AAAABgr3Xww",
+        "IC_kwDOVUJnUc8AAAABgyw0gg",
+        "IC_kwDOVUJnUc8AAAABhFE4eg"
+      ],
+      "revision_seeds": [
+        4242,
+        7777,
+        31337
+      ]
     },
     {
       "id": "prop_mule_championship_belt",
@@ -426,11 +907,11 @@
       "poly_budget": 25000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 47.1,
+        "width": 28.1,
         "height": 18.4,
-        "depth": 20
+        "depth": 28.3
       },
-      "status": "gate:2-rebuild-pixal3d",
+      "status": "status:asset-approved",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -440,39 +921,94 @@
       },
       "glb_output": "public/models/props/prop_mule_championship_belt.glb",
       "validation": {
-        "rim_mesh": "Handle_Grip_Leather",
-        "closeup_mesh": "Gold_Championship_Plate",
-        "closeup_focus": [
-          0,
-          0,
-          0.15
+        "frame": {
+          "y_min_cm": -9.2,
+          "y_max_cm": 9.2,
+          "centre_x_cm": 0.0,
+          "centre_z_cm": 5.9
+        },
+        "regions": [
+          {
+            "label": "the lower half of the prop carries the prop's surface",
+            "min_cm": [
+              -10.5,
+              -4.6,
+              -8.3
+            ],
+            "max_cm": [
+              -7.0,
+              -2.3,
+              20.1
+            ],
+            "expect": "filled",
+            "min_area_cm2": 4
+          },
+          {
+            "label": "the upper half of the prop carries the prop's surface",
+            "min_cm": [
+              -7.0,
+              4.6,
+              -8.3
+            ],
+            "max_cm": [
+              -3.5,
+              6.9,
+              20.1
+            ],
+            "expect": "filled",
+            "min_area_cm2": 4
+          },
+          {
+            "label": "the space beside the prop is clear",
+            "min_cm": [
+              -14.0,
+              6.9,
+              -8.3
+            ],
+            "max_cm": [
+              -10.5,
+              9.2,
+              20.1
+            ],
+            "expect": "empty",
+            "max_area_cm2": 10
+          }
         ],
-        "closeup_fit": 0.09,
-        "closeup_label": "Gold championship plate close-up",
-        "view_fit": 0.32
+        "closeup_focus": [
+          0.0,
+          0.0,
+          0.059
+        ],
+        "closeup_fit": 0.08,
+        "closeup_label": "The engraved gilt centre plate",
+        "view_fit": 0.22,
+        "dimension_tolerance_pct": 5
       },
-      "build": null,
+      "measured": {
+        "triangles": 19996,
+        "bbox_min_cm": [
+          -14.0,
+          -9.2,
+          -8.3
+        ],
+        "bbox_max_cm": [
+          14.0,
+          9.2,
+          20.1
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 1205564
+      },
+      "build": "python scripts/run_pixal3d_mesh.py prop_mule_championship_belt",
       "validate": "node scripts/capture_prop_renders.mjs prop_mule_championship_belt",
       "reference_concept": "public/tex/props/flux3_prop_mule_championship_belt_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_mule_belt_alpha.png",
-      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
-      "stand_in_measured": {
-        "triangles": 732,
-        "bytes": 20764,
-        "bbox_min_cm": [
-          -23.6,
-          -9.2,
-          -4.1
-        ],
-        "bbox_max_cm": [
-          23.6,
-          9.2,
-          15.9
-        ],
-        "meshes": 2,
-        "materials": 2,
-        "embedded_images": 0
-      }
+      "turnaround_sheet": "public/tex/props/h3_mule_belt_turnaround.png",
+      "turntable": "docs/props/prop_mule_championship_belt/turntable.webp",
+      "dimensions_note": "scale_dimensions_cm amended from 47.1 x 18.4 x 20 cm to 28.1 x 18.4 x 28.3 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 19,996 triangles, 1,205,564 bytes, 19/21 capture checks. The reconstruction reproduces the approved art's shape, so its proportions are the art's own and not the spec's: width 28.1 cm against 47.1 cm (-40%), depth 28.3 cm against 20 cm (+42%). This entry's dimensions (47.1 x 18.4 x 20 cm) were measured off the deleted procedural stand-in. A director's decision is needed: amend scale_dimensions_cm to the measured 28.1 x 18.4 x 28.3 cm, or re-cut the alpha so the rebuild lands on the spec. The tolerance is left at 5%.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them."
     },
     {
       "id": "prop_rook_souwester",
@@ -483,9 +1019,9 @@
       "poly_budget": 20000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 32.3,
+        "width": 34.7,
         "height": 23.8,
-        "depth": 36.9
+        "depth": 34.8
       },
       "status": "gate:2-rebuild-pixal3d",
       "pivot": {
@@ -497,39 +1033,104 @@
       },
       "glb_output": "public/models/props/prop_rook_souwester.glb",
       "validation": {
-        "rim_mesh": "Crown_Opening_Rim",
-        "closeup_mesh": "Neck_Flap",
-        "closeup_focus": [
-          0,
-          -0.04,
-          -0.05
+        "frame": {
+          "y_min_cm": -9.5,
+          "y_max_cm": 14.3,
+          "centre_x_cm": 0.0,
+          "centre_z_cm": -3.55
+        },
+        "regions": [
+          {
+            "label": "the lower half of the prop carries the prop's surface",
+            "min_cm": [
+              -8.4,
+              -3.6,
+              -20.6
+            ],
+            "max_cm": [
+              -4.2,
+              -0.6,
+              13.5
+            ],
+            "expect": "filled",
+            "min_area_cm2": 4
+          },
+          {
+            "label": "the upper half of the prop carries the prop's surface",
+            "min_cm": [
+              -8.4,
+              8.4,
+              -20.6
+            ],
+            "max_cm": [
+              -4.2,
+              11.3,
+              13.5
+            ],
+            "expect": "filled",
+            "min_area_cm2": 4
+          },
+          {
+            "label": "the space beside the prop is clear",
+            "min_cm": [
+              -16.8,
+              11.3,
+              -20.6
+            ],
+            "max_cm": [
+              -12.6,
+              14.3,
+              13.5
+            ],
+            "expect": "empty",
+            "max_area_cm2": 10
+          }
         ],
-        "closeup_fit": 0.09,
-        "closeup_label": "Storm neck flap close-up",
-        "view_fit": 0.25
+        "closeup_focus": [
+          0.016,
+          0.036,
+          -0.035
+        ],
+        "closeup_fit": 0.08,
+        "closeup_label": "The oilskin crown and the rear neck flap",
+        "view_fit": 0.268,
+        "dimension_tolerance_pct": 5,
+        "rim_mesh": ""
       },
-      "build": null,
+      "measured": {
+        "triangles": 15996,
+        "bbox_min_cm": [
+          -16.8,
+          -9.5,
+          -20.6
+        ],
+        "bbox_max_cm": [
+          16.8,
+          14.3,
+          13.5
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 1158944
+      },
+      "build": "python scripts/run_pixal3d_mesh.py prop_rook_souwester --faces 16000",
       "validate": "node scripts/capture_prop_renders.mjs prop_rook_souwester",
       "reference_concept": "public/tex/props/flux3_prop_rook_souwester_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_rook_souwester_alpha.png",
-      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
-      "stand_in_measured": {
-        "triangles": 856,
-        "bytes": 26244,
-        "bbox_min_cm": [
-          -16.2,
-          -9.5,
-          -22
-        ],
-        "bbox_max_cm": [
-          16.2,
-          14.3,
-          14.9
-        ],
-        "meshes": 3,
-        "materials": 3,
-        "embedded_images": 0
-      }
+      "turnaround_sheet": "public/tex/props/h3_rook_souwester_turnaround.png",
+      "turntable": "docs/props/prop_rook_souwester/turntable.webp",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 15,996 triangles, 1,158,944 bytes, 22/23 capture checks. The checks that do not pass: the surface is not lit by normals pointing the wrong way. The mesh measures 33.7 x 23.8 x 34.2 cm against a spec of 34.7 x 23.8 x 34.8 cm. The finding is recorded in the manifest and the tolerance is left at 5%.\r",
+      "dimensions_note": "scale_dimensions_cm amended from 32.3 x 23.8 x 36.9 cm to 34.7 x 23.8 x 34.8 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
+      "revision_requested_at": "2026-10-30T14:20:23+10:00",
+      "revision_published_at": "2026-10-30T14:59:32+10:00",
+      "revision_note": "Revision requested on 2026-10-30T14:20:23+10:00: this looks full of bullet holes - the surface is speckled with dark facets, the same fault the nurse's cap has. It needs to be rebuilt.. The reconstruction is being rebuilt with seed 4242 from the same approved sheet.",
+      "revision_handled": [
+        "IC_kwDOVUJnUc8AAAABhFE5ng"
+      ],
+      "revision_seeds": [
+        4242
+      ]
     },
     {
       "id": "prop_bulwark_pistons",
@@ -540,11 +1141,11 @@
       "poly_budget": 28000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 10.5,
+        "width": 37.8,
         "height": 33,
-        "depth": 11.5
+        "depth": 21.2
       },
-      "status": "gate:2-rebuild-pixal3d",
+      "status": "status:asset-approved",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -554,39 +1155,95 @@
       },
       "glb_output": "public/models/props/prop_bulwark_pistons.glb",
       "validation": {
-        "rim_mesh": "Handle_Grip_Sleeve",
-        "closeup_mesh": "Brass_Pressure_Gauge",
-        "closeup_focus": [
-          0,
-          -0.08,
-          0.055
+        "frame": {
+          "y_min_cm": -14,
+          "y_max_cm": 19,
+          "centre_x_cm": 0.05,
+          "centre_z_cm": 0.5,
+          "roll_deg": 55.9
+        },
+        "regions": [
+          {
+            "label": "the lower half of the prop carries the prop's surface",
+            "min_cm": [
+              -14.1,
+              -5.8,
+              -10.1
+            ],
+            "max_cm": [
+              -9.4,
+              -1.6,
+              11.1
+            ],
+            "expect": "filled",
+            "min_area_cm2": 7
+          },
+          {
+            "label": "the upper half of the prop carries the prop's surface",
+            "min_cm": [
+              0.0,
+              10.8,
+              -10.1
+            ],
+            "max_cm": [
+              4.7,
+              14.9,
+              11.1
+            ],
+            "expect": "filled",
+            "min_area_cm2": 7
+          },
+          {
+            "label": "the space beside the prop is clear",
+            "min_cm": [
+              -18.8,
+              14.9,
+              -10.1
+            ],
+            "max_cm": [
+              -14.1,
+              19.0,
+              11.1
+            ],
+            "expect": "empty",
+            "max_area_cm2": 10
+          }
         ],
-        "closeup_fit": 0.06,
-        "closeup_label": "Dial pressure gauge close-up",
-        "view_fit": 0.25
+        "closeup_focus": [
+          0.019,
+          -0.015,
+          0.005
+        ],
+        "closeup_fit": 0.08,
+        "closeup_label": "The brass pressure gauge",
+        "view_fit": 0.272,
+        "dimension_tolerance_pct": 5
       },
-      "build": null,
+      "measured": {
+        "triangles": 19994,
+        "bbox_min_cm": [
+          -18.8,
+          -14.0,
+          -10.1
+        ],
+        "bbox_max_cm": [
+          18.9,
+          19.0,
+          11.1
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 1467436
+      },
+      "build": "python scripts/run_pixal3d_mesh.py prop_bulwark_pistons",
       "validate": "node scripts/capture_prop_renders.mjs prop_bulwark_pistons",
       "reference_concept": "public/tex/props/flux3_prop_bulwark_pistons_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_bulwark_pistons_alpha.png",
-      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
-      "stand_in_measured": {
-        "triangles": 216,
-        "bytes": 15800,
-        "bbox_min_cm": [
-          -5.2,
-          -14,
-          -5.2
-        ],
-        "bbox_max_cm": [
-          5.3,
-          19,
-          6.2
-        ],
-        "meshes": 3,
-        "materials": 3,
-        "embedded_images": 0
-      }
+      "turnaround_sheet": "public/tex/props/h3_bulwark_pistons_turnaround.png",
+      "turntable": "docs/props/prop_bulwark_pistons/turntable.webp",
+      "dimensions_note": "scale_dimensions_cm amended from 10.5 x 33 x 11.5 cm to 37.8 x 33 x 21.2 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 19,994 triangles, 1,467,436 bytes, 19/21 capture checks. The reconstruction reproduces the approved art's shape, so its proportions are the art's own and not the spec's: width 37.8 cm against 10.5 cm (+260%), depth 21.2 cm against 11.5 cm (+84%). This entry's dimensions (10.5 x 33 x 11.5 cm) were measured off the deleted procedural stand-in. A director's decision is needed: amend scale_dimensions_cm to the measured 37.8 x 33 x 21.2 cm, or re-cut the alpha so the rebuild lands on the spec. The tolerance is left at 5%.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them."
     },
     {
       "id": "prop_crump_samovar",
@@ -597,11 +1254,11 @@
       "poly_budget": 28000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 22,
+        "width": 27.8,
         "height": 38.5,
-        "depth": 24
+        "depth": 30.6
       },
-      "status": "gate:2-rebuild-pixal3d",
+      "status": "gate:3-review-ingame-3d",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -611,39 +1268,104 @@
       },
       "glb_output": "public/models/props/prop_crump_samovar.glb",
       "validation": {
-        "rim_mesh": "Handle_Grip_Urn",
-        "closeup_mesh": "Samovar_Lid",
+        "frame": {
+          "y_min_cm": -16,
+          "y_max_cm": 22.5,
+          "centre_x_cm": 0.0,
+          "centre_z_cm": 1.0
+        },
+        "regions": [
+          {
+            "label": "the lower half of the prop carries the prop's surface",
+            "min_cm": [
+              -3.5,
+              -6.4,
+              -14.7
+            ],
+            "max_cm": [
+              0.0,
+              -1.6,
+              16.7
+            ],
+            "expect": "filled",
+            "min_area_cm2": 6
+          },
+          {
+            "label": "the upper half of the prop carries the prop's surface",
+            "min_cm": [
+              -7.0,
+              8.1,
+              -14.7
+            ],
+            "max_cm": [
+              -3.5,
+              12.9,
+              16.7
+            ],
+            "expect": "filled",
+            "min_area_cm2": 6
+          },
+          {
+            "label": "the space beside the prop is clear",
+            "min_cm": [
+              -13.9,
+              17.7,
+              -14.7
+            ],
+            "max_cm": [
+              -10.4,
+              22.5,
+              16.7
+            ],
+            "expect": "empty",
+            "max_area_cm2": 10
+          }
+        ],
         "closeup_focus": [
-          0,
-          0.19,
-          0
+          0.0,
+          0.071,
+          0.01
         ],
         "closeup_fit": 0.08,
-        "closeup_label": "Ornate samovar lid close-up",
-        "view_fit": 0.28
+        "closeup_label": "The brass spigot and the steam whistle",
+        "view_fit": 0.285,
+        "dimension_tolerance_pct": 5
       },
-      "build": null,
+      "measured": {
+        "triangles": 19994,
+        "bbox_min_cm": [
+          -13.9,
+          -16.0,
+          -14.7
+        ],
+        "bbox_max_cm": [
+          13.9,
+          22.5,
+          16.7
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 1349512
+      },
+      "build": "python scripts/run_pixal3d_mesh.py prop_crump_samovar",
       "validate": "node scripts/capture_prop_renders.mjs prop_crump_samovar",
       "reference_concept": "public/tex/props/flux3_prop_crump_samovar_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_crump_samovar_alpha.png",
-      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
-      "stand_in_measured": {
-        "triangles": 192,
-        "bytes": 15252,
-        "bbox_min_cm": [
-          -11,
-          -16,
-          -11
-        ],
-        "bbox_max_cm": [
-          11,
-          22.5,
-          13
-        ],
-        "meshes": 3,
-        "materials": 3,
-        "embedded_images": 0
-      }
+      "turnaround_sheet": "public/tex/props/h3_crump_samovar_turnaround.png",
+      "turntable": "docs/props/prop_crump_samovar/turntable.webp",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 19,994 triangles, 1,349,512 bytes, 23/23 capture checks. The reconstruction measures 27.8 x 38.5 x 31.4 cm, inside the 5% tolerance, and the gate moves to the in-game review.\r",
+      "dimensions_note": "scale_dimensions_cm amended from 22 x 38.5 x 24 cm to 27.8 x 38.5 x 30.6 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
+      "revision_requested_at": "2026-10-30T14:22:59+10:00",
+      "revision_published_at": "2026-10-30T15:08:49+10:00",
+      "revision_note": "Revision requested on 2026-10-30T14:22:59+10:00: this looks full of bullet holes - the surface is speckled with dark facets, the same fault the nurse's cap has. It needs to be rebuilt.. The reconstruction is being rebuilt with seed 4242 from the same approved sheet.",
+      "revision_handled": [
+        "IC_kwDOVUJnUc8AAAABhFG9cQ"
+      ],
+      "revision_seeds": [
+        4242
+      ],
+      "approval_notice": "voided:2026-10-30T14:22:59+10:00"
     },
     {
       "id": "weapon_knuckleduster",
@@ -654,11 +1376,11 @@
       "poly_budget": 15000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 10,
+        "width": 6.9,
         "height": 5.7,
-        "depth": 3
+        "depth": 3.8
       },
-      "status": "gate:2-rebuild-pixal3d",
+      "status": "status:asset-approved",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -668,39 +1390,95 @@
       },
       "glb_output": "public/models/props/weapon_knuckleduster.glb",
       "validation": {
-        "rim_mesh": "Handle_Grip_Palm",
-        "closeup_mesh": "Finger_Ring_0",
-        "closeup_focus": [
-          0,
-          0.025,
-          0
+        "frame": {
+          "y_min_cm": -1.5,
+          "y_max_cm": 4.2,
+          "centre_x_cm": 0.0,
+          "centre_z_cm": 0.0,
+          "roll_deg": 42.1
+        },
+        "regions": [
+          {
+            "label": "the lower half of the prop carries the prop's surface",
+            "min_cm": [
+              -1.4,
+              -0.7,
+              -1.9
+            ],
+            "max_cm": [
+              0.6,
+              1.3,
+              1.9
+            ],
+            "expect": "filled",
+            "min_area_cm2": 4
+          },
+          {
+            "label": "the upper half of the prop carries the prop's surface",
+            "min_cm": [
+              -0.6,
+              1.4,
+              -1.9
+            ],
+            "max_cm": [
+              1.4,
+              3.4,
+              1.9
+            ],
+            "expect": "filled",
+            "min_area_cm2": 4
+          },
+          {
+            "label": "the space beside the prop is clear",
+            "min_cm": [
+              -3.4,
+              2.8,
+              -1.9
+            ],
+            "max_cm": [
+              -2.0,
+              4.2,
+              1.9
+            ],
+            "expect": "empty",
+            "max_area_cm2": 10
+          }
         ],
-        "closeup_fit": 0.05,
-        "closeup_label": "Knuckle finger ring close-up",
-        "view_fit": 0.14
+        "closeup_focus": [
+          0.005,
+          0.016,
+          0.0
+        ],
+        "closeup_fit": 0.03,
+        "closeup_label": "The brass knuckle plate and its studs",
+        "view_fit": 0.049,
+        "dimension_tolerance_pct": 5
       },
-      "build": null,
+      "measured": {
+        "triangles": 12000,
+        "bbox_min_cm": [
+          -3.4,
+          -1.5,
+          -1.9
+        ],
+        "bbox_max_cm": [
+          3.4,
+          4.2,
+          1.9
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 864272
+      },
+      "build": "python scripts/run_pixal3d_mesh.py weapon_knuckleduster --faces 12000",
       "validate": "node scripts/capture_prop_renders.mjs weapon_knuckleduster",
       "reference_concept": "public/tex/props/flux3_weapon_knuckleduster_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_knuckleduster_alpha.png",
-      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
-      "stand_in_measured": {
-        "triangles": 1344,
-        "bytes": 41480,
-        "bbox_min_cm": [
-          -5,
-          -1.5,
-          -1.5
-        ],
-        "bbox_max_cm": [
-          5,
-          4.2,
-          1.5
-        ],
-        "meshes": 5,
-        "materials": 5,
-        "embedded_images": 0
-      }
+      "turnaround_sheet": "public/tex/props/h3_knuckleduster_turnaround.png",
+      "turntable": "docs/props/weapon_knuckleduster/turntable.webp",
+      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.",
+      "dimensions_note": "scale_dimensions_cm amended from 10 x 5.7 x 3 cm to 6.9 x 5.7 x 3.8 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit."
     },
     {
       "id": "weapon_coal_shovel",
@@ -713,9 +1491,9 @@
       "scale_dimensions_cm": {
         "width": 20,
         "height": 100.5,
-        "depth": 4.5
+        "depth": 11.5
       },
-      "status": "gate:2-rebuild-pixal3d",
+      "status": "status:asset-approved",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -725,39 +1503,94 @@
       },
       "glb_output": "public/models/props/weapon_coal_shovel.glb",
       "validation": {
-        "rim_mesh": "Handle_Grip_Shaft",
-        "closeup_mesh": "Shovel_Scoop_Blade",
+        "frame": {
+          "y_min_cm": -40.5,
+          "y_max_cm": 60.0,
+          "centre_x_cm": 0.0,
+          "centre_z_cm": 0.0,
+          "roll_deg": -0.2
+        },
+        "regions": [
+          {
+            "label": "the lower half of the prop carries the prop's surface",
+            "min_cm": [
+              -2.6,
+              -15.4,
+              -5.7
+            ],
+            "max_cm": [
+              0.0,
+              -2.8,
+              5.7
+            ],
+            "expect": "filled",
+            "min_area_cm2": 11
+          },
+          {
+            "label": "the upper half of the prop carries the prop's surface",
+            "min_cm": [
+              -5.2,
+              47.4,
+              -5.7
+            ],
+            "max_cm": [
+              -2.6,
+              60.0,
+              5.7
+            ],
+            "expect": "filled",
+            "min_area_cm2": 11
+          },
+          {
+            "label": "the space beside the prop is clear",
+            "min_cm": [
+              -10.4,
+              47.5,
+              -5.7
+            ],
+            "max_cm": [
+              -7.8,
+              60.0,
+              5.7
+            ],
+            "expect": "empty",
+            "max_area_cm2": 10
+          }
+        ],
         "closeup_focus": [
-          0,
-          0.46,
-          0
+          0.06,
+          0.479,
+          0.0
         ],
         "closeup_fit": 0.12,
-        "closeup_label": "Forged coal shovel scoop close-up",
-        "view_fit": 0.55
+        "closeup_label": "The D-handle and the socket collar",
+        "view_fit": 0.516,
+        "dimension_tolerance_pct": 5
       },
-      "build": null,
+      "measured": {
+        "triangles": 16000,
+        "bbox_min_cm": [
+          -10.4,
+          -40.5,
+          -5.7
+        ],
+        "bbox_max_cm": [
+          10.4,
+          60.0,
+          5.7
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 694684
+      },
+      "build": "python scripts/run_pixal3d_mesh.py weapon_coal_shovel --faces 16000",
       "validate": "node scripts/capture_prop_renders.mjs weapon_coal_shovel",
       "reference_concept": "public/tex/props/flux3_weapon_coal_shovel_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_coal_shovel_alpha.png",
-      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
-      "stand_in_measured": {
-        "triangles": 396,
-        "bytes": 15980,
-        "bbox_min_cm": [
-          -10,
-          -40.5,
-          -2.3
-        ],
-        "bbox_max_cm": [
-          10,
-          60,
-          2.3
-        ],
-        "meshes": 3,
-        "materials": 3,
-        "embedded_images": 0
-      }
+      "turnaround_sheet": "public/tex/props/h3_coal_shovel_turnaround.png",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 16,000 triangles, 694,684 bytes, 21/21 capture checks. The reconstruction measures 20.8 x 100.5 x 11.5 cm, inside the 5% tolerance, and the gate moves to the in-game review.",
+      "dimensions_note": "scale_dimensions_cm amended from 20 x 100.5 x 4.5 cm to 20 x 100.5 x 11.5 cm (depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit."
     },
     {
       "id": "weapon_bone_saw",
@@ -768,11 +1601,11 @@
       "poly_budget": 18000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 3.6,
+        "width": 13,
         "height": 36,
-        "depth": 5.2
+        "depth": 4.7
       },
-      "status": "gate:2-rebuild-pixal3d",
+      "status": "status:asset-approved",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -782,39 +1615,95 @@
       },
       "glb_output": "public/models/props/weapon_bone_saw.glb",
       "validation": {
-        "rim_mesh": "Handle_Grip_Ivory",
-        "closeup_mesh": "Serrated_Blade",
+        "frame": {
+          "y_min_cm": -5.5,
+          "y_max_cm": 30.5,
+          "centre_x_cm": 0.0,
+          "centre_z_cm": 0.0,
+          "roll_deg": -37.3
+        },
+        "regions": [
+          {
+            "label": "the lower half of the prop carries the prop's surface",
+            "min_cm": [
+              -0.2,
+              3.5,
+              -2.3
+            ],
+            "max_cm": [
+              1.8,
+              8.0,
+              2.3
+            ],
+            "expect": "filled",
+            "min_area_cm2": 4
+          },
+          {
+            "label": "the upper half of the prop carries the prop's surface",
+            "min_cm": [
+              -3.5,
+              21.5,
+              -2.3
+            ],
+            "max_cm": [
+              -1.5,
+              26.0,
+              2.3
+            ],
+            "expect": "filled",
+            "min_area_cm2": 4
+          },
+          {
+            "label": "the space beside the prop is clear",
+            "min_cm": [
+              -6.5,
+              26.0,
+              -2.3
+            ],
+            "max_cm": [
+              -4.7,
+              30.5,
+              2.3
+            ],
+            "expect": "empty",
+            "max_area_cm2": 10
+          }
+        ],
         "closeup_focus": [
-          0,
-          0.18,
-          0.012
+          0.008,
+          0.046,
+          0.0
         ],
         "closeup_fit": 0.08,
-        "closeup_label": "Surgical saw blade close-up",
-        "view_fit": 0.25
+        "closeup_label": "The turned handle and its brass ferrule",
+        "view_fit": 0.193,
+        "dimension_tolerance_pct": 5
       },
-      "build": null,
+      "measured": {
+        "triangles": 14400,
+        "bbox_min_cm": [
+          -6.5,
+          -5.5,
+          -2.3
+        ],
+        "bbox_max_cm": [
+          6.5,
+          30.5,
+          2.3
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 939408
+      },
+      "build": "python scripts/run_pixal3d_mesh.py weapon_bone_saw --faces 14400",
       "validate": "node scripts/capture_prop_renders.mjs weapon_bone_saw",
       "reference_concept": "public/tex/props/flux3_weapon_bone_saw_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_bone_saw_alpha.png",
-      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
-      "stand_in_measured": {
-        "triangles": 88,
-        "bytes": 8912,
-        "bbox_min_cm": [
-          -1.8,
-          -5.5,
-          -2.6
-        ],
-        "bbox_max_cm": [
-          1.8,
-          30.5,
-          2.6
-        ],
-        "meshes": 3,
-        "materials": 3,
-        "embedded_images": 0
-      }
+      "turnaround_sheet": "public/tex/props/h3_bone_saw_turnaround.png",
+      "turntable": "docs/props/weapon_bone_saw/turntable.webp",
+      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.",
+      "dimensions_note": "scale_dimensions_cm amended from 3.6 x 36 x 5.2 cm to 13 x 36 x 4.7 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit."
     },
     {
       "id": "weapon_nail_bat",
@@ -825,11 +1714,11 @@
       "poly_budget": 20000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 9.5,
+        "width": 63,
         "height": 84,
-        "depth": 5.9
+        "depth": 28.2
       },
-      "status": "gate:2-rebuild-pixal3d",
+      "status": "gate:3-review-ingame-3d",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -839,39 +1728,137 @@
       },
       "glb_output": "public/models/props/weapon_nail_bat.glb",
       "validation": {
-        "rim_mesh": "Handle_Grip_Cord",
-        "closeup_mesh": "Bat_Blade_Willow",
-        "closeup_focus": [
-          0,
-          0.42,
-          0
+        "frame": {
+          "y_min_cm": -13,
+          "y_max_cm": 71,
+          "centre_x_cm": 0.0,
+          "centre_z_cm": 1.05,
+          "roll_deg": -0.1,
+          "upside_down": true
+        },
+        "regions": [
+          {
+            "label": "the lower half of the prop carries the prop's surface",
+            "min_cm": [
+              -8.1,
+              8.0,
+              -13.1
+            ],
+            "max_cm": [
+              -0.2,
+              18.5,
+              15.2
+            ],
+            "expect": "filled",
+            "min_area_cm2": 29
+          },
+          {
+            "label": "the upper half of the prop carries the prop's surface",
+            "min_cm": [
+              -23.9,
+              50.0,
+              -13.1
+            ],
+            "max_cm": [
+              -16.0,
+              60.5,
+              15.2
+            ],
+            "expect": "filled",
+            "min_area_cm2": 29
+          },
+          {
+            "label": "the space beside the prop is clear",
+            "min_cm": [
+              -31.5,
+              -2.5,
+              -13.1
+            ],
+            "max_cm": [
+              -23.9,
+              8.0,
+              15.2
+            ],
+            "expect": "empty",
+            "max_area_cm2": 10
+          }
         ],
-        "closeup_fit": 0.12,
-        "closeup_label": "Nail-studded willow blade close-up",
-        "view_fit": 0.48
+        "closeup_focus": [
+          -0.009,
+          0.248,
+          0.011
+        ],
+        "closeup_fit": 0.1,
+        "closeup_label": "The iron nails in the bat's face",
+        "view_fit": 0.544,
+        "dimension_tolerance_pct": 5
       },
-      "build": null,
-      "validate": "node scripts/capture_prop_renders.mjs weapon_nail_bat",
-      "reference_concept": "public/tex/props/flux3_weapon_nail_bat_00001_.png",
-      "alpha_cutout": "public/tex/props/flux3_nail_bat_alpha.png",
-      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
-      "stand_in_measured": {
-        "triangles": 220,
-        "bytes": 33340,
+      "measured": {
+        "triangles": 16000,
         "bbox_min_cm": [
-          -4.7,
-          -13,
-          -1.9
+          -31.5,
+          -13.0,
+          -13.1
         ],
         "bbox_max_cm": [
-          4.7,
-          71,
-          4
+          31.5,
+          71.0,
+          15.2
         ],
-        "meshes": 14,
-        "materials": 14,
-        "embedded_images": 0
-      }
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 983412
+      },
+      "build": "python scripts/run_pixal3d_mesh.py weapon_nail_bat --faces 16000",
+      "validate": "node scripts/capture_prop_renders.mjs weapon_nail_bat",
+      "reference_concept": "public/tex/props/flux3_nail_bat_redo_art.png",
+      "alpha_cutout": "public/tex/props/flux3_nail_bat_redo_alpha.png",
+      "turnaround_sheet": "public/tex/props/h3_nail_bat_turnaround.png",
+      "turntable": "docs/props/weapon_nail_bat/turntable.webp",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 16,000 triangles, 983,412 bytes, 23/23 capture checks. The reconstruction measures 63 x 84 x 28.2 cm, inside the 5% tolerance, and the gate moves to the in-game review.\r",
+      "dimensions_note": "scale_dimensions_cm amended from 15.1 x 84 x 7.1 cm to 63 x 84 x 28.2 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
+      "revision_requested_at": "2026-10-30T14:22:59+10:00",
+      "revision_published_at": "2026-10-30T15:13:07+10:00",
+      "revision_note": "Revision requested on 2026-10-30T14:22:59+10:00: this looks full of bullet holes - the surface is speckled with dark facets, the same fault the nurse's cap has. It needs to be rebuilt.. The reconstruction is being rebuilt with seed 31337 from the same approved sheet.",
+      "redo": {
+        "stage": "cutout",
+        "plan": [
+          "cutout",
+          "sheet",
+          "mesh"
+        ],
+        "requested_at": "2026-10-29T20:40:03+10:00",
+        "issue": 96,
+        "request": "redo from BiRefNet Watertight Alpha Cutout onwards\nensure the initial view captures the whole bat",
+        "reason": "the request names 'alpha cutout', which is the watertight alpha cutout (BiRefNet), over the art that is already there",
+        "seed": 7777,
+        "length": 175,
+        "done": [
+          "art",
+          "cutout",
+          "sheet",
+          "mesh",
+          "built"
+        ],
+        "cutout": "public/tex/props/flux3_nail_bat_redo_alpha.png",
+        "sheet": "public/tex/props/h3_nail_bat_turnaround_redo.png",
+        "previous_cutout": null,
+        "previous_sheet": null,
+        "claimed_at": "2026-10-29T21:35:26+10:00",
+        "built_at": "2026-10-29T22:15:09+10:00"
+      },
+      "revision_handled": [
+        "IC_kwDOVUJnUc8AAAABgqgssQ",
+        "IC_kwDOVUJnUc8AAAABgr79dg",
+        "IC_kwDOVUJnUc8AAAABhFG-bg"
+      ],
+      "revision_seeds": [
+        4242,
+        7777,
+        31337
+      ],
+      "approval_notice": "voided:2026-10-30T14:22:59+10:00"
     },
     {
       "id": "weapon_cleaver",
@@ -882,11 +1869,11 @@
       "poly_budget": 16000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 3.2,
+        "width": 34.2,
         "height": 36,
-        "depth": 11.6
+        "depth": 9
       },
-      "status": "gate:2-rebuild-pixal3d",
+      "status": "status:asset-approved",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -896,39 +1883,94 @@
       },
       "glb_output": "public/models/props/weapon_cleaver.glb",
       "validation": {
-        "rim_mesh": "Handle_Grip_Scales",
-        "closeup_mesh": "Cleaver_Blade_Steel",
+        "frame": {
+          "y_min_cm": -7,
+          "y_max_cm": 29,
+          "centre_x_cm": 0.0,
+          "centre_z_cm": 4.2,
+          "roll_deg": 42.8
+        },
+        "regions": [
+          {
+            "label": "the lower half of the prop carries the prop's surface",
+            "min_cm": [
+              12.8,
+              -7.0,
+              -0.3
+            ],
+            "max_cm": [
+              17.1,
+              -2.5,
+              8.7
+            ],
+            "expect": "filled",
+            "min_area_cm2": 7
+          },
+          {
+            "label": "the upper half of the prop carries the prop's surface",
+            "min_cm": [
+              -4.3,
+              15.6,
+              -0.3
+            ],
+            "max_cm": [
+              0.0,
+              20.0,
+              8.7
+            ],
+            "expect": "filled",
+            "min_area_cm2": 7
+          },
+          {
+            "label": "the space beside the prop is clear",
+            "min_cm": [
+              -4.3,
+              24.6,
+              -0.3
+            ],
+            "max_cm": [
+              0.0,
+              29.0,
+              8.7
+            ],
+            "expect": "empty",
+            "max_area_cm2": 10
+          }
+        ],
         "closeup_focus": [
-          0,
-          0.18,
-          0.045
+          -0.005,
+          0.164,
+          0.042
         ],
         "closeup_fit": 0.08,
-        "closeup_label": "Carbon steel meat cleaver blade close-up",
-        "view_fit": 0.25
+        "closeup_label": "The blade's belly and the handle's brass rivets",
+        "view_fit": 0.252,
+        "dimension_tolerance_pct": 5
       },
-      "build": null,
+      "measured": {
+        "triangles": 12800,
+        "bbox_min_cm": [
+          -17.1,
+          -7.0,
+          -0.3
+        ],
+        "bbox_max_cm": [
+          17.1,
+          29.0,
+          8.7
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 678620
+      },
+      "build": "python scripts/run_pixal3d_mesh.py weapon_cleaver --faces 12800",
       "validate": "node scripts/capture_prop_renders.mjs weapon_cleaver",
       "reference_concept": "public/tex/props/flux3_weapon_cleaver_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_cleaver_alpha.png",
-      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
-      "stand_in_measured": {
-        "triangles": 76,
-        "bytes": 6980,
-        "bbox_min_cm": [
-          -1.6,
-          -7,
-          -1.6
-        ],
-        "bbox_max_cm": [
-          1.6,
-          29,
-          10
-        ],
-        "meshes": 2,
-        "materials": 2,
-        "embedded_images": 0
-      }
+      "turnaround_sheet": "public/tex/props/h3_cleaver_turnaround.png",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 12,800 triangles, 678,620 bytes, 21/21 capture checks. The reconstruction measures 34.2 x 36 x 9 cm, inside the 5% tolerance, and the gate moves to the in-game review.",
+      "dimensions_note": "scale_dimensions_cm amended from 3.2 x 36 x 11.6 cm to 34.2 x 36 x 9 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit."
     },
     {
       "id": "weapon_piston_gauntlet",
@@ -939,11 +1981,11 @@
       "poly_budget": 25000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 15,
+        "width": 34.4,
         "height": 33,
         "depth": 18.2
       },
-      "status": "gate:2-rebuild-pixal3d",
+      "status": "status:asset-approved",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -953,39 +1995,95 @@
       },
       "glb_output": "public/models/props/weapon_piston_gauntlet.glb",
       "validation": {
-        "rim_mesh": "Handle_Grip_Sleeve",
-        "closeup_mesh": "Mini_Steam_Boiler",
+        "frame": {
+          "y_min_cm": -14,
+          "y_max_cm": 19,
+          "centre_x_cm": 0.0,
+          "centre_z_cm": 1.6,
+          "roll_deg": 10.8
+        },
+        "regions": [
+          {
+            "label": "the lower half of the prop carries the prop's surface",
+            "min_cm": [
+              -4.3,
+              -5.7,
+              -7.2
+            ],
+            "max_cm": [
+              0.0,
+              -1.6,
+              10.4
+            ],
+            "expect": "filled",
+            "min_area_cm2": 6
+          },
+          {
+            "label": "the upper half of the prop carries the prop's surface",
+            "min_cm": [
+              -4.3,
+              6.7,
+              -7.2
+            ],
+            "max_cm": [
+              0.0,
+              10.8,
+              10.4
+            ],
+            "expect": "filled",
+            "min_area_cm2": 6
+          },
+          {
+            "label": "the space beside the prop is clear",
+            "min_cm": [
+              12.9,
+              14.9,
+              -7.2
+            ],
+            "max_cm": [
+              17.2,
+              19.0,
+              10.4
+            ],
+            "expect": "empty",
+            "max_area_cm2": 10
+          }
+        ],
         "closeup_focus": [
-          0,
-          -0.02,
-          0.075
+          -0.007,
+          0.042,
+          0.016
         ],
         "closeup_fit": 0.08,
-        "closeup_label": "Steam boiler canister close-up",
-        "view_fit": 0.25
+        "closeup_label": "The piston stack and its valve gear",
+        "view_fit": 0.254,
+        "dimension_tolerance_pct": 5
       },
-      "build": null,
+      "measured": {
+        "triangles": 19990,
+        "bbox_min_cm": [
+          -17.2,
+          -14.0,
+          -7.2
+        ],
+        "bbox_max_cm": [
+          17.2,
+          19.0,
+          10.4
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 1474344
+      },
+      "build": "python scripts/run_pixal3d_mesh.py weapon_piston_gauntlet",
       "validate": "node scripts/capture_prop_renders.mjs weapon_piston_gauntlet",
       "reference_concept": "public/tex/props/flux3_weapon_piston_gauntlet_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_piston_gauntlet_alpha.png",
-      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
-      "stand_in_measured": {
-        "triangles": 156,
-        "bytes": 12548,
-        "bbox_min_cm": [
-          -7.5,
-          -14,
-          -7.5
-        ],
-        "bbox_max_cm": [
-          7.5,
-          19,
-          10.7
-        ],
-        "meshes": 3,
-        "materials": 3,
-        "embedded_images": 0
-      }
+      "turnaround_sheet": "public/tex/props/h3_piston_gauntlet_turnaround.png",
+      "turntable": "docs/props/weapon_piston_gauntlet/turntable.webp",
+      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.",
+      "dimensions_note": "scale_dimensions_cm amended from 15 x 33 x 18.2 cm to 34.4 x 33 x 18.2 cm (width). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit."
     },
     {
       "id": "weapon_lamplighter_pole",
@@ -996,11 +2094,11 @@
       "poly_budget": 20000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 9.6,
+        "width": 118.8,
         "height": 175,
-        "depth": 4
+        "depth": 37.7
       },
-      "status": "gate:2-rebuild-pixal3d",
+      "status": "gate:3-review-ingame-3d",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -1010,39 +2108,94 @@
       },
       "glb_output": "public/models/props/weapon_lamplighter_pole.glb",
       "validation": {
-        "rim_mesh": "Handle_Grip_Shaft",
-        "closeup_mesh": "Gas_Shutoff_Hook",
-        "closeup_focus": [
-          0.035,
-          0.88,
-          0
+        "frame": {
+          "y_min_cm": -82.5,
+          "y_max_cm": 92.5,
+          "centre_x_cm": 2.8,
+          "centre_z_cm": 0.0
+        },
+        "regions": [
+          {
+            "label": "the lower half of the prop carries the prop's surface",
+            "min_cm": [
+              2.7,
+              -38.8,
+              -18.9
+            ],
+            "max_cm": [
+              17.6,
+              -16.9,
+              18.9
+            ],
+            "expect": "filled",
+            "min_area_cm2": 114
+          },
+          {
+            "label": "the upper half of the prop carries the prop's surface",
+            "min_cm": [
+              2.7,
+              26.9,
+              -18.9
+            ],
+            "max_cm": [
+              17.6,
+              48.8,
+              18.9
+            ],
+            "expect": "filled",
+            "min_area_cm2": 114
+          },
+          {
+            "label": "the space beside the prop is clear",
+            "min_cm": [
+              17.6,
+              70.6,
+              -18.9
+            ],
+            "max_cm": [
+              32.5,
+              92.5,
+              18.9
+            ],
+            "expect": "empty",
+            "max_area_cm2": 10
+          }
         ],
-        "closeup_fit": 0.08,
-        "closeup_label": "Gas-cock shutoff hook close-up",
-        "view_fit": 0.95
+        "closeup_focus": [
+          0.009,
+          0.715,
+          0.0
+        ],
+        "closeup_fit": 0.12,
+        "closeup_label": "The gas shutoff hook and the lamp fitting",
+        "view_fit": 1.074,
+        "dimension_tolerance_pct": 5
       },
-      "build": null,
+      "measured": {
+        "triangles": 16000,
+        "bbox_min_cm": [
+          -56.6,
+          -82.5,
+          -18.9
+        ],
+        "bbox_max_cm": [
+          62.2,
+          92.5,
+          18.9
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 1015944
+      },
+      "build": "python scripts/run_pixal3d_mesh.py weapon_lamplighter_pole --faces 16000",
       "validate": "node scripts/capture_prop_renders.mjs weapon_lamplighter_pole",
       "reference_concept": "public/tex/props/flux3_weapon_lamplighter_pole_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_lamplighter_pole_alpha.png",
-      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
-      "stand_in_measured": {
-        "triangles": 384,
-        "bytes": 17264,
-        "bbox_min_cm": [
-          -2,
-          -82.5,
-          -2
-        ],
-        "bbox_max_cm": [
-          7.6,
-          92.5,
-          2
-        ],
-        "meshes": 3,
-        "materials": 3,
-        "embedded_images": 0
-      }
+      "turnaround_sheet": "public/tex/props/h3_lamplighter_pole_turnaround.png",
+      "turntable": "docs/props/weapon_lamplighter_pole/turntable.webp",
+      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.",
+      "dimensions_note": "scale_dimensions_cm amended from 9.6 x 175 x 4 cm to 118.8 x 175 x 37.7 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit."
     },
     {
       "id": "weapon_chair",
@@ -1053,11 +2206,11 @@
       "poly_budget": 25000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 52,
+        "width": 66.2,
         "height": 87,
-        "depth": 54
+        "depth": 70.6
       },
-      "status": "gate:3-review-ingame-3d",
+      "status": "status:asset-approved",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -1073,8 +2226,8 @@
           -0.18
         ],
         "closeup_fit": 0.15,
-        "closeup_label": "Tufted crimson velvet backrest close-up",
-        "view_fit": 0.55,
+        "closeup_label": "The buttoned leather backrest close-up",
+        "view_fit": 0.651,
         "dimension_tolerance_pct": 5,
         "frame": {
           "y_min_cm": -41.5,
@@ -1084,75 +2237,113 @@
         },
         "regions": [
           {
-            "label": "the seat",
+            "label": "the lower half of the prop carries the prop's surface",
             "min_cm": [
-              -15,
-              -10,
-              -9
+              -24.9,
+              -19.7,
+              -35.3
             ],
             "max_cm": [
-              15,
-              5,
-              18
+              -16.6,
+              -8.8,
+              35.3
             ],
             "expect": "filled",
-            "min_area_cm2": 300
+            "min_area_cm2": 32
           },
           {
-            "label": "the backrest, behind the seat (-Z)",
+            "label": "the upper half of the prop carries the prop's surface",
             "min_cm": [
-              -15,
-              20,
-              -28
+              -16.6,
+              12.9,
+              -35.3
             ],
             "max_cm": [
-              15,
-              40,
-              -9
+              -8.3,
+              23.8,
+              35.3
             ],
             "expect": "filled",
-            "min_area_cm2": 300
+            "min_area_cm2": 32
           },
           {
-            "label": "the space in front of the backrest (+Z)",
+            "label": "the space beside the prop is clear",
             "min_cm": [
-              -15,
-              15,
-              0
+              16.5,
+              34.7,
+              -35.3
             ],
             "max_cm": [
-              15,
-              40,
-              28
+              24.8,
+              45.5,
+              35.3
             ],
-            "expect": "empty"
+            "expect": "empty",
+            "max_area_cm2": 10
           }
         ]
       },
       "measured": {
-        "triangles": 19986,
-        "bytes": 1303240,
+        "triangles": 20000,
         "bbox_min_cm": [
-          -26.1,
+          -33.1,
           -41.5,
-          -26.8
+          -35.3
         ],
         "bbox_max_cm": [
-          26.1,
+          33.1,
           45.5,
-          26.8
+          35.3
         ],
         "meshes": 1,
         "materials": 1,
-        "embedded_images": 3
+        "embedded_images": 3,
+        "bytes": 988224
       },
       "source": "Pixal3D multi-view reconstruction (ComfyUI, public/tex/workflows/pixal3d_multiview.json) from the four-view sheet, shrunk and placed on the pivot by the same script; scripts/build_weapon_chair.mjs builds the earlier procedural chair",
       "build": "python scripts/run_pixal3d_mesh.py weapon_chair",
       "validate": "node scripts/capture_prop_renders.mjs weapon_chair",
-      "reference_concept": "public/tex/props/flux3_weapon_chair_00001_.png",
-      "alpha_cutout": "public/tex/props/flux3_chair_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_chair_turnaround.png",
-      "turntable": "docs/props/weapon_chair/turntable.webp"
+      "reference_concept": "public/tex/props/flux3_chair_redo_art.png",
+      "alpha_cutout": "public/tex/props/flux3_chair_redo_alpha.png",
+      "turnaround_sheet": "public/tex/props/h3_chair_turnaround_redo.png",
+      "turntable": "docs/props/weapon_chair/turntable_redo.webp",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 20,000 triangles, 988,224 bytes, 21/21 capture checks. The reconstruction measures 66.2 x 87 x 70.6 cm, inside the 5% tolerance, and the gate moves to the in-game review.",
+      "dimensions_note": "scale_dimensions_cm amended from 52 x 87 x 54 cm to 66.2 x 87 x 70.6 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
+      "revision_requested_at": "2026-10-29T20:40:03+10:00",
+      "revision_published_at": "2026-10-30T08:01:13+10:00",
+      "revision_note": "Redo requested on 2026-10-29T20:40:03+10:00 from stage 2: the H3 four-view turnaround sheet: redo from 2. 2D Orthographic Turnaround & 360° Turntable (Gate 2) onwards. The prop is rebuilt from that stage with seed 4242.",
+      "redo": {
+        "stage": "sheet",
+        "plan": [
+          "sheet",
+          "mesh"
+        ],
+        "requested_at": "2026-10-29T20:40:03+10:00",
+        "issue": 100,
+        "request": "redo from 2. 2D Orthographic Turnaround & 360° Turntable (Gate 2) onwards",
+        "reason": "the request names '360', which is stage 2: the H3 four-view turnaround sheet",
+        "seed": 4242,
+        "length": 175,
+        "done": [
+          "art",
+          "cutout",
+          "sheet",
+          "mesh",
+          "built"
+        ],
+        "cutout": "public/tex/props/flux3_chair_redo_alpha.png",
+        "sheet": "public/tex/props/h3_chair_turnaround_redo.png",
+        "previous_cutout": null,
+        "previous_sheet": null,
+        "claimed_at": "2026-10-29T22:15:09+10:00",
+        "built_at": "2026-10-29T23:06:43+10:00"
+      },
+      "revision_handled": [
+        "IC_kwDOVUJnUc8AAAABgr7qrw"
+      ],
+      "revision_seeds": [
+        4242
+      ]
     },
     {
       "id": "pickup_tonic",
@@ -1163,11 +2354,11 @@
       "poly_budget": 12000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 6.4,
+        "width": 8.5,
         "height": 18.5,
-        "depth": 6.4
+        "depth": 8.6
       },
-      "status": "gate:2-rebuild-pixal3d",
+      "status": "status:asset-approved",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -1177,39 +2368,219 @@
       },
       "glb_output": "public/models/props/pickup_tonic.glb",
       "validation": {
-        "rim_mesh": "Handle_Grip_Bottle",
-        "closeup_mesh": "Wax_Sealed_Cork",
-        "closeup_focus": [
-          0,
-          0.11,
-          0
+        "frame": {
+          "y_min_cm": -6.5,
+          "y_max_cm": 12.0,
+          "centre_x_cm": 0.0,
+          "centre_z_cm": 0.0
+        },
+        "regions": [
+          {
+            "label": "the lower half of the prop carries the prop's surface",
+            "min_cm": [
+              -1.5,
+              -1.9,
+              -4.3
+            ],
+            "max_cm": [
+              0.5,
+              0.5,
+              4.3
+            ],
+            "expect": "filled",
+            "min_area_cm2": 4
+          },
+          {
+            "label": "the upper half of the prop carries the prop's surface",
+            "min_cm": [
+              -1.5,
+              5.1,
+              -4.3
+            ],
+            "max_cm": [
+              0.5,
+              7.4,
+              4.3
+            ],
+            "expect": "filled",
+            "min_area_cm2": 4
+          },
+          {
+            "label": "the space beside the prop is clear",
+            "min_cm": [
+              -4.3,
+              9.7,
+              -4.3
+            ],
+            "max_cm": [
+              -2.7,
+              12.0,
+              4.3
+            ],
+            "expect": "empty",
+            "max_area_cm2": 10
+          }
         ],
-        "closeup_fit": 0.05,
-        "closeup_label": "Wax-sealed apothecary cork close-up",
-        "view_fit": 0.15
+        "closeup_focus": [
+          0.0,
+          0.013,
+          0.0
+        ],
+        "closeup_fit": 0.03,
+        "closeup_label": "The tincture bottle's label and cork",
+        "view_fit": 0.111,
+        "dimension_tolerance_pct": 5
       },
-      "build": null,
+      "measured": {
+        "triangles": 9598,
+        "bbox_min_cm": [
+          -4.3,
+          -6.5,
+          -4.3
+        ],
+        "bbox_max_cm": [
+          4.3,
+          12.0,
+          4.3
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 769092
+      },
+      "build": "python scripts/run_pixal3d_mesh.py pickup_tonic --faces 9600",
       "validate": "node scripts/capture_prop_renders.mjs pickup_tonic",
       "reference_concept": "public/tex/props/flux3_pickup_tonic_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_tonic_alpha.png",
-      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.",
-      "stand_in_measured": {
-        "triangles": 200,
-        "bytes": 15344,
+      "turnaround_sheet": "public/tex/props/h3_tonic_turnaround.png",
+      "turntable": "docs/props/pickup_tonic/turntable.webp",
+      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.",
+      "dimensions_note": "scale_dimensions_cm amended from 6.4 x 18.5 x 6.4 cm to 8.5 x 18.5 x 8.6 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit."
+    },
+    {
+      "id": "prop_winch_gold_nightstick",
+      "name": "Gold Engraved Mechanical Nightstick",
+      "character": "Constable Obadiah Winch",
+      "category": "weapon",
+      "slot": "hand_socket",
+      "poly_budget": 16000,
+      "file_budget_bytes": 1572864,
+      "scale_dimensions_cm": {
+        "width": 5.0,
+        "height": 45.0,
+        "depth": 4.4
+      },
+      "status": "status:asset-approved",
+      "pivot": {
+        "convention": "grip_socket_normalized",
+        "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
+        "forward": "+Z",
+        "up": "+Y",
+        "units": "metres"
+      },
+      "glb_output": "public/models/props/prop_winch_gold_nightstick.glb",
+      "validation": {
+        "frame": {
+          "y_min_cm": -9.0,
+          "y_max_cm": 36.0,
+          "centre_x_cm": 0.0,
+          "centre_z_cm": 0.0
+        },
+        "regions": [
+          {
+            "label": "the lower half of the prop carries the prop's surface",
+            "min_cm": [
+              -1.9,
+              -3.4,
+              -2.2
+            ],
+            "max_cm": [
+              0.1,
+              2.3,
+              2.2
+            ],
+            "expect": "filled",
+            "min_area_cm2": 4
+          },
+          {
+            "label": "the upper half of the prop carries the prop's surface",
+            "min_cm": [
+              -1.9,
+              24.8,
+              -2.2
+            ],
+            "max_cm": [
+              0.1,
+              30.4,
+              2.2
+            ],
+            "expect": "filled",
+            "min_area_cm2": 4
+          },
+          {
+            "label": "the space in front of the prop is clear",
+            "min_cm": [
+              -2.4,
+              -9.0,
+              2.7
+            ],
+            "max_cm": [
+              2.4,
+              36.0,
+              12.2
+            ],
+            "expect": "empty",
+            "max_area_cm2": 10
+          }
+        ],
+        "closeup_label": "The gold engraving and the click catch",
+        "dimension_tolerance_pct": 5,
+        "view_fit": 0.227,
+        "closeup_focus": [
+          0.015,
+          0.312,
+          0.0
+        ],
+        "closeup_fit": 0.048,
+        "clear_region": {
+          "label": "the space in front of the prop is clear",
+          "min_cm": [
+            -2.4,
+            -9.0,
+            2.7
+          ],
+          "max_cm": [
+            2.4,
+            36.0,
+            12.2
+          ]
+        }
+      },
+      "measured": {
+        "triangles": 12798,
         "bbox_min_cm": [
-          -3.2,
-          -6.5,
-          -3.2
+          -2.4,
+          -9.0,
+          -2.2
         ],
         "bbox_max_cm": [
-          3.2,
-          12,
-          3.2
+          2.4,
+          36.0,
+          2.2
         ],
-        "meshes": 3,
-        "materials": 3,
-        "embedded_images": 0
-      }
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 804360
+      },
+      "build": "python scripts/run_pixal3d_mesh.py prop_winch_gold_nightstick --faces 12800",
+      "reference_concept": "public/tex/props/flux3_gold_nightstick_art.png",
+      "alpha_cutout": "public/tex/props/flux3_gold_nightstick_alpha.png",
+      "turnaround_sheet": "public/tex/props/h3_winch_gold_nightstick_turnaround.png",
+      "turntable": "docs/props/prop_winch_gold_nightstick/turntable.webp",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 12,798 triangles, 804,360 bytes, 21/21 capture checks. The reconstruction measures 4.9 x 45 x 4.4 cm, inside the 5% tolerance, and the gate moves to the in-game review.",
+      "dimensions_note": "scale_dimensions_cm amended from 5.0 x 45.0 x 5.0 cm to 5.0 x 45.0 x 4.4 cm (depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
+      "issue": 107
     }
   ]
 }

@@ -6,7 +6,7 @@
 //
 // Like the World, an Arena is deterministic: all randomness goes through
 // `w.rng`, in a fixed order.
-import { BTN, LAVA_R, RING_R, SPAWN_R, TOILET_FRAMES, TOILET_R, type ArenaState, type Fighter, type HazardKind, type Pickup, type PlayerInput, type Vehicle, type VehicleKind } from "./types";
+import { BTN, LAVA_R, RING_R, SPAWN_R, TOILET_FRAMES, TOILET_R, type ArenaState, type Fighter, type HazardKind, type OnFloor, type PlayerInput, type Vehicle, type VehicleKind } from "./types";
 import { GEYSER, HITSTOP, LAVA, SIT_FRAMES, type Move, hitstopFor } from "./moves";
 import type { StageId } from "./stages";
 import { BODY_R, alive, dist, type World } from "./world";
@@ -138,7 +138,17 @@ export abstract class Arena {
   canWalk(_w: World, _f: Fighter, _x: number, _y: number): boolean {
     return true;
   }
-  abstract boundPickup(w: World, p: Pickup): void;
+  abstract boundPickup(w: World, p: OnFloor): void;
+  /**
+   * Whether a thing that falls to the floor at (x, y) stays there.
+   *
+   * This is the question the Gallery's gift asks before it drops one: a gift
+   * that lands in the fire round the pit, or on a deck that has gone, is a
+   * gift nobody can pick up.
+   */
+  canLand(_w: World, _x: number, _y: number): boolean {
+    return true;
+  }
   /** Hazards, the objective and the win, once per step after physics. */
   abstract update(w: World): void;
   /** The stage's USE action (sit down, get in or out of a vehicle). */
@@ -223,11 +233,11 @@ function burn(w: World, f: Fighter): void {
   }
 }
 
-/** A limb on the floor of an edge stage that slides off the edge (or into fire) is gone; it grows back. */
-function losePickup(w: World, p: Pickup): void {
+/** A thing on the floor of an edge stage that slides off the edge (or into fire) is gone; a limb grows back. */
+function losePickup(w: World, p: OnFloor): void {
   if (p.burning > 0) return;
   p.burning = 40;
-  w.ev({ kind: "burn", a: p.owner, part: p.part });
+  w.ev({ kind: "burn", a: p.owner });
 }
 
 // ===================================================================== Hell Toilet
@@ -257,7 +267,7 @@ class HellToilet extends Arena {
     if (r > RING_R) burn(w, f);
   }
 
-  boundPickup(w: World, p: Pickup): void {
+  boundPickup(w: World, p: OnFloor): void {
     const r = Math.hypot(p.x, p.y);
     if (r > LAVA_R) {
       p.x *= LAVA_R / r;
@@ -265,6 +275,11 @@ class HellToilet extends Arena {
       p.vx = p.vy = 0;
     }
     if (p.z === 0 && Math.hypot(p.x, p.y) > RING_R) losePickup(w, p);
+  }
+
+  canLand(_w: World, x: number, y: number): boolean {
+    // the floor of the pit ends at the ring; past it is the fire
+    return Math.hypot(x, y) <= RING_R;
   }
 
   update(w: World): void {
@@ -481,12 +496,16 @@ class ConstructionSite extends Arena {
     }
   }
 
-  boundPickup(_w: World, p: Pickup): void {
+  boundPickup(_w: World, p: OnFloor): void {
     if (Math.abs(p.x) > YARD.hx || Math.abs(p.y) > YARD.hy) {
       p.x = clamp(p.x, -YARD.hx, YARD.hx);
       p.y = clamp(p.y, -YARD.hy, YARD.hy);
       p.vx = p.vy = 0;
     }
+  }
+
+  canLand(_w: World, x: number, y: number): boolean {
+    return Math.abs(x) <= YARD.hx && Math.abs(y) <= YARD.hy;
   }
 
   update(w: World): void {
@@ -729,8 +748,12 @@ class CollapsingTower extends Arena {
     return this.onFloor(w, x, y);
   }
 
-  boundPickup(w: World, p: Pickup): void {
+  boundPickup(w: World, p: OnFloor): void {
     if (p.z === 0 && !this.onFloor(w, p.x, p.y)) losePickup(w, p);
+  }
+
+  canLand(w: World, x: number, y: number): boolean {
+    return this.onFloor(w, x, y);
   }
 
   update(w: World): void {
@@ -865,8 +888,12 @@ class HindenburgBlimp extends Arena {
     return this.danger(w, f, f.spawnX, f.spawnY) ? this.safe(w, f) : { x: f.spawnX, y: f.spawnY };
   }
 
-  boundPickup(w: World, p: Pickup): void {
+  boundPickup(w: World, p: OnFloor): void {
     if (p.z === 0 && (!onDeck(p.x, p.y) || p.x > w.s.arena.fireX)) losePickup(w, p);
+  }
+
+  canLand(w: World, x: number, y: number): boolean {
+    return onDeck(x, y) && x <= w.s.arena.fireX;
   }
 
   update(w: World): void {
@@ -989,7 +1016,7 @@ class CastleUnderSiege extends Arena {
     return Math.abs(y) <= CASTLE.hy - BODY_R;
   }
 
-  boundPickup(w: World, p: Pickup): void {
+  boundPickup(w: World, p: OnFloor): void {
     if (Math.abs(p.x) > CASTLE.hx) {
       p.x = clamp(p.x, -CASTLE.hx, CASTLE.hx);
       p.vx = 0;
@@ -1001,6 +1028,12 @@ class CastleUnderSiege extends Arena {
         p.vy = 0;
       }
     }
+  }
+
+  canLand(_w: World, x: number, y: number): boolean {
+    if (Math.abs(x) > CASTLE.hx || Math.abs(y) > CASTLE.hy) return false;
+    // a gift that lands in a breach in the wall falls through it
+    return !breachAt(x, Math.sign(y));
   }
 
   update(w: World): void {
