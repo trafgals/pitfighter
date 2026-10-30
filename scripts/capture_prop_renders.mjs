@@ -23,7 +23,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import puppeteer from "puppeteer-core";
-import { inspectGlb, readWorldTriangles, surfaceAreaInBox } from "./lib/glb_inspect.mjs";
+import { inspectGlb, readWorldTriangles, readTopology, surfaceAreaInBox, MESH_LIMITS } from "./lib/glb_inspect.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const PORT = Number(process.env.PROP_CAPTURE_PORT || 5200);
@@ -220,6 +220,35 @@ async function main() {
   check(report.bytes <= budget.bytes, "file size is within budget", `${(report.bytes / 1048576).toFixed(3)} MB <= 1.5 MB`);
   check(report.problems.length === 0, "the mesh has no structural problems", report.problems.join("; "));
   check(report.nonFinite === 0, "no vertex position is NaN or infinite", `${report.nonFinite}`);
+
+  // The mesh as one surface.
+  //
+  // A reconstruction that comes back fragmented - every piece carrying its
+  // own copy of the vertices it touches - is geometrically the same object
+  // and topologically a pile of shards. Every other check here is exactly
+  // what a fragmented mesh gets right: the triangle count, the bounding box,
+  // the dimensions and the frame are all still right, which is how a prop
+  // covered in dark seams passed twenty-one of twenty-one checks.
+  //
+  // What it does to the render is not subtle. The vertices along a seam
+  // carry normals averaged over one side only, so the seam renders as a hard,
+  // often black, edge; and an unwrap over a fragmented mesh lays out
+  // hundreds of overlapping charts, so the baked texture is a patchwork and
+  // the normal map is garbage on top of it. The reader is asked what the
+  // mesh looks like as a surface, and a surface that is in pieces is not one.
+  const topology = readTopology(modelPath);
+  const duplicatePct = (100 * topology.duplicateVertices) / Math.max(1, topology.vertices);
+  const seamPct = (100 * topology.boundaryEdges) / Math.max(1, topology.edges);
+  check(
+    duplicatePct <= MESH_LIMITS.duplicateVertexPct,
+    "the mesh is one surface, not a pile of shards",
+    `${topology.duplicateVertices} of ${topology.vertices} vertices are duplicates of another vertex (${duplicatePct.toFixed(1)}%)`,
+  );
+  check(
+    seamPct <= MESH_LIMITS.boundaryEdgePct,
+    "the mesh's seams are closed",
+    `${topology.boundaryEdges} of ${topology.edges} edges are used by only one triangle (${seamPct.toFixed(1)}%)`,
+  );
 
   const dims = report.bbox.size.map(cm);
   const within = (actual, spec) => Math.abs(actual - spec) <= Math.max(toleranceCm, (spec * dimensionTolerancePct) / 100);
@@ -522,6 +551,14 @@ async function main() {
     bbox: { min: report.bbox.min, max: report.bbox.max },
     meshes: report.meshes.map((mesh) => ({ name: mesh.name, triangles: mesh.triangles, material: mesh.primitives[0]?.material ?? null })),
     materials: report.materials,
+    topology: {
+      vertices: topology.vertices,
+      faces: topology.faces,
+      duplicateVertices: topology.duplicateVertices,
+      boundaryEdges: topology.boundaryEdges,
+      edges: topology.edges,
+      invertedFaces: topology.invertedFaces,
+    },
     renders: rendered,
     checks,
   };

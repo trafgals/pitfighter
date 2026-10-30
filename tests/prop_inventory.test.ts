@@ -121,11 +121,28 @@ describe.skipIf(!PYTHON)("the prop inventory", () => {
 
   it("says what to do with a prop that is waiting", () => {
     const body = inventory();
-    expect(body).toContain("/approve-3d");
-    expect(body).toContain("/revision");
     const waiting = rowsOf(body, "#### Waiting on you");
+    const deciding = waiting.filter((row) => !row.includes("in the build queue"));
     for (const row of waiting) {
-      expect(row).toMatch(/waiting on the in-game review/);
+      // A prop that is waiting is either waiting for a decision or already
+      // in the build queue; what it must not be is a row that says nothing.
+      expect(row).toMatch(/waiting on the in-game review|in the build queue/);
+    }
+    // The two answers are offered only when there is something to answer.
+    if (deciding.length) {
+      expect(body).toContain("/approve-3d");
+      expect(body).toContain("/revision");
+    }
+  });
+
+  it("does not ask for a decision on a prop that is already being rebuilt", () => {
+    const body = inventory();
+    const waiting = rowsOf(body, "#### Waiting on you");
+    const queued = waiting.filter((row) => row.includes("in the build queue"));
+    // Nothing is owed on a prop that is in the build queue: the decision has
+    // been made and the rebuild is under way.
+    for (const row of queued) {
+      expect(row).not.toContain("waiting on the in-game review");
     }
   });
 });

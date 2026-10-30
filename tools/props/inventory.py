@@ -93,6 +93,22 @@ KINDS = {
 }
 
 
+def rebuilding(asset):
+    """Why this prop is being rebuilt, if it is.
+
+    A prop that a reviewer asked to revise is not waiting for a decision any
+    more: it is in the build queue, and the decision was made. Saying
+    otherwise would put it back in the column of things a person has to do.
+    """
+    redo = asset.get("redo") or {}
+    if redo and "built" not in (redo.get("done") or []):
+        stage = redo.get("stage") or "mesh"
+        return f"in the build queue - being rebuilt from the {stage} stage"
+    if asset.get("revision_requested_at") and not asset.get("revision_built_at"):
+        return "in the build queue - the mesh is being rebuilt"
+    return None
+
+
 def outstanding(asset, report):
     """What is left to do about a prop, in one sentence.
 
@@ -110,6 +126,9 @@ def outstanding(asset, report):
         notes.append("the render was published upside down and has been re-shot in the frame of the art")
     if asset.get("id") == "weapon_lamplighter_pole":
         return "closed: the constable's gold nightstick took its place"
+    queue = rebuilding(asset)
+    if queue:
+        return queue + (" - " + "; ".join(notes) if notes else "")
     if notes:
         return "waiting on the in-game review - " + "; ".join(notes)
     return "waiting on the in-game review"
@@ -133,6 +152,8 @@ def body():
     waiting = [row for row in rows if row["asset"].get("status") != APPROVED and row["outstanding"] != "closed: the constable's gold nightstick took its place"]
     closed = [row for row in rows if row["outstanding"] == "closed: the constable's gold nightstick took its place"]
     held = [row for row in rows if "held" in str(row["asset"].get("status", ""))]
+    queued = [row for row in waiting if row["outstanding"].startswith("in the build queue")]
+    deciding = [row for row in waiting if not row["outstanding"].startswith("in the build queue")]
 
     lines = [
         MARKER,
@@ -140,7 +161,8 @@ def body():
         "### The prop inventory",
         "",
         f"The batch the Pixal3D multi-view pipeline rebuilt: **{len(rows)} props**. "
-        f"**{len(approved)} are approved and in the game**, **{len(waiting)} are waiting for a decision**, "
+        f"**{len(approved)} are approved and in the game**, **{len(deciding)} are waiting for a decision**, "
+        f"**{len(queued)} are in the build queue**, "
         f"and **{len(closed)} is closed**."
         + (f" **{len(held)} are held on an unsettled finding.**" if held else " None is held."),
         "",
@@ -162,18 +184,30 @@ def body():
         )
     lines += [
         "",
-        "Each of these is at gate 3 with its checks green and its render matching the art it was built from. "
-        "To settle one, say so on its own issue:",
-        "",
-        "```",
-        "/approve-3d",
-        "/revision the grip is smooth and reads as a tube",
-        "```",
-        "",
-        "A command has to be **issued**, not mentioned: it starts a line, it is not inside a code block, and it "
-        "is not on a quoted line. Approving one of these also puts it in the game - and its placement has to be "
-        "measured first, because the approved fifteen all have one and these do not yet.",
-        "",
+    ]
+    if deciding:
+        lines += [
+            "The ones waiting for a decision are at gate 3 with their checks green and their render matching "
+            "the art they were built from. To settle one, say so on its own issue:",
+            "",
+            "```",
+            "/approve-3d",
+            "/revision the grip is smooth and reads as a tube",
+            "```",
+            "",
+            "A command has to be **issued**, not mentioned: it starts a line, it is not inside a code block, and it "
+            "is not on a quoted line. Approving one of these also puts it in the game - and its placement has to be "
+            "measured first, because the approved props all have one and these do not yet.",
+            "",
+        ]
+    if queued:
+        lines += [
+            "The ones in the build queue have already been decided: a reviewer asked for them to be rebuilt, and "
+            "they are being rebuilt. Nothing is owed on them - their new renders will be published on their own "
+            "issues when they land, and they come back to this page for a decision then.",
+            "",
+        ]
+    lines += [
         "#### Approved and in the game",
         "",
         "| prop | fighter | issue | in the game as |",

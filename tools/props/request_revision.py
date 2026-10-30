@@ -197,8 +197,14 @@ def main():
     # that decides, and a comment that says "in the queue" must not be left
     # behind by a manifest that says otherwise.
     for asset_id, number, request, seed, stage in queued:
+        # The approval comes off with the rest. The prop is about to be
+        # rebuilt, so the mesh that was approved is about to be replaced - and
+        # the label is what the approval is read from, so a label left on the
+        # issue would have the approval applied again to a mesh nobody has
+        # seen.
         gh("issue", "edit", str(number), "--remove-label", "gate:3-review-ingame-3d",
            "--remove-label", "asset:3d-built", "--remove-label", REVISION_LABEL,
+           "--remove-label", "status:asset-approved",
            "--add-label", STAGE_LABELS[stage])
         if stage == MESH:
             body = (

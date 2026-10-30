@@ -141,6 +141,17 @@ numbers are in a comment under the issue, with the render pictures in it.
    that hold the prop's business end in frame, and the check that the render
    still matches the art - the model's silhouette against the front tile of
    the sheet it was built from, and against that tile turned over.
+
+   Two of the checks are about the mesh as a surface rather than about its
+   size: **the mesh is one surface, not a pile of shards**, and **the mesh's
+   seams are closed**. They are there because a reconstruction can come back
+   fragmented - every piece of the surface carrying its own copy of the
+   vertices it touches - and it then renders as a surface covered in dark
+   seams, with a baked texture that is a patchwork, while its triangle count,
+   its dimensions and its frame are all exactly right. The nurse's cap is
+   the case that matters: it passed twenty-one of twenty-one checks with
+   35% of its vertices duplicated, and it looked as if it had been shot
+   through. A mesh that is in pieces is not one, and now it does not pass.
 4. **Decide.**
 
 ### The two things a reviewer can say
