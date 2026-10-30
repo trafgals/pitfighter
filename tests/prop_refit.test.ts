@@ -25,16 +25,24 @@ import { describe, expect, it } from "vitest";
 const ROOT = process.cwd();
 const CHECK = path.join(ROOT, "tools", "props", "check_regions.py");
 
-/** The python on this machine, if there is one. */
-function findPython(): string | null {
+/**
+ * The python, if it can run the tool.
+ *
+ * The tool measures a mesh's surface, so it needs numpy. A runner without it
+ * cannot run the measurement, and a test that fails there says nothing about
+ * the boxes - it says the runner has no numpy. So the test is skipped, the
+ * way the tests that need no python at all are skipped on a machine with
+ * none.
+ */
+function findPythonWithNumpy(): string | null {
   for (const candidate of ["python3", "python", "py"]) {
-    const probe = spawnSync(candidate, ["--version"], { encoding: "utf8" });
+    const probe = spawnSync(candidate, ["-c", "import numpy"], { encoding: "utf8" });
     if (!probe.error && probe.status === 0) return candidate;
   }
   return null;
 }
 
-const PYTHON = findPython();
+const PYTHON = findPythonWithNumpy();
 
 type Region = {
   asset: string;
