@@ -78,6 +78,27 @@ The labels say where each prop is, so the list can be scanned:
 A prop that has no 3D asset yet has no picture on its issue, and that is the
 truth of it rather than a gap in the review: it has not been built.
 
+### The inventory
+
+A list of issue titles is the queue, but it is not one you can read at a glance:
+what is settled, what is waiting on a person and what is closed all look alike
+in it. So the batch is also written up as a single page - the **Asset Inventory**
+issue, #108 - that says what is approved, what is waiting and what is closed,
+with the issue each prop is judged on.
+
+That page is generated, not written by hand:
+
+```bash
+python tools/props/inventory.py            # print the body
+python tools/props/inventory.py --apply    # create or update the issue
+```
+
+It is written from `data/asset_manifest.json` and from the capture reports, so
+it says what is true rather than what was true when it was last regenerated.
+`tests/prop_inventory.test.ts` holds it against the manifest, the capture
+reports and the game's own prop table, so an inventory that stops adding up
+fails the suite rather than misleading the next reader.
+
 ### What is on the issue
 
 Each rebuilt prop's issue carries, in its **3. Model Status** section, what
