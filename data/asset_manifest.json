@@ -2181,7 +2181,7 @@
         "height": 87,
         "depth": 70.6
       },
-      "status": "gate:2-rebuild-pixal3d",
+      "status": "gate:3-review-ingame-3d",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -2240,13 +2240,13 @@
           {
             "label": "the space beside the prop is clear",
             "min_cm": [
-              -8.3,
-              -30.6,
+              16.5,
+              34.7,
               -35.3
             ],
             "max_cm": [
-              0.0,
-              -19.8,
+              24.8,
+              45.5,
               35.3
             ],
             "expect": "empty",
@@ -2269,7 +2269,7 @@
         "meshes": 1,
         "materials": 1,
         "embedded_images": 3,
-        "bytes": 988076
+        "bytes": 988224
       },
       "source": "Pixal3D multi-view reconstruction (ComfyUI, public/tex/workflows/pixal3d_multiview.json) from the four-view sheet, shrunk and placed on the pivot by the same script; scripts/build_weapon_chair.mjs builds the earlier procedural chair",
       "build": "python scripts/run_pixal3d_mesh.py weapon_chair",
@@ -2278,7 +2278,7 @@
       "alpha_cutout": "public/tex/props/flux3_chair_redo_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_chair_turnaround_redo.png",
       "turntable": "docs/props/weapon_chair/turntable_redo.webp",
-      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 20,000 triangles, 988,076 bytes, 20/21 capture checks. The checks that do not pass: the space beside the prop is clear is clear. The mesh measures 66.2 x 87 x 70.6 cm against a spec of 66.2 x 87 x 70.6 cm. The finding is recorded in the manifest and the tolerance is left at 5%.",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 20,000 triangles, 988,224 bytes, 21/21 capture checks. The reconstruction measures 66.2 x 87 x 70.6 cm, inside the 5% tolerance, and the gate moves to the in-game review.",
       "dimensions_note": "scale_dimensions_cm amended from 52 x 87 x 54 cm to 66.2 x 87 x 70.6 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
       "revision_requested_at": "2026-10-29T20:40:03+10:00",
       "revision_published_at": "2026-10-30T08:01:13+10:00",

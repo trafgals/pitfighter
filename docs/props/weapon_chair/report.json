@@ -1,7 +1,7 @@
 {
   "asset": "weapon_chair",
   "model": "public/models/props/weapon_chair.glb",
-  "capturedAt": "2026-10-29T22:01:13.378Z",
+  "capturedAt": "2026-10-30T00:45:28.021Z",
   "budget": {
     "triangles": 25000,
     "bytes": 1572864,
@@ -12,7 +12,7 @@
     }
   },
   "triangles": 20000,
-  "bytes": 988076,
+  "bytes": 988224,
   "dimensionsCm": {
     "width": 66.2,
     "height": 87,
@@ -45,19 +45,19 @@
       "view": "front",
       "label": "Front (0deg, +Z to camera)",
       "file": "test-output/props/weapon_chair/front.png",
-      "bytes": 204494
+      "bytes": 215617
     },
     {
       "view": "profile",
       "label": "Profile (90deg, right side)",
       "file": "test-output/props/weapon_chair/profile.png",
-      "bytes": 121781
+      "bytes": 163900
     },
     {
       "view": "badge",
       "label": "Tufted crimson velvet backrest close-up",
       "file": "test-output/props/weapon_chair/badge.png",
-      "bytes": 499979
+      "bytes": 474096
     }
   ],
   "checks": [
@@ -124,17 +124,17 @@
     {
       "ok": true,
       "message": "the lower half of the prop carries the prop's surface is there",
-      "detail": "349 cm2 of surface >= 32"
+      "detail": "817 cm2 of surface >= 32"
     },
     {
       "ok": true,
       "message": "the upper half of the prop carries the prop's surface is there",
-      "detail": "478 cm2 of surface >= 32"
+      "detail": "220 cm2 of surface >= 32"
     },
     {
-      "ok": false,
+      "ok": true,
       "message": "the space beside the prop is clear is clear",
-      "detail": "221 cm2 of surface <= 10"
+      "detail": "0 cm2 of surface <= 10"
     },
     {
       "ok": true,
@@ -163,7 +163,7 @@
     {
       "ok": true,
       "message": "the front render is a real image",
-      "detail": "204494 bytes"
+      "detail": "215617 bytes"
     }
   ]
 }
