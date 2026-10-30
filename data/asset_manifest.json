@@ -616,7 +616,7 @@
         "height": 9,
         "depth": 14.8
       },
-      "status": "gate:2-review-turnaround",
+      "status": "gate:2-rebuild-pixal3d",
       "pivot": {
         "convention": "head_socket_normalized",
         "origin": "the base opening: the crown's head-entry rim lies on the y=0 plane, centred on the hat's axis",
@@ -666,12 +666,12 @@
           {
             "label": "the space beside the prop is clear",
             "min_cm": [
-              -7.0,
+              -6.9,
               6.4,
               -3.9
             ],
             "max_cm": [
-              -5.1,
+              -5.0,
               8,
               10.9
             ],
@@ -686,19 +686,37 @@
         ],
         "closeup_fit": 0.06,
         "closeup_label": "The tweed crown and the copper brim wire",
-        "view_fit": 0.113,
+        "view_fit": 0.112,
         "dimension_tolerance_pct": 5,
         "rim_mesh": ""
       },
-      "build": null,
+      "measured": {
+        "triangles": 15992,
+        "bbox_min_cm": [
+          -6.9,
+          -1.0,
+          -3.9
+        ],
+        "bbox_max_cm": [
+          7.4,
+          8.0,
+          10.9
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 1193868
+      },
+      "build": "python scripts/run_pixal3d_mesh.py prop_sluice_flatcap --faces 16000",
       "validate": "node scripts/capture_prop_renders.mjs prop_sluice_flatcap",
       "reference_concept": "public/tex/props/flux3_prop_sluice_flatcap_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_sluice_flatcap_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_sluice_flatcap_turnaround.png",
       "turntable": "docs/props/prop_sluice_flatcap/turntable.webp",
-      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 15,992 triangles, 1,193,868 bytes, 22/24 capture checks. The checks that do not pass: the mesh is one surface, not a pile of shards; the mesh's seams are closed. The mesh measures 14.4 x 9 x 14.7 cm against a spec of 14.5 x 9 x 14.8 cm. The finding is recorded in the manifest and the tolerance is left at 5%.",
       "dimensions_note": "scale_dimensions_cm amended from 24.5 x 9 x 31.8 cm to 14.5 x 9 x 14.8 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
       "revision_requested_at": "2026-10-30T14:20:23+10:00",
+      "revision_published_at": "2026-10-30T14:34:59+10:00",
       "revision_note": "Revision requested on 2026-10-30T14:20:23+10:00: this looks full of bullet holes - the surface is speckled with dark facets, the same fault the nurse's cap has. It needs to be rebuilt.. The reconstruction is being rebuilt with seed 7777 from the same approved sheet.",
       "redo": {
         "stage": "mesh",
@@ -729,26 +747,7 @@
       "revision_seeds": [
         4242,
         7777
-      ],
-      "stand_in_measured": {
-        "triangles": 16000,
-        "bbox_min_cm": [
-          -7.0,
-          -1.0,
-          -3.9
-        ],
-        "bbox_max_cm": [
-          7.5,
-          8.0,
-          10.9
-        ],
-        "meshes": 1,
-        "materials": 1,
-        "embedded_images": 3,
-        "bytes": 1168804
-      },
-      "revision_seed": 7777,
-      "revision_claimed_at": "2026-10-30T14:22:12+10:00"
+      ]
     },
     {
       "id": "prop_kilnworth_nursecap",
@@ -841,7 +840,7 @@
       "validate": "node scripts/capture_prop_renders.mjs prop_kilnworth_nursecap",
       "reference_concept": "public/tex/props/flux3_kilnworth_nursecap_redo_art.png",
       "alpha_cutout": "public/tex/props/flux3_kilnworth_nursecap_redo_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_kilnworth_nursecap_turnaround_redo.png",
+      "turnaround_sheet": "public/tex/props/h3_kilnworth_nursecap_turnaround.png",
       "turntable": "docs/props/prop_kilnworth_nursecap/turntable.webp",
       "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 16,000 triangles, 987,304 bytes, 17/21 capture checks. The checks that do not pass: width matches the spec (18 cm +/- 5%); depth matches the spec (18 cm +/- 5%); the lower half of the prop carries the prop's surface is there; the upper half of the prop carries the prop's surface is there. The mesh measures 13.3 x 11.5 x 3.1 cm against a spec of 18 x 11.5 x 18 cm. The finding is recorded in the manifest and the tolerance is left at 5%.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.",
       "dimensions_note": "scale_dimensions_cm amended from 13.3 x 11.5 x 3.1 cm to 17 x 11.5 x 16.8 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
@@ -896,7 +895,8 @@
         "embedded_images": 3,
         "bytes": 985244
       },
-      "revision_seed": 31337
+      "revision_seed": 31337,
+      "revision_claimed_at": "2026-10-30T14:34:25+10:00"
     },
     {
       "id": "prop_mule_championship_belt",

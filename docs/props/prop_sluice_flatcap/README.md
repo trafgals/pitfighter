@@ -1,5 +1,13 @@
 # prop_sluice_flatcap
 
+
+> **This asset is held at a gate.** The capture it came from did not pass
+> every check, and the renders are here so the finding can be judged, not
+> because the asset is approved. The checks that did not pass:
+
+> - the mesh is one surface, not a pile of shards (4662 of 12438 vertices are duplicates of another vertex (37.5%))
+> - the mesh's seams are closed (8500 of 28238 edges are used by only one triangle (30.1%))
+
 The verification renders for this prop, produced by
 
 ```
