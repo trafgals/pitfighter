@@ -102,10 +102,24 @@ numbers are in a comment under the issue, with the render pictures in it.
    reconstruction is built from the turnaround sheet, so it should be the same
    prop in the same shape - a different silhouette, a missing part or a
    mirrored detail is a defect, not a style difference.
+
+   The renders are shown in the frame of the art the prop was built from, so
+   the two can be compared directly. A reconstruction is turned over before
+   it is conditioned on, so some meshes are stored the other way up from
+   their art and some are rolled: the capture turns the prop back into the
+   art's frame before it photographs it. If a render ever shows up the wrong
+   way round again, that is a defect in the capture, not a prop that has
+   wandered off the concept art.
+
+   The section 1 references are written from the manifest, which is the one
+   place that knows which art a prop was built from. A prop whose art was
+   redone has two sets of references, and the issue shows the current one.
 3. **Read the checks.** `report.json` lists every check the capture ran and
    whether it passed. The ones that matter to a reviewer are the dimensions
-   against the spec, the triangle and byte budgets, and the validation boxes
-   that hold the prop's business end in frame.
+   against the spec, the triangle and byte budgets, the validation boxes
+   that hold the prop's business end in frame, and the check that the render
+   still matches the art - the model's silhouette against the front tile of
+   the sheet it was built from, and against that tile turned over.
 4. **Decide.**
 
 ### The two things a reviewer can say
