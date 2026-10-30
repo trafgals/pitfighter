@@ -1,80 +1,88 @@
 {
   "asset": "prop_kilnworth_nursecap",
   "model": "public/models/props/prop_kilnworth_nursecap.glb",
-  "capturedAt": "2026-10-30T02:21:07.725Z",
+  "capturedAt": "2026-10-30T04:44:15.612Z",
   "budget": {
     "triangles": 20000,
     "bytes": 1572864,
     "dimensionsCm": {
-      "width": 17,
+      "width": 13.3,
       "height": 11.5,
-      "depth": 16.8
+      "depth": 3.2
     }
   },
-  "triangles": 15994,
-  "bytes": 985244,
+  "triangles": 15998,
+  "bytes": 934340,
   "dimensionsCm": {
-    "width": 17.1,
+    "width": 13.3,
     "height": 11.5,
-    "depth": 16.8
+    "depth": 3.2
   },
   "bbox": {
     "min": [
-      -0.08545015007257462,
+      -0.06651519238948822,
       0,
-      -0.08423678576946259
+      -0.01580060087144375
     ],
     "max": [
-      0.08545015007257462,
+      0.06651519238948822,
       0.11500000208616257,
-      0.08423678576946259
+      0.01580060087144375
     ]
   },
   "meshes": [
     {
       "name": "mesh_0",
-      "triangles": 15994,
+      "triangles": 15998,
       "material": 0
     }
   ],
   "materials": [
     "(unnamed)"
   ],
+  "topology": {
+    "vertices": 11699,
+    "faces": 15998,
+    "duplicateVertices": 3700,
+    "boundaryEdges": 7004,
+    "edges": 27499,
+    "invertedFaces": 2
+  },
   "renders": [
     {
       "view": "front",
       "label": "Front (0deg, +Z to camera)",
       "file": "test-output/props/prop_kilnworth_nursecap/front.png",
-      "bytes": 255935
+      "bytes": 389007
     },
     {
       "view": "profile",
       "label": "Profile (90deg, right side)",
       "file": "test-output/props/prop_kilnworth_nursecap/profile.png",
-      "bytes": 228209
+      "bytes": 113101
     },
     {
       "view": "badge",
       "label": "The crimson Geneva cross on the linen crown",
       "file": "test-output/props/prop_kilnworth_nursecap/badge.png",
-      "bytes": 665445
+      "bytes": 737899
     }
   ],
   "checks": [
     {
       "ok": true,
       "message": "the model has triangles",
-      "detail": "15994"
+      "detail": "15998"
     },
     {
       "ok": true,
       "message": "triangle count is under budget",
-      "detail": "15994 < 20000"
+      "detail": "15998 < 20000"
     },
     {
       "ok": true,
       "message": "file size is within budget",
-      "detail": "0.940 MB <= 1.5 MB"
+      "detail": "0.891 MB <= 1.5 MB"
     },
     {
       "ok": true,
@@ -87,9 +95,19 @@
       "detail": "0"
     },
     {
+      "ok": false,
+      "message": "the mesh is one surface, not a pile of shards",
+      "detail": "3700 of 11699 vertices are duplicates of another vertex (31.6%)"
+    },
+    {
+      "ok": false,
+      "message": "the mesh's seams are closed",
+      "detail": "7004 of 27499 edges are used by only one triangle (25.5%)"
+    },
+    {
       "ok": true,
-      "message": "width matches the spec (17 cm +/- 5%)",
-      "detail": "17.1 cm"
+      "message": "width matches the spec (13.3 cm +/- 5%)",
+      "detail": "13.3 cm"
     },
     {
       "ok": true,
@@ -98,8 +116,8 @@
     },
     {
       "ok": true,
-      "message": "depth matches the spec (16.8 cm +/- 5%)",
-      "detail": "16.8 cm"
+      "message": "depth matches the spec (3.2 cm +/- 5%)",
+      "detail": "3.2 cm"
     },
     {
       "ok": true,
@@ -124,12 +142,12 @@
     {
       "ok": true,
       "message": "the lower half of the prop carries the prop's surface is there",
-      "detail": "29 cm2 of surface >= 4"
+      "detail": "9 cm2 of surface >= 4"
     },
     {
       "ok": true,
       "message": "the upper half of the prop carries the prop's surface is there",
-      "detail": "33 cm2 of surface >= 4"
+      "detail": "9 cm2 of surface >= 4"
     },
     {
       "ok": true,
@@ -154,12 +172,12 @@
     {
       "ok": true,
       "message": "the renderer sees the same triangle count as the file",
-      "detail": "15994 vs 15994"
+      "detail": "15998 vs 15998"
     },
     {
       "ok": true,
       "message": "the published render still matches the approved art",
-      "detail": "IoU 0.825 against the sheet's front view, 0.71 the wrong way up"
+      "detail": "IoU 0.984 against the sheet's front view, 0.662 the wrong way up"
     },
     {
       "ok": true,
@@ -168,7 +186,7 @@
     {
       "ok": true,
       "message": "the front render is a real image",
-      "detail": "255935 bytes"
+      "detail": "389007 bytes"
     }
   ]
 }

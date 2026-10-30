@@ -5,10 +5,8 @@
 > every check, and the renders are here so the finding can be judged, not
 > because the asset is approved. The checks that did not pass:
 
-> - width matches the spec (18 cm +/- 5%) (13.3 cm)
-> - depth matches the spec (18 cm +/- 5%) (3.1 cm)
-> - the lower half of the prop carries the prop's surface is there (0 cm2 of surface >= 4)
-> - the upper half of the prop carries the prop's surface is there (0 cm2 of surface >= 4)
+> - the mesh is one surface, not a pile of shards (3700 of 11699 vertices are duplicates of another vertex (31.6%))
+> - the mesh's seams are closed (7004 of 27499 edges are used by only one triangle (25.5%))
 
 The verification renders for this prop, produced by
 

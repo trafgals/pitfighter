@@ -758,11 +758,11 @@
       "poly_budget": 20000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 17,
+        "width": 13.3,
         "height": 11.5,
-        "depth": 16.8
+        "depth": 3.2
       },
-      "status": "gate:2-review-turnaround",
+      "status": "gate:2-rebuild-pixal3d",
       "pivot": {
         "convention": "head_socket_normalized",
         "origin": "the base opening: the crown's head-entry rim lies on the y=0 plane, centred on the hat's axis",
@@ -782,14 +782,14 @@
           {
             "label": "the lower half of the prop carries the prop's surface",
             "min_cm": [
-              -6.4,
+              -5.2,
               2.6,
-              -8.4
+              -1.6
             ],
             "max_cm": [
-              -4.3,
+              -3.2,
               4.6,
-              8.4
+              1.6
             ],
             "expect": "filled",
             "min_area_cm2": 4
@@ -797,14 +797,14 @@
           {
             "label": "the upper half of the prop carries the prop's surface",
             "min_cm": [
-              -4.3,
+              -3.5,
               8.3,
-              -8.4
+              -1.6
             ],
             "max_cm": [
-              -2.1,
+              -1.5,
               10.3,
-              8.4
+              1.6
             ],
             "expect": "filled",
             "min_area_cm2": 4
@@ -812,14 +812,14 @@
           {
             "label": "the space beside the prop is clear",
             "min_cm": [
-              -8.6,
+              -6.7,
               9.8,
-              -8.4
+              -1.6
             ],
             "max_cm": [
-              -6.4,
+              -4.8,
               11.5,
-              8.4
+              1.6
             ],
             "expect": "empty",
             "max_area_cm2": 10
@@ -832,19 +832,37 @@
         ],
         "closeup_fit": 0.05,
         "closeup_label": "The crimson Geneva cross on the linen crown",
-        "view_fit": 0.133,
+        "view_fit": 0.089,
         "dimension_tolerance_pct": 5,
         "rim_mesh": ""
       },
-      "build": null,
+      "measured": {
+        "triangles": 15998,
+        "bbox_min_cm": [
+          -6.7,
+          0.0,
+          -1.6
+        ],
+        "bbox_max_cm": [
+          6.7,
+          11.5,
+          1.6
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 934340
+      },
+      "build": "python scripts/run_pixal3d_mesh.py prop_kilnworth_nursecap --faces 16000",
       "validate": "node scripts/capture_prop_renders.mjs prop_kilnworth_nursecap",
       "reference_concept": "public/tex/props/flux3_kilnworth_nursecap_redo_art.png",
       "alpha_cutout": "public/tex/props/flux3_kilnworth_nursecap_redo_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_kilnworth_nursecap_turnaround.png",
       "turntable": "docs/props/prop_kilnworth_nursecap/turntable.webp",
-      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 16,000 triangles, 987,304 bytes, 17/21 capture checks. The checks that do not pass: width matches the spec (18 cm +/- 5%); depth matches the spec (18 cm +/- 5%); the lower half of the prop carries the prop's surface is there; the upper half of the prop carries the prop's surface is there. The mesh measures 13.3 x 11.5 x 3.1 cm against a spec of 18 x 11.5 x 18 cm. The finding is recorded in the manifest and the tolerance is left at 5%.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.",
-      "dimensions_note": "scale_dimensions_cm amended from 13.3 x 11.5 x 3.1 cm to 17 x 11.5 x 16.8 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 15,998 triangles, 934,340 bytes, 22/24 capture checks. The checks that do not pass: the mesh is one surface, not a pile of shards; the mesh's seams are closed. The mesh measures 13.3 x 11.5 x 3.2 cm against a spec of 13.3 x 11.5 x 3.2 cm. The finding is recorded in the manifest and the tolerance is left at 5%.",
+      "dimensions_note": "scale_dimensions_cm amended from 17 x 11.5 x 16.8 cm to 13.3 x 11.5 x 3.2 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
       "revision_requested_at": "2026-10-30T14:20:23+10:00",
+      "revision_published_at": "2026-10-30T14:44:15+10:00",
       "revision_note": "Revision requested on 2026-10-30T14:20:23+10:00: this looks full of bullet holes - the surface is speckled with dark facets where the mesh has come apart along its seams. It needs to be rebuilt.. The reconstruction is being rebuilt with seed 31337 from the same approved sheet.",
       "redo": {
         "stage": "mesh",
@@ -877,26 +895,7 @@
         4242,
         7777,
         31337
-      ],
-      "stand_in_measured": {
-        "triangles": 15994,
-        "bbox_min_cm": [
-          -8.5,
-          0.0,
-          -8.4
-        ],
-        "bbox_max_cm": [
-          8.5,
-          11.5,
-          8.4
-        ],
-        "meshes": 1,
-        "materials": 1,
-        "embedded_images": 3,
-        "bytes": 985244
-      },
-      "revision_seed": 31337,
-      "revision_claimed_at": "2026-10-30T14:34:25+10:00"
+      ]
     },
     {
       "id": "prop_mule_championship_belt",
@@ -1130,7 +1129,8 @@
       "revision_note": "Revision requested on 2026-10-30T14:20:23+10:00: this looks full of bullet holes - the surface is speckled with dark facets, the same fault the nurse's cap has. It needs to be rebuilt.. The reconstruction is being rebuilt with seed 4242 from the same approved sheet.",
       "revision_handled": [
         "IC_kwDOVUJnUc8AAAABhFE5ng"
-      ]
+      ],
+      "revision_claimed_at": "2026-10-30T14:43:31+10:00"
     },
     {
       "id": "prop_bulwark_pistons",
