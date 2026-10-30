@@ -2431,7 +2431,7 @@
     {
       "id": "prop_winch_gold_nightstick",
       "name": "Gold Engraved Mechanical Nightstick",
-      "character": "Obadiah Winch",
+      "character": "Constable Obadiah Winch",
       "category": "weapon",
       "slot": "hand_socket",
       "poly_budget": 16000,

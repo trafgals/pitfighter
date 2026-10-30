@@ -95,6 +95,12 @@ PLACEMENT = {
         # points along the arm
         "bone": "hand", "offset": [0, -0.3, 0], "turn": [3.1416, 0, 0], "scale": 1,
     },
+    "prop_winch_gold_nightstick": {
+        "kind": "wielded", "fighter": "constable-winch", "gear": "",
+        # the heavy head of the nightstick stands up out of the grip, and it
+        # points along the arm
+        "bone": "hand", "offset": [0, -0.3, 0], "turn": [3.1416, 0, 0], "scale": 1,
+    },
     "weapon_knuckleduster": {
         "kind": "gift", "fighter": "", "gear": "",
         "throw": "knuckleduster",
@@ -113,6 +119,37 @@ PLACEMENT = {
         "throw": "piston-gauntlet",
         # the drill points up and forward out of the fist
         "bone": "hand", "offset": [0, -0.26, 0], "turn": [0, 0, 2.3562], "scale": 1,
+    },
+    "weapon_coal_shovel": {
+        "kind": "gift", "fighter": "", "gear": "",
+        "throw": "coal-shovel",
+        # a hand holds a shovel by its D-handle, so the handle is in the fist
+        # and the blade leads: the shovel's origin is halfway up the shaft, so
+        # the offset is the length of the shaft above the grip as well
+        "bone": "hand", "offset": [0, -0.8, 0], "turn": [0, 0, 0], "scale": 1,
+    },
+    "weapon_cleaver": {
+        "kind": "gift", "fighter": "", "gear": "",
+        "throw": "cleaver",
+        # the blade runs up out of the handle, and it points along the arm; the
+        # mesh was rolled 42.8 degrees because the approved art is drawn on the
+        # diagonal, so the roll is undone before it is held
+        "bone": "hand", "offset": [0, -0.3, 0], "turn": [3.1416, 0, -0.747], "scale": 1,
+    },
+    "weapon_chair": {
+        "kind": "gift", "fighter": "", "gear": "",
+        "throw": "chair",
+        # a chair is held by the top of its back, so the seat leads and the
+        # chair hangs out in front: the chair's origin is at the seat, so the
+        # offset is the height of the back above the grip as well. The chair is
+        # half a metre across, so it is held clear of the arm that holds it.
+        "bone": "hand", "offset": [0.25, -0.755, 0], "turn": [0, 0, 0], "scale": 1,
+    },
+    "pickup_tonic": {
+        "kind": "gift", "fighter": "", "gear": "",
+        "throw": "tonic",
+        # a bottle is held by its body, and the neck leads so it can be drunk
+        "bone": "hand", "offset": [0, -0.3, 0], "turn": [3.1416, 0, 0], "scale": 1,
     },
 }
 

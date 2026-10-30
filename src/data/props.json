@@ -1,6 +1,27 @@
 {
   "props": [
     {
+      "id": "pickup_tonic",
+      "name": "Bottle of Tincture",
+      "kind": "gift",
+      "fighter": "",
+      "gear": "",
+      "throw": "tonic",
+      "url": "/public/models/props/pickup_tonic.glb",
+      "bone": "hand",
+      "offset": [
+        0,
+        -0.3,
+        0
+      ],
+      "turn": [
+        3.1416,
+        0,
+        0
+      ],
+      "scale": 1
+    },
+    {
       "id": "prop_bulwark_pistons",
       "name": "Hydraulic Arm Rams & Gauges",
       "kind": "gear",
@@ -148,6 +169,27 @@
       "scale": 1.55
     },
     {
+      "id": "prop_winch_gold_nightstick",
+      "name": "Gold Engraved Mechanical Nightstick",
+      "kind": "wielded",
+      "fighter": "constable-winch",
+      "gear": "",
+      "throw": "",
+      "url": "/public/models/props/prop_winch_gold_nightstick.glb",
+      "bone": "hand",
+      "offset": [
+        0,
+        -0.3,
+        0
+      ],
+      "turn": [
+        3.1416,
+        0,
+        0
+      ],
+      "scale": 1
+    },
+    {
       "id": "weapon_bone_saw",
       "name": "Surgeon's Bone Saw",
       "kind": "gift",
@@ -163,6 +205,69 @@
       ],
       "turn": [
         3.1416,
+        0,
+        0
+      ],
+      "scale": 1
+    },
+    {
+      "id": "weapon_chair",
+      "name": "Private Box Chair",
+      "kind": "gift",
+      "fighter": "",
+      "gear": "",
+      "throw": "chair",
+      "url": "/public/models/props/weapon_chair.glb",
+      "bone": "hand",
+      "offset": [
+        0.25,
+        -0.755,
+        0
+      ],
+      "turn": [
+        0,
+        0,
+        0
+      ],
+      "scale": 1
+    },
+    {
+      "id": "weapon_cleaver",
+      "name": "Butcher's Cleaver",
+      "kind": "gift",
+      "fighter": "",
+      "gear": "",
+      "throw": "cleaver",
+      "url": "/public/models/props/weapon_cleaver.glb",
+      "bone": "hand",
+      "offset": [
+        0,
+        -0.3,
+        0
+      ],
+      "turn": [
+        3.1416,
+        0,
+        -0.747
+      ],
+      "scale": 1
+    },
+    {
+      "id": "weapon_coal_shovel",
+      "name": "Stoker's Shovel",
+      "kind": "gift",
+      "fighter": "",
+      "gear": "",
+      "throw": "coal-shovel",
+      "url": "/public/models/props/weapon_coal_shovel.glb",
+      "bone": "hand",
+      "offset": [
+        0,
+        -0.8,
+        0
+      ],
+      "turn": [
+        0,
         0,
         0
       ],
