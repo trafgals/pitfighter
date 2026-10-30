@@ -1,7 +1,7 @@
 {
   "asset": "weapon_lamplighter_pole",
   "model": "public/models/props/weapon_lamplighter_pole.glb",
-  "capturedAt": "2026-10-29T06:33:08.332Z",
+  "capturedAt": "2026-10-30T02:21:23.347Z",
   "budget": {
     "triangles": 20000,
     "bytes": 1572864,
@@ -155,6 +155,11 @@
       "ok": true,
       "message": "the renderer sees the same triangle count as the file",
       "detail": "16000 vs 16000"
+    },
+    {
+      "ok": true,
+      "message": "the published render still matches the approved art",
+      "detail": "IoU 0.816 against the sheet's front view, 0.508 the wrong way up"
     },
     {
       "ok": true,

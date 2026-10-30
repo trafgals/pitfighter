@@ -1,7 +1,7 @@
 {
   "asset": "weapon_chair",
   "model": "public/models/props/weapon_chair.glb",
-  "capturedAt": "2026-10-30T00:45:28.021Z",
+  "capturedAt": "2026-10-30T02:28:45.482Z",
   "budget": {
     "triangles": 25000,
     "bytes": 1572864,
@@ -55,7 +55,7 @@
     },
     {
       "view": "badge",
-      "label": "Tufted crimson velvet backrest close-up",
+      "label": "The buttoned leather backrest close-up",
       "file": "test-output/props/weapon_chair/badge.png",
       "bytes": 474096
     }
@@ -155,6 +155,11 @@
       "ok": true,
       "message": "the renderer sees the same triangle count as the file",
       "detail": "20000 vs 20000"
+    },
+    {
+      "ok": true,
+      "message": "the published render still matches the approved art",
+      "detail": "IoU 0.883 against the sheet's front view, 0.536 the wrong way up"
     },
     {
       "ok": true,

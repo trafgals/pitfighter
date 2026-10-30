@@ -1,7 +1,7 @@
 {
   "asset": "prop_smelt_stovepipe",
   "model": "public/models/props/prop_smelt_stovepipe.glb",
-  "capturedAt": "2026-10-27T06:50:51.888Z",
+  "capturedAt": "2026-10-30T02:21:30.891Z",
   "budget": {
     "triangles": 35000,
     "bytes": 1572864,
@@ -81,7 +81,7 @@
   "renders": [
     {
       "view": "front",
-      "label": "Front (0deg, badge to camera)",
+      "label": "Front (0deg, +Z to camera)",
       "file": "test-output/props/prop_smelt_stovepipe/front.png",
       "bytes": 456931
     },

@@ -1,7 +1,7 @@
 {
   "asset": "weapon_piston_gauntlet",
   "model": "public/models/props/weapon_piston_gauntlet.glb",
-  "capturedAt": "2026-10-29T04:08:41.279Z",
+  "capturedAt": "2026-10-30T02:20:44.851Z",
   "budget": {
     "triangles": 25000,
     "bytes": 1572864,
@@ -45,19 +45,19 @@
       "view": "front",
       "label": "Front (0deg, +Z to camera)",
       "file": "test-output/props/weapon_piston_gauntlet/front.png",
-      "bytes": 238518
+      "bytes": 243055
     },
     {
       "view": "profile",
       "label": "Profile (90deg, right side)",
       "file": "test-output/props/weapon_piston_gauntlet/profile.png",
-      "bytes": 146765
+      "bytes": 152187
     },
     {
       "view": "badge",
       "label": "The piston stack and its valve gear",
       "file": "test-output/props/weapon_piston_gauntlet/badge.png",
-      "bytes": 487097
+      "bytes": 483839
     }
   ],
   "checks": [
@@ -158,12 +158,17 @@
     },
     {
       "ok": true,
+      "message": "the published render still matches the approved art",
+      "detail": "IoU 0.816 against the sheet's front view, 0.665 the wrong way up"
+    },
+    {
+      "ok": true,
       "message": "every verification render has real content"
     },
     {
       "ok": true,
       "message": "the front render is a real image",
-      "detail": "238518 bytes"
+      "detail": "243055 bytes"
     }
   ]
 }

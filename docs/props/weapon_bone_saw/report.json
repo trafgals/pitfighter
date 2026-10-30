@@ -1,7 +1,7 @@
 {
   "asset": "weapon_bone_saw",
   "model": "public/models/props/weapon_bone_saw.glb",
-  "capturedAt": "2026-10-29T03:42:03.117Z",
+  "capturedAt": "2026-10-30T02:20:41.529Z",
   "budget": {
     "triangles": 18000,
     "bytes": 1572864,
@@ -45,19 +45,19 @@
       "view": "front",
       "label": "Front (0deg, +Z to camera)",
       "file": "test-output/props/weapon_bone_saw/front.png",
-      "bytes": 217343
+      "bytes": 213362
     },
     {
       "view": "profile",
       "label": "Profile (90deg, right side)",
       "file": "test-output/props/weapon_bone_saw/profile.png",
-      "bytes": 101112
+      "bytes": 104152
     },
     {
       "view": "badge",
       "label": "The turned handle and its brass ferrule",
       "file": "test-output/props/weapon_bone_saw/badge.png",
-      "bytes": 536800
+      "bytes": 519444
     }
   ],
   "checks": [
@@ -158,12 +158,17 @@
     },
     {
       "ok": true,
+      "message": "the published render still matches the approved art",
+      "detail": "IoU 0.871 against the sheet's front view, 0.155 the wrong way up"
+    },
+    {
+      "ok": true,
       "message": "every verification render has real content"
     },
     {
       "ok": true,
       "message": "the front render is a real image",
-      "detail": "217343 bytes"
+      "detail": "213362 bytes"
     }
   ]
 }

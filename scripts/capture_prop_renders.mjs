@@ -131,6 +131,10 @@ if (!modelPath) {
   process.exit(2);
 }
 const modelFile = path.relative(ROOT, modelPath).split(path.sep).join("/");
+// The turnaround sheet the prop was built from, served with the page so the
+// render can be compared with the art it is meant to reproduce.
+const sheetFile = entry?.turnaround_sheet ? String(entry.turnaround_sheet).replace(/^public\//, "") : "";
+const sheetUrl = sheetFile ? `/${sheetFile}` : "";
 
 let server = null;
 let browser = null;
@@ -437,13 +441,18 @@ async function main() {
   const url =
     `http://127.0.0.1:${PORT}/tools/prop-capture/capture.html?model=/${modelFile.replace(/^public\//, "")}` +
     `&width=${WIDTH}&height=${HEIGHT}&fit=${viewFit}&closeupFit=${closeupFit}` +
-    `&closeup=${encodeURIComponent(closeupFocus)}`;
+    `&closeup=${encodeURIComponent(closeupFocus)}` +
+    // The prop is shown in the frame of the art it was built from, and the
+    // sheet is handed over so the render can be compared with it.
+    `&flip=${frame?.upside_down ? 1 : 0}&roll=${frame?.roll_deg ?? 0}` +
+    `&sheet=${encodeURIComponent(sheetUrl)}`;
   await page.goto(url, { waitUntil: "load" });
   await page.waitForFunction(() => window.__propCapture && window.__propCapture.ready, { timeout: 60_000, polling: "raf" });
 
   const pageStats = await page.evaluate(() => ({
     stats: window.__propCapture.stats,
     errors: window.__propCapture.errors,
+    fidelity: window.__propCapture.fidelity,
   }));
   check(missing.length === 0, "every asset the page asked for was served", missing.join("; "));
   // "Failed to load resource" lines are covered by the response check above;
@@ -459,6 +468,29 @@ async function main() {
     "the renderer sees the same triangle count as the file",
     `${pageStats.stats?.triangles} vs ${report.triangles}`,
   );
+
+  // Does the model still look like the approved art?
+  //
+  // The render is compared with the front tile of the sheet the prop was
+  // built from, and with that tile turned over. A prop that is published the
+  // wrong way up scores better the other way round, and that is the failure
+  // a reviewer sees first and cannot account for: the model looks nothing
+  // like the concept art and nothing in the report says why.
+  //
+  // The margin is wide because some props are drawn on the diagonal, and a
+  // diagonal drawing and a standing model are not the same shape however
+  // faithfully the model was made. What the check is for is the inversion,
+  // which is not a matter of taste.
+  const fidelity = pageStats.fidelity;
+  if (fidelity) {
+    check(
+      fidelity.straight >= fidelity.flipped - 0.15,
+      "the published render still matches the approved art",
+      `IoU ${fidelity.straight} against the sheet's front view, ${fidelity.flipped} the wrong way up`,
+    );
+  } else {
+    console.log("  (no turnaround sheet to compare the render against: the fidelity check does not apply)");
+  }
 
   const rendered = [];
   const canvas = await page.$("#view");
