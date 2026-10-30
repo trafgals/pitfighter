@@ -311,7 +311,7 @@ export function ragdoll(b: Body, f: Fighter, tp: Target, dt: number, from: Fight
   });
 
   // the floor, in the root's frame: under it by the body's height in the air
-  const floorY = airborne(f.state) ? -f.z : 0;
+  const floorY = airborne(f.state) || f.z > 0 ? -f.z : 0;
   if (!airborne(f.state)) r.fly = null;
   if (f.stop === 0) {
     if (airborne(f.state)) jolt(b, r, f, dt);

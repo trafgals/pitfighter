@@ -84,3 +84,33 @@ describe("the human missile", () => {
     expect(c.state).not.toBe("down");
   });
 });
+
+describe("wall-splat and wall grapples", () => {
+  it("a body flung fast into the outer perimeter wall enters wallsplat and can be wall-grappled", () => {
+    const w = world();
+    const [a, b] = w.fighters;
+    Object.assign(b, { state: "thrown", t: 0, dur: 24, x: 0.9, y: 0, z: 0.5, vz: 0, slideX: -0.18, slideY: 0, partner: 0, moveHits: [0] });
+    let splat;
+    for (let i = 0; i < 10 && !splat; i++) {
+      w.step(idle(2));
+      splat = w.s.events.find((e) => e.kind === "wallsplat" && e.a === 1);
+    }
+    expect(splat).toBeTruthy();
+    expect(b.state).toBe("wallsplat");
+    expect(b.z).toBeGreaterThan(0);
+
+    // Attacker steps up and presses Triangle (GRAB) on the wall-splatted victim
+    b.stop = 0;
+    Object.assign(a, { x: b.x + 0.85, y: b.y, facing: Math.PI });
+    const hpBefore = b.parts.torso.hp;
+    w.step([{ x: 0, y: 0, buttons: 4 }, { x: 0, y: 0, buttons: 0 }]); // BTN.GRAB = 4
+    let wallThrow;
+    for (let i = 0; i < 15 && !wallThrow; i++) {
+      w.step(idle(2));
+      wallThrow = w.s.events.find((e) => e.kind === "throw" && e.a === 0);
+    }
+    expect(wallThrow).toBeTruthy();
+    expect(wallThrow!.what).toBeTruthy();
+    expect(b.parts.torso.hp).toBeLessThan(hpBefore);
+  });
+});

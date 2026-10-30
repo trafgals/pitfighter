@@ -74,6 +74,7 @@ export type FighterState =
   | "air" // launched: floating, juggled, steering with the stick until the floor
   | "airslam" // an air grab: carrying the victim down
   | "airslammed"
+  | "wallsplat" // slammed into the outer wall: sticks briefly, hittable before falling to down
   | "down"
   | "wakeup"
   | "dizzy"
@@ -95,9 +96,13 @@ export interface Fighter {
   facing: number; // radians, 0 = +x
   slideX: number; // knockback velocity (m/frame), decays
   slideY: number;
+  velX: number; // locomotion velocity (m/frame), ramps with mass and skids on stop
+  velY: number;
   dirX: number; // the direction of a dash or an evade (unit)
   dirY: number;
   running: boolean; // Cross held while moving
+  aimPart: "head" | "torso" | "legs" | null; // R1 + direction regional strike target
+  lastBigBlow: number; // frame this fighter last landed a knockdown, launch, throw, air grab or special
   z: number; // height above the floor (m): only a launched body leaves it
   vz: number; // m/frame, up +
   juggle: number; // hits taken in the air since the launch: the more, the harder the victim can steer
@@ -234,7 +239,10 @@ export interface GameEvent {
     | "launch" // a launcher sends a fighter up
     | "bounce" // a juggled body bounces off the floor
     | "airgrab" // caught out of the air (what: the grab's name)
-    | "crunch"; // a flying body hits a wall, a prop or another fighter
+    | "crunch" // a flying body hits a wall, a prop or another fighter
+    | "wallsplat" // a flying body sticks to the outer wall
+    | "counter" // a strike caught the victim during attack startup
+    | "appeal"; // the Gallery answers a well-earned taunt with a gift
   a: number; // actor
   b?: number; // other party
   part?: PartId;

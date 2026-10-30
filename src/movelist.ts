@@ -5,6 +5,7 @@
 import type { AirGrabEnd } from "./sim/airgrabs";
 import type { LimbTrait } from "./sim/limbs";
 import { FLOW, MOVES, STRING_STARTS } from "./sim/moves";
+import { CHARACTERS } from "./data/characters";
 import { STYLES } from "./sim/styles";
 import { LIMBS, type Fighter, type PartId } from "./sim/types";
 import { World } from "./sim/world";
@@ -88,6 +89,6 @@ export function moveSheet(w: World, f: Fighter): MoveSheet {
     kicks: chain(w, f, STRING_STARTS.low).map((id) => row(w, f, id, "back ○")),
     extras: [row(w, f, "dashStrike", "✕ then ○"), row(w, f, st.special, "○ + △")],
     airGrab: { name: grab.name, dmg: grab.dmg, end: ENDS[grab.end] },
-    flow: `Mid-string, a landed punch flows into the kicks (back ○) and a landed kick into the punches (○), ${FLOW.max} times a combo. The same limb twice running is ${FLOW.same} frames slower.`,
+    flow: `Mid-string, a landed punch flows into the kicks (back ○) and a landed kick into the punches (○), ${FLOW.max} times a combo. Hold R1 + ↑/•/↓ + ○ to aim at Head, Torso, or Legs. △ on a downed or wall-splatted foe triggers ${CHARACTERS[f.style]?.moves.ground.name ?? "Ground Grapple"} / ${CHARACTERS[f.style]?.moves.wall.name ?? "Wall Grapple"}; L2 after a big blow appeals for ${CHARACTERS[f.style]?.moves.appeal.gift ?? "a Gallery Gift"}.`,
   };
 }

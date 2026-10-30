@@ -77,6 +77,7 @@ window.addEventListener("keydown", (e) => {
   if (e.code === "BracketLeft") select.cycleType(-1);
   if (e.code === "BracketRight") select.cycleType(1);
   if (e.code === "KeyP") select.setPractice(!select.practice);
+  if (e.code === "Slash") select.toggleHelp();
   if (e.code === "KeyG") {
     scene.gore = !scene.gore;
     select.setGore(scene.gore);
@@ -103,6 +104,7 @@ function attract(): void {
   scene.setInset(0);
   cues.reset();
   acc = 0;
+  select.setAttract(styles);
 }
 
 // ?lab=1: the feel lab (src/lab/): dials over the numbers that make the feel, and takes to replay under them

@@ -68,7 +68,8 @@ export const SPECIAL_CHORD = 3;
 // Hitstop: a landed hit freezes the attacker and the victim for a few frames
 // (both by the same amount, so frame advantage is unchanged). Pitfighter's
 // own feel layer: the calibration tests switch it off to compare raw timings.
-export const HITSTOP = { base: 3, perDmg: 0.5, knock: 3, max: 12, block: 3, reversal: 10, grab: 3, throw: 6, ko: 16 };
+export const HITSTOP = { base: 3, perDmg: 0.5, knock: 3, counter: 4, max: 12, block: 3, reversal: 10, grab: 3, throw: 6, ko: 16 };
+export const COUNTER = { dmg: 1.2, stun: 1.25, backStun: 1.2 };
 export function hitstopFor(dmg: number, knockdown: boolean): number {
   return Math.min(HITSTOP.max, Math.round(HITSTOP.base + dmg * HITSTOP.perDmg) + (knockdown ? HITSTOP.knock : 0));
 }
@@ -114,7 +115,7 @@ export const REGROW_FRAMES = 720;
 export const SIT_FRAMES = 20;
 export const GEYSER = { warn: 60, erupt: 20, radius: 1.3, dmg: 10, minGap: 240, maxGap: 420 };
 export const LAVA = { tick: 10, dmg: 2 };
-export const SPEED = { walk: 0.05, run: 0.1, hop: 0.045, bounce: 0.03 };
+export const SPEED = { walk: 0.05, run: 0.1, hop: 0.045, bounce: 0.03, accel: 0.35, skid: 0.72, runTurn: 0.22, track: 0.12 };
 // Cross: a dash covers about 1.6 m in its first `move` frames, then eases into
 // a run if the button is still held. Square with a direction: Urban Reign's
 // evade, a 34 frame sidestep (its decoded record) that nothing touches over the
@@ -148,5 +149,5 @@ export const AIR = { launch: 0.062, pop: 0.034, maxPops: 8, g: 0.0018, steer: 0.
 // `hitstun` (a staggered body) or `down` (a knocked-down one) metres a frame,
 // and a sliding body keeps `friction` of its speed every frame, so it travels
 // about push / (divisor * (1 - friction)) in all.
-export const KNOCK = { hitstun: 8, down: 12, friction: 0.85 };
-export const CRUNCH = { speed: 0.05, dmg: 90, rebound: 0.45, knock: 0.06 };
+export const KNOCK = { hitstun: 8, down: 12, friction: 0.85, lift: 0.024, bounce: 0.25 };
+export const CRUNCH = { speed: 0.05, dmg: 90, rebound: 0.45, knock: 0.06, wallSplat: 0.065, splatDur: 28 };

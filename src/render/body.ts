@@ -847,6 +847,19 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
     case "thrown":
       play(THROWN, t, stateTiming(f.dur || 24));
       break;
+    case "wallsplat":
+      plant = "none";
+      p.y = -0.05;
+      p.spineX = -0.32;
+      p.headX = 0.25;
+      p.armL = [-1.4, 0, 1.1];
+      p.armR = [-1.4, 0, -1.1];
+      p.elbowL = p.elbowR = -0.35;
+      p.legL = [0.15, 0.18];
+      p.legR = [0.15, -0.18];
+      p.kneeL = p.kneeR = 0.45;
+      label = "wallsplat";
+      break;
     case "air":
     case "airslammed": {
       // up in a juggle (or carried in an air grab): the throw's flight, by how far through the flight the body is, so it
@@ -952,6 +965,10 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
     const a = lookAngle(f, w);
     p.headY += a * 0.55;
     p.spineY += a * 0.3;
+    const fwdVel = (f.velX ?? 0) * Math.cos(f.facing) + (f.velY ?? 0) * Math.sin(f.facing);
+    const latVel = -(f.velX ?? 0) * Math.sin(f.facing) + (f.velY ?? 0) * Math.cos(f.facing);
+    p.spineX += Math.max(-0.18, Math.min(0.18, fwdVel * 1.4));
+    p.spineZ += Math.max(-0.16, Math.min(0.16, -latVel * 1.4));
   }
 
   // one leg: hop; no legs: bounce along on the torso

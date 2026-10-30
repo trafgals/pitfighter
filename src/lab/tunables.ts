@@ -5,7 +5,7 @@
 //
 // Changing a sim number changes what a recorded take does when it replays:
 // that is the point of the lab, which replays one take under two presets.
-import { AIR, CRUNCH, DASH, EVADE, HITSTOP, KNOCK, SPEED } from "../sim/moves";
+import { AIR, COUNTER, CRUNCH, DASH, EVADE, HITSTOP, KNOCK, SPEED } from "../sim/moves";
 import { CAMERA } from "../render/camera";
 import { SLOW_FINAL, SLOW_KO } from "../render/impact";
 
@@ -47,19 +47,31 @@ export const TUNABLES: Tunable[] = [
     ["base", "every hit", 0, 10, 1],
     ["perDmg", "per point of damage", 0, 2, 0.05],
     ["knock", "extra on a knockdown", 0, 12, 1],
+    ["counter", "extra on a counter-hit", 0, 14, 1],
     ["max", "cap", 0, 30, 1],
     ["reversal", "reversal", 0, 30, 1],
     ["throw", "throw", 0, 20, 1],
     ["ko", "KO", 0, 40, 1],
   ]),
+  ...group("counter", "Counter & Stagger", "sim", COUNTER, [
+    ["dmg", "counter damage mult", 1, 2, 0.05],
+    ["stun", "counter hitstun mult", 1, 2, 0.05],
+    ["backStun", "back-hit stun mult", 1, 2, 0.05],
+  ]),
   ...group("knock", "Knockback", "sim", KNOCK, [
     ["hitstun", "stagger push divisor", 2, 30, 0.5],
     ["down", "knockdown push divisor", 2, 30, 0.5],
     ["friction", "slide kept per frame", 0.5, 0.99, 0.01],
+    ["lift", "knockdown launch (m/frame)", 0, 0.06, 0.002],
+    ["bounce", "knockdown floor bounce", 0, 0.6, 0.05],
   ]),
   ...group("speed", "Movement (m/frame)", "sim", SPEED, [
     ["walk", "walk", 0.01, 0.15, 0.005],
     ["run", "run", 0.03, 0.25, 0.005],
+    ["accel", "acceleration ramp", 0.1, 1, 0.05],
+    ["skid", "stop skid kept per frame", 0, 0.95, 0.02],
+    ["runTurn", "run turn rate (rad/f)", 0.05, 0.6, 0.02],
+    ["track", "startup tracking (rad/f)", 0, 0.4, 0.02],
   ]),
   ...group("dash", "Dash", "sim", DASH, [
     ["speed", "speed (m/frame)", 0.03, 0.3, 0.005],
@@ -83,6 +95,8 @@ export const TUNABLES: Tunable[] = [
   ...group("crunch", "Crunch", "sim", CRUNCH, [
     ["speed", "crunches from (m/frame)", 0.01, 0.2, 0.005],
     ["rebound", "rebound", 0, 1, 0.05],
+    ["wallSplat", "wall-splat from (m/frame)", 0.03, 0.2, 0.005],
+    ["splatDur", "wall-splat duration (f)", 10, 60, 2],
   ]),
   ...group("slowKo", "Slow motion on a KO", "render", SLOW_KO, [
     ["scale", "speed", 0.05, 1, 0.05],

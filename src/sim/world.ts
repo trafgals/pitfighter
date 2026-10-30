@@ -19,6 +19,7 @@ import {
 import {
   AIR,
   BUFFER,
+  COUNTER,
   CRUNCH,
   FLOW,
   PRACTICE,
@@ -55,6 +56,7 @@ import {
 } from "./moves";
 import { AIR_GRAB, type AirGrab } from "./airgrabs";
 import { PLAIN, rollLimb, shape, striker, type LimbTrait } from "./limbs";
+import { CHARACTERS } from "../data/characters";
 import { STYLES } from "./styles";
 import { Rng } from "./rng";
 import { DEFAULT_STAGE, type StageId } from "./stages";
@@ -78,7 +80,7 @@ const BIT_INDEX: Record<number, number> = Object.fromEntries(BUTTONS.map((b, i) 
 const LIMB_TORSO_SHARE = 0.35; // part of every limb/head hit that also lands on the torso
 export const BODY_R = 0.33;
 // states a knock leaves you in: falling from one of them credits whoever hit you last
-const KNOCKED = new Set(["down", "hitstun", "blockstun", "thrown", "reversed", "dizzy", "air"]);
+const KNOCKED = new Set(["down", "hitstun", "blockstun", "thrown", "reversed", "dizzy", "air", "wallsplat"]);
 /** Launched and still up: the juggle states. */
 export const airborne = (f: Fighter): boolean => f.state === "air";
 
@@ -161,9 +163,13 @@ export class World {
         facing: sp[id].facing,
         slideX: 0,
         slideY: 0,
+        velX: 0,
+        velY: 0,
         dirX: 0,
         dirY: 0,
         running: false,
+        aimPart: null,
+        lastBigBlow: -1000,
         z: 0,
         vz: 0,
         juggle: 0,
@@ -347,10 +353,14 @@ export class World {
     if (st !== "attack") {
       f.move = null;
       f.chain = false;
+      f.aimPart = null;
     }
     if (st === "idle" || st === "walk") {
       f.combo = 0;
       f.flows = 0;
+    } else {
+      f.velX = 0;
+      f.velY = 0;
     }
     f.chainTo = null;
     if (st !== "walk") f.running = false;
@@ -531,6 +541,9 @@ export class World {
         this.setState(f, "wakeup", DOWN.wake);
         f.invuln = DOWN.wake + DOWN.wakeInvuln;
         break;
+      case "wallsplat":
+        this.setState(f, "down", DOWN.dur);
+        break;
       case "thrown":
         this.setState(f, "down", DOWN.dur);
         break;
@@ -557,6 +570,10 @@ export class World {
         break;
       case "taunt":
         this.addFury(f, TAUNT.fury);
+        if (this.s.frame - f.lastBigBlow <= 120) {
+          f.lastBigBlow = -1000;
+          this.spawnAppealGift(f);
+        }
         this.setState(f, "idle");
         break;
       case "airslammed":
@@ -638,17 +655,31 @@ export class World {
       }
       if (nArms > 0) {
         this.consume(f, BTN.GRAB);
+        if (this.tryGroundGrapple(f)) return;
         this.startMove(f, "grab");
         return;
       }
     }
     if (this.buffered(f, BTN.HIGH)) {
       this.consume(f, BTN.HIGH);
+      const vx = f.velX;
+      const vy = f.velY;
       // the stick pulled back, away from where the fighter faces: the low string
-      const back = st.mag > 0.5 && st.dx * Math.cos(f.facing) + st.dy * Math.sin(f.facing) < -0.5;
-      if (running) this.startMove(f, "dashStrike");
-      else if (back && nLegs === 2) this.startMove(f, STRING_STARTS.low);
-      else this.startMove(f, nArms > 0 ? STRING_STARTS.high : "headbutt");
+      const fwd = st.mag > 0.35 ? st.dx * Math.cos(f.facing) + st.dy * Math.sin(f.facing) : 0;
+      const back = st.mag > 0.5 && fwd < -0.5;
+      const aimUp = fwd > 0.35 || st.dy < -0.35;
+      const aimDown = fwd < -0.35 || st.dy > 0.35;
+      if (running) {
+        this.startMove(f, "dashStrike");
+        f.slideX += vx * 0.45;
+        f.slideY += vy * 0.45;
+      } else if ((back || (lockHeld && aimDown)) && nLegs === 2) {
+        this.startMove(f, STRING_STARTS.low);
+        if (lockHeld) f.aimPart = "legs";
+      } else {
+        this.startMove(f, nArms > 0 ? STRING_STARTS.high : "headbutt");
+        if (lockHeld) f.aimPart = aimUp ? "head" : "torso";
+      }
       return;
     }
     if (this.buffered(f, BTN.LOW) && nLegs === 2) {
@@ -665,7 +696,7 @@ export class World {
       return;
     }
 
-    // movement
+    // movement with mass: ramp velocity up over ~5-6 frames, skid when stopping from a run
     let moving = false;
     if (st.mag) {
       // Cross held: run (two legs, and not while locked on)
@@ -673,13 +704,36 @@ export class World {
       let sp: number;
       if (nLegs === 2) sp = (run ? SPEED.run : SPEED.walk) * limbMod(f, LEGS, "speed");
       else sp = f.hopPhase % HOP_CYCLE < HOP_AIR ? (nLegs === 1 ? SPEED.hop : SPEED.bounce) * (HOP_CYCLE / HOP_AIR) : 0;
-      this.travel(f, st.dx * st.mag * sp, st.dy * st.mag * sp);
+      const wantX = st.dx * st.mag * sp;
+      const wantY = st.dy * st.mag * sp;
+      if (nLegs === 2) {
+        f.velX += (wantX - f.velX) * SPEED.accel;
+        f.velY += (wantY - f.velY) * SPEED.accel;
+        if (Math.hypot(wantX - f.velX, wantY - f.velY) < 1e-4) {
+          f.velX = wantX;
+          f.velY = wantY;
+        }
+      } else {
+        f.velX = wantX;
+        f.velY = wantY;
+      }
+      this.travel(f, f.velX, f.velY);
       moving = true;
       if (f.state === "idle") this.setState(f, "walk");
       f.running = run;
       const t = this.lockTarget(f);
-      if (run || !(t && (lockHeld || dist(f, t) < 4.5))) turnToward(f, Math.atan2(st.dy, st.dx), run ? 0.4 : 0.3);
-    } else if (f.state === "walk") this.setState(f, "idle");
+      if (run || !(t && (lockHeld || dist(f, t) < 4.5))) turnToward(f, Math.atan2(st.dy, st.dx), run ? SPEED.runTurn : 0.3);
+    } else {
+      if (Math.hypot(f.velX, f.velY) > 0.002) {
+        f.velX *= SPEED.skid;
+        f.velY *= SPEED.skid;
+        this.travel(f, f.velX, f.velY);
+        if (Math.hypot(f.velX, f.velY) < 0.002) f.velX = f.velY = 0;
+      } else {
+        f.velX = f.velY = 0;
+      }
+      if (f.state === "walk") this.setState(f, "idle");
+    }
     if (nLegs < 2 && (moving || f.hopPhase % HOP_CYCLE !== 0)) f.hopPhase++;
     else if (nLegs === 2) f.hopPhase = 0;
 
@@ -732,6 +786,10 @@ export class World {
     if (f.t < m.startup) {
       f.x += Math.cos(f.facing) * 0.012;
       f.y += Math.sin(f.facing) * 0.012;
+      if (f.t < m.startup * 0.5 && f.move !== "dashStrike") {
+        const t = this.lockTarget(f);
+        if (t && dist(f, t) < 3.5) turnToward(f, Math.atan2(t.y - f.y, t.x - f.x), SPEED.track);
+      }
     }
     const next = this.nextOf(f, f.move);
     if (!next) return;
@@ -792,7 +850,12 @@ export class World {
       this.consume(f, BTN.GRAB);
       const mag = Math.hypot(inp.x, inp.y);
       const dir = mag > 0.3 ? Math.atan2(inp.y, inp.x) : f.facing;
+      const ch = CHARACTERS[f.style];
+      const rel = mag > 0.3 ? normAngle(dir - f.facing) : 0;
+      const throwIdx = mag <= 0.3 ? 0 : rel > Math.PI * 0.65 && rel < Math.PI * 1.35 ? 1 : rel >= Math.PI * 1.35 ? 2 : 3;
+      const throwDesign = ch?.moves.throws[throwIdx];
       const dmg = THROW.dmg * limbMod(f, ARMS, "grab") * (arms(f) === 1 ? 0.6 : 1) * this.comboScale(p);
+      f.lastBigBlow = this.s.frame;
       this.release(f);
       this.setState(p, "thrown", THROW.dur);
       p.moveHits = [f.id];
@@ -802,7 +865,7 @@ export class World {
       this.damage(p, "torso", dmg, f.id);
       this.addFury(f, FURY.throw);
       const stop = this.freeze(f, p, HITSTOP.throw);
-      this.ev({ kind: "throw", a: f.id, b: p.id, dmg, stop });
+      this.ev({ kind: "throw", a: f.id, b: p.id, dmg, stop, what: throwDesign?.name });
       this.setState(f, "idle");
       f.invuln = 6;
     }
@@ -955,19 +1018,31 @@ export class World {
     const dy = Math.sin(a.facing);
     a.moveLanded = true;
     const otg = d.state === "down";
-    const dmg = m.dmg * this.comboScale(d) * (otg ? DOWN.otgScale : 1) * (d.state === "reversal" ? 1.2 : 1);
-    const part = this.pickPart(d, m.height);
+    const counter = d.state === "attack" && !!d.move && d.move !== "grab" && d.t - 1 < this.eff(d, d.move).startup;
+    const backHit = this.facingDot(d, a) < -0.3;
+    const runTrip = d.running && d.state === "walk";
+    const dmg =
+      m.dmg *
+      this.comboScale(d) *
+      (otg ? DOWN.otgScale : 1) *
+      (d.state === "reversal" ? 1.2 : 1) *
+      (counter ? COUNTER.dmg : 1) *
+      (a.aimPart ? 1.08 : 1);
+    const part = this.pickPart(d, m.height, a.aimPart);
     d.combo++;
     d.recentHits.push({ by: a.id, f: this.s.frame });
     const crowd = new Set(d.recentHits.map((h) => h.by)).size >= CROWD.attackers;
-    const knock = m.knockdown || crowd || d.state === "seated" || d.state === "sitting";
+    const knock = m.knockdown || crowd || runTrip || d.state === "seated" || d.state === "sitting" || d.state === "wallsplat";
+    if (knock || m.launch || m.kind === "special") a.lastBigBlow = this.s.frame;
     const hit: GameEvent = { f: this.s.frame, kind: "hit", a: a.id, b: d.id, part, dmg };
     this.s.events.push(hit);
+    if (counter) this.ev({ kind: "counter", a: a.id, b: d.id, part, dmg });
     this.addFury(a, FURY.hit);
     this.addFury(d, FURY.taken);
     this.damage(d, part, dmg, a.id);
     this.arena.onHit(this, d);
-    hit.stop = this.freeze(a, d, d.state === "ko" ? HITSTOP.ko : hitstopFor(dmg, knock && !otg));
+    const baseStop = d.state === "ko" ? HITSTOP.ko : hitstopFor(dmg, knock && !otg) + (counter ? HITSTOP.counter : 0);
+    hit.stop = this.freeze(a, d, baseStop);
     if (d.state === "ko") return;
     if (otg) return;
 
@@ -985,7 +1060,9 @@ export class World {
         this.ev({ kind: "crowd", a: d.id });
       }
     } else if (d.state !== "dizzy") {
-      this.setState(d, "hitstun", m.hitstun);
+      const stun = Math.round(m.hitstun * (counter ? COUNTER.stun : 1) * (backHit ? COUNTER.backStun : 1));
+      this.setState(d, "hitstun", stun);
+      if (backHit) d.facing = normAngle(d.facing + Math.PI * 0.65);
       d.slideX = (dx * m.push) / KNOCK.hitstun;
       d.slideY = (dy * m.push) / KNOCK.hitstun;
     }
@@ -1026,8 +1103,11 @@ export class World {
   knockDown(d: Fighter, dx: number, dy: number, push: number): void {
     if (d.state === "holding" || d.state === "held") this.release(d);
     this.setState(d, "down", DOWN.dur);
+    d.moveHits = d.lastHitBy >= 0 ? [d.lastHitBy] : [];
     d.slideX = (dx * push) / KNOCK.down;
     d.slideY = (dy * push) / KNOCK.down;
+    d.vz = Math.max(d.vz, KNOCK.lift * Math.min(1.5, Math.max(0.6, push)));
+    d.bounced = false;
   }
 
   /** t has already advanced this frame, so t - 1 is the reversal's motion frame (0 on the press frame). */
@@ -1037,6 +1117,7 @@ export class World {
   }
 
   private reverse(d: Fighter, a: Fighter): void {
+    const def = CHARACTERS[d.style]?.moves.deflects[d.revHeight === "low" ? 1 : 0];
     this.setState(a, "reversed", REVERSAL.stun);
     a.slideX = (Math.cos(d.facing) * 0.6) / 10;
     a.slideY = (Math.sin(d.facing) * 0.6) / 10;
@@ -1046,7 +1127,7 @@ export class World {
     d.facing = Math.atan2(a.y - d.y, a.x - d.x);
     const stop = this.freeze(a, d, HITSTOP.reversal);
     this.addFury(d, FURY.reversal);
-    this.ev({ kind: "reversal", a: d.id, b: a.id, stop });
+    this.ev({ kind: "reversal", a: d.id, b: a.id, stop, what: def?.name });
     // kinetic pushback: clear the crowd around the reverser
     for (const o of this.s.fighters) {
       if (o.id === d.id || o.id === a.id || !alive(o)) continue;
@@ -1064,7 +1145,13 @@ export class World {
     }
   }
 
-  private pickPart(d: Fighter, h: Height): PartId {
+  private pickPart(d: Fighter, h: Height, aim: Fighter["aimPart"] = null): PartId {
+    if (aim === "head" && d.parts.head.attached) return "head";
+    if (aim === "torso") return "torso";
+    if (aim === "legs") {
+      const legsAvail = (["legL", "legR"] as const).filter((p) => d.parts[p].attached);
+      if (legsAvail.length) return legsAvail[Math.floor(this.rng.next() * legsAvail.length)];
+    }
     const pool: [PartId, number][] =
       h === "high"
         ? [
@@ -1243,7 +1330,29 @@ export class World {
       this.catchAir(f, best);
       return;
     }
+    if (best.state === "wallsplat") {
+      const wallName = CHARACTERS[f.style]?.moves.wall.name;
+      const dmg = THROW.dmg * 1.15 * limbMod(f, ARMS, "grab") * this.comboScale(best);
+      best.combo++;
+      this.addFury(f, FURY.throw);
+      this.damage(best, "torso", dmg, f.id);
+      f.lastBigBlow = this.s.frame;
+      const stop = this.freeze(f, best, HITSTOP.throw);
+      if (alive(best)) {
+        const dx = Math.cos(f.facing);
+        const dy = Math.sin(f.facing);
+        this.knockDown(best, -dx, -dy, 1.0);
+      }
+      this.ev({ kind: "throw", a: f.id, b: best.id, dmg, stop, what: wallName });
+      return;
+    }
     if (best.state === "reattach") this.dropReattach(best);
+    const fromBack = this.facingDot(best, f) < -0.3;
+    const backName = fromBack ? CHARACTERS[f.style]?.moves.back.name : undefined;
+    if (fromBack) {
+      this.damage(best, "torso", 4 * limbMod(f, ARMS, "grab"), f.id);
+      if (!alive(best)) return;
+    }
     this.setState(f, "holding", HOLD.dur);
     this.setState(best, "held", HOLD.dur);
     f.partner = best.id;
@@ -1253,7 +1362,66 @@ export class World {
     f.facing = Math.atan2(best.y - f.y, best.x - f.x);
     const stop = this.freeze(f, best, HITSTOP.grab);
     this.arena.onHit(this, best);
-    this.ev({ kind: "grab", a: f.id, b: best.id, stop });
+    this.ev({ kind: "grab", a: f.id, b: best.id, stop, what: backName });
+  }
+
+  /** Triangle near a downed opponent when no standing target is in grab reach: execute style ground grapple. */
+  private tryGroundGrapple(f: Fighter): boolean {
+    const reach = GRAB.reach * limbMod(f, ARMS, "grabReach");
+    for (const d of this.s.fighters) {
+      if (d.id === f.id || d.invuln > 0) continue;
+      if (!["ko", "falling", "driving", "down", "wakeup", "thrown", "held", "holding", "airslam", "airslammed"].includes(d.state)) {
+        if (this.inCone(f, d, reach, GRAB.arc)) return false;
+      }
+    }
+    let best: Fighter | null = null;
+    let bd = 1.2;
+    for (const d of this.s.fighters) {
+      if (d.id === f.id || d.state !== "down" || d.invuln > 0) continue;
+      const dd = dist(f, d);
+      if (dd < bd && this.inCone(f, d, 1.2, 0.3)) {
+        bd = dd;
+        best = d;
+      }
+    }
+    if (!best) return false;
+    f.facing = Math.atan2(best.y - f.y, best.x - f.x);
+    const dmg = 10 * limbMod(f, ARMS, "grab") * DOWN.otgScale * this.comboScale(best);
+    const part = this.pickPart(best, "low", "legs");
+    this.damage(best, part, dmg, f.id);
+    this.addFury(f, FURY.hit);
+    f.lastBigBlow = this.s.frame;
+    const stop = this.freeze(f, best, HITSTOP.grab);
+    this.setState(f, "attack");
+    f.move = "headbutt";
+    f.t = this.eff(f, "headbutt").startup + this.eff(f, "headbutt").active;
+    this.ev({ kind: "grab", a: f.id, b: best.id, dmg, stop, what: CHARACTERS[f.style]?.moves.ground.name });
+    return true;
+  }
+
+  /** Gallery's Appeal: completing a taunt shortly after a big blow makes the Gallery toss a fresh limb gift. */
+  private spawnAppealGift(f: Fighter): void {
+    const missing = LIMBS.find((p) => !f.parts[p].attached);
+    const part: PartId = missing ?? "armR";
+    const trait = this.grow(f, part);
+    const ang = f.facing;
+    this.s.pickups.push({
+      id: this.s.nextPickupId++,
+      owner: f.id,
+      part,
+      style: f.style,
+      trait,
+      hp: f.parts[part].max,
+      x: f.x + Math.cos(ang) * 1.1,
+      y: f.y + Math.sin(ang) * 1.1,
+      z: 2.2,
+      vx: 0,
+      vy: 0,
+      vz: -0.02,
+      spin: 0.25,
+      burning: 0,
+    });
+    this.ev({ kind: "appeal", a: f.id, what: CHARACTERS[f.style]?.moves.appeal.gift });
   }
 
   /** A thrown body, or a juggled one flying fast enough, is a missile: it knocks down whoever it hits. */
@@ -1266,6 +1434,7 @@ export class World {
   private catchAir(f: Fighter, d: Fighter): void {
     const g = World.airGrab(f);
     f.facing = Math.atan2(d.y - f.y, d.x - f.x);
+    f.lastBigBlow = this.s.frame;
     this.setState(f, "airslam", g.dur);
     this.setState(d, "airslammed", g.slam);
     f.partner = d.id;
@@ -1326,7 +1495,7 @@ export class World {
 
   private resolveThrown(f: Fighter): void {
     const speed = Math.hypot(f.slideX, f.slideY);
-    const missile = f.state === "air" && speed >= CRUNCH.knock;
+    const missile = (f.state === "air" || (f.state === "down" && f.t < 24)) && speed >= CRUNCH.knock;
     if (f.state !== "thrown" && !missile) return;
     const by = f.state === "thrown" ? f.partner : f.lastHitBy;
     for (const o of this.s.fighters) {
@@ -1352,9 +1521,14 @@ export class World {
     const fs = this.s.fighters;
     for (const f of fs) {
       if (f.state === "seated" || f.state === "driving" || this.frozen[f.id]) continue;
+      if (f.state === "wallsplat") {
+        f.z = Math.max(0, f.z - 0.015);
+        f.slideX = f.slideY = 0;
+        continue;
+      }
       f.x += f.slideX;
       f.y += f.slideY;
-      if (f.state === "air" || (f.z > 0 && f.state !== "airslammed")) this.fly(f);
+      if (f.state === "air" || ((f.z > 0 || f.vz > 0) && f.state !== "airslammed")) this.fly(f);
       const decay = f.state === "thrown" ? 1 : f.state === "air" ? AIR.drag : KNOCK.friction;
       f.slideX *= decay;
       f.slideY *= decay;
@@ -1416,9 +1590,19 @@ export class World {
     const dmg = Math.round(CRUNCH.dmg * into);
     const by = f.state === "thrown" ? f.partner : f.lastHitBy;
     const part = this.pickPart(f, f.z > 0.5 || f.state === "thrown" ? "high" : "low");
-    // bounce off: the part of the move into the surface comes back, softened
-    f.slideX = (vx + 2 * into * nx) * CRUNCH.rebound;
-    f.slideY = (vy + 2 * into * ny) * CRUNCH.rebound;
+    const outerWall = (f.state === "thrown" || Math.hypot(f.x, f.y) > 4.5) && into >= CRUNCH.wallSplat;
+    if (outerWall) {
+      this.setState(f, "wallsplat", CRUNCH.splatDur);
+      f.z = Math.max(f.z, 0.35);
+      f.vz = 0;
+      f.slideX = f.slideY = 0;
+      f.facing = Math.atan2(ny, nx);
+      this.ev({ kind: "wallsplat", a: f.id, b: by, part, dmg });
+    } else {
+      // bounce off: the part of the move into the surface comes back, softened
+      f.slideX = (vx + 2 * into * nx) * CRUNCH.rebound;
+      f.slideY = (vy + 2 * into * ny) * CRUNCH.rebound;
+    }
     this.ev({ kind: "crunch", a: f.id, b: by, part, dmg });
     this.damage(f, part, dmg, by);
     if (!alive(f)) return;
@@ -1433,6 +1617,14 @@ export class World {
     f.z = 0;
     const fall = -f.vz;
     f.vz = 0;
+    if (f.state === "down") {
+      if (!f.bounced && fall > AIR.bounceMin * 0.5 && KNOCK.bounce > 0) {
+        f.bounced = true;
+        f.vz = fall * KNOCK.bounce;
+        this.ev({ kind: "bounce", a: f.id });
+      }
+      return;
+    }
     if (f.state !== "air") return;
     if (!f.bounced && fall > AIR.bounceMin) {
       f.bounced = true;
@@ -1492,6 +1684,8 @@ export class World {
     for (const f of s.fighters) {
       mix(f.x);
       mix(f.y);
+      mix(f.velX);
+      mix(f.velY);
       mix(f.facing);
       mix(f.t);
       mix(f.state.length * 31 + f.state.charCodeAt(0));

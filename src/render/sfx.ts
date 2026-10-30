@@ -9,6 +9,7 @@
 import type { Cue } from "./cues";
 import type { World } from "../sim/world";
 import type { StageId } from "../sim/stages";
+import { CHARACTERS } from "../data/characters";
 
 type Voice = (t: number, out: AudioNode, k: number) => void;
 
@@ -155,6 +156,18 @@ export class Sfx {
     crunch: (t, o) => {
       this.noiseHit(t, o, "lowpass", 1400, 160, 1.3, 0.6, 0.28);
       this.tone(t, o, "square", 95, 40, 0.35, 0.14);
+    },
+    wallsplat: (t, o) => {
+      this.noiseHit(t, o, "lowpass", 1100, 110, 1.6, 0.75, 0.34);
+      this.tone(t, o, "sawtooth", 82, 32, 0.45, 0.22);
+    },
+    counter: (t, o) => {
+      this.tone(t, o, "triangle", 920, 260, 0.4, 0.11);
+      this.noiseHit(t, o, "bandpass", 2800, 900, 1.8, 0.5, 0.08);
+    },
+    appeal: (t, o) => {
+      this.tone(t, o, "triangle", 440, 660, 0.22, 0.18);
+      this.tone(t + 0.09, o, "triangle", 660, 880, 0.2, 0.22);
     },
     bounce: (t, o) => {
       this.tone(t, o, "sine", 110, 50, 0.6, 0.16);
@@ -344,6 +357,19 @@ export class Sfx {
       if (q.kind === "wind") k = what === "gust" ? 1 : 0;
       if (q.kind === "crash") k = Math.min(1, ((q as { dmg?: number }).dmg ?? 4) / 12);
       voice(t, pan, k);
+      if (q.kind === "hit") {
+        const atk = w.s.fighters[q.a];
+        const craft = atk ? CHARACTERS[atk.style]?.limbs.craft : undefined;
+        if (craft === "clockwork-brass" || craft === "bell-bronze" || craft === "signal-iron" || craft === "butcher-hook") {
+          this.tone(t, pan, "triangle", 1350 + 300 * k, 680, 0.14 + 0.1 * k, 0.09);
+        } else if (craft === "kiln-porcelain" || craft === "glass-cane") {
+          this.tone(t, pan, "sine", 2400, 1700, 0.12 + 0.08 * k, 0.06);
+        } else if (craft === "hydraulic-steel" || craft === "quarry-granite") {
+          this.tone(t, pan, "square", 95, 38, 0.22 + 0.15 * k, 0.14);
+        } else if (craft === "ship-oak" || craft === "cooper-stave") {
+          this.noiseHit(t, pan, "bandpass", 680, 240, 2.2, 0.25, 0.08);
+        }
+      }
       this.played[key] = (this.played[key] ?? 0) + 1;
       if (["ko", "reversal", "crowd", "special", "win", "fall", "wreck", "impact", "crunch", "airgrab"].includes(q.kind)) this.hype = Math.min(1, this.hype + 0.5);
       if (q.kind === "hit") this.hype = Math.min(1, this.hype + 0.04 * k);
