@@ -616,7 +616,7 @@
         "height": 9,
         "depth": 14.8
       },
-      "status": "status:asset-approved",
+      "status": "gate:2-review-turnaround",
       "pivot": {
         "convention": "head_socket_normalized",
         "origin": "the base opening: the crown's head-entry rim lies on the y=0 plane, centred on the hat's axis",
@@ -690,24 +690,7 @@
         "dimension_tolerance_pct": 5,
         "rim_mesh": ""
       },
-      "measured": {
-        "triangles": 16000,
-        "bbox_min_cm": [
-          -7.0,
-          -1.0,
-          -3.9
-        ],
-        "bbox_max_cm": [
-          7.5,
-          8.0,
-          10.9
-        ],
-        "meshes": 1,
-        "materials": 1,
-        "embedded_images": 3,
-        "bytes": 1168804
-      },
-      "build": "python scripts/run_pixal3d_mesh.py prop_sluice_flatcap --faces 16000",
+      "build": null,
       "validate": "node scripts/capture_prop_renders.mjs prop_sluice_flatcap",
       "reference_concept": "public/tex/props/flux3_prop_sluice_flatcap_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_sluice_flatcap_alpha.png",
@@ -715,9 +698,8 @@
       "turntable": "docs/props/prop_sluice_flatcap/turntable.webp",
       "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.",
       "dimensions_note": "scale_dimensions_cm amended from 24.5 x 9 x 31.8 cm to 14.5 x 9 x 14.8 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
-      "revision_requested_at": "2026-10-29T21:55:31+10:00",
-      "revision_published_at": "2026-10-29T22:34:28+10:00",
-      "revision_note": "Redo requested on 2026-10-29T21:55:31+10:00 from stage 3: the Pixal3D reconstruction: It looks like there are a bunch of holes in it? Redo. The prop is rebuilt from that stage with seed 4242.",
+      "revision_requested_at": "2026-10-30T14:20:23+10:00",
+      "revision_note": "Revision requested on 2026-10-30T14:20:23+10:00: this looks full of bullet holes - the surface is speckled with dark facets, the same fault the nurse's cap has. It needs to be rebuilt.. The reconstruction is being rebuilt with seed 7777 from the same approved sheet.",
       "redo": {
         "stage": "mesh",
         "plan": [
@@ -741,11 +723,31 @@
         "built_at": "2026-10-29T22:33:46+10:00"
       },
       "revision_handled": [
-        "IC_kwDOVUJnUc8AAAABgyxdzw"
+        "IC_kwDOVUJnUc8AAAABgyxdzw",
+        "IC_kwDOVUJnUc8AAAABhFE3RQ"
       ],
       "revision_seeds": [
-        4242
-      ]
+        4242,
+        7777
+      ],
+      "stand_in_measured": {
+        "triangles": 16000,
+        "bbox_min_cm": [
+          -7.0,
+          -1.0,
+          -3.9
+        ],
+        "bbox_max_cm": [
+          7.5,
+          8.0,
+          10.9
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 1168804
+      },
+      "revision_seed": 7777
     },
     {
       "id": "prop_kilnworth_nursecap",
@@ -760,7 +762,7 @@
         "height": 11.5,
         "depth": 16.8
       },
-      "status": "gate:3-review-ingame-3d",
+      "status": "gate:2-review-turnaround",
       "pivot": {
         "convention": "head_socket_normalized",
         "origin": "the base opening: the crown's head-entry rim lies on the y=0 plane, centred on the hat's axis",
@@ -834,24 +836,7 @@
         "dimension_tolerance_pct": 5,
         "rim_mesh": ""
       },
-      "measured": {
-        "triangles": 15994,
-        "bbox_min_cm": [
-          -8.5,
-          0.0,
-          -8.4
-        ],
-        "bbox_max_cm": [
-          8.5,
-          11.5,
-          8.4
-        ],
-        "meshes": 1,
-        "materials": 1,
-        "embedded_images": 3,
-        "bytes": 985244
-      },
-      "build": "python scripts/run_pixal3d_mesh.py prop_kilnworth_nursecap --faces 16000",
+      "build": null,
       "validate": "node scripts/capture_prop_renders.mjs prop_kilnworth_nursecap",
       "reference_concept": "public/tex/props/flux3_kilnworth_nursecap_redo_art.png",
       "alpha_cutout": "public/tex/props/flux3_kilnworth_nursecap_redo_alpha.png",
@@ -859,9 +844,8 @@
       "turntable": "docs/props/prop_kilnworth_nursecap/turntable.webp",
       "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 16,000 triangles, 987,304 bytes, 17/21 capture checks. The checks that do not pass: width matches the spec (18 cm +/- 5%); depth matches the spec (18 cm +/- 5%); the lower half of the prop carries the prop's surface is there; the upper half of the prop carries the prop's surface is there. The mesh measures 13.3 x 11.5 x 3.1 cm against a spec of 18 x 11.5 x 18 cm. The finding is recorded in the manifest and the tolerance is left at 5%.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.",
       "dimensions_note": "scale_dimensions_cm amended from 13.3 x 11.5 x 3.1 cm to 17 x 11.5 x 16.8 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
-      "revision_requested_at": "2026-10-29T21:55:31+10:00",
-      "revision_published_at": "2026-10-29T23:35:06+10:00",
-      "revision_note": "Redo requested on 2026-10-29T21:55:31+10:00 from stage 3: the Pixal3D reconstruction: Why is the cross at the front so smeared in the 3d model? Try again. The prop is rebuilt from that stage with seed 7777.",
+      "revision_requested_at": "2026-10-30T14:20:23+10:00",
+      "revision_note": "Revision requested on 2026-10-30T14:20:23+10:00: this looks full of bullet holes - the surface is speckled with dark facets where the mesh has come apart along its seams. It needs to be rebuilt.. The reconstruction is being rebuilt with seed 31337 from the same approved sheet.",
       "redo": {
         "stage": "mesh",
         "plan": [
@@ -886,12 +870,32 @@
       },
       "revision_handled": [
         "IC_kwDOVUJnUc8AAAABgr3Xww",
-        "IC_kwDOVUJnUc8AAAABgyw0gg"
+        "IC_kwDOVUJnUc8AAAABgyw0gg",
+        "IC_kwDOVUJnUc8AAAABhFE4eg"
       ],
       "revision_seeds": [
         4242,
-        7777
-      ]
+        7777,
+        31337
+      ],
+      "stand_in_measured": {
+        "triangles": 15994,
+        "bbox_min_cm": [
+          -8.5,
+          0.0,
+          -8.4
+        ],
+        "bbox_max_cm": [
+          8.5,
+          11.5,
+          8.4
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 985244
+      },
+      "revision_seed": 31337
     },
     {
       "id": "prop_mule_championship_belt",
@@ -1018,7 +1022,7 @@
         "height": 23.8,
         "depth": 34.8
       },
-      "status": "gate:3-review-ingame-3d",
+      "status": "gate:2-review-turnaround",
       "pivot": {
         "convention": "head_socket_normalized",
         "origin": "the base opening: the crown's head-entry rim lies on the y=0 plane, centred on the hat's axis",
@@ -1092,7 +1096,15 @@
         "dimension_tolerance_pct": 5,
         "rim_mesh": ""
       },
-      "measured": {
+      "build": null,
+      "validate": "node scripts/capture_prop_renders.mjs prop_rook_souwester",
+      "reference_concept": "public/tex/props/flux3_prop_rook_souwester_00001_.png",
+      "alpha_cutout": "public/tex/props/flux3_rook_souwester_alpha.png",
+      "turnaround_sheet": "public/tex/props/h3_rook_souwester_turnaround.png",
+      "turntable": "docs/props/prop_rook_souwester/turntable.webp",
+      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.",
+      "dimensions_note": "scale_dimensions_cm amended from 32.3 x 23.8 x 36.9 cm to 34.7 x 23.8 x 34.8 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
+      "stand_in_measured": {
         "triangles": 16000,
         "bbox_min_cm": [
           -17.3,
@@ -1109,14 +1121,15 @@
         "embedded_images": 3,
         "bytes": 1159860
       },
-      "build": "python scripts/run_pixal3d_mesh.py prop_rook_souwester --faces 16000",
-      "validate": "node scripts/capture_prop_renders.mjs prop_rook_souwester",
-      "reference_concept": "public/tex/props/flux3_prop_rook_souwester_00001_.png",
-      "alpha_cutout": "public/tex/props/flux3_rook_souwester_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_rook_souwester_turnaround.png",
-      "turntable": "docs/props/prop_rook_souwester/turntable.webp",
-      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.",
-      "dimensions_note": "scale_dimensions_cm amended from 32.3 x 23.8 x 36.9 cm to 34.7 x 23.8 x 34.8 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit."
+      "revision_seed": 4242,
+      "revision_requested_at": "2026-10-30T14:20:23+10:00",
+      "revision_seeds": [
+        4242
+      ],
+      "revision_note": "Revision requested on 2026-10-30T14:20:23+10:00: this looks full of bullet holes - the surface is speckled with dark facets, the same fault the nurse's cap has. It needs to be rebuilt.. The reconstruction is being rebuilt with seed 4242 from the same approved sheet.",
+      "revision_handled": [
+        "IC_kwDOVUJnUc8AAAABhFE5ng"
+      ]
     },
     {
       "id": "prop_bulwark_pistons",
