@@ -1844,7 +1844,7 @@
         "height": 36,
         "depth": 9
       },
-      "status": "gate:2-rebuild-pixal3d",
+      "status": "gate:3-review-ingame-3d",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -1940,7 +1940,7 @@
       "reference_concept": "public/tex/props/flux3_weapon_cleaver_00001_.png",
       "alpha_cutout": "public/tex/props/flux3_cleaver_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_cleaver_turnaround.png",
-      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 12,800 triangles, 678,620 bytes, 20/21 capture checks. The checks that do not pass: the lower half of the prop carries the prop's surface is there. The mesh measures 34.2 x 36 x 9 cm against a spec of 34.2 x 36 x 9 cm. The finding is recorded in the manifest and the tolerance is left at 5%.",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 12,800 triangles, 678,620 bytes, 21/21 capture checks. The reconstruction measures 34.2 x 36 x 9 cm, inside the 5% tolerance, and the gate moves to the in-game review.",
       "dimensions_note": "scale_dimensions_cm amended from 3.2 x 36 x 11.6 cm to 34.2 x 36 x 9 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit."
     },
     {

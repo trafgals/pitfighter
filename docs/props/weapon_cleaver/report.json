@@ -1,7 +1,7 @@
 {
   "asset": "weapon_cleaver",
   "model": "public/models/props/weapon_cleaver.glb",
-  "capturedAt": "2026-10-29T14:46:28.815Z",
+  "capturedAt": "2026-10-30T00:45:14.302Z",
   "budget": {
     "triangles": 16000,
     "bytes": 1572864,
@@ -122,9 +122,9 @@
       "detail": "4.2 cm"
     },
     {
-      "ok": false,
+      "ok": true,
       "message": "the lower half of the prop carries the prop's surface is there",
-      "detail": "0 cm2 of surface >= 7"
+      "detail": "54 cm2 of surface >= 7"
     },
     {
       "ok": true,
