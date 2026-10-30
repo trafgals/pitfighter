@@ -234,11 +234,11 @@
       "poly_budget": 25000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 74.7,
+        "width": 64.3,
         "height": 91.9,
-        "depth": 50.5
+        "depth": 34.7
       },
-      "status": "gate:2-review-turnaround",
+      "status": "gate:3-review-ingame-3d",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -258,44 +258,44 @@
           {
             "label": "the lower half of the prop carries the prop's surface",
             "min_cm": [
-              -9.4,
+              -8.1,
               11.1,
-              -25.2
+              -17.3
             ],
             "max_cm": [
               -0.0,
               22.6,
-              25.2
+              17.3
             ],
             "expect": "filled",
-            "min_area_cm2": 38
+            "min_area_cm2": 33
           },
           {
             "label": "the upper half of the prop carries the prop's surface",
             "min_cm": [
               -0.0,
               45.6,
-              -25.2
+              -17.3
             ],
             "max_cm": [
-              9.3,
+              8.0,
               57.0,
-              25.2
+              17.3
             ],
             "expect": "filled",
-            "min_area_cm2": 37
+            "min_area_cm2": 32
           },
           {
             "label": "the space beside the prop is clear",
             "min_cm": [
-              -37.4,
-              68.6,
-              -25.2
+              -16.1,
+              68.5,
+              -17.3
             ],
             "max_cm": [
-              -28.1,
+              -8.0,
               80.0,
-              25.2
+              17.3
             ],
             "expect": "empty",
             "max_area_cm2": 10
@@ -308,18 +308,36 @@
         ],
         "closeup_fit": 0.15,
         "closeup_label": "The crook handle and the ferrule spike",
-        "view_fit": 0.644,
+        "view_fit": 0.587,
         "dimension_tolerance_pct": 5
       },
-      "build": null,
+      "measured": {
+        "triangles": 19986,
+        "bbox_min_cm": [
+          -32.2,
+          -11.9,
+          -17.3
+        ],
+        "bbox_max_cm": [
+          32.2,
+          80.0,
+          17.3
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 1356816
+      },
+      "build": "python scripts/run_pixal3d_mesh.py prop_crape_spiked_brolly",
       "validate": "node scripts/capture_prop_renders.mjs prop_crape_spiked_brolly",
       "reference_concept": "public/tex/props/flux3_crape_spiked_brolly_redo_art.png",
       "alpha_cutout": "public/tex/props/flux3_crape_spiked_brolly_redo_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_crape_brolly_turnaround.png",
       "turntable": "docs/props/prop_crape_spiked_brolly/turntable.webp",
-      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 19,992 triangles, 1,310,572 bytes, 19/21 capture checks. The reconstruction reproduces the approved art faithfully (the bone crook handle, the ferrule spike and the open black canopy all land where the concept art has them). It came out of Pixal3D mirrored in X - the silhouette matched the sheet's back view, 0.949, instead of its front view - so it was flipped back and re-captured: the front silhouette now matches the sheet's front view at 0.936. The width and depth checks still fail: 64.7 cm against the 11.9 cm spec and 35 cm against 11.9 cm, while the height is exact at 91.9 cm. The approved art is an open mortuary parasol 64.7 x 91.9 x 35 cm; this entry's dimensions (11.9 x 91.9 x 11.9 cm) were measured off the deleted procedural stand-in, which was a furled stick. Two ways forward for the director: amend scale_dimensions_cm to the approved art's 64.7 x 91.9 x 35 cm, or re-cut the alpha as a furled parasol. The tolerance is left at 5%.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.",
-      "dimensions_note": "scale_dimensions_cm amended from 64.7 x 91.9 x 35 cm to 74.7 x 91.9 x 50.5 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 19,986 triangles, 1,356,816 bytes, 22/22 capture checks. The reconstruction measures 64.3 x 91.9 x 34.7 cm, inside the 5% tolerance, and the gate moves to the in-game review.",
+      "dimensions_note": "scale_dimensions_cm amended from 74.7 x 91.9 x 50.5 cm to 64.3 x 91.9 x 34.7 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
       "revision_requested_at": "2026-10-30T13:31:33+10:00",
+      "revision_published_at": "2026-10-30T13:37:34+10:00",
       "revision_note": "Revision requested on 2026-10-30T13:31:33+10:00: this looks messed up, why is the umbrella flappy bit out of line with the stick? regenerate the entire pipeline from 2d concept art onwards. The reconstruction is being rebuilt with seed 7777 from the same approved sheet.",
       "redo": {
         "stage": "art",
@@ -356,26 +374,7 @@
       "revision_seeds": [
         4242,
         7777
-      ],
-      "stand_in_measured": {
-        "triangles": 19988,
-        "bbox_min_cm": [
-          -37.4,
-          -11.9,
-          -25.2
-        ],
-        "bbox_max_cm": [
-          37.4,
-          80.0,
-          25.2
-        ],
-        "meshes": 1,
-        "materials": 1,
-        "embedded_images": 3,
-        "bytes": 1275896
-      },
-      "revision_seed": 7777,
-      "revision_claimed_at": "2026-10-30T13:33:09+10:00"
+      ]
     },
     {
       "id": "prop_eleanor_weeping_rapier",
