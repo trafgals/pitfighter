@@ -192,7 +192,8 @@ async function main() {
   check(count.frame === 0 && count.counting, `the countdown holds the sim at frame 0 with the beacons up (${JSON.stringify(count)})`);
   check(count.inset > 40 && Math.abs(count.inset - count.cards) <= 2, `the camera frames the fight above the HUD cards (inset ${count.inset} px, cards ${count.cards} px)`);
   await page.screenshot({ path: path.join(OUT, "2_countdown.png") });
-  await page.waitForFunction(() => window.__game.mode === "match", { timeout: 10_000 });
+  // the countdown runs on real time but counts at most 0.1 s a frame, and CI's software renderer takes 400 ms or more a frame
+  await page.waitForFunction(() => window.__game.mode === "match", { timeout: 20_000 });
   const went = await page.evaluate(() => [document.querySelector(".countdown").textContent, window.__game.scene.counting]);
   check(went[0] === "START!" && !went[1], `then START! and the fight (${JSON.stringify(went)})`);
   const setup = await page.evaluate(() => window.__game.world.fighters.map((f) => ({ style: f.style, human: f.human, x: f.spawnX, y: f.spawnY })));
@@ -543,7 +544,9 @@ async function main() {
   const readied = await padState();
   check(readied.mode === "select" && JSON.stringify(readied.slots) === JSON.stringify([["pad0", true]]), `a second Start readies the pad (${JSON.stringify(readied)})`);
   await padPress(9);
-  await page.waitForFunction(() => window.__game.mode === "match", { timeout: 10_000 });
+  // started: the countdown is the match's first beat. (Waiting out the countdown too would time the
+  // software renderer: it counts at most 0.1 s a frame, and a frame there takes 400 ms or more.)
+  await page.waitForFunction(() => window.__game.mode === "countdown" || window.__game.mode === "match", { timeout: 10_000 });
   const padMatch = await page.evaluate(() => window.__game.world.fighters.map((f) => f.human));
   check(padMatch.length === 4 && padMatch[0] && padMatch.slice(1).every((h) => !h), `a third Start starts the match with the pad as P1 and 3 CPUs (${JSON.stringify(padMatch)})`);
 
