@@ -25,6 +25,7 @@ import { animate, onHit } from "./animate";
 import type { Cue } from "./cues";
 import { Fx } from "./fx";
 import { Impact } from "./impact";
+import { CAMERA, cameraOffset, frameShot, type Framee } from "./camera";
 import { MotionDebug } from "./motiondebug";
 import { canvasTexture, makeStageView, toV, yaw, type StageView } from "./stageviews";
 
@@ -627,8 +628,7 @@ export class Scene {
 
   private sync(w: World, time: number, dt: number): void {
     const s = w.s;
-    const centre = new THREE.Vector3();
-    let n = 0;
+    const framees: Framee[] = [];
     s.fighters.forEach((f, i) => {
       const v = this.fighters[i];
       v.root.position.copy(toV(f.x, f.y, f.z)); // up in a juggle
@@ -694,10 +694,7 @@ export class Scene {
         v.marker.visible = !!tg && tg.id !== f.id && alive(tg) && alive(f);
         if (tg) v.marker.position.copy(toV(tg.x, tg.y, 2.5 + Math.sin(time * 6) * 0.06));
       }
-      if (alive(f)) {
-        centre.add(v.root.position);
-        n++;
-      }
+      framees.push({ x: v.root.position.x, z: v.root.position.z, human: f.human, alive: alive(f), target: f.target });
     });
 
     // pickups
@@ -765,22 +762,18 @@ export class Scene {
     });
     for (let i = s.geysers.length; i < this.hazards.length; i++) this.hazards[i].g.visible = false;
 
-    // camera: frames everyone still standing, punches in on big hits, shakes with trauma
-    if (n) centre.divideScalar(n);
-    centre.y = 0;
-    let spread = 4;
-    for (const f of s.fighters) if (alive(f)) spread = Math.max(spread, Math.hypot(f.x - centre.x, -f.y - centre.z));
-    centre.lerp(new THREE.Vector3(0, 0, 0), 0.35);
-    const k = 1 - Math.exp(-dt * 3);
-    this.camTarget.lerp(centre, k);
-    // stand back by as much more as the HUD covers, so everyone stays in the picture above it
+    // camera: frames the action (camera.ts), punches in on big hits, shakes with trauma
+    const shot = frameShot(framees);
+    const k = 1 - Math.exp(-dt * CAMERA.follow);
+    this.camTarget.lerp(new THREE.Vector3(shot.x, 0, shot.z), k);
+    // stand back by as much more as the HUD covers, so the action stays in the picture above it
     const h = this.canvas.clientHeight || window.innerHeight;
     // (the view offset narrows the lens to h of h + inset, and the fight has h - inset of that)
     const hud = Math.min(this.inset, h * 0.4);
     const cover = h > 0 ? (h + hud) / (h - hud) : 1;
-    this.camDist += (Math.min(26 * cover, (9 + spread * 1.5) * cover) - this.camDist) * k;
+    this.camDist += (shot.dist * cover - this.camDist) * k;
     this.punch *= Math.exp(-dt * 4);
-    const pk = this.punch * this.punch;
+    const pk = Math.min(1, this.punch * this.punch * CAMERA.punch);
     let tx = this.camTarget.x + (this.punchAt.x - this.camTarget.x) * pk * 0.35;
     let tz = this.camTarget.z + (this.punchAt.z - this.camTarget.z) * pk * 0.35;
     let dist = this.camDist * (1 - pk * 0.12);
@@ -797,16 +790,18 @@ export class Scene {
       tilt += 0.07 * e;
       side = Math.sin(im.finaleT * 0.35) * dist * 0.35 * e;
     }
-    tx += im.kick.x;
-    tz += im.kick.z;
-    const sh = this.shake * this.shake * 0.5;
+    const ks = CAMERA.shake;
+    tx += im.kick.x * ks;
+    tz += im.kick.z * ks;
+    const sh = this.shake * this.shake * 0.5 * ks;
     this.shake = Math.max(0, this.shake - dt * 2.2);
     const jx = (Math.random() - 0.5) * sh;
     const jy = (Math.random() - 0.5) * sh;
-    this.camera.position.set(tx + jx + side, dist * 0.78 + jy + im.kick.y, tz + dist * 0.72);
-    this.camera.lookAt(tx + jx * 0.5 - im.kick.x * 0.4, 0.8 + jy * 0.5, tz - im.kick.z * 0.4);
-    if (tilt) this.camera.rotateZ(tilt);
-    const fov = 42 - pk * 3;
+    const off = cameraOffset(dist);
+    this.camera.position.set(tx + jx + side, CAMERA.lookY + off.y + jy + im.kick.y * ks, tz + off.z);
+    this.camera.lookAt(tx + jx * 0.5 - im.kick.x * ks * 0.4, CAMERA.lookY + jy * 0.5, tz - im.kick.z * ks * 0.4);
+    if (tilt) this.camera.rotateZ(tilt * ks);
+    const fov = CAMERA.fov - pk * 3;
     if (Math.abs(this.camera.fov - fov) > 0.01) {
       this.camera.fov = fov;
       this.camera.updateProjectionMatrix();

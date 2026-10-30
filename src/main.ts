@@ -11,6 +11,8 @@ import { CueTracker } from "./render/cues";
 import { Sfx } from "./render/sfx";
 import { DEFAULT_FIGHTERS, Select, type SelectResult } from "./select";
 import { MoveList } from "./render/movelist";
+import { buildMatch, Player, Recorder, type Setup, type Take } from "./lab/replay";
+import { LabPanel } from "./lab/panel";
 
 const params = new URLSearchParams(location.search);
 const canvas = document.querySelector<HTMLCanvasElement>("#view")!;
@@ -75,6 +77,7 @@ window.addEventListener("keydown", (e) => {
   if (e.code === "BracketLeft") select.cycleType(-1);
   if (e.code === "BracketRight") select.cycleType(1);
   if (e.code === "KeyP") select.setPractice(!select.practice);
+  if (e.code === "Slash") select.toggleHelp();
   if (e.code === "KeyG") {
     scene.gore = !scene.gore;
     select.setGore(scene.gore);
@@ -101,12 +104,20 @@ function attract(): void {
   scene.setInset(0);
   cues.reset();
   acc = 0;
+  select.setAttract(styles);
 }
 
+// ?lab=1: the feel lab (src/lab/): dials over the numbers that make the feel, and takes to replay under them
+const lab = params.get("lab") === "1" ? new LabPanel({ record, stop, replay, spar }) : null;
+/** the match being played, as it began: a take replays it from here */
+let setup: Setup | null = null;
+let recorder: Recorder | null = null;
+let take: Take | null = null;
+let player: Player | null = null;
+
 function startMatch(r: SelectResult, seed = Number(params.get("seed") ?? Date.now() >>> 0)): void {
-  world = new World({ seed, styles: r.styles, humans: r.humans, stage: r.stage, practice: r.practice });
-  // in practice the CPUs are dummies: they stand there and take it
-  bots = r.humans.map((h, i) => (h || r.practice ? null : new Bot(i, seed, 0.55 + 0.1 * ((i * 7) % 4))));
+  setup = { seed, styles: r.styles, humans: r.humans, stage: r.stage, practice: r.practice, spar: lab?.spar };
+  ({ world, bots } = buildMatch(setup));
   devices = r.devices;
   scene.attach(world);
   hud.attach(world);
@@ -141,14 +152,65 @@ const fitHud = () => scene.setInset(mode === "select" ? 0 : hud.inset);
 window.addEventListener("resize", fitHud);
 new ResizeObserver(fitHud).observe(document.querySelector("#hud .cards")!);
 
+/** Begin the match again from its first frame, the same as it began, on the dials as they are now. */
+function restart(m = setup && buildMatch(setup)): void {
+  if (!m || !setup || !world) return;
+  ({ world, bots } = m);
+  scene.attach(world);
+  hud.attach(world);
+  cues.reset();
+  moves.hide();
+  acc = 0;
+  if (mode !== "match") go();
+}
+
+/** Lab: start a take, from a fresh start of this match. */
+function record(): void {
+  if (!setup || mode === "select") return;
+  player = null;
+  restart();
+  recorder = new Recorder(setup);
+  lab?.setRecording(true);
+}
+/** Lab: end the take; it is what REPLAY plays from now on. */
+function stop(): void {
+  if (recorder && recorder.length) take = recorder.take;
+  recorder = null;
+  lab?.setRecording(false);
+}
+/** Lab: play the last take back from its start on the dials as they are now; at its end the hands are yours again. */
+function replay(): void {
+  if (recorder) stop();
+  if (!take || mode === "select") {
+    lab?.status("record a take first (1)");
+    return;
+  }
+  player = new Player(take);
+  restart(player.match);
+}
+/** Lab: the dummies fight back, or stand still again, from a fresh start. */
+function spar(on: boolean): void {
+  if (!setup) return;
+  setup = { ...setup, spar: on };
+  take = null;
+  player = null;
+  recorder = null;
+  lab?.setRecording(false);
+  if (mode !== "select") restart();
+}
+
 function stepOnce(): void {
   if (!world) return;
   const w = world;
-  const inputs: PlayerInput[] = w.fighters.map((_, i) => {
-    const d = devices[i];
-    if (d) return input.read(d);
-    return bots[i]?.think(w) ?? NO_INPUT;
-  });
+  const inputs: PlayerInput[] = player
+    ? player.next()
+    : w.fighters.map((_, i) => {
+        const d = devices[i];
+        if (d) return input.read(d);
+        return bots[i]?.think(w) ?? NO_INPUT;
+      });
+  if (player?.done) player = null; // the take has run out: the hands are the players' again
+  recorder?.push(inputs);
   w.step(inputs);
   const c = cues.collect(w);
   scene.cue(c, w);
@@ -205,6 +267,14 @@ function frame(now: number): void {
     }
     lastMoves = press;
     if (!moves.open) run(dt);
+    if (lab && world) {
+      const sec = (n: number) => (n / FPS).toFixed(1);
+      lab.status(
+        recorder ? `recording ${sec(recorder.length)} s`
+        : player ? `replaying ${sec(player.frame)} / ${sec(player.take.frames.length)} s`
+        : take ? `take ready: ${sec(take.frames.length)} s` : "press 1 to record a take",
+      );
+    }
   }
   else if (mode === "over") {
     overT += real;
@@ -233,7 +303,14 @@ if (params.get("auto")) {
   const st = params.get("stage");
   if (st && STAGES.some((x) => x.id === st)) select.setStage(st as StageId);
   select.start(Number(params.get("seed") ?? 1));
-} else attract();
+} else {
+  // the lab opens on a practice match against one dummy
+  if (lab) {
+    select.setPractice(true);
+    select.setCount(2);
+  }
+  attract();
+}
 
 // test / debugging hook
 declare global {

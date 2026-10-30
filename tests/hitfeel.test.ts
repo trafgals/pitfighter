@@ -181,3 +181,73 @@ describe("fury and specials", () => {
     expect(b.fury).toBe(0);
   });
 });
+
+describe("combat depth: counter-hits, regional targeting, ground grapples, and Gallery appeal", () => {
+  it("striking an opponent during their attack startup triggers a counter-hit with bonus damage and stun", () => {
+    const w = duel(1.0, [0, 0], false);
+    const [, b] = w.fighters;
+    // Put b into slow heavy startup
+    b.state = "attack";
+    b.move = "punchFin";
+    b.t = 1;
+    const hp0 = b.parts.torso.hp;
+    tap(w, 0, BTN.HIGH);
+    let counterEv;
+    for (let i = 0; i < 20; i++) {
+      w.step(idle(2));
+      counterEv ??= w.s.events.find((e) => e.kind === "counter");
+    }
+    expect(counterEv).toBeTruthy();
+    expect(b.parts.torso.hp).toBeLessThan(hp0);
+  });
+
+  it("holding R1 (LOCK) + stick aims strikes at head, torso, or legs intentionally", () => {
+    for (const [stickY, expected] of [
+      [-1, "head"],
+      [0, "torso"],
+      [1, "legs"],
+    ] as const) {
+      const w = duel(1.0, [0, 0], false);
+      w.step([
+        { x: 0, y: stickY, buttons: BTN.LOCK | BTN.HIGH },
+        { x: 0, y: 0, buttons: 0 },
+      ]);
+      let hitPart: string | undefined;
+      for (let i = 0; i < 20 && !hitPart; i++) {
+        w.step([{ x: 0, y: stickY, buttons: BTN.LOCK }, { x: 0, y: 0, buttons: 0 }]);
+        const h = hitOn(w);
+        if (h) hitPart = h.part;
+      }
+      if (expected === "legs") expect(["legL", "legR"]).toContain(hitPart);
+      else expect(hitPart).toBe(expected);
+    }
+  });
+
+  it("pressing Triangle near a downed opponent executes a style ground grapple", () => {
+    const w = duel(0.9, [0, 0], false);
+    const [, b] = w.fighters;
+    w.knockDown(b, 1, 0, 0.2);
+    b.invuln = 0;
+    const legHpBefore = b.parts.legL.hp + b.parts.legR.hp;
+    tap(w, 0, BTN.GRAB);
+    const grabEv = w.s.events.find((e) => e.kind === "grab" && e.a === 0);
+    expect(grabEv).toBeTruthy();
+    expect(grabEv!.what).toBeTruthy();
+    expect(b.parts.legL.hp + b.parts.legR.hp).toBeLessThan(legHpBefore);
+  });
+
+  it("completing a taunt shortly after a big blow triggers the Gallery appeal gift drop", () => {
+    const w = duel(1.0, [0, 0], false);
+    const [a] = w.fighters;
+    a.lastBigBlow = w.s.frame;
+    const pickupsBefore = w.s.pickups.length;
+    tap(w, 0, BTN.TAUNT);
+    let appealEv;
+    for (let i = 0; i < 75; i++) {
+      w.step(idle(2));
+      appealEv ??= w.s.events.find((e) => e.kind === "appeal" && e.a === 0);
+    }
+    expect(appealEv).toBeTruthy();
+    expect(w.s.pickups.length).toBe(pickupsBefore + 1);
+  });
+});

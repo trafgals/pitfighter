@@ -113,7 +113,12 @@ export class Hud {
       else if (e.kind === "wind" && e.what === "warn") this.say("GUST INCOMING!", 45);
       else if (e.kind === "impact") this.say("THE BLIMP HITS THE GROUND!", 110);
       else if (e.kind === "capture") this.say(`${nm(e.a)} TAKES THE FLAGPOLE`, 45);
-      else if (e.kind === "reversal") this.say(`${nm(e.a)} REVERSAL!`, 45);
+      else if (e.kind === "reversal") this.say(e.what ? `${nm(e.a)} ${e.what.toUpperCase()}!` : `${nm(e.a)} REVERSAL!`, 45);
+      else if (e.kind === "counter") this.say(`${nm(e.a)} COUNTER!`, 40);
+      else if (e.kind === "wallsplat") this.say(`${nm(e.a)} WALL SPLAT!`, 45);
+      else if (e.kind === "appeal") this.say(`${nm(e.a)} APPEALS — ${(e.what ?? "GIFT").toUpperCase()}!`, 60);
+      else if (e.kind === "throw" && e.what) this.say(`${nm(e.a)} ${e.what.toUpperCase()}!`, 45);
+      else if (e.kind === "grab" && e.what) this.say(`${nm(e.a)} ${e.what.toUpperCase()}!`, 45);
       else if (e.kind === "detach" && e.part) this.say(`${nm(e.a)} LOST ${e.part.startsWith("arm") ? "AN ARM" : "A LEG"}!`, 50);
       else if (e.kind === "crowd") this.say(`${nm(e.a)} ESCAPES THE DOGPILE`, 50);
       else if (e.kind === "airgrab") this.say(`${nm(e.a)} ${e.what}!`, 55);

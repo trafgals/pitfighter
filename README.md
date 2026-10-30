@@ -167,7 +167,10 @@ of those verbs the game has today. See [docs/characters.md](docs/characters.md).
 - **Feedback:** sparks, dust and flash rings on impacts, a hit flash on the
   victim, camera shake with a punch-in on heavy hits, bloom, and synthesised
   sound (Web Audio, no sample files): impacts, swings, a lava rumble, and a
-  crowd that swells on big moments. Each blow lurches the camera along its
+  crowd that swells on big moments. The camera sits low and close on the
+  humans, the foe each is locked on to and whoever is near them, and backs
+  off only as far as they spread (`src/render/camera.ts`); with no human
+  playing it frames everyone. Each blow lurches the camera along its
   line; a heavy one tilts it and flashes the picture white. A KO slows time,
   and the blow that wins the match nearly stops it while the camera closes in.
 - **Juggled bodies:** up in a juggle a body is on the ragdoll from the launch
@@ -236,6 +239,32 @@ npm run dev
 
 Then open http://localhost:5173. Add `?auto=1&seed=3` to skip straight into an 8-CPU match.
 Add `?lofi=1` to turn off bloom on slow machines, `?mute=1` to start muted, and `?gore=0` to play without blood.
+
+### The feel lab
+
+`?lab=1` opens the feel lab: a practice match against one dummy, with a
+panel of dials over the numbers that decide how the fight feels.
+
+- **Dials:** the camera, hitstop, knockback, movement, the dash and evade,
+  juggles, crunch and the KO slow motion (`src/lab/tunables.ts`). They are
+  the live constants the game reads, so a turn takes hold at once. A turned
+  dial shows orange; double-click it to put it back. The dials are kept in
+  this browser between visits, and **reset all** puts them all back.
+- **Takes:** `1` records a take from a fresh start of the match, and `1`
+  again stops it. `2` replays it on the dials as they are now; when it runs
+  out, the hands are yours again. The sim is deterministic, so the same take
+  on the same dials plays out the same, frame for frame.
+- **A and B:** save the dials as preset A or B, then `3` and `4` replay the
+  last take on A or on B, to feel the same exchange both ways.
+- **dummies fight** makes the dummies fight back (the CPU), still the same
+  on every replay.
+- **copy changes** copies the dials you turned, and A's and B's, as JSON:
+  paste it into an issue or a chat to say what felt right.
+- `` ` `` hides and shows the panel. Pick your fighter and join with a pad
+  or the keyboard as usual.
+
+The lab changes nothing about the game until a number it found is written
+back into `src/sim/moves.ts` or `src/render/camera.ts`.
 `?auto=1` skips the countdown unless you add `?countdown=1`.
 
 The game is published at https://trafgals.github.io/pitfighter/. Every push to
@@ -292,6 +321,7 @@ This runs the same browser checks against the published GitHub Pages site.
 - `src/sim/`: the deterministic simulation (fixed 60 Hz steps, seeded RNG, no clock and no `Math.random`). `world.ts` holds the rules of the fight, `arena.ts` the rules of each stage, `moves.ts` the frame data, `styles.ts` the roster and `ai.ts` the CPU fighters.
 - `src/render/`: the Three.js scene (`scene.ts`), the stages' arenas (`stageviews.ts`), the bodies (`body.ts`), effects, sound and the DOM HUD. They only read the simulation.
 - `src/input.ts`, `src/select.ts`, `src/main.ts`: devices, the character select and the game loop.
+- `src/lab/`: the feel lab (`?lab=1`): the dials, the takes and their replay.
 
 The frame data is calibrated against *Urban Reign*: startup, string timing,
 hitstun, the reversal window, grapples and knockdowns were read frame by frame

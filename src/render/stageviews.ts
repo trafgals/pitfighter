@@ -100,6 +100,7 @@ class HellToiletView extends StageView {
   private halo: THREE.Mesh;
   private crowd: THREE.InstancedMesh;
   private crowdBase: { x: number; y: number; z: number; ph: number; sp: number }[] = [];
+  private nearRocks: { mesh: THREE.Mesh; mat: THREE.MeshStandardMaterial }[] = [];
   private dummy = new THREE.Object3D();
 
   constructor() {
@@ -141,14 +142,19 @@ class HellToiletView extends StageView {
     this.lavaLight.position.set(0, 0.5, 0);
     sc.add(this.lavaLight);
 
-    // jagged rocks at the outer wall
+    // jagged rocks at the outer wall (near-edge rocks get their own material so they fade when occluding the low camera)
     const rockMat = new THREE.MeshStandardMaterial({ color: 0x1a0d0b, roughness: 1 });
     for (let i = 0; i < 46; i++) {
       const a = (i / 46) * Math.PI * 2 + Math.random() * 0.05;
       const h = 1.5 + Math.random() * 3.5;
-      const rock = new THREE.Mesh(new THREE.ConeGeometry(0.6 + Math.random() * 0.7, h, 5), rockMat);
-      rock.position.set(Math.cos(a) * (LAVA_R + 1.0 + Math.random()), h / 2 - 0.5, Math.sin(a) * (LAVA_R + 1.0 + Math.random()));
+      const rx = Math.cos(a) * (LAVA_R + 1.0 + Math.random());
+      const rz = Math.sin(a) * (LAVA_R + 1.0 + Math.random());
+      const isNear = rz > 3.5;
+      const mat = isNear ? new THREE.MeshStandardMaterial({ color: 0x1a0d0b, roughness: 1, transparent: true, opacity: 1 }) : rockMat;
+      const rock = new THREE.Mesh(new THREE.ConeGeometry(0.6 + Math.random() * 0.7, h, 5), mat);
+      rock.position.set(rx, h / 2 - 0.5, rz);
       rock.rotation.set((Math.random() - 0.5) * 0.3, Math.random() * 3, (Math.random() - 0.5) * 0.3);
+      if (isNear) this.nearRocks.push({ mesh: rock, mat });
       sc.add(rock);
     }
 
@@ -226,7 +232,7 @@ class HellToiletView extends StageView {
     sc.add(this.crowd);
   }
 
-  update(_w: World | null, time: number, dt: number, hype: number): void {
+  update(w: World | null, time: number, dt: number, hype: number): void {
     this.lavaTex.offset.x = time * 0.02;
     this.lavaTex.offset.y = time * 0.05;
     this.lavaLight.intensity = 55 + Math.sin(time * 7.3) * 5 + Math.sin(time * 3.1) * 4;
@@ -248,6 +254,21 @@ class HellToiletView extends StageView {
       this.crowd.setMatrixAt(i, this.dummy.matrix);
     });
     this.crowd.instanceMatrix.needsUpdate = true;
+    const rate = dt > 0 && dt < 0.5 ? Math.min(1, dt * 10) : 1;
+    for (const { mesh, mat } of this.nearRocks) {
+      const rx = mesh.position.x;
+      const rz = mesh.position.z;
+      const occluded =
+        !!w &&
+        w.fighters.some((f) => {
+          if (f.state === "ko" || f.state === "falling" || f.out) return false;
+          const fz = -f.y;
+          return fz > 1.5 && rz > fz - 1.5 && Math.abs(f.x - rx) < 5.5;
+        });
+      const target = occluded ? 0.15 : 1;
+      mat.opacity += (target - mat.opacity) * rate;
+      mat.depthWrite = mat.opacity > 0.95;
+    }
   }
 }
 

@@ -15,10 +15,26 @@ import type { Character, Family, GalleryThrow, Kit, Special, SpecialId, Style } 
 // part is not one the renderer knows, or when a number is out of range. That
 // is a test-suite guarantee, not a build one — run `npm test` to get it.
 const raw = charactersJson as unknown as {
+  theme: {
+    title: string;
+    logline: string;
+    stages: { redress: { id: string; name: string; idea: string }[] };
+    gallery: { throws: GalleryThrow[] };
+  };
+  crafts: { id: string; name: string; look: string; hit: string; tip: string }[];
   characters: Character[];
   specials: Record<SpecialId, Special>;
-  theme: { gallery: { throws: GalleryThrow[] } };
 };
+
+/** The world's stage redressings (Old Sorrow names and briefs, keyed by stage id). */
+export const STAGE_REDRESS: Record<string, { name: string; idea: string }> = Object.fromEntries(
+  raw.theme.stages.redress.map((s) => [s.id, { name: s.name, idea: s.idea }]),
+);
+
+/** Each limb craft, keyed by craft id. */
+export const CRAFT_BY_ID: Record<string, { id: string; name: string; look: string; hit: string; tip: string }> = Object.fromEntries(
+  raw.crafts.map((c) => [c.id, c]),
+);
 
 /** Every fighter, in the order the game has always used them. The order is
  *  load-bearing: `Fighter.style` is an index into this array. */
