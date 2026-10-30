@@ -315,8 +315,8 @@
       "validate": "node scripts/capture_prop_renders.mjs prop_crape_spiked_brolly",
       "reference_concept": "public/tex/props/flux3_crape_spiked_brolly_redo_art.png",
       "alpha_cutout": "public/tex/props/flux3_crape_spiked_brolly_redo_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_crape_brolly_turnaround_redo.png",
-      "turntable": "docs/props/prop_crape_spiked_brolly/turntable_redo.webp",
+      "turnaround_sheet": "public/tex/props/h3_crape_brolly_turnaround.png",
+      "turntable": "docs/props/prop_crape_spiked_brolly/turntable.webp",
       "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 19,992 triangles, 1,310,572 bytes, 19/21 capture checks. The reconstruction reproduces the approved art faithfully (the bone crook handle, the ferrule spike and the open black canopy all land where the concept art has them). It came out of Pixal3D mirrored in X - the silhouette matched the sheet's back view, 0.949, instead of its front view - so it was flipped back and re-captured: the front silhouette now matches the sheet's front view at 0.936. The width and depth checks still fail: 64.7 cm against the 11.9 cm spec and 35 cm against 11.9 cm, while the height is exact at 91.9 cm. The approved art is an open mortuary parasol 64.7 x 91.9 x 35 cm; this entry's dimensions (11.9 x 91.9 x 11.9 cm) were measured off the deleted procedural stand-in, which was a furled stick. Two ways forward for the director: amend scale_dimensions_cm to the approved art's 64.7 x 91.9 x 35 cm, or re-cut the alpha as a furled parasol. The tolerance is left at 5%.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.",
       "dimensions_note": "scale_dimensions_cm amended from 64.7 x 91.9 x 35 cm to 74.7 x 91.9 x 50.5 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
       "revision_requested_at": "2026-10-30T13:31:33+10:00",
@@ -374,7 +374,8 @@
         "embedded_images": 3,
         "bytes": 1275896
       },
-      "revision_seed": 7777
+      "revision_seed": 7777,
+      "revision_claimed_at": "2026-10-30T13:33:09+10:00"
     },
     {
       "id": "prop_eleanor_weeping_rapier",
@@ -616,7 +617,7 @@
         "height": 9,
         "depth": 14.8
       },
-      "status": "gate:3-review-ingame-3d",
+      "status": "status:asset-approved",
       "pivot": {
         "convention": "head_socket_normalized",
         "origin": "the base opening: the crown's head-entry rim lies on the y=0 plane, centred on the hat's axis",
