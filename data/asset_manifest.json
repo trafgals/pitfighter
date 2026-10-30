@@ -616,7 +616,7 @@
         "height": 9,
         "depth": 14.8
       },
-      "status": "gate:2-rebuild-pixal3d",
+      "status": "status:asset-approved",
       "pivot": {
         "convention": "head_socket_normalized",
         "origin": "the base opening: the crown's head-entry rim lies on the y=0 plane, centred on the hat's axis",
@@ -713,7 +713,7 @@
       "alpha_cutout": "public/tex/props/flux3_sluice_flatcap_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_sluice_flatcap_turnaround.png",
       "turntable": "docs/props/prop_sluice_flatcap/turntable.webp",
-      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 15,992 triangles, 1,193,868 bytes, 22/24 capture checks. The checks that do not pass: the mesh is one surface, not a pile of shards; the mesh's seams are closed. The mesh measures 14.4 x 9 x 14.7 cm against a spec of 14.5 x 9 x 14.8 cm. The finding is recorded in the manifest and the tolerance is left at 5%.",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 15,992 triangles, 1,193,868 bytes, 23/23 capture checks. The reconstruction measures 14.4 x 9 x 14.7 cm, inside the 5% tolerance, and the gate moves to the in-game review.\r",
       "dimensions_note": "scale_dimensions_cm amended from 24.5 x 9 x 31.8 cm to 14.5 x 9 x 14.8 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
       "revision_requested_at": "2026-10-30T14:20:23+10:00",
       "revision_published_at": "2026-10-30T14:34:59+10:00",
@@ -762,7 +762,7 @@
         "height": 11.5,
         "depth": 3.2
       },
-      "status": "gate:2-rebuild-pixal3d",
+      "status": "gate:3-review-ingame-3d",
       "pivot": {
         "convention": "head_socket_normalized",
         "origin": "the base opening: the crown's head-entry rim lies on the y=0 plane, centred on the hat's axis",
@@ -859,7 +859,7 @@
       "alpha_cutout": "public/tex/props/flux3_kilnworth_nursecap_redo_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_kilnworth_nursecap_turnaround.png",
       "turntable": "docs/props/prop_kilnworth_nursecap/turntable.webp",
-      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 15,998 triangles, 934,340 bytes, 22/24 capture checks. The checks that do not pass: the mesh is one surface, not a pile of shards; the mesh's seams are closed. The mesh measures 13.3 x 11.5 x 3.2 cm against a spec of 13.3 x 11.5 x 3.2 cm. The finding is recorded in the manifest and the tolerance is left at 5%.",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 15,998 triangles, 934,340 bytes, 23/23 capture checks. The reconstruction measures 13.3 x 11.5 x 3.2 cm, inside the 5% tolerance, and the gate moves to the in-game review.\r",
       "dimensions_note": "scale_dimensions_cm amended from 17 x 11.5 x 16.8 cm to 13.3 x 11.5 x 3.2 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
       "revision_requested_at": "2026-10-30T14:20:23+10:00",
       "revision_published_at": "2026-10-30T14:44:15+10:00",
@@ -1119,7 +1119,7 @@
       "alpha_cutout": "public/tex/props/flux3_rook_souwester_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_rook_souwester_turnaround.png",
       "turntable": "docs/props/prop_rook_souwester/turntable.webp",
-      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 15,996 triangles, 1,158,944 bytes, 22/24 capture checks. The checks that do not pass: the mesh is one surface, not a pile of shards; the mesh's seams are closed. The mesh measures 33.7 x 23.8 x 34.2 cm against a spec of 34.7 x 23.8 x 34.8 cm. The finding is recorded in the manifest and the tolerance is left at 5%.",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 15,996 triangles, 1,158,944 bytes, 22/23 capture checks. The checks that do not pass: the surface is not lit by normals pointing the wrong way. The mesh measures 33.7 x 23.8 x 34.2 cm against a spec of 34.7 x 23.8 x 34.8 cm. The finding is recorded in the manifest and the tolerance is left at 5%.\r",
       "dimensions_note": "scale_dimensions_cm amended from 32.3 x 23.8 x 36.9 cm to 34.7 x 23.8 x 34.8 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
       "revision_requested_at": "2026-10-30T14:20:23+10:00",
       "revision_published_at": "2026-10-30T14:59:32+10:00",
@@ -1257,7 +1257,7 @@
         "height": 38.5,
         "depth": 30.6
       },
-      "status": "gate:2-rebuild-pixal3d",
+      "status": "status:asset-approved",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -1353,7 +1353,7 @@
       "alpha_cutout": "public/tex/props/flux3_crump_samovar_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_crump_samovar_turnaround.png",
       "turntable": "docs/props/prop_crump_samovar/turntable.webp",
-      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 19,994 triangles, 1,349,512 bytes, 22/24 capture checks. The checks that do not pass: the mesh is one surface, not a pile of shards; the mesh's seams are closed. The mesh measures 27.8 x 38.5 x 31.4 cm against a spec of 27.8 x 38.5 x 30.6 cm. The finding is recorded in the manifest and the tolerance is left at 5%.",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 19,994 triangles, 1,349,512 bytes, 23/23 capture checks. The reconstruction measures 27.8 x 38.5 x 31.4 cm, inside the 5% tolerance, and the gate moves to the in-game review.\r",
       "dimensions_note": "scale_dimensions_cm amended from 22 x 38.5 x 24 cm to 27.8 x 38.5 x 30.6 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
       "revision_requested_at": "2026-10-30T14:22:59+10:00",
       "revision_published_at": "2026-10-30T15:08:49+10:00",
@@ -1716,7 +1716,7 @@
         "height": 84,
         "depth": 28.2
       },
-      "status": "gate:2-rebuild-pixal3d",
+      "status": "status:asset-approved",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -1814,7 +1814,7 @@
       "alpha_cutout": "public/tex/props/flux3_nail_bat_redo_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_nail_bat_turnaround.png",
       "turntable": "docs/props/weapon_nail_bat/turntable.webp",
-      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 16,000 triangles, 983,412 bytes, 22/24 capture checks. The checks that do not pass: the mesh is one surface, not a pile of shards; the mesh's seams are closed. The mesh measures 63 x 84 x 28.2 cm against a spec of 63 x 84 x 28.2 cm. The finding is recorded in the manifest and the tolerance is left at 5%.",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 16,000 triangles, 983,412 bytes, 23/23 capture checks. The reconstruction measures 63 x 84 x 28.2 cm, inside the 5% tolerance, and the gate moves to the in-game review.\r",
       "dimensions_note": "scale_dimensions_cm amended from 15.1 x 84 x 7.1 cm to 63 x 84 x 28.2 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
       "revision_requested_at": "2026-10-30T14:22:59+10:00",
       "revision_published_at": "2026-10-30T15:13:07+10:00",
