@@ -747,7 +747,8 @@
         "embedded_images": 3,
         "bytes": 1168804
       },
-      "revision_seed": 7777
+      "revision_seed": 7777,
+      "revision_claimed_at": "2026-10-30T14:22:12+10:00"
     },
     {
       "id": "prop_kilnworth_nursecap",
@@ -1257,7 +1258,7 @@
         "height": 38.5,
         "depth": 30.6
       },
-      "status": "status:asset-approved",
+      "status": "gate:2-review-turnaround",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -1330,7 +1331,15 @@
         "view_fit": 0.282,
         "dimension_tolerance_pct": 5
       },
-      "measured": {
+      "build": null,
+      "validate": "node scripts/capture_prop_renders.mjs prop_crump_samovar",
+      "reference_concept": "public/tex/props/flux3_prop_crump_samovar_00001_.png",
+      "alpha_cutout": "public/tex/props/flux3_crump_samovar_alpha.png",
+      "turnaround_sheet": "public/tex/props/h3_crump_samovar_turnaround.png",
+      "turntable": "docs/props/prop_crump_samovar/turntable.webp",
+      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.",
+      "dimensions_note": "scale_dimensions_cm amended from 22 x 38.5 x 24 cm to 27.8 x 38.5 x 30.6 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
+      "stand_in_measured": {
         "triangles": 19996,
         "bbox_min_cm": [
           -13.9,
@@ -1347,14 +1356,15 @@
         "embedded_images": 3,
         "bytes": 1359000
       },
-      "build": "python scripts/run_pixal3d_mesh.py prop_crump_samovar",
-      "validate": "node scripts/capture_prop_renders.mjs prop_crump_samovar",
-      "reference_concept": "public/tex/props/flux3_prop_crump_samovar_00001_.png",
-      "alpha_cutout": "public/tex/props/flux3_crump_samovar_alpha.png",
-      "turnaround_sheet": "public/tex/props/h3_crump_samovar_turnaround.png",
-      "turntable": "docs/props/prop_crump_samovar/turntable.webp",
-      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.",
-      "dimensions_note": "scale_dimensions_cm amended from 22 x 38.5 x 24 cm to 27.8 x 38.5 x 30.6 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit."
+      "revision_seed": 4242,
+      "revision_requested_at": "2026-10-30T14:22:59+10:00",
+      "revision_seeds": [
+        4242
+      ],
+      "revision_note": "Revision requested on 2026-10-30T14:22:59+10:00: this looks full of bullet holes - the surface is speckled with dark facets, the same fault the nurse's cap has. It needs to be rebuilt.. The reconstruction is being rebuilt with seed 4242 from the same approved sheet.",
+      "revision_handled": [
+        "IC_kwDOVUJnUc8AAAABhFG9cQ"
+      ]
     },
     {
       "id": "weapon_knuckleduster",
@@ -1707,7 +1717,7 @@
         "height": 84,
         "depth": 7.1
       },
-      "status": "status:asset-approved",
+      "status": "gate:2-review-turnaround",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -1782,24 +1792,7 @@
         "view_fit": 0.428,
         "dimension_tolerance_pct": 5
       },
-      "measured": {
-        "triangles": 16000,
-        "bbox_min_cm": [
-          -7.5,
-          -13.0,
-          -2.5
-        ],
-        "bbox_max_cm": [
-          7.5,
-          71.0,
-          4.6
-        ],
-        "meshes": 1,
-        "materials": 1,
-        "embedded_images": 3,
-        "bytes": 930152
-      },
-      "build": "python scripts/run_pixal3d_mesh.py weapon_nail_bat --faces 16000",
+      "build": null,
       "validate": "node scripts/capture_prop_renders.mjs weapon_nail_bat",
       "reference_concept": "public/tex/props/flux3_nail_bat_redo_art.png",
       "alpha_cutout": "public/tex/props/flux3_nail_bat_redo_alpha.png",
@@ -1807,9 +1800,8 @@
       "turntable": "docs/props/weapon_nail_bat/turntable_redo.webp",
       "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.",
       "dimensions_note": "scale_dimensions_cm amended from 125.8 x 84 x 37.8 cm to 15.1 x 84 x 7.1 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
-      "revision_requested_at": "2026-10-29T20:40:03+10:00",
-      "revision_published_at": "2026-10-29T22:15:46+10:00",
-      "revision_note": "Redo requested on 2026-10-29T20:40:03+10:00 from the watertight alpha cutout (BiRefNet), over the art that is already there: redo from BiRefNet Watertight Alpha Cutout onwards\nensure the initial view captures the whole bat. The prop is rebuilt from that stage with seed 7777.",
+      "revision_requested_at": "2026-10-30T14:22:59+10:00",
+      "revision_note": "Revision requested on 2026-10-30T14:22:59+10:00: this looks full of bullet holes - the surface is speckled with dark facets, the same fault the nurse's cap has. It needs to be rebuilt.. The reconstruction is being rebuilt with seed 31337 from the same approved sheet.",
       "redo": {
         "stage": "cutout",
         "plan": [
@@ -1839,12 +1831,32 @@
       },
       "revision_handled": [
         "IC_kwDOVUJnUc8AAAABgqgssQ",
-        "IC_kwDOVUJnUc8AAAABgr79dg"
+        "IC_kwDOVUJnUc8AAAABgr79dg",
+        "IC_kwDOVUJnUc8AAAABhFG-bg"
       ],
       "revision_seeds": [
         4242,
-        7777
-      ]
+        7777,
+        31337
+      ],
+      "stand_in_measured": {
+        "triangles": 16000,
+        "bbox_min_cm": [
+          -7.5,
+          -13.0,
+          -2.5
+        ],
+        "bbox_max_cm": [
+          7.5,
+          71.0,
+          4.6
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 930152
+      },
+      "revision_seed": 31337
     },
     {
       "id": "weapon_cleaver",
