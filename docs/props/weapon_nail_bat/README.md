@@ -1,5 +1,13 @@
 # weapon_nail_bat
 
+
+> **This asset is held at a gate.** The capture it came from did not pass
+> every check, and the renders are here so the finding can be judged, not
+> because the asset is approved. The checks that did not pass:
+
+> - the mesh is one surface, not a pile of shards (4231 of 12233 vertices are duplicates of another vertex (34.6%))
+> - the mesh's seams are closed (7908 of 27954 edges are used by only one triangle (28.3%))
+
 The verification renders for this prop, produced by
 
 ```

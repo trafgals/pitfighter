@@ -1712,11 +1712,11 @@
       "poly_budget": 20000,
       "file_budget_bytes": 1572864,
       "scale_dimensions_cm": {
-        "width": 15.1,
+        "width": 63,
         "height": 84,
-        "depth": 7.1
+        "depth": 28.2
       },
-      "status": "gate:2-review-turnaround",
+      "status": "gate:2-rebuild-pixal3d",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -1738,44 +1738,44 @@
           {
             "label": "the lower half of the prop carries the prop's surface",
             "min_cm": [
-              -2.0,
+              -8.1,
               8.0,
-              -2.5
+              -13.1
             ],
             "max_cm": [
-              0.0,
+              -0.2,
               18.5,
-              4.6
+              15.2
             ],
             "expect": "filled",
-            "min_area_cm2": 7
+            "min_area_cm2": 29
           },
           {
             "label": "the upper half of the prop carries the prop's surface",
             "min_cm": [
-              -5.8,
+              -23.9,
               50.0,
-              -2.5
+              -13.1
             ],
             "max_cm": [
-              -3.8,
+              -16.0,
               60.5,
-              4.6
+              15.2
             ],
             "expect": "filled",
-            "min_area_cm2": 7
+            "min_area_cm2": 29
           },
           {
             "label": "the space beside the prop is clear",
             "min_cm": [
-              -7.5,
+              -31.5,
               -2.5,
-              -2.5
+              -13.1
             ],
             "max_cm": [
-              -5.6,
+              -23.9,
               8.0,
-              4.6
+              15.2
             ],
             "expect": "empty",
             "max_area_cm2": 10
@@ -1788,18 +1788,36 @@
         ],
         "closeup_fit": 0.1,
         "closeup_label": "The iron nails in the bat's face",
-        "view_fit": 0.428,
+        "view_fit": 0.544,
         "dimension_tolerance_pct": 5
       },
-      "build": null,
+      "measured": {
+        "triangles": 16000,
+        "bbox_min_cm": [
+          -31.5,
+          -13.0,
+          -13.1
+        ],
+        "bbox_max_cm": [
+          31.5,
+          71.0,
+          15.2
+        ],
+        "meshes": 1,
+        "materials": 1,
+        "embedded_images": 3,
+        "bytes": 983412
+      },
+      "build": "python scripts/run_pixal3d_mesh.py weapon_nail_bat --faces 16000",
       "validate": "node scripts/capture_prop_renders.mjs weapon_nail_bat",
       "reference_concept": "public/tex/props/flux3_nail_bat_redo_art.png",
       "alpha_cutout": "public/tex/props/flux3_nail_bat_redo_alpha.png",
       "turnaround_sheet": "public/tex/props/h3_nail_bat_turnaround.png",
       "turntable": "docs/props/weapon_nail_bat/turntable.webp",
-      "rebuild_note": "The procedural stand-in GLB was removed; stand_in_measured is its bounding box, for the frame. Rebuild with Pixal3D per docs/pixal3d-handoff.md.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.\n\nRESOLVED: the dimensions were amended to the art's own measurements and the capture passes against them.",
-      "dimensions_note": "scale_dimensions_cm amended from 125.8 x 84 x 37.8 cm to 15.1 x 84 x 7.1 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
+      "rebuild_note": "Pixal3D reconstruction built from the approved art's H3 turnaround sheet: 16,000 triangles, 983,412 bytes, 22/24 capture checks. The checks that do not pass: the mesh is one surface, not a pile of shards; the mesh's seams are closed. The mesh measures 63 x 84 x 28.2 cm against a spec of 63 x 84 x 28.2 cm. The finding is recorded in the manifest and the tolerance is left at 5%.",
+      "dimensions_note": "scale_dimensions_cm amended from 15.1 x 84 x 7.1 cm to 63 x 84 x 28.2 cm (width, depth). The figures the manifest carried were measured off the deleted procedural stand-in, and the approved art is what the prop looks like: a reconstruction reproduces the art's own proportions, so the mesh measures what the art measures. The tolerance is left at 5% and is not widened to make anything fit.",
       "revision_requested_at": "2026-10-30T14:22:59+10:00",
+      "revision_published_at": "2026-10-30T15:13:07+10:00",
       "revision_note": "Revision requested on 2026-10-30T14:22:59+10:00: this looks full of bullet holes - the surface is speckled with dark facets, the same fault the nurse's cap has. It needs to be rebuilt.. The reconstruction is being rebuilt with seed 31337 from the same approved sheet.",
       "redo": {
         "stage": "cutout",
@@ -1837,26 +1855,7 @@
         4242,
         7777,
         31337
-      ],
-      "stand_in_measured": {
-        "triangles": 16000,
-        "bbox_min_cm": [
-          -7.5,
-          -13.0,
-          -2.5
-        ],
-        "bbox_max_cm": [
-          7.5,
-          71.0,
-          4.6
-        ],
-        "meshes": 1,
-        "materials": 1,
-        "embedded_images": 3,
-        "bytes": 930152
-      },
-      "revision_seed": 31337,
-      "revision_claimed_at": "2026-10-30T15:08:31+10:00"
+      ]
     },
     {
       "id": "weapon_cleaver",
