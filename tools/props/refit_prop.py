@@ -20,6 +20,16 @@ This pass does the same job against the mesh that exists:
 The thresholds are the same as the first pass: 35% of the box's area for a
 filled box, 10 cm2 for a clear one.
 
+A box that does not fit the mesh that was built is cut again from the sheet.
+The sheet is the same art on a turntable, upright and centred - the thing the
+mesh was built from - so a cell of the sheet means the same thing on both,
+which the drawing does not: the shovel's drawing is a wide diagonal
+composition, and stretching its crop over the mesh puts the cell that holds
+the blade where the handle is. The mesh's own surface then chooses which of
+the sheet's cells the box is: the cell where the prop's surface is, for a box
+that has to be filled, and the cell where it is not, for a box that has to be
+clear.
+
 Usage: python refit_prop.py <asset_id>
 """
 import json
@@ -31,7 +41,9 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import manifest_io  # noqa: E402
+import mesh_surface  # noqa: E402
 import pose  # noqa: E402
+import sheet_view  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 MANIFEST = os.path.join(ROOT, "data", "asset_manifest.json")
@@ -40,6 +52,9 @@ GRID = 8            # the cutout is cut into this many cells across and down
 MIN_CM = 2.0        # a region is at least this wide, so it can hold any surface
 EMPTY_COVERAGE = 0.05
 SOLID_ALPHA = 128   # a pixel counts as the prop's surface above this alpha
+
+SHEET_SOLID = 0.25  # a cell the sheet shows as prop, and not as a shadow
+SHEET_EMPTY = 0.05  # a cell the sheet shows as empty
 
 
 def read_glb_bbox(path):
@@ -151,26 +166,127 @@ def box_from(px, cell, frame, measured, to_cm, solid):
     return [round(lo_x, 1), round(lo_y, 1), z0], [round(hi_x, 1), round(hi_y, 1), z1]
 
 
-def main():
-    asset_id = sys.argv[1]
-    with manifest_io.locked(MANIFEST):
-        manifest = manifest_io.load(MANIFEST)
-    entry = next(a for a in manifest["assets"] if a["id"] == asset_id)
+def fits(region, area):
+    """Whether a measured area is what the region asks for."""
+    if region["expect"] == "filled":
+        return area >= region["min_area_cm2"]
+    return area <= region["max_area_cm2"]
 
-    glb = os.path.join(ROOT, entry["glb_output"])
-    if not os.path.exists(glb):
-        raise SystemExit(f"{glb} does not exist yet")
-    lo, hi = read_glb_bbox(glb)
-    measured = {
-        "width": round(hi[0] - lo[0], 2),
-        "height": round(hi[1] - lo[1], 2),
-        "depth": round(hi[2] - lo[2], 2),
-    }
-    frame = entry["validation"]["frame"]
 
+def sheet_box(cell, frame, measured, to_cm):
+    """A cell of the sheet's front view, as a model-space box.
+
+    The sheet's view is cropped to the prop and stretched to a square, so the
+    square's edges are the prop's own edges and the cell lands on the model's
+    measured box. The depth is the model's whole depth: the view cannot say
+    how deep the prop is, and the box asks about the prop's whole thickness.
+    """
+    x0, y0, x1, y1 = cell["box"]
+    ax, ay = to_cm(x0, y0)
+    bx, by = to_cm(x1, y1)
+    lo_x, hi_x = max(min(ax, bx), frame["centre_x_cm"] - measured["width"] / 2), \
+        min(max(ax, bx), frame["centre_x_cm"] + measured["width"] / 2)
+    lo_y, hi_y = max(min(ay, by), frame["y_min_cm"]), min(max(ay, by), frame["y_max_cm"])
+    z0 = round(frame["centre_z_cm"] - measured["depth"] / 2, 1)
+    z1 = round(frame["centre_z_cm"] + measured["depth"] / 2, 1)
+    return [round(lo_x, 1), round(lo_y, 1), z0], [round(hi_x, 1), round(hi_y, 1), z1]
+
+
+def pick_from_sheet(cells, frame, measured, to_cm, points, weights, rows, solid):
+    """The sheet's cell the mesh agrees with, and the box it would make.
+
+    A box that has to be filled goes where the mesh's surface is, among the
+    cells the sheet shows as prop; a box that has to be clear goes where the
+    mesh's surface is not, among the cells the sheet shows as empty.
+    """
+    best = None
+    for cell in cells:
+        if rows is not None and cell["cy"] not in rows:
+            continue
+        if solid and cell["coverage"] < SHEET_SOLID:
+            continue
+        if not solid and cell["coverage"] > SHEET_EMPTY:
+            continue
+        box = sheet_box(cell, frame, measured, to_cm)
+        area = mesh_surface.area_in(points, weights, box)
+        if best is None or (area > best[0] if solid else area < best[0]):
+            best = (area, cell, box)
+    return best
+
+
+def refit_from_sheet(entry, frame, measured, regions, points, weights):
+    """Regions the mesh disagrees with are cut from the sheet instead.
+
+    The drawing is cut and stretched over the mesh's box, and for a prop drawn
+    the way it does not stand - on the diagonal - a cell of the drawing and a
+    cell of the mesh do not mean the same thing, so the box lands on empty
+    space and the capture fails for a reason that has nothing to do with the
+    mesh. The sheet is the same art upright and centred, the very thing the
+    mesh was built from, and the mesh's own surface then says which of the
+    sheet's cells the box is.
+
+    Only a region that fails is touched: a region the mesh agrees with keeps
+    the box it has.
+    """
+    notes = []
+    sheet = entry.get("turnaround_sheet")
+    if not sheet:
+        return regions, notes
+    path = os.path.join(ROOT, sheet)
+    if not os.path.exists(path):
+        return regions, notes
+
+    view = sheet_view.front_view(entry)
+    cells = sheet_view.cells_of(sheet_view.view_mask(path, view, frame))
+    # the sheet's view is cropped to the prop and squared, so its cells are
+    # positions on the prop and the model box is where they land
+    to_cm = mapper((0, 0, sheet_view.SIZE, sheet_view.SIZE),
+                   (sheet_view.SIZE, sheet_view.SIZE), frame, measured)
+    lower_rows = range(GRID // 2 + 1, GRID)
+    upper_rows = range(0, GRID // 2 - 1)
+
+    for region in regions:
+        here = mesh_surface.area_in(points, weights, (region["min_cm"], region["max_cm"]))
+        if fits(region, here):
+            continue
+        if region["expect"] == "filled":
+            rows = lower_rows if region["label"].startswith("the lower half") else upper_rows
+            choice = pick_from_sheet(cells, frame, measured, to_cm, points, weights,
+                                     rows, solid=True)
+        else:
+            choice = pick_from_sheet(cells, frame, measured, to_cm, points, weights,
+                                     None, solid=False)
+        if choice is None:
+            notes.append(f"{region['label']}: the sheet has no cell for it; left as it is")
+            continue
+        area, cell, box = choice
+        moved = {
+            "label": region["label"],
+            "min_cm": box[0],
+            "max_cm": box[1],
+            "expect": region["expect"],
+        }
+        if region["expect"] == "filled":
+            footprint = (box[1][0] - box[0][0]) * (box[1][1] - box[0][1])
+            moved["min_area_cm2"] = max(4, round(footprint * 0.35))
+        else:
+            moved["max_area_cm2"] = region.get("max_area_cm2", 10)
+        if not fits(moved, area):
+            notes.append(f"{region['label']}: the sheet's cell holds {area:.0f} cm2; left as it is")
+            continue
+        region.update(moved)
+        notes.append(f"{region['label']}: {here:.0f} -> {area:.0f} cm2, "
+                     f"cut from the sheet's {view} view (cell {cell['box']})")
+    return regions, notes
+
+
+def derive_regions(entry, frame, measured):
+    """The regions cut from the prop's own art.
+
+    The art is drawn leaning, or the other way up, and the mesh stands on its
+    pivot, so the boxes are cut from the art in the frame the mesh stands in.
+    """
     alpha_path = os.path.join(ROOT, entry["alpha_cutout"])
-    # the art is drawn leaning, or the other way up, and the mesh stands on its
-    # pivot: the boxes are cut from the art in the frame the mesh stands in
     alpha = pose.posed_cutout(alpha_of(alpha_path), frame)
     box = alpha.getbbox()
     size, cells = cells_of(alpha)
@@ -218,6 +334,34 @@ def main():
             "expect": "empty",
             "max_area_cm2": 10,
         })
+    return regions
+
+
+def main():
+    asset_id = sys.argv[1]
+    with manifest_io.locked(MANIFEST):
+        manifest = manifest_io.load(MANIFEST)
+    entry = next(a for a in manifest["assets"] if a["id"] == asset_id)
+
+    glb = os.path.join(ROOT, entry["glb_output"])
+    if not os.path.exists(glb):
+        raise SystemExit(f"{glb} does not exist yet")
+    lo, hi = read_glb_bbox(glb)
+    measured = {
+        "width": round(hi[0] - lo[0], 2),
+        "height": round(hi[1] - lo[1], 2),
+        "depth": round(hi[2] - lo[2], 2),
+    }
+    frame = entry["validation"]["frame"]
+
+    regions = derive_regions(entry, frame, measured)
+
+    # A box that the mesh disagrees with is cut again from the sheet. The mesh
+    # is read the way the capture reads it, so what is measured here is what
+    # the capture will measure.
+    tris = mesh_surface.read_glb(glb)
+    points, weights = mesh_surface.sample(tris)
+    regions, notes = refit_from_sheet(entry, frame, measured, regions, points, weights)
 
     # The manifest is written under its lock, and the entry is re-read inside
     # it: the finish chain and the watcher on the issues both write this file,
@@ -264,6 +408,8 @@ def main():
 
     print(f"{asset_id}: measured {measured['width']} x {measured['height']} x {measured['depth']} cm, "
           f"view_fit {written['view_fit']}")
+    for note in notes:
+        print(f"  {note}")
     for region in written["regions"]:
         limit = region.get("min_area_cm2", region.get("max_area_cm2"))
         print(f"  {region['expect']:>6}  {region['min_cm']}..{region['max_cm']}  limit {limit}")

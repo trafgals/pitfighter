@@ -59,7 +59,7 @@ describe("the tools in tools/props", () => {
     // work is done.
     // a real import, at the start of a line: the usage examples in a
     // module's own docstring are indented, and they are not imports
-    const siblings = /^(?:import|from)\s+(manifest_io|issues|git_io|pose)\b/m;
+    const siblings = /^(?:import|from)\s+(manifest_io|issues|git_io|pose|compare_front|mesh_surface|sheet_view|refit_prop)\b/m;
     const offenders: string[] = [];
     for (const name of fs.readdirSync(TOOLS)) {
       if (!name.endsWith(".py")) continue;
