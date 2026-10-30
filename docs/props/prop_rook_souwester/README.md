@@ -1,5 +1,13 @@
 # prop_rook_souwester
 
+
+> **This asset is held at a gate.** The capture it came from did not pass
+> every check, and the renders are here so the finding can be judged, not
+> because the asset is approved. The checks that did not pass:
+
+> - the mesh is one surface, not a pile of shards (5681 of 13404 vertices are duplicates of another vertex (42.4%))
+> - the mesh's seams are closed (10082 of 29035 edges are used by only one triangle (34.7%))
+
 The verification renders for this prop, produced by
 
 ```
