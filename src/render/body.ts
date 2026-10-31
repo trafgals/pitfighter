@@ -44,6 +44,7 @@ import {
   clinchKnee,
   clipFor,
   familyOf,
+  GAITS,
   heightOf,
   loadFrame,
   mirror,
@@ -263,7 +264,7 @@ export interface Body {
   /** where each foot is on the floor (world space) while it carries weight, and how far the leg IK has it (animate.ts) */
   feet: { L: Foot; R: Foot };
   /** the walk cycle: its phase (one per stride of both feet), where the root was last frame, its speed (m/s) */
-  gait: { phase: number; prev: THREE.Vector3 | null; speed: number; on: boolean };
+  gait: { phase: number; prev: THREE.Vector3 | null; speed: number; on: boolean; /** 0 walking ahead .. 1 shuffling sideways or backwards (eased) */ strafe: number };
   /** the skeleton on the ragdoll through a fall (ragdoll.ts), or null */
   rag: Rag | null;
   /** a get-up blending out of the pose the ragdoll left the body lying in, or null */
@@ -286,7 +287,7 @@ export interface Body {
 export interface Foot {
   down: boolean;
   at: THREE.Vector3;
-  swing: { from: THREE.Vector3; u: number; dur: number } | null;
+  swing: { from: THREE.Vector3; u: number; dur: number; /** where the gait last had the foot */ pos?: THREE.Vector3 } | null;
   w: number;
   /** the sole's pitch (rad) on the ankle while walking: toe up at heel strike, toe down as it pushes off */
   roll: number;
@@ -605,7 +606,7 @@ export function buildBody(f: Fighter, skipGear?: ReadonlySet<string>): Body {
     hands: fists,
     ankles,
     feet: { L: newFoot(), R: newFoot() },
-    gait: { phase: 0, prev: null, speed: 0, on: false },
+    gait: { phase: 0, prev: null, speed: 0, on: false, strafe: 0 },
     rag: null,
     settle: null,
     skeleton,
@@ -662,6 +663,8 @@ export interface Cue {
   /** render frames since it started, hitstops left out */
   age: number;
   blend: Pose | null;
+  /** the body's walk cycle, for the arms and the shoulders to swing with the feet (set by animate) */
+  gait?: Body["gait"];
 }
 /** Came down out of the air already lying flat: a throw or a juggle. */
 export const flung = (from: Fighter["state"] | null): boolean => from === "thrown" || from === "air" || from === "airslammed";
@@ -702,7 +705,7 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
   let snap = false;
   let impact = false; // jump onto the pose even in hitstop: the blow it lands is what froze the body
   const t = f.t;
-  const sw = Math.sin(time * 9);
+  
   const nLegs = legs(f);
   // the street fighter's stance: bladed, lead side forward, the chest turned back
   // square to the target, bouncing on bent knees
@@ -758,34 +761,52 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
       p.tail = Math.sin(time * 1.7) * 0.4;
       break;
     }
-    case "walk":
+    case "walk": {
       // the feet are stepped by the gait (animate.ts): the stance legs are where each foot lands under the hip
       plant = nLegs === 2 ? "gait" : "both";
       // walking, the feet come in under the hips, the lead foot only a little ahead
       p.legL = [-0.14, 0.05];
       p.legR = [0.02, -0.05];
       p.y -= 0.02;
-      // guard up while stalking: counter-rotating shoulders against the pelvis stride and natural arm pump
       blade();
-      p.hipY = 0.22 + sw * 0.08;
-      p.spineY = -0.18 - sw * 0.09;
-      p.rz = sw * 0.045;
-      p.spineZ = -sw * 0.035;
-      p.armL[0] += sw * 0.16;
-      p.armR[0] -= sw * 0.16;
-      p.elbowL += sw * 0.08;
-      p.elbowR -= sw * 0.08;
+      // the shoulders, arms and pelvis swing with the feet, not with the clock: c is 1 with the left foot furthest forward, -1 with the right
+      const g = cue.gait;
+      const gt = GAITS[family];
+      const going = g && g.on ? Math.min(1, g.speed / 3) : 0;
+      const c = g && g.on ? -Math.cos(2 * Math.PI * g.phase) : 0;
+      const st = g?.strafe ?? 0;
+      const run = f.running ? 1 : 0;
+      // legs and arms in opposition; the pelvis turns with the leg that is forward and the shoulders against it
+      const a = c * going * gt.swing * (1 - 0.85 * st);
+      p.hipY = 0.22 + c * going * gt.swing * 0.1;
+      p.spineY = -0.18 - c * going * gt.swing * 0.12;
+      p.rz = c * going * 0.045;
+      p.spineZ = -c * going * 0.035;
+      p.armL[0] += a * 0.36;
+      p.armR[0] -= a * 0.36;
+      p.elbowL += a * 0.15;
+      p.elbowR -= a * 0.15;
       p.tail = Math.sin(time * 6) * 0.5;
-      if (f.running) {
-        // Cross held: a sprint, leaning into it, the arms pumping
+      if (st > 0.01) {
+        // locked on and shuffling: low and bladed, the knees bent, the guard up and still, the head on the target
+        p.y -= 0.05 * st;
+        p.kneeL += 0.12 * st;
+        p.kneeR += 0.12 * st;
+        p.spineX += 0.06 * st;
+        p.hipY += 0.1 * st;
+      }
+      if (run) {
+        // Cross held: a sprint, leaning into it, the arms pumping against the legs
         p.spineX += 0.35;
         p.headX -= 0.2;
-        p.armL = [-0.5 + sw * 0.9, 0, 0.2];
-        p.armR = [-0.5 - sw * 0.9, 0, -0.2];
+        const pump = c * going * gt.swing;
+        p.armL = [-0.5 + pump * 1.0, 0, 0.2];
+        p.armR = [-0.5 - pump * 1.0, 0, -0.2];
         p.elbowL = p.elbowR = -1.5;
         p.tail = -0.5;
       }
       break;
+    }
     case "dash": {
       // Cross: driving off the back foot, low and leaning, arms pumping
       plant = "none";

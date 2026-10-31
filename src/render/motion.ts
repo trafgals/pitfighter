@@ -1038,3 +1038,28 @@ export const IDLE: Record<Family, { rate: number; bob: number; sway: number; paw
   grappler: { rate: 2.8, bob: 0.02, sway: 0.05, paw: 0.07 },
   kicker: { rate: 5.0, bob: 0.045, sway: 0.03, paw: 0.05 },
 };
+
+/**
+ * How each family carries itself on the move: its step length against the
+ * standard one, the pelvis's bounce and sideways shift (m), how far the arms and
+ * the shoulders swing against the legs (1: the standard), the share of the cycle
+ * a foot spends in the air at a run, and how high the feet lift.
+ */
+export interface Gait {
+  stride: number;
+  bob: number;
+  shift: number;
+  swing: number;
+  air: number;
+  lift: number;
+}
+export const GAITS: Record<Family, Gait> = {
+  boxing: { stride: 0.92, bob: 0.06, shift: 0.025, swing: 0.8, air: 0.62, lift: 1.1 },
+  karate: { stride: 1, bob: 0.045, shift: 0.02, swing: 0.9, air: 0.6, lift: 1 },
+  muay: { stride: 1, bob: 0.04, shift: 0.035, swing: 1, air: 0.6, lift: 1 },
+  kungfu: { stride: 0.95, bob: 0.035, shift: 0.02, swing: 1.1, air: 0.62, lift: 1.1 },
+  brawler: { stride: 1, bob: 0.05, shift: 0.035, swing: 1.1, air: 0.58, lift: 1 },
+  power: { stride: 1.05, bob: 0.03, shift: 0.045, swing: 0.7, air: 0.55, lift: 0.85 },
+  grappler: { stride: 0.95, bob: 0.03, shift: 0.04, swing: 0.7, air: 0.55, lift: 0.85 },
+  kicker: { stride: 1.05, bob: 0.055, shift: 0.02, swing: 1, air: 0.62, lift: 1.15 },
+};

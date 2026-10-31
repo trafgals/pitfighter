@@ -101,7 +101,7 @@ describe("planted feet", () => {
     for (const speed of [1.2, 3]) {
       const { w, f, b, time } = standing(0);
       f.state = "walk";
-      const S = strideOf(speed);
+      const S = strideOf(speed, familyOf(0));
       let swings = 0;
       let wasDown = true;
       const held: Record<"L" | "R", THREE.Vector3 | null> = { L: null, R: null };

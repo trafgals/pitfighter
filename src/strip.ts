@@ -145,20 +145,40 @@ function rows(): Row[] {
     ];
   }
   // locomotion
-  const walk = (speed: number): Row => ({
-    name: `${speed < 2 ? "walk" : "run"} ${speed} m/s`,
+  // the sim's own velocity (m/frame) as well as the root's travel, as in the game; facing +z (sim angle pi/2)
+  const move = (name: string, vx: number, vz: number, frames = 60, running = false): Row => ({
+    name,
     style: sStyle,
-    frames: 60,
-    start: (f) => Object.assign(f, { state: "walk" }),
-    each: (_f, b) => {
-      b.root.position.z += speed * DT;
+    frames,
+    start: (f) => Object.assign(f, { state: "walk", facing: Math.PI / 2, running }),
+    each: (f, b) => {
+      Object.assign(f, { velX: (vx * DT), velY: (vz * DT) });
+      b.root.position.x += vx * DT;
+      b.root.position.z += vz * DT;
     },
   });
+  // walk 3 m/s, then let go of the stick: the stop
+  const stop: Row = {
+    name: "walk, then stop",
+    style: sStyle,
+    frames: 60,
+    start: (f) => Object.assign(f, { state: "walk", facing: Math.PI / 2, running: false }),
+    each: (f, b, _w, t) => {
+      const v = t < 25 ? 3 : 3 * 0.72 ** (t - 24);
+      if (t >= 25) f.state = "idle";
+      Object.assign(f, { velX: 0, velY: (v * DT) });
+      b.root.position.z += v * DT;
+    },
+  };
   return [
     { name: "idle", style: sStyle, frames: 90, start: (f) => Object.assign(f, { state: "idle" }) },
     { name: "taunt", style: sStyle, frames: 30, start: (f) => Object.assign(f, { state: "taunt", dur: 70 }) },
-    walk(1.2),
-    walk(3),
+    move("walk 1.5 m/s", 0, 1.5),
+    move("walk 3 m/s", 0, 3),
+    move("run 6 m/s", 0, 6, 60, true),
+    move("strafe 3 m/s (locked on)", 3, 0),
+    move("backpedal 2 m/s", 0, -2),
+    stop,
   ];
 }
 
