@@ -114,7 +114,7 @@ The test fails if contact is off the hit frame, if the speed peak is more than a
 | All-Round | karate | jab1 | 12 | 43 | 12 | 0 | 11 | -1 |
 | All-Round | karate | jab2 | 9 | 36 | 9 | 0 | 8 | -1 |
 | All-Round | karate | jab3 | 11 | 38 | 11 | 0 | 11 | 0 |
-| All-Round | karate | punchFin | 17 | 47 | 17 | 0 | 16 | -1 |
+| All-Round | karate | punchFin | 17 | 47 | 17 | 0 | 17 | 0 |
 | All-Round | karate | kick1 | 18 | 48 | 18 | 0 | 18 | 0 |
 | All-Round | karate | kick2 | 20 | 51 | 20 | 0 | 20 | 0 |
 | All-Round | karate | sweep | 26 | 60 | 26 | 0 | 27 | +1 |
@@ -127,14 +127,14 @@ The test fails if contact is off the hit frame, if the speed peak is more than a
 | Street | brawler | jab1 | 10 | 41 | 10 | 0 | 9 | -1 |
 | Street | brawler | jab2 | 7 | 34 | 7 | 0 | 6 | -1 |
 | Street | brawler | jab3 | 9 | 36 | 9 | 0 | 8 | -1 |
-| Street | brawler | punchFin | 15 | 45 | 15 | 0 | 14 | -1 |
+| Street | brawler | punchFin | 15 | 45 | 15 | 0 | 15 | 0 |
 | Street | brawler | kick1 | 16 | 46 | 16 | 0 | 15 | -1 |
 | Street | brawler | kick2 | 18 | 49 | 18 | 0 | 18 | 0 |
 | Street | brawler | sweep | 24 | 58 | 24 | 0 | 24 | 0 |
 | Karate | karate | jab1 | 10 | 41 | 10 | 0 | 9 | -1 |
 | Karate | karate | jab2 | 7 | 34 | 7 | 0 | 6 | -1 |
 | Karate | karate | jab3 | 9 | 36 | 9 | 0 | 9 | 0 |
-| Karate | karate | punchFin | 15 | 45 | 15 | 0 | 14 | -1 |
+| Karate | karate | punchFin | 15 | 45 | 15 | 0 | 15 | 0 |
 | Karate | karate | kick1 | 16 | 46 | 16 | 0 | 16 | 0 |
 | Karate | karate | kick2 | 18 | 49 | 18 | 0 | 18 | 0 |
 | Karate | karate | sweep | 24 | 58 | 24 | 0 | 25 | +1 |
@@ -169,7 +169,7 @@ The test fails if contact is off the hit frame, if the speed peak is more than a
 | Tae Kwon Do | kicker | jab1 | 10 | 41 | 10 | 0 | 9 | -1 |
 | Tae Kwon Do | kicker | jab2 | 7 | 34 | 7 | 0 | 6 | -1 |
 | Tae Kwon Do | kicker | jab3 | 9 | 36 | 9 | 0 | 9 | 0 |
-| Tae Kwon Do | kicker | punchFin | 15 | 45 | 15 | 0 | 14 | -1 |
+| Tae Kwon Do | kicker | punchFin | 15 | 45 | 15 | 0 | 15 | 0 |
 | Tae Kwon Do | kicker | kick1 | 16 | 46 | 16 | 0 | 16 | 0 |
 | Tae Kwon Do | kicker | kick2 | 18 | 49 | 18 | 0 | 18 | 0 |
 | Tae Kwon Do | kicker | sweep | 24 | 58 | 24 | 0 | 23 | -1 |
@@ -177,13 +177,14 @@ The test fails if contact is off the hit frame, if the speed peak is more than a
 | Judo Based | grappler | jab1 | 12 | 43 | 12 | 0 | 11 | -1 |
 | Judo Based | grappler | jab2 | 9 | 36 | 9 | 0 | 8 | -1 |
 | Judo Based | grappler | jab3 | 11 | 38 | 11 | 0 | 11 | 0 |
+| Judo Based | grappler | punchFin | 17 | 47 | 17 | 0 | 17 | 0 |
 | Judo Based | grappler | kick1 | 18 | 48 | 18 | 0 | 18 | 0 |
 | Judo Based | grappler | kick2 | 20 | 51 | 20 | 0 | 20 | 0 |
 | Judo Based | grappler | sweep | 26 | 60 | 26 | 0 | 26 | 0 |
 | Samurai Sword | brawler | jab1 | 14 | 45 | 14 | 0 | 13 | -1 |
 | Samurai Sword | brawler | jab2 | 11 | 38 | 11 | 0 | 10 | -1 |
 | Samurai Sword | brawler | jab3 | 13 | 40 | 13 | 0 | 12 | -1 |
-| Samurai Sword | brawler | punchFin | 19 | 49 | 19 | 0 | 18 | -1 |
+| Samurai Sword | brawler | punchFin | 19 | 49 | 19 | 0 | 19 | 0 |
 | Samurai Sword | brawler | kick1 | 20 | 50 | 20 | 0 | 19 | -1 |
 | Samurai Sword | brawler | kick2 | 22 | 53 | 22 | 0 | 22 | 0 |
 | Samurai Sword | brawler | sweep | 28 | 62 | 28 | 0 | 28 | 0 |

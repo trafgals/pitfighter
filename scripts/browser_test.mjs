@@ -157,7 +157,7 @@ async function main() {
   // the game reads the keyboard once per animation frame, and a slow software
   // renderer can go longer than a fixed delay between frames: hold every key
   // down, and then up, across two rendered frames so the poll always sees both
-  const frames = () => withTimeout(page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))), 5_000, "two frames");
+  const frames = () => withTimeout(page.evaluate(() => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))), 15_000, "two frames");
   const press = async (key) => {
     await page.keyboard.down(key);
     await frames();
@@ -182,8 +182,8 @@ async function main() {
   check(stageAfter === "hell-toilet", `[ goes back to Hell Toilet (${stageAfter})`);
   await press("Enter");
   // the countdown: the sim waits, a big number counts down, the human stands in a column of light under a bouncing tag
-  await page.waitForFunction(() => window.__game.mode === "countdown", { timeout: 5_000 });
-  await page.waitForFunction(() => document.querySelector(".countdown.show")?.textContent === "2", { timeout: 5_000 });
+  await page.waitForFunction(() => window.__game.mode === "countdown", { timeout: 15_000 });
+  await page.waitForFunction(() => document.querySelector(".countdown.show")?.textContent === "2", { timeout: 15_000 });
   const count = await page.evaluate(() => {
     const g = window.__game;
     const cards = document.querySelector("#hud .cards").getBoundingClientRect();
@@ -691,7 +691,7 @@ async function main() {
   await page.keyboard.press("Digit1");
   await withTimeout(page.evaluate(() => window.__game.step(90)), 15_000, "lab take 90 frames");
   await page.keyboard.press("Digit1");
-  await withTimeout(page.waitForFunction(() => /take ready/.test(document.querySelector("#lab .status").textContent), { timeout: 5_000 }), 6_000, "lab take ready");
+  await withTimeout(page.waitForFunction(() => /take ready/.test(document.querySelector("#lab .status").textContent), { timeout: 15_000 }), 16_000, "lab take ready");
   const ready = await page.evaluate(() => document.querySelector("#lab .status").textContent);
   await page.keyboard.press("Digit2");
   await withTimeout(page.evaluate(() => window.__game.step(30)), 15_000, "lab replay 30 frames");

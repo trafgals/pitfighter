@@ -17,6 +17,11 @@ export const toV = (x: number, y: number, h = 0) => new THREE.Vector3(x, h, -y);
 export const yaw = (facing: number) => Math.atan2(Math.cos(facing), -Math.sin(facing));
 
 export function canvasTexture(w: number, h: number, draw: (g: CanvasRenderingContext2D) => void): THREE.CanvasTexture {
+  if (typeof document === "undefined") {
+    const dt = new THREE.DataTexture(new Uint8Array(4), 1, 1);
+    dt.wrapS = dt.wrapT = THREE.RepeatWrapping;
+    return dt as unknown as THREE.CanvasTexture;
+  }
   const c = document.createElement("canvas");
   c.width = w;
   c.height = h;
@@ -350,161 +355,449 @@ const SEATS: Record<VehicleKind, [number, number]> = {
   crane: [0.85, 1.05],
 };
 
-interface VehicleView {
+export interface VehicleView {
   root: THREE.Group;
+  body: THREE.Group;
   paint: THREE.MeshStandardMaterial;
+  glassMat: THREE.MeshStandardMaterial;
   flag: THREE.MeshBasicMaterial;
   spin: THREE.Object3D | null; // the mixer drum, the roller drum, the excavator's cab
+  implement: THREE.Object3D | null; // articulated blade, bucket, forks, boom, bed
+  hood: THREE.Object3D | null;
+  doorL: THREE.Object3D | null;
+  doorR: THREE.Object3D | null;
+  exhaust: THREE.Object3D | null;
+  headlights: THREE.Mesh[];
+  wheels: THREE.Object3D[];
+  deformables: { mesh: THREE.Mesh; base: Float32Array }[];
   smoke: number; // render-time smoke spawn accumulator
   kind: VehicleKind;
   wrecked: boolean;
+  lastHp: number;
+  stage: number;
 }
 
-/** A construction machine built from primitives, facing +x in its own space (sim facing 0). */
-function buildVehicle(kind: VehicleKind): VehicleView {
+/** Deform subdivided vehicle body/implement meshes inward around `localPt` (in `view.root` local space). */
+export function deformVehicle(view: VehicleView, localPt: THREE.Vector3, radius: number, depth: number): void {
+  const r2 = radius * radius;
+  for (const { mesh, base } of view.deformables) {
+    const geo = mesh.geometry;
+    const pos = geo.getAttribute("position") as THREE.BufferAttribute;
+    const mx = mesh.position.x;
+    const my = mesh.position.y;
+    const mz = mesh.position.z;
+    let changed = false;
+    for (let i = 0; i < pos.count; i++) {
+      const vx = pos.getX(i);
+      const vy = pos.getY(i);
+      const vz = pos.getZ(i);
+      const wx = mx + vx;
+      const wy = my + vy;
+      const wz = mz + vz;
+      const dx = wx - localPt.x;
+      const dy = wy - localPt.y;
+      const dz = wz - localPt.z;
+      const d2 = dx * dx + dy * dy + dz * dz;
+      if (d2 >= r2) continue;
+      const falloff = (1 - Math.sqrt(d2) / radius) ** 2;
+      const crease = 0.82 + 0.36 * Math.sin( base[i * 3] * 9.7 + base[i * 3 + 2] * 11.3 );
+      const push = depth * falloff * crease;
+      // Crumple inward toward chassis core and downward on heavy blows
+      const nx = vx - Math.sign(wx || 1) * push * 0.85;
+      const ny = vy - push * 0.35 + Math.sin(base[i * 3] * 14) * push * 0.25;
+      const nz = vz - Math.sign(wz || 1) * push * 0.85;
+      // Clamp maximum displacement relative to base vertex so geometry stays coherent
+      const bx = base[i * 3];
+      const by = base[i * 3 + 1];
+      const bz = base[i * 3 + 2];
+      pos.setXYZ(
+        i,
+         THREE.MathUtils.clamp(nx, bx - 0.42, bx + 0.42),
+        THREE.MathUtils.clamp(ny, by - 0.35, by + 0.35),
+        THREE.MathUtils.clamp(nz, bz - 0.42, bz + 0.42),
+      );
+      changed = true;
+    }
+    if (changed) {
+      pos.needsUpdate = true;
+      geo.computeVertexNormals();
+    }
+  }
+}
+
+/** A high-detail construction machine built from articulated & deformable parts, facing +x in its own space (sim facing 0). */
+export function buildVehicle(kind: VehicleKind): VehicleView {
   const root = new THREE.Group();
   const body = new THREE.Group(); // faces +x
   root.add(body);
-  const paint = new THREE.MeshStandardMaterial({ color: kind === "mixer" ? 0xe8e8e8 : kind === "forklift" ? 0xff7a10 : CAT_YELLOW, roughness: 0.55, metalness: 0.2 });
-  const dark = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.9 });
-  const steel = new THREE.MeshStandardMaterial({ color: 0x8a8f96, roughness: 0.4, metalness: 0.8 });
-  const glass = new THREE.MeshStandardMaterial({ color: 0x6aa0c8, roughness: 0.1, metalness: 0.3, transparent: true, opacity: 0.45 });
-  const wheel = (x: number, z: number, r = 0.42, w = 0.32) => {
-    const m = cyl(r, r, w, dark, 18);
-    m.rotation.x = Math.PI / 2;
-    m.position.set(x, r, z);
-    body.add(m);
+  const paint = new THREE.MeshStandardMaterial({
+    color: kind === "mixer" ? 0xe8e4dc : kind === "forklift" ? 0xff7a10 : CAT_YELLOW,
+    roughness: 0.48,
+    metalness: 0.28,
+  });
+  const dark = new THREE.MeshStandardMaterial({ color: 0x22201e, roughness: 0.85, metalness: 0.35 });
+  const steel = new THREE.MeshStandardMaterial({ color: 0x8a8f96, roughness: 0.35, metalness: 0.82 });
+  const chrome = new THREE.MeshStandardMaterial({ color: 0xd8e0e8, roughness: 0.16, metalness: 0.94 });
+  const brass = new THREE.MeshStandardMaterial({ color: 0xd49b38, roughness: 0.28, metalness: 0.86 });
+  const glassMat = new THREE.MeshStandardMaterial({ color: 0x74accf, roughness: 0.12, metalness: 0.3, transparent: true, opacity: 0.46 });
+  const bulbMat = new THREE.MeshBasicMaterial({ color: 0xfff0b8 });
+
+  const deformables: { mesh: THREE.Mesh; base: Float32Array }[] = [];
+  const wheels: THREE.Object3D[] = [];
+  const headlights: THREE.Mesh[] = [];
+  let doorL: THREE.Object3D | null = null;
+  let doorR: THREE.Object3D | null = null;
+  let hood: THREE.Object3D | null = null;
+  let exhaust: THREE.Object3D | null = null;
+  let implement: THREE.Object3D | null = null;
+  let spin: THREE.Object3D | null = null;
+
+  const dBox = (w: number, h: number, d: number, mat: THREE.Material, x = 0, y = 0, z = 0, parent: THREE.Object3D = body) => {
+    const geo = new THREE.BoxGeometry(w, h, d, 6, 4, 6);
+    const m = new THREE.Mesh(geo, mat);
+    m.position.set(x, y, z);
+    parent.add(m);
+    const pos = geo.getAttribute("position") as THREE.BufferAttribute;
+    deformables.push({ mesh: m, base: new Float32Array(pos.array) });
+    return m;
   };
-  const tracks = (len: number, z: number) => body.add(box(len, 0.55, 0.45, dark, 0, 0.3, z));
+
+  const wheel = (x: number, z: number, r = 0.42, w = 0.32) => {
+    const wg = new THREE.Group();
+    const tire = cyl(r, r, w, dark, 20);
+    tire.rotation.x = Math.PI / 2;
+    const rim = cyl(r * 0.56, r * 0.56, w + 0.02, paint, 14);
+    rim.rotation.x = Math.PI / 2;
+    const hub = cyl(r * 0.22, r * 0.22, w + 0.05, brass, 10);
+    hub.rotation.x = Math.PI / 2;
+    wg.add(tire, rim, hub);
+    for (let i = 0; i < 8; i++) {
+      const a = (i / 8) * Math.PI * 2;
+      const lug = box(0.06, 0.05, w * 0.92, dark, Math.cos(a) * (r - 0.01), Math.sin(a) * (r - 0.01), 0);
+      lug.rotation.z = a;
+      wg.add(lug);
+    }
+    wg.position.set(x, r, z);
+    body.add(wg);
+    wheels.push(wg);
+  };
+
+  const tracks = (len: number, z: number) => {
+    const tg = new THREE.Group();
+    tg.add(dBox(len, 0.52, 0.44, dark, 0, 0.28, 0, tg));
+    // Drive sprocket, front idler, and bogie rollers
+    const spF = cyl(0.24, 0.24, 0.48, steel, 14);
+    spF.rotation.x = Math.PI / 2;
+    spF.position.set(len * 0.42, 0.28, 0);
+    const spR = cyl(0.24, 0.24, 0.48, brass, 14);
+    spR.rotation.x = Math.PI / 2;
+    spR.position.set(-len * 0.42, 0.28, 0);
+    tg.add(spF, spR);
+    for (let k = -2; k <= 2; k++) {
+      const grouser = box(0.08, 0.05, 0.46, steel, k * (len * 0.18), 0.55, 0);
+      tg.add(grouser);
+    }
+    tg.position.set(0, 0, z);
+    body.add(tg);
+    wheels.push(tg);
+  };
+
+  const buildEngineHood = (x: number, y: number, w: number, h: number, d: number, mat: THREE.Material = paint) => {
+    const hg = new THREE.Group();
+    dBox(w, h, d, mat, 0, h / 2, 0, hg);
+    // Radiator grille & brass trim
+    hg.add(box(0.04, h * 0.72, d * 0.74, dark, w / 2 + 0.01, h * 0.5, 0));
+    hg.add(box(0.05, h * 0.78, 0.04, brass, w / 2 + 0.015, h * 0.5, d * 0.38));
+    hg.add(box(0.05, h * 0.78, 0.04, brass, w / 2 + 0.015, h * 0.5, -d * 0.38));
+    for (let i = 0; i < 4; i++) {
+      hg.add(box(0.05, 0.025, d * 0.68, steel, w / 2 + 0.02, h * (0.22 + i * 0.17), 0));
+    }
+    hg.position.set(x, y, 0);
+    body.add(hg);
+    hood = hg;
+    // Vertical exhaust stack with rain-cap
+    const ex = new THREE.Group();
+    const pipe = cyl(0.045, 0.055, 0.75, dark, 10);
+    pipe.position.y = 0.375;
+    const muffler = cyl(0.085, 0.085, 0.32, steel, 10);
+    muffler.position.y = 0.22;
+    const cap = box(0.13, 0.025, 0.13, brass, 0.02, 0.76, 0);
+    cap.rotation.z = -0.25;
+    ex.add(pipe, muffler, cap);
+    ex.position.set(x + w * 0.15, y + h, -d * 0.38);
+    body.add(ex);
+    exhaust = ex;
+    // Twin brass headlamps
+    for (const sz of [-1, 1]) {
+      const lamp = new THREE.Group();
+      const housing = cyl(0.075, 0.06, 0.1, brass, 12);
+      housing.rotation.z = Math.PI / 2;
+      const lens = new THREE.Mesh(new THREE.CircleGeometry(0.068, 12), bulbMat);
+      lens.rotation.y = Math.PI / 2;
+      lens.position.x = 0.055;
+      lamp.add(housing, lens);
+      lamp.position.set(x + w / 2 + 0.02, y + h * 0.68, sz * (d * 0.42));
+      body.add(lamp);
+      headlights.push(lens);
+    }
+  };
+
   const cab = (x: number, y: number, w = 0.9, h = 0.9, d = 1.1) => {
     const frame = new THREE.Group();
-    frame.add(box(w, 0.08, d, paint, 0, h, 0));
+    dBox(w + 0.06, 0.08, d + 0.06, paint, 0, h, 0, frame);
     for (const [px, pz] of [
       [w / 2, d / 2],
       [-w / 2, d / 2],
       [w / 2, -d / 2],
       [-w / 2, -d / 2],
-    ])
-      frame.add(box(0.06, h, 0.06, paint, px, h / 2, pz));
-    frame.add(box(0.02, h * 0.7, d * 0.95, glass, w / 2, h * 0.55, 0));
+    ]) {
+      frame.add(box(0.06, h, 0.06, dark, px, h / 2, pz));
+    }
+    // Front & rear glass
+    frame.add(box(0.02, h * 0.68, d * 0.92, glassMat, w / 2, h * 0.56, 0));
+    frame.add(box(0.02, h * 0.55, d * 0.88, glassMat, -w / 2, h * 0.6, 0));
+    // Hinged Left & Right breakaway cab doors
+    const mkDoor = (side: 1 | -1) => {
+      const dg = new THREE.Group();
+      dBox(w * 0.86, h * 0.44, 0.04, paint, -w * 0.43, h * 0.24, 0, dg);
+      dg.add(box(w * 0.78, h * 0.38, 0.02, glassMat, -w * 0.43, h * 0.64, 0));
+      dg.add(box(0.14, 0.03, 0.05, brass, -w * 0.72, h * 0.42, side * 0.03));
+      dg.position.set(w * 0.43, 0.04, side * (d / 2 + 0.01));
+      frame.add(dg);
+      return dg;
+    };
+    doorL = mkDoor(1);
+    doorR = mkDoor(-1);
     frame.position.set(x, y, 0);
     body.add(frame);
   };
-  let spin: THREE.Object3D | null = null;
+
   switch (kind) {
     case "bulldozer": {
-      tracks(2.0, 0.65);
-      tracks(2.0, -0.65);
-      body.add(box(1.7, 0.6, 1.0, paint, -0.1, 0.8, 0));
-      cab(-0.4, 1.1);
-      const blade = box(0.2, 0.85, 2.3, steel, 1.25, 0.5, 0);
-      blade.rotation.z = -0.15;
-      body.add(blade, box(0.5, 0.1, 0.1, paint, 1.0, 0.6, 0.6), box(0.5, 0.1, 0.1, paint, 1.0, 0.6, -0.6));
+      tracks(2.05, 0.68);
+      tracks(2.05, -0.68);
+      buildEngineHood(0.05, 0.52, 1.55, 0.62, 1.02);
+      cab(-0.42, 1.1, 0.88, 0.92, 1.06);
+      const bladeG = new THREE.Group();
+      const mainBlade = dBox(0.22, 0.88, 2.38, steel, 1.28, 0.52, 0, bladeG);
+      mainBlade.rotation.z = -0.14;
+      // Curved top spill guard & side cheek plates
+      const topGuard = box(0.18, 0.22, 2.34, steel, 1.22, 1.0, 0);
+      topGuard.rotation.z = 0.28;
+      bladeG.add(
+        topGuard,
+        box(0.36, 0.82, 0.06, steel, 1.18, 0.5, 1.16),
+        box(0.36, 0.82, 0.06, steel, 1.18, 0.5, -1.16),
+        box(0.65, 0.12, 0.12, paint, 0.95, 0.36, 0.62),
+        box(0.65, 0.12, 0.12, paint, 0.95, 0.36, -0.62),
+      );
+      // Twin hydraulic lift cylinders
+      for (const sz of [-0.46, 0.46]) {
+        const cylB = cyl(0.06, 0.06, 0.72, dark, 10);
+        cylB.position.set(0.88, 0.88, sz);
+        cylB.rotation.z = -0.45;
+        const rod = cyl(0.035, 0.035, 0.5, chrome, 8);
+        rod.position.set(1.06, 0.66, sz);
+        rod.rotation.z = -0.45;
+        bladeG.add(cylB, rod);
+      }
+      // Rear 3-shank ripper
+      for (const sz of [-0.35, 0, 0.35]) {
+        const shank = box(0.12, 0.45, 0.06, steel, -1.12, 0.38, sz);
+        shank.rotation.z = 0.35;
+        body.add(shank);
+      }
+      body.add(bladeG);
+      implement = bladeG;
       break;
     }
     case "excavator": {
-      tracks(2.2, 0.7);
-      tracks(2.2, -0.7);
+      tracks(2.2, 0.72);
+      tracks(2.2, -0.72);
       const top = new THREE.Group();
-      top.add(box(1.6, 0.55, 1.4, paint, -0.2, 0.0, 0));
-      const boom = box(1.8, 0.22, 0.25, paint, 0.9, 0.6, 0.35);
-      boom.rotation.z = 0.55;
-      const stick = box(1.2, 0.18, 0.2, paint, 1.95, 0.75, 0.35);
-      stick.rotation.z = -1.0;
-      const bucket = box(0.45, 0.4, 0.55, steel, 2.3, 0.15, 0.35);
-      top.add(boom, stick, bucket);
+      dBox(1.65, 0.58, 1.44, paint, -0.22, 0.0, 0, top);
+      // Counterweight & engine louvres at rear
+      dBox(0.38, 0.62, 1.48, dark, -0.95, 0.04, 0, top);
+      const armG = new THREE.Group();
+      const boom = dBox(1.75, 0.24, 0.26, paint, 0.85, 0.58, 0.32, armG);
+      boom.rotation.z = 0.52;
+      const boomCyl = cyl(0.05, 0.05, 1.1, chrome, 10);
+      boomCyl.rotation.z = -0.95;
+      boomCyl.position.set(0.68, 0.38, 0.32);
+      const stick = dBox(1.22, 0.19, 0.2, paint, 1.92, 0.72, 0.32, armG);
+      stick.rotation.z = -0.98;
+      dBox(0.48, 0.42, 0.58, steel, 2.28, 0.15, 0.32, armG);
+      for (let t = -2; t <= 2; t++) {
+        armG.add(box(0.18, 0.04, 0.05, brass, 2.52, 0.02, 0.32 + t * 0.11));
+      }
+      armG.add(boomCyl);
+      top.add(armG);
       top.position.y = 0.85;
       body.add(top);
-      cab(0.1, 1.1, 0.8, 0.9, 0.7);
+      buildEngineHood(-0.35, 0.85, 0.9, 0.52, 0.85);
+      cab(0.12, 1.1, 0.82, 0.9, 0.72);
       spin = top;
+      implement = armG;
       break;
     }
     case "dumptruck": {
-      wheel(1.0, 0.75, 0.5);
-      wheel(1.0, -0.75, 0.5);
-      wheel(-0.8, 0.75, 0.5);
-      wheel(-0.8, -0.75, 0.5);
-      body.add(box(2.6, 0.3, 1.3, dark, 0, 0.6, 0));
-      cab(0.75, 0.75, 0.8, 0.85, 1.2);
+      wheel(1.0, 0.76, 0.5);
+      wheel(1.0, -0.76, 0.5);
+      wheel(-0.8, 0.76, 0.5);
+      wheel(-0.8, -0.76, 0.5);
+      dBox(2.65, 0.32, 1.32, dark, 0, 0.6, 0);
+      buildEngineHood(1.02, 0.74, 0.62, 0.55, 1.14);
+      cab(0.62, 0.75, 0.78, 0.86, 1.2);
       const bed = new THREE.Group();
-      bed.add(box(1.5, 0.08, 1.5, paint, 0, 0, 0), box(1.5, 0.6, 0.08, paint, 0, 0.3, 0.72), box(1.5, 0.6, 0.08, paint, 0, 0.3, -0.72), box(0.08, 0.7, 1.5, paint, 0.72, 0.35, 0));
-      bed.position.set(-0.55, 0.82, 0);
+      dBox(1.58, 0.1, 1.54, paint, 0, 0, 0, bed);
+      dBox(1.58, 0.64, 0.09, paint, 0, 0.32, 0.73, bed);
+      dBox(1.58, 0.64, 0.09, paint, 0, 0.32, -0.73, bed);
+      dBox(0.09, 0.76, 1.54, paint, 0.75, 0.38, 0, bed);
+      // Canopy spill shield over cab & structural side ribs
+      bed.add(box(0.48, 0.07, 1.54, paint, 0.95, 0.76, 0));
+      for (let r = -2; r <= 2; r++) {
+        bed.add(box(0.06, 0.62, 0.05, steel, r * 0.3, 0.32, 0.78));
+        bed.add(box(0.06, 0.62, 0.05, steel, r * 0.3, 0.32, -0.78));
+      }
+      // Tailgate
+      dBox(0.07, 0.6, 1.48, steel, -0.76, 0.32, 0, bed);
+      bed.position.set(-0.56, 0.82, 0);
       bed.rotation.z = 0.05;
       body.add(bed);
+      implement = bed;
       break;
     }
     case "forklift": {
-      wheel(0.45, 0.45, 0.28, 0.22);
-      wheel(0.45, -0.45, 0.28, 0.22);
-      wheel(-0.45, 0.45, 0.24, 0.2);
-      wheel(-0.45, -0.45, 0.24, 0.2);
-      body.add(box(1.2, 0.5, 0.95, paint, -0.1, 0.5, 0), box(0.4, 0.5, 0.9, dark, -0.55, 0.75, 0));
-      cab(-0.05, 0.6, 0.7, 1.1, 0.85);
-      body.add(box(0.08, 2.0, 0.08, steel, 0.65, 1.0, 0.3), box(0.08, 2.0, 0.08, steel, 0.65, 1.0, -0.3));
-      body.add(box(0.9, 0.05, 0.12, steel, 1.1, 0.25, 0.25), box(0.9, 0.05, 0.12, steel, 1.1, 0.25, -0.25));
+      wheel(0.45, 0.46, 0.28, 0.22);
+      wheel(0.45, -0.46, 0.28, 0.22);
+      wheel(-0.45, 0.46, 0.24, 0.2);
+      wheel(-0.45, -0.46, 0.24, 0.2);
+      buildEngineHood(-0.12, 0.26, 1.18, 0.5, 0.94);
+      dBox(0.42, 0.56, 0.92, dark, -0.58, 0.68, 0);
+      cab(-0.05, 0.6, 0.72, 1.1, 0.86);
+      // Dual mast rails & hydraulic lift cylinder
+      body.add(
+        box(0.08, 2.05, 0.08, steel, 0.65, 1.02, 0.32),
+        box(0.08, 2.05, 0.08, steel, 0.65, 1.02, -0.32),
+        box(0.06, 0.08, 0.68, dark, 0.65, 1.95, 0),
+        box(0.06, 0.08, 0.68, dark, 0.65, 1.1, 0),
+      );
+      const liftCyl = cyl(0.045, 0.045, 1.6, chrome, 10);
+      liftCyl.position.set(0.62, 0.95, 0);
+      body.add(liftCyl);
+      const forkG = new THREE.Group();
+      forkG.add(
+        box(0.06, 0.55, 0.74, dark, 0.72, 0.48, 0),
+        dBox(0.95, 0.05, 0.13, steel, 1.14, 0.22, 0.25, forkG),
+        dBox(0.95, 0.05, 0.13, steel, 1.14, 0.22, -0.25, forkG),
+      );
+      body.add(forkG);
+      implement = forkG;
       break;
     }
     case "roller": {
-      const drum = cyl(0.55, 0.55, 1.7, steel, 24);
+      const drum = cyl(0.56, 0.56, 1.74, steel, 28);
       drum.rotation.x = Math.PI / 2;
-      drum.position.set(0.85, 0.55, 0);
-      body.add(drum, box(0.4, 0.3, 1.8, paint, 0.85, 1.1, 0));
-      wheel(-0.7, 0.75, 0.5, 0.35);
-      wheel(-0.7, -0.75, 0.5, 0.35);
-      body.add(box(1.4, 0.55, 1.2, paint, -0.5, 0.8, 0));
+      drum.position.set(0.85, 0.56, 0);
+      // Yoke frame & scraper bar around compactor drum
+      const yoke = new THREE.Group();
+      dBox(0.45, 0.32, 1.84, paint, 0.85, 1.12, 0, yoke);
+      yoke.add(
+        box(0.55, 0.12, 0.08, paint, 0.65, 0.65, 0.92),
+        box(0.55, 0.12, 0.08, paint, 0.65, 0.65, -0.92),
+        box(0.05, 0.08, 1.76, brass, 1.44, 0.58, 0),
+      );
+      body.add(drum, yoke);
+      wheel(-0.7, 0.76, 0.5, 0.36);
+      wheel(-0.7, -0.76, 0.5, 0.36);
+      buildEngineHood(-0.52, 0.52, 1.38, 0.56, 1.18);
       cab(-0.4, 1.05, 0.85, 0.85, 1.0);
       spin = drum;
+      implement = yoke;
       break;
     }
     case "mixer": {
-      wheel(1.0, 0.7, 0.45);
-      wheel(1.0, -0.7, 0.45);
-      wheel(-0.6, 0.7, 0.45);
-      wheel(-0.6, -0.7, 0.45);
-      wheel(-1.1, 0.7, 0.45);
-      wheel(-1.1, -0.7, 0.45);
-      body.add(box(2.8, 0.3, 1.2, dark, 0, 0.55, 0));
-      const cabPaint = new THREE.MeshStandardMaterial({ color: 0xc8202a, roughness: 0.5 });
-      body.add(box(0.8, 0.6, 1.2, cabPaint, 0.95, 1.0, 0));
-      cab(0.85, 0.75, 0.8, 0.85, 1.2);
+      wheel(1.0, 0.72, 0.45);
+      wheel(1.0, -0.72, 0.45);
+      wheel(-0.6, 0.72, 0.45);
+      wheel(-0.6, -0.72, 0.45);
+      wheel(-1.1, 0.72, 0.45);
+      wheel(-1.1, -0.72, 0.45);
+      dBox(2.85, 0.32, 1.22, dark, 0, 0.55, 0);
+      const cabPaint = new THREE.MeshStandardMaterial({ color: 0xc8202a, roughness: 0.45, metalness: 0.25 });
+      buildEngineHood(0.98, 0.7, 0.78, 0.58, 1.18, cabPaint);
+      cab(0.84, 0.75, 0.8, 0.85, 1.2);
       const drumG = new THREE.Group();
-      const drum = new THREE.Mesh(new THREE.SphereGeometry(0.7, 20, 14), paint);
-      drum.scale.set(1.5, 1, 1);
-      const stripe = new THREE.Mesh(new THREE.TorusGeometry(0.66, 0.05, 6, 24), new THREE.MeshStandardMaterial({ color: 0xc8202a }));
-      stripe.rotation.y = Math.PI / 2;
-      drumG.add(drum, stripe);
-      drumG.position.set(-0.5, 1.4, 0);
-      drumG.rotation.z = 0.25;
-      body.add(drumG);
+      const drumGeo = new THREE.SphereGeometry(0.72, 20, 14);
+      const drum = new THREE.Mesh(drumGeo, paint);
+      drum.scale.set(1.52, 1, 1);
+      deformables.push({ mesh: drum, base: new Float32Array((drumGeo.getAttribute("position") as THREE.BufferAttribute).array) });
+      const stripeMat = new THREE.MeshStandardMaterial({ color: 0xc8202a, roughness: 0.4 });
+      for (const sx of [-0.35, 0, 0.35]) {
+        const st = new THREE.Mesh(new THREE.TorusGeometry(0.66 - Math.abs(sx) * 0.2, 0.045, 6, 24), stripeMat);
+        st.rotation.y = Math.PI / 2 + 0.28;
+        st.position.x = sx;
+        drumG.add(st);
+      }
+      drumG.add(drum);
+      drumG.position.set(-0.48, 1.42, 0);
+      drumG.rotation.z = 0.24;
+      // Rear charging hopper & swiveling discharge chute
+      const chuteG = new THREE.Group();
+      chuteG.add(
+        box(0.35, 0.45, 0.5, steel, -1.35, 1.65, 0),
+        box(0.75, 0.1, 0.26, steel, -1.58, 1.12, 0.18),
+      );
+      body.add(drumG, chuteG);
       spin = drumG;
+      implement = chuteG;
       break;
     }
     case "loader": {
-      wheel(0.6, 0.7, 0.5, 0.35);
-      wheel(0.6, -0.7, 0.5, 0.35);
-      wheel(-0.7, 0.7, 0.5, 0.35);
-      wheel(-0.7, -0.7, 0.5, 0.35);
-      body.add(box(1.9, 0.55, 1.1, paint, -0.1, 0.8, 0));
+      wheel(0.6, 0.72, 0.5, 0.36);
+      wheel(0.6, -0.72, 0.5, 0.36);
+      wheel(-0.7, 0.72, 0.5, 0.36);
+      wheel(-0.7, -0.72, 0.5, 0.36);
+      buildEngineHood(-0.18, 0.52, 1.85, 0.56, 1.1);
       cab(-0.2, 1.05, 0.85, 0.9, 1.0);
-      body.add(box(0.8, 0.12, 0.15, paint, 1.15, 0.75, 0.45), box(0.8, 0.12, 0.15, paint, 1.15, 0.75, -0.45));
-      const bucket = box(0.6, 0.55, 2.0, steel, 1.6, 0.5, 0);
-      bucket.rotation.z = 0.3;
-      body.add(bucket);
+      const scoopG = new THREE.Group();
+      scoopG.add(
+        box(0.88, 0.13, 0.14, paint, 1.12, 0.76, 0.46),
+        box(0.88, 0.13, 0.14, paint, 1.12, 0.76, -0.46),
+      );
+      const bucket = dBox(0.62, 0.58, 2.04, steel, 1.62, 0.5, 0, scoopG);
+      bucket.rotation.z = 0.28;
+      for (let t = -3; t <= 3; t++) {
+        scoopG.add(box(0.2, 0.04, 0.06, brass, 1.95, 0.24, t * 0.26));
+      }
+      body.add(scoopG);
+      implement = scoopG;
       break;
     }
     case "crane": {
-      wheel(1.0, 0.75, 0.48);
-      wheel(1.0, -0.75, 0.48);
-      wheel(-0.4, 0.75, 0.48);
-      wheel(-0.4, -0.75, 0.48);
-      wheel(-1.0, 0.75, 0.48);
-      wheel(-1.0, -0.75, 0.48);
-      body.add(box(2.8, 0.35, 1.35, paint, 0, 0.65, 0));
+      wheel(1.0, 0.76, 0.48);
+      wheel(1.0, -0.76, 0.48);
+      wheel(-0.4, 0.76, 0.48);
+      wheel(-0.4, -0.76, 0.48);
+      wheel(-1.0, 0.76, 0.48);
+      wheel(-1.0, -0.76, 0.48);
+      dBox(2.85, 0.36, 1.36, paint, 0, 0.65, 0);
+      // Outrigger stabilizer beams
+      for (const [ox, oz] of [[0.6, 0.82], [0.6, -0.82], [-0.9, 0.82], [-0.9, -0.82]]) {
+        body.add(box(0.18, 0.14, 0.35, dark, ox, 0.42, oz), cyl(0.16, 0.2, 0.08, steel, 10));
+      }
+      buildEngineHood(-0.88, 0.82, 0.85, 0.52, 1.04);
       cab(0.85, 0.82, 0.8, 0.85, 1.3);
-      const boom = box(3.6, 0.3, 0.35, paint, -0.1, 1.95, 0);
+      const boomG = new THREE.Group();
+      const boom = dBox(3.65, 0.32, 0.36, paint, -0.1, 1.95, 0, boomG);
       boom.rotation.z = 0.5;
-      const hook = box(0.08, 1.0, 0.08, steel, 1.45, 2.3, 0);
-      body.add(boom, hook, box(0.8, 0.5, 1.0, paint, -0.9, 1.05, 0));
+      const innerBoom = box(1.4, 0.22, 0.24, steel, 1.25, 2.68, 0);
+      innerBoom.rotation.z = 0.5;
+      const cable = box(0.03, 1.15, 0.03, dark, 1.65, 2.22, 0);
+      const hookBlock = box(0.16, 0.26, 0.16, brass, 1.65, 1.62, 0);
+      boomG.add(innerBoom, cable, hookBlock);
+      body.add(boomG);
+      implement = boomG;
       break;
     }
   }
@@ -515,7 +808,27 @@ function buildVehicle(kind: VehicleKind): VehicleView {
   fl.position.set(-0.68, 2.45, 0.5);
   body.add(ant, fl);
   shadowed(root);
-  return { root, paint, flag, spin, smoke: 0, kind, wrecked: false };
+  return {
+    root,
+    body,
+    paint,
+    glassMat,
+    flag,
+    spin,
+    implement,
+    hood,
+    doorL,
+    doorR,
+    exhaust,
+    headlights,
+    wheels,
+    deformables,
+    smoke: 0,
+    kind,
+    wrecked: false,
+    lastHp: -1,
+    stage: 0,
+  };
 }
 
 class ConstructionView extends StageView {
@@ -527,6 +840,7 @@ class ConstructionView extends StageView {
   private smokeAge: Float32Array;
   private smokeN = 0;
   private beacons: THREE.PointLight[] = [];
+  private debris: { mesh: THREE.Object3D; vx: number; vy: number; vz: number; rx: number; rz: number; age: number }[] = [];
 
   constructor() {
     super();
@@ -600,7 +914,7 @@ class ConstructionView extends StageView {
     fence(YARD.hy * 2 + 6, -(YARD.hx + 3), 0, Math.PI / 2);
     fence(YARD.hy * 2 + 6, YARD.hx + 3, 0, Math.PI / 2);
 
-    // a half-built steel frame and a tower crane at the back of the site
+    // a half-built steel frame, Victorian gasometer guide-frame, and a tower crane at the back of the site
     const girder = new THREE.MeshStandardMaterial({ color: 0xb0381c, roughness: 0.6, metalness: 0.5 });
     const frame = new THREE.Group();
     for (let i = 0; i < 5; i++)
@@ -612,6 +926,25 @@ class ConstructionView extends StageView {
       }
     frame.position.set(-7, 0, -(YARD.hy + 8));
     g.add(shadowed(frame, true, false));
+    // Victorian Limehouse telescopic Gasometer & brick railway viaduct arches
+    const ironFrameMat = new THREE.MeshStandardMaterial({ color: 0x2c3036, roughness: 0.5, metalness: 0.78 });
+    const gasometer = new THREE.Group();
+    const gasDrum = cyl(5.2, 5.2, 7.5, new THREE.MeshStandardMaterial({ color: 0x483830, roughness: 0.7, metalness: 0.5 }), 24);
+    gasDrum.position.y = 3.75;
+    gasometer.add(gasDrum);
+    for (let i = 0; i < 10; i++) {
+      const a = (i / 10) * Math.PI * 2;
+      gasometer.add(box(0.28, 14, 0.28, ironFrameMat, Math.cos(a) * 5.6, 7, Math.sin(a) * 5.6));
+    }
+    for (const h of [5, 9.5, 13.8]) {
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(5.6, 0.14, 8, 24), ironFrameMat);
+      ring.rotation.x = Math.PI / 2;
+      ring.position.y = h;
+      gasometer.add(ring);
+    }
+    gasometer.position.set(-18, 0, -(YARD.hy + 12));
+    g.add(gasometer);
+
     const tc = new THREE.Group();
     const mast = box(1, 24, 1, new THREE.MeshStandardMaterial({ color: CAT_YELLOW, wireframe: true }), 0, 12, 0);
     const jib = box(22, 0.8, 0.8, new THREE.MeshStandardMaterial({ color: CAT_YELLOW, wireframe: true }), 5, 24, 0);
@@ -661,12 +994,23 @@ class ConstructionView extends StageView {
       g.add(b);
     }
 
-    // smoke from wrecked machines
-    const sn = 160;
+    // volumetric smoke from damaged and wrecked machines (using soft radial dotTexture)
+    const sn = 180;
     const sp = new Float32Array(sn * 3).fill(-999);
     const sg = new THREE.BufferGeometry();
     sg.setAttribute("position", new THREE.BufferAttribute(sp, 3));
-    this.smoke = new THREE.Points(sg, new THREE.PointsMaterial({ color: 0x302a26, size: 0.9, transparent: true, opacity: 0.55, depthWrite: false }));
+    this.smoke = new THREE.Points(
+      sg,
+      new THREE.PointsMaterial({
+        color: 0x302a26,
+        map: dotTexture(),
+        alphaTest: 0.02,
+        size: 1.15,
+        transparent: true,
+        opacity: 0.58,
+        depthWrite: false,
+      }),
+    );
     this.smokeAge = new Float32Array(sn).fill(99);
     g.add(this.smoke);
   }
@@ -677,10 +1021,22 @@ class ConstructionView extends StageView {
     return { pos: toV(v.x + Math.cos(v.facing) * fwd, v.y + Math.sin(v.facing) * fwd, h - 0.52), facing: v.facing };
   }
 
+  private detachPart(part: THREE.Object3D | null, vx: number, vy: number, vz: number): void {
+    if (!part || !part.parent) return;
+    const worldPos = part.getWorldPosition(new THREE.Vector3());
+    const worldQuat = part.getWorldQuaternion(new THREE.Quaternion());
+    part.parent.remove(part);
+    part.position.copy(worldPos);
+    part.quaternion.copy(worldQuat);
+    this.group.add(part);
+    this.debris.push({ mesh: part, vx, vy, vz, rx: (Math.random() - 0.5) * 9, rz: (Math.random() - 0.5) * 9, age: 0 });
+  }
+
   update(w: World | null, time: number, dt: number): void {
     const vs = w?.s.arena.vehicles ?? [];
     while (this.views.length < vs.length) {
       const v = buildVehicle(vs[this.views.length].kind);
+      v.lastHp = vs[this.views.length].hp;
       this.views.push(v);
       this.group.add(v.root);
       const b = new THREE.PointLight(0xffa000, 0, 6, 2);
@@ -695,30 +1051,119 @@ class ConstructionView extends StageView {
       view.root.rotation.y = v.facing;
       // bounce over the ruts while moving, and shake under boost
       const mv = Math.abs(v.speed);
-      view.root.position.y = Math.abs(Math.sin(time * 13 + i)) * Math.min(0.06, mv * 0.6) + (v.boost > 0 ? Math.sin(time * 60) * 0.02 : 0);
+      view.root.position.y = Math.abs(Math.sin(time * 13 + i)) * Math.min(0.06, mv * 0.6) + (v.boost > 0 ? Math.sin(time * 60) * 0.025 : 0);
       if (view.spin) {
         if (view.kind === "roller") view.spin.rotation.y -= v.speed * 2;
-        else if (view.kind === "mixer") view.spin.rotation.x += dt * 2;
+        else if (view.kind === "mixer") view.spin.rotation.x += dt * 2.2;
         else view.spin.rotation.y = Math.sin(time * 0.7 + i) * 0.4;
+      }
+      // Animate articulated implement (blade, bucket, forks, boom, dump bed)
+      if (view.implement && !v.wrecked) {
+        const boostLift = v.boost > 0 ? 0.16 : 0;
+        if (view.kind === "bulldozer" || view.kind === "loader") {
+          view.implement.rotation.z = boostLift + Math.sin(time * 9 + i) * Math.min(0.08, mv * 0.5);
+        } else if (view.kind === "forklift") {
+          view.implement.position.y = boostLift * 1.4 + Math.abs(Math.sin(time * 6 + i)) * Math.min(0.12, mv * 0.8);
+        } else if (view.kind === "dumptruck") {
+          view.implement.rotation.z = 0.05 + boostLift * 0.8 + Math.abs(Math.sin(time * 11 + i)) * Math.min(0.07, mv * 0.5);
+        } else if (view.kind === "excavator") {
+          view.implement.rotation.z = Math.sin(time * 1.8 + i) * 0.18;
+        }
+      }
+      // Exhaust rain-cap chatter
+      if (view.exhaust && !v.wrecked) {
+        view.exhaust.rotation.z = Math.sin(time * (v.driver >= 0 ? 36 : 10) + i) * (v.driver >= 0 ? 0.04 : 0.01);
       }
       view.flag.color.set(v.driver >= 0 ? PLAYER_COLORS[v.driver] : 0x888888);
       this.beacons[i].intensity = v.driver >= 0 && !v.wrecked ? 3 + 3 * Math.sign(Math.sin(time * 8 + i)) : 0;
-      const dmg = 1 - v.hp / v.max;
+
+      // Real-time vertex deformation whenever vehicle takes structural HP damage
+      if (view.lastHp < 0) view.lastHp = v.hp;
+      if (v.hp < view.lastHp) {
+        const drop = view.lastHp - v.hp;
+        const ang = (v.hp * 2.39996 + i * 1.7) % (Math.PI * 2);
+        const localImpact = new THREE.Vector3(Math.cos(ang) * 1.15, 0.75 + (i % 3) * 0.2, Math.sin(ang) * 0.75);
+        deformVehicle(view, localImpact, 1.4, Math.min(0.32, 0.05 + drop * 0.006));
+        view.lastHp = v.hp;
+      }
+
+      // 4-Stage Progressive Breakaway & Deformation
+      const hpFrac = Math.max(0, v.hp / v.max);
+      const dmg = 1 - hpFrac;
+      if (hpFrac <= 0.75 && view.stage < 1) {
+        view.stage = 1;
+        view.glassMat.opacity = 0.68;
+        view.glassMat.roughness = 0.55;
+        view.glassMat.color.setHex(0xc8dce8); // spiderweb-frosted glass
+        if (view.doorL) view.doorL.rotation.y = 0.38; // left door unlatched & ajar
+      }
+      if (hpFrac <= 0.5 && view.stage < 2) {
+        view.stage = 2;
+        if (view.doorR) view.doorR.rotation.y = -0.45;
+        if (view.hood) view.hood.rotation.z = 0.24; // crumpled hood popped open
+        if (view.headlights[0]) view.headlights[0].visible = false; // broken headlamp
+      }
+      if (hpFrac <= 0.25 && view.stage < 3) {
+        view.stage = 3;
+        this.detachPart(view.doorL, (Math.random() - 0.5) * 4, 3.2, 2.5);
+        this.detachPart(view.doorR, (Math.random() - 0.5) * 4, 3.4, -2.5);
+        view.doorL = null;
+        view.doorR = null;
+      }
+      if (view.stage >= 2 && !v.wrecked) {
+        if (view.hood) view.hood.rotation.z = 0.24 + Math.sin(time * 24 + i) * 0.05;
+        view.wheels.forEach((wh, wi) => {
+          wh.rotation.z = Math.sin(time * 14 + wi) * 0.08 * dmg;
+        });
+      }
       if (v.wrecked && !view.wrecked) {
-        view.paint.color.set(0x4a3a2c); // burnt out
-        view.root.rotation.z = 0.08;
+        view.stage = 4;
+        view.paint.color.set(0x3a2c22); // charred soot
+        view.paint.roughness = 0.92;
+        view.body.position.y = -0.16; // collapsed suspension
+        view.root.rotation.z = 0.11;
+        this.detachPart(view.exhaust, (Math.random() - 0.5) * 3.5, 4.2, (Math.random() - 0.5) * 3.5);
+        view.exhaust = null;
+        view.wheels.forEach((wh, wi) => {
+          wh.rotation.z = (wi % 2 === 0 ? 1 : -1) * 0.32; // splayed broken axles
+        });
+        deformVehicle(view, new THREE.Vector3(0, 1.1, 0), 2.2, 0.26);
       }
       view.wrecked = v.wrecked;
-      if (!v.wrecked) view.paint.emissive.setRGB(dmg > 0.6 ? 0.25 * (0.5 + 0.5 * Math.sin(time * 10)) : 0, 0, 0);
+      if (!v.wrecked) view.paint.emissive.setRGB(dmg > 0.6 ? 0.28 * (0.5 + 0.5 * Math.sin(time * 10)) : 0, 0, 0);
       // smoke: black from a wreck, a grey wisp from a badly damaged machine
-      view.smoke += dt * (v.wrecked ? 14 : dmg > 0.5 ? 5 : 0);
+      view.smoke += dt * (v.wrecked ? 16 : dmg > 0.45 ? 6 : 0);
       while (view.smoke > 1) {
         view.smoke--;
         const k = this.smokeN++ % this.smokeAge.length;
         this.smokeAge[k] = 0;
-        sp.setXYZ(k, v.x + (Math.random() - 0.5) * 0.6, 1.4, -v.y + (Math.random() - 0.5) * 0.6);
+        sp.setXYZ(k, v.x + (Math.random() - 0.5) * 0.65, 1.35, -v.y + (Math.random() - 0.5) * 0.65);
       }
     });
+    // Step flying breakaway vehicle debris
+    for (let d = this.debris.length - 1; d >= 0; d--) {
+      const item = this.debris[d];
+      item.age += dt;
+      if (item.age > 3.5) {
+        this.group.remove(item.mesh);
+        this.debris.splice(d, 1);
+        continue;
+      }
+      item.vy -= 9.8 * dt;
+      item.mesh.position.x += item.vx * dt;
+      item.mesh.position.y += item.vy * dt;
+      item.mesh.position.z += item.vz * dt;
+      item.mesh.rotation.x += item.rx * dt;
+      item.mesh.rotation.z += item.rz * dt;
+      if (item.mesh.position.y < 0.08) {
+        item.mesh.position.y = 0.08;
+        item.vy = Math.abs(item.vy) * 0.35;
+        item.vx *= 0.65;
+        item.vz *= 0.65;
+        item.rx *= 0.6;
+        item.rz *= 0.6;
+      }
+    }
     for (let k = 0; k < this.smokeAge.length; k++) {
       this.smokeAge[k] += dt;
       if (this.smokeAge[k] > 3) sp.setY(k, -999);
@@ -727,7 +1172,6 @@ class ConstructionView extends StageView {
     sp.needsUpdate = true;
   }
 }
-
 // ===================================================================== Collapsing Tower
 class TowerView extends StageView {
   readonly id = "collapsing-tower" as const;
@@ -735,6 +1179,7 @@ class TowerView extends StageView {
   readonly fog: [number, number, number] = [0x101830, 30, 110];
   private tiles: { m: THREE.Mesh; mat: THREE.MeshStandardMaterial; home: THREE.Vector3; vy: number; spin: THREE.Vector3; gone: boolean }[] = [];
   private searchlights: THREE.SpotLight[] = [];
+  private gears: THREE.Object3D[] = [];
 
   constructor() {
     super();
@@ -779,6 +1224,34 @@ class TowerView extends StageView {
       shaft.add(f);
     }
     g.add(shaft);
+    // Victorian Clockwork Spire mechanism beneath the central tiles & 4 corner Gothic pinnacles
+    const brassGearMat = new THREE.MeshStandardMaterial({ color: 0xc89232, metalness: 0.86, roughness: 0.3, emissive: 0x221000 });
+    for (let gi = 0; gi < 2; gi++) {
+      const gear = new THREE.Group();
+      const r = gi === 0 ? 3.4 : 2.1;
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(r, 0.16, 8, 32), brassGearMat);
+      ring.rotation.x = Math.PI / 2;
+      gear.add(ring, box(r * 2, 0.12, 0.22, brassGearMat), box(0.22, 0.12, r * 2, brassGearMat));
+      for (let t = 0; t < 16; t++) {
+        const a = (t / 16) * Math.PI * 2;
+        const tooth = box(0.26, 0.16, 0.24, brassGearMat, Math.cos(a) * (r + 0.18), 0, Math.sin(a) * (r + 0.18));
+        tooth.rotation.y = -a;
+        gear.add(tooth);
+      }
+      gear.position.y = -1.45 - gi * 0.35;
+      g.add(gear);
+      this.gears.push(gear);
+    }
+    const spireMat = new THREE.MeshStandardMaterial({ color: 0x2e3440, metalness: 0.75, roughness: 0.45 });
+    for (const [sx, sz] of [[-half - 0.35, -half - 0.35], [half + 0.35, -half - 0.35], [-half - 0.35, half + 0.35], [half + 0.35, half + 0.35]]) {
+      const sp = new THREE.Group();
+      sp.add(box(0.65, 2.2, 0.65, spireMat, 0, 0.4, 0));
+      const cone = new THREE.Mesh(new THREE.ConeGeometry(0.48, 1.8, 8), brassGearMat);
+      cone.position.y = 2.4;
+      sp.add(cone);
+      sp.position.set(sx, -0.6, sz);
+      g.add(sp);
+    }
     // a parapet rim of steel under the roof edge
     const steel = new THREE.MeshStandardMaterial({ color: 0x3a3e46, metalness: 0.8, roughness: 0.4 });
     g.add(box(half * 2 + 0.3, 0.4, 0.3, steel, 0, -1.35, half), box(half * 2 + 0.3, 0.4, 0.3, steel, 0, -1.35, -half), box(0.3, 0.4, half * 2, steel, half, -1.35, 0), box(0.3, 0.4, half * 2, steel, -half, -1.35, 0));
@@ -861,6 +1334,7 @@ class TowerView extends StageView {
         t.mat.emissive.setRGB(0.5 * k2 * (0.6 + 0.4 * Math.sin(time * 30)), 0.08 * k2, 0);
       } else t.mat.emissive.setRGB(0, 0, 0);
     });
+    this.gears.forEach((gr, gi) => (gr.rotation.y = time * (gi === 0 ? 0.35 : -0.55)));
     this.group.children.forEach((c) => {
       if (c.userData.cone) c.rotation.z = Math.sin(time * 0.3 + c.position.x) * 0.4;
     });
@@ -1002,7 +1476,7 @@ class BlimpView extends StageView {
     }
     const fg = new THREE.BufferGeometry();
     fg.setAttribute("position", new THREE.BufferAttribute(fp, 3));
-    this.flames = new THREE.Points(fg, new THREE.PointsMaterial({ color: 0xff7020, size: 0.55, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending, depthWrite: false }));
+    this.flames = new THREE.Points(fg, new THREE.PointsMaterial({ color: 0xff7824, map: dotTexture(), alphaTest: 0.02, size: 0.78, transparent: true, opacity: 0.88, blending: THREE.AdditiveBlending, depthWrite: false }));
     g.add(this.flames);
     this.fireLight = new THREE.PointLight(0xff6010, 0, 22, 1.6);
     g.add(this.fireLight);
@@ -1216,6 +1690,20 @@ class CastleView extends StageView {
       g.add(shadowed(roof));
     }
 
+    // Wrought-iron cresset fire-baskets burning along the battlements
+    const cressetIron = new THREE.MeshStandardMaterial({ color: 0x24201e, metalness: 0.82, roughness: 0.45 });
+    const cressetFlame = new THREE.MeshBasicMaterial({ color: 0xff9830 });
+    for (const [cx, cz] of [[-CASTLE.hx * 0.55, -CASTLE.hy - 0.25], [CASTLE.hx * 0.55, -CASTLE.hy - 0.25], [-CASTLE.hx * 0.55, CASTLE.hy + 0.25], [CASTLE.hx * 0.55, CASTLE.hy + 0.25]]) {
+      const cr = new THREE.Group();
+      cr.add(cyl(0.05, 0.06, 1.3, cressetIron, 8), cyl(0.26, 0.14, 0.28, cressetIron, 10));
+      cr.children[1].position.y = 0.72;
+      const fl = new THREE.Mesh(new THREE.SphereGeometry(0.2, 10, 8), cressetFlame);
+      fl.scale.set(1, 1.4, 1);
+      fl.position.y = 0.9;
+      cr.add(fl);
+      cr.position.set(cx, 0.65, cz);
+      g.add(cr);
+    }
     // the flagpole and the circle the banner rises in
     const pole = cyl(0.06, 0.08, 4.6, new THREE.MeshStandardMaterial({ color: 0x5a4028, roughness: 0.7 }), 10);
     pole.position.y = 2.3;
