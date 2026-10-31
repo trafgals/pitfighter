@@ -389,15 +389,20 @@ async function main() {
         return { lit, colours: colours.size };
       };
       let best = { lit: 0, colours: 0 };
-      for (let i = 0; i < 16; i++) {
+      for (let i = 0; i < 20; i++) {
+        if (window.__game?.scene) {
+          try {
+            window.__game.scene.render(performance.now() / 1000, 1 / 60, 1 / 60);
+          } catch {}
+        }
         const px = read();
         if (px.colours > best.colours) best = px;
         if (px.lit > 200 && px.colours > 40) return px;
-        await new Promise((r) => setTimeout(r, 120));
+        await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 60)));
       }
       return best;
     });
-  await new Promise((r) => setTimeout(r, 500));
+  await frames();
   const px = await litCanvas();
   check(px.lit > 200 && px.colours > 40, `canvas renders the arena (${px.lit} lit px, ${px.colours} colours)`);
   await page.screenshot({ path: path.join(OUT, "3_match_fight.png") });
@@ -628,7 +633,7 @@ async function main() {
     if (run.id === "collapsing-tower") check(after.tilesGone > 0 && (after.seen.collapse ?? 0) > 0, `collapsing-tower: the roof is falling apart (${after.tilesGone} tiles gone)`);
     if (run.id === "hindenburg-blimp") check(after.fireX < 10 && after.down && (after.seen.impact ?? 0) === 1, `hindenburg-blimp: the fire spreads (x = ${after.fireX.toFixed(2)}) and the blimp hit the ground (${after.seen.impact ?? 0} impact)`);
     if (run.id === "castle-under-siege") check((after.seen.geyser ?? 0) > 0, `castle-under-siege: the siege engines fire (${after.seen.geyser ?? 0} strikes)`);
-    await new Promise((r) => setTimeout(r, 600));
+    await frames();
     const px = await litCanvas();
     check(px.lit > 200 && px.colours > 40, `${run.id}: canvas renders the arena (${px.lit} lit px, ${px.colours} colours)`);
     await page.screenshot({ path: path.join(OUT, `7_${run.id}_fight.png`) });
