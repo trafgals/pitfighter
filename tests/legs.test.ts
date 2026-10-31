@@ -204,4 +204,29 @@ describe("the foot rolls through a step", () => {
     for (let i = 0; i < 60; i++) step(b, f, w, time);
     expect(Math.abs(b.feet.R.roll)).toBeLessThan(0.02);
   });
+
+  it("keeps the walk cycle stepping smoothly across high-refresh sub-frames between 60 Hz sim ticks", () => {
+    const { w, f, b, time } = standing();
+    f.state = "walk";
+    f.velY = 0.035; // 2.1 m/s in sim units
+    const subDt = 1 / 120;
+    let maxLiftL = 0;
+    let maxLiftR = 0;
+    let phaseWrapped = 0;
+    let prevPhase = 0;
+    for (let i = 0; i < 240; i++) {
+      // Only step root position on even frames (60 Hz sim vs 120 Hz render)
+      if (i % 2 === 0) b.root.position.z += f.velY;
+      time.t += subDt;
+      animate(b, f, w, time.t, subDt);
+      expect(b.gait.on).toBe(true);
+      if (b.gait.phase < prevPhase - 0.5) phaseWrapped++;
+      prevPhase = b.gait.phase;
+      maxLiftL = Math.max(maxLiftL, ankleOf(b, "L").y);
+      maxLiftR = Math.max(maxLiftR, ankleOf(b, "R").y);
+    }
+    expect(phaseWrapped).toBeGreaterThanOrEqual(2);
+    expect(maxLiftL).toBeGreaterThan(0.12);
+    expect(maxLiftR).toBeGreaterThan(0.12);
+  });
 });

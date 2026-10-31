@@ -5,17 +5,36 @@ import type { Body } from "./body";
 
 const textureCache = new Map<string, THREE.Texture>();
 
-function getTexture(url: string, isColor: boolean): THREE.Texture | null {
+function loadRepeatedTexture(
+  url: string,
+  isColor: boolean,
+  rx: number,
+  ry: number,
+  clamp = false,
+  onReady?: (tex: THREE.Texture) => void,
+): THREE.Texture | null {
   if (typeof document === "undefined") return null;
-  let tex = textureCache.get(url);
-  if (!tex) {
-    tex = new THREE.TextureLoader().load(url);
-    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-    if (isColor) {
-      tex.colorSpace = THREE.SRGBColorSpace;
-    }
-    textureCache.set(url, tex);
+  const key = `${url}:${rx}x${ry}:${clamp ? "c" : "r"}`;
+  const existing = textureCache.get(key);
+  if (existing) {
+    if (existing.image && onReady) onReady(existing);
+    return existing;
   }
+  const tex = new THREE.TextureLoader().load(url, (loaded) => {
+    loaded.wrapS = loaded.wrapT = clamp ? THREE.ClampToEdgeWrapping : THREE.RepeatWrapping;
+    loaded.repeat.set(rx, ry);
+    if (isColor) {
+      loaded.colorSpace = THREE.SRGBColorSpace;
+    }
+    loaded.needsUpdate = true;
+    if (onReady) onReady(loaded);
+  });
+  tex.wrapS = tex.wrapT = clamp ? THREE.ClampToEdgeWrapping : THREE.RepeatWrapping;
+  tex.repeat.set(rx, ry);
+  if (isColor) {
+    tex.colorSpace = THREE.SRGBColorSpace;
+  }
+  textureCache.set(key, tex);
   return tex;
 }
 
@@ -41,76 +60,107 @@ const CRAFT_SPECS: Record<string, { metalness: number; roughness: number }> = {
 export function applyFighterTextures(slug: string, body: Body): void {
   if (typeof document === "undefined") return;
 
-  const cloth = getTexture(`/tex/fighters/${slug}/cloth.webp`, true);
-  const clothH = getTexture(`/tex/fighters/${slug}/cloth_h.webp`, false);
-  const skin = getTexture(`/tex/fighters/${slug}/skin.webp`, true);
-  const skinH = getTexture(`/tex/fighters/${slug}/skin_h.webp`, false);
-  const limb = getTexture(`/tex/fighters/${slug}/limb.webp`, true);
-  const limbH = getTexture(`/tex/fighters/${slug}/limb_h.webp`, false);
-  const face = getTexture(`/tex/fighters/${slug}/face.webp`, true);
+  const clothUrl = `/tex/fighters/${slug}/cloth.webp`;
+  const clothHUrl = `/tex/fighters/${slug}/cloth_h.webp`;
+  const skinUrl = `/tex/fighters/${slug}/skin.webp`;
+  const skinHUrl = `/tex/fighters/${slug}/skin_h.webp`;
+  const limbUrl = `/tex/fighters/${slug}/limb.webp`;
+  const limbHUrl = `/tex/fighters/${slug}/limb_h.webp`;
+  const faceUrl = `/tex/fighters/${slug}/face.webp`;
 
-  if (!cloth || !limb || !skin || !face) return;
-
-  const rep = (t: THREE.Texture, rx: number, ry: number) => {
-    const c = t.clone();
-    c.wrapS = c.wrapT = THREE.RepeatWrapping;
-    c.repeat.set(rx, ry);
-    c.needsUpdate = true;
-    return c;
-  };
-
-  // 1. Torso: authentic cloth material
+  // 1. Torso & chest attachments (pecs, shoulder blades, belt, pelvis): authentic cloth material
   const torsoMat = body.skins.torso.material as THREE.MeshStandardMaterial;
-  torsoMat.map = rep(cloth, 2, 2);
-  if (clothH) torsoMat.bumpMap = rep(clothH, 2, 2);
-  torsoMat.bumpScale = 1.5;
-  torsoMat.color.setHex(0xffffff);
-  torsoMat.needsUpdate = true;
+  const clothTorsoH = loadRepeatedTexture(clothHUrl, false, 2, 2);
+  loadRepeatedTexture(clothUrl, true, 2, 2, false, (clothTex) => {
+    torsoMat.map = clothTex;
+    if (clothTorsoH) torsoMat.bumpMap = clothTorsoH;
+    torsoMat.bumpScale = 0.04;
+    torsoMat.color.setHex(0xffffff);
+    torsoMat.roughness = 0.78;
+    torsoMat.needsUpdate = true;
+
+    for (const group of [body.spine, body.hips]) {
+      for (const child of group.children) {
+        if (child instanceof THREE.Mesh && child.material instanceof THREE.MeshStandardMaterial) {
+          child.material = child.material.clone();
+          child.material.map = clothTex;
+          if (clothTorsoH) child.material.bumpMap = clothTorsoH;
+          child.material.bumpScale = 0.03;
+          child.material.color.setHex(0xffffff);
+          child.material.needsUpdate = true;
+        }
+      }
+    }
+  });
 
   // 2. Legs: authentic trousers/skirt/wool cloth
-  for (const leg of [body.skins.legL, body.skins.legR]) {
-    const legMat = leg.material as THREE.MeshStandardMaterial;
-    legMat.map = rep(cloth, 1, 2);
-    if (clothH) legMat.bumpMap = rep(clothH, 1, 2);
-    legMat.bumpScale = 1.5;
-    legMat.color.setHex(0xffffff);
-    legMat.needsUpdate = true;
-  }
+  const clothLegH = loadRepeatedTexture(clothHUrl, false, 1, 2);
+  loadRepeatedTexture(clothUrl, true, 1, 2, false, (clothLeg) => {
+    for (const leg of [body.skins.legL, body.skins.legR]) {
+      const legMat = leg.material as THREE.MeshStandardMaterial;
+      legMat.map = clothLeg;
+      if (clothLegH) legMat.bumpMap = clothLegH;
+      legMat.bumpScale = 0.04;
+      legMat.color.setHex(0xffffff);
+      legMat.roughness = 0.8;
+      legMat.needsUpdate = true;
+    }
+  });
 
-  // 3. Arms: the fighter's bespoke craft limbs (brass, porcelain, oak, steel, etc.)
+  // 3. Arms & shoulder/elbow caps: the fighter's bespoke craft limbs (brass, porcelain, oak, steel, etc.)
   const spec = CRAFT_SPECS[slug] ?? { metalness: 0.3, roughness: 0.5 };
-  for (const arm of [body.skins.armL, body.skins.armR]) {
-    const armMat = arm.material as THREE.MeshStandardMaterial;
-    armMat.map = rep(limb, 1, 2);
-    if (limbH) armMat.bumpMap = rep(limbH, 1, 2);
-    armMat.bumpScale = 2.0;
-    armMat.metalness = spec.metalness;
-    armMat.roughness = spec.roughness;
-    armMat.color.setHex(0xffffff);
-    armMat.needsUpdate = true;
-  }
+  const limbArmH = loadRepeatedTexture(limbHUrl, false, 1, 2);
+  loadRepeatedTexture(limbUrl, true, 1, 2, false, (limbArm) => {
+    for (const arm of [body.skins.armL, body.skins.armR]) {
+      const armMat = arm.material as THREE.MeshStandardMaterial;
+      armMat.map = limbArm;
+      if (limbArmH) armMat.bumpMap = limbArmH;
+      armMat.bumpScale = 0.05;
+      armMat.metalness = spec.metalness;
+      armMat.roughness = spec.roughness;
+      armMat.color.setHex(0xffffff);
+      armMat.needsUpdate = true;
+    }
+    for (const bone of [body.limbs.armL, body.limbs.armR, body.joints.elbowL, body.joints.elbowR]) {
+      for (const child of bone.children) {
+        if (child instanceof THREE.Mesh && child.material instanceof THREE.MeshStandardMaterial) {
+          child.material = child.material.clone();
+          child.material.map = limbArm;
+          if (limbArmH) child.material.bumpMap = limbArmH;
+          child.material.bumpScale = 0.04;
+          child.material.metalness = spec.metalness;
+          child.material.roughness = spec.roughness;
+          child.material.color.setHex(0xffffff);
+          child.material.needsUpdate = true;
+        }
+      }
+    }
+  });
 
-  // 4. Head skull and neck: authentic skin material
-  const headSkinMesh = body.head.children.find(
-    (c) => c instanceof THREE.Mesh && c.geometry instanceof THREE.SphereGeometry && c.scale.y > 1.05
-  ) as THREE.Mesh | undefined;
-  if (headSkinMesh && headSkinMesh.material instanceof THREE.MeshStandardMaterial) {
-    headSkinMesh.material.map = rep(skin, 2, 1);
-    if (skinH) headSkinMesh.material.bumpMap = rep(skinH, 2, 1);
-    headSkinMesh.material.bumpScale = 1.0;
-    headSkinMesh.material.color.setHex(0xffffff);
-    headSkinMesh.material.needsUpdate = true;
-  }
+  // 4. Head skull, jaw, and ears: authentic skin material
+  const skinHeadH = loadRepeatedTexture(skinHUrl, false, 2, 1);
+  loadRepeatedTexture(skinUrl, true, 2, 1, false, (skinHead) => {
+    for (const child of body.head.children) {
+      if (
+        child instanceof THREE.Mesh &&
+        child.name !== "faceDecal" &&
+        child.geometry instanceof THREE.SphereGeometry &&
+        child.scale.x >= 0.9 &&
+        child.material instanceof THREE.MeshStandardMaterial
+      ) {
+        child.material.map = skinHead;
+        if (skinHeadH) child.material.bumpMap = skinHeadH;
+        child.material.bumpScale = 0.025;
+        child.material.color.setHex(0xffffff);
+        child.material.needsUpdate = true;
+      }
+    }
+  });
 
   // 5. Face decal on front of skull
   if (!body.head.getObjectByName("faceDecal")) {
-    const faceTex = face.clone();
-    faceTex.wrapS = faceTex.wrapT = THREE.ClampToEdgeWrapping;
-    faceTex.needsUpdate = true;
-
     const faceGeo = new THREE.PlaneGeometry(0.24, 0.24);
     const faceMat = new THREE.MeshStandardMaterial({
-      map: faceTex,
       transparent: true,
       alphaTest: 0.05,
       roughness: 0.6,
@@ -119,6 +169,13 @@ export function applyFighterTextures(slug: string, body: Body): void {
     const faceMesh = new THREE.Mesh(faceGeo, faceMat);
     faceMesh.name = "faceDecal";
     faceMesh.position.set(0, 0.16, 0.158);
+    faceMesh.visible = false;
     body.head.add(faceMesh);
+
+    loadRepeatedTexture(faceUrl, true, 1, 1, true, (faceTex) => {
+      faceMat.map = faceTex;
+      faceMat.needsUpdate = true;
+      faceMesh.visible = true;
+    });
   }
 }

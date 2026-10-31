@@ -10,6 +10,7 @@ import { BLIMP, CASTLE, TOWER, YARD, onDeck, tileCentre } from "../sim/arena";
 import type { StageId } from "../sim/stages";
 import type { World } from "../sim/world";
 import { PLAYER_COLORS } from "./body";
+import { dotTexture } from "./fx";
 import { surface } from "./textures";
 
 export const toV = (x: number, y: number, h = 0) => new THREE.Vector3(x, h, -y);
@@ -88,11 +89,11 @@ export abstract class StageView {
   }
 }
 
-// ===================================================================== Hell Toilet
+// ===================================================================== Hell Toilet (The Sump)
 class HellToiletView extends StageView {
   readonly id = "hell-toilet" as const;
-  readonly background = 0x140303;
-  readonly fog: [number, number, number] = [0x2a0505, 26, 60];
+  readonly background = 0x120504;
+  readonly fog: [number, number, number] = [0x240806, 26, 62];
   private lavaTex: THREE.CanvasTexture;
   private lavaLight: THREE.PointLight;
   private embers: THREE.Points;
@@ -106,28 +107,43 @@ class HellToiletView extends StageView {
   constructor() {
     super();
     const sc = this.group;
-    this.lights(0xff8866, 0x220000, 0.55, 0xffc0a0, 1.4, 13);
+    this.lights(0xff9872, 0x240604, 0.65, 0xffcfa8, 1.45, 13, 0x6888c8, 0.85);
 
-    // cracked basalt floor, molten rock glowing in the cracks
+    // Cracked wet Victorian Sump basalt & iron grate floor, molten furnace glow in the seams
     const basalt = surface("basalt", 2);
     const floor = new THREE.Mesh(
-      new THREE.CylinderGeometry(RING_R, RING_R + 0.2, 0.6, 72),
-      new THREE.MeshStandardMaterial({ ...basalt, roughness: 0.9, emissive: 0xffffff, emissiveIntensity: 1.4, bumpScale: 2 }),
+      new THREE.CylinderGeometry(RING_R, RING_R + 0.25, 0.6, 72),
+      new THREE.MeshStandardMaterial({
+        ...basalt,
+        roughness: 0.55,
+        metalness: 0.14,
+        emissive: 0xffffff,
+        emissiveIntensity: 1.15,
+        bumpScale: 2.4,
+      }),
     );
     floor.position.y = -0.3;
     floor.receiveShadow = true;
     sc.add(floor);
 
-    // a ring of hellfire around the floor
+    // Cast-iron riveted coping curb around the pit edge
+    const castIron = new THREE.MeshStandardMaterial({ color: 0x262220, roughness: 0.42, metalness: 0.78 });
+    const curb = new THREE.Mesh(new THREE.TorusGeometry(RING_R - 0.08, 0.14, 12, 72), castIron);
+    curb.rotation.x = Math.PI / 2;
+    curb.position.y = -0.02;
+    curb.receiveShadow = true;
+    sc.add(curb);
+
+    // Ring of molten Sump slag & hellfire around the floor
     this.lavaTex = canvasTexture(512, 512, (g) => {
       const grd = g.createLinearGradient(0, 0, 512, 512);
-      grd.addColorStop(0, "#ff3a00");
-      grd.addColorStop(0.5, "#ffb000");
-      grd.addColorStop(1, "#ff2000");
+      grd.addColorStop(0, "#d92b00");
+      grd.addColorStop(0.5, "#ff9a00");
+      grd.addColorStop(1, "#c81800");
       g.fillStyle = grd;
       g.fillRect(0, 0, 512, 512);
       for (let i = 0; i < 300; i++) {
-        g.fillStyle = `rgba(${120 + Math.random() * 80},${Math.random() * 30},0,0.6)`;
+        g.fillStyle = `rgba(${110 + Math.random() * 80},${Math.random() * 28},0,0.62)`;
         g.beginPath();
         g.arc(Math.random() * 512, Math.random() * 512, 6 + Math.random() * 30, 0, Math.PI * 2);
         g.fill();
@@ -138,60 +154,90 @@ class HellToiletView extends StageView {
     lava.rotation.x = -Math.PI / 2;
     lava.position.y = -0.45;
     sc.add(lava);
-    this.lavaLight = new THREE.PointLight(0xff4a10, 60, 30, 1.6);
-    this.lavaLight.position.set(0, 0.5, 0);
+    this.lavaLight = new THREE.PointLight(0xff5418, 48, 30, 1.6);
+    this.lavaLight.position.set(0, 0.6, 0);
     sc.add(this.lavaLight);
 
-    // jagged rocks at the outer wall (near-edge rocks get their own material so they fade when occluding the low camera)
-    const rockMat = new THREE.MeshStandardMaterial({ color: 0x1a0d0b, roughness: 1 });
-    for (let i = 0; i < 46; i++) {
-      const a = (i / 46) * Math.PI * 2 + Math.random() * 0.05;
-      const h = 1.5 + Math.random() * 3.5;
-      const rx = Math.cos(a) * (LAVA_R + 1.0 + Math.random());
-      const rz = Math.sin(a) * (LAVA_R + 1.0 + Math.random());
-      const isNear = rz > 3.5;
-      const mat = isNear ? new THREE.MeshStandardMaterial({ color: 0x1a0d0b, roughness: 1, transparent: true, opacity: 1 }) : rockMat;
-      const rock = new THREE.Mesh(new THREE.ConeGeometry(0.6 + Math.random() * 0.7, h, 5), mat);
-      rock.position.set(rx, h / 2 - 0.5, rz);
-      rock.rotation.set((Math.random() - 0.5) * 0.3, Math.random() * 3, (Math.random() - 0.5) * 0.3);
-      if (isNear) this.nearRocks.push({ mesh: rock, mat });
-      sc.add(rock);
+    // Victorian brick & cast-iron sewer pillars around the outer wall (near-edge pillars fade when occluding the low camera)
+    const brickSurf = surface("stone", 2, 2);
+    const pillarMat = new THREE.MeshStandardMaterial({ ...brickSurf, color: 0x3b231e, roughness: 0.85, bumpScale: 1.8 });
+    const brazierFireMat = new THREE.MeshBasicMaterial({ color: 0xffaa38 });
+    for (let i = 0; i < 32; i++) {
+      const a = (i / 32) * Math.PI * 2;
+      const isArchPier = i % 2 === 0;
+      const h = isArchPier ? 3.2 : 1.9 + (i % 3) * 0.45;
+      const rad = LAVA_R + 1.35 + (isArchPier ? 0.15 : 0);
+      const rx = Math.cos(a) * rad;
+      const rz = Math.sin(a) * rad;
+      const isNear = rz > 3.2;
+      const mat = isNear
+        ? new THREE.MeshStandardMaterial({ ...brickSurf, color: 0x3b231e, roughness: 0.85, bumpScale: 1.8, transparent: true, opacity: 1 })
+        : pillarMat;
+      const w = isArchPier ? 0.82 : 0.62;
+      const pillar = new THREE.Mesh(new THREE.CylinderGeometry(w * 0.78, w, h, 8), mat);
+      pillar.position.set(rx, h / 2 - 0.5, rz);
+      pillar.rotation.y = -a;
+      if (isArchPier && !isNear) {
+        const cap = new THREE.Mesh(new THREE.CylinderGeometry(w * 0.96, w * 0.86, 0.22, 8), castIron);
+        cap.position.y = h / 2 + 0.08;
+        pillar.add(cap);
+        if (i % 4 === 0) {
+          const bowl = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.2, 0.24, 10), castIron);
+          bowl.position.y = h / 2 + 0.28;
+          const flame = new THREE.Mesh(new THREE.SphereGeometry(0.24, 10, 8), brazierFireMat);
+          flame.scale.set(1, 1.35, 1);
+          flame.position.y = h / 2 + 0.45;
+          pillar.add(bowl, flame);
+        }
+      }
+      if (isNear) this.nearRocks.push({ mesh: pillar, mat });
+      sc.add(pillar);
     }
 
-    // THE LAST TOILET
-    const porcelain = new THREE.MeshStandardMaterial({ color: 0xf4f1ea, roughness: 0.25, metalness: 0.05 });
-    const gold = new THREE.MeshStandardMaterial({ color: 0xffc23a, roughness: 0.3, metalness: 0.9, emissive: 0x442200 });
+    // THE THRONE OF THE SUMP (Ornate Victorian porcelain & polished brass cistern)
+    const porcelain = new THREE.MeshStandardMaterial({ color: 0xd8d0c2, roughness: 0.34, metalness: 0.08 });
+    const brass = new THREE.MeshStandardMaterial({ color: 0xd49b38, roughness: 0.26, metalness: 0.88, emissive: 0x281200 });
     const toilet = new THREE.Group();
     const bowl = new THREE.Mesh(
       new THREE.LatheGeometry([new THREE.Vector2(0.18, 0), new THREE.Vector2(0.22, 0.2), new THREE.Vector2(0.3, 0.35), new THREE.Vector2(0.34, 0.45), new THREE.Vector2(0.3, 0.46)], 24),
       porcelain,
     );
-    const seat = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.05, 10, 24), gold);
+    const seat = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.05, 10, 24), brass);
     seat.rotation.x = Math.PI / 2;
     seat.position.y = 0.48;
-    const tank = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.5, 0.22), porcelain);
-    tank.position.set(0, 0.75, -0.32);
-    const plinth = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.7, 0.18, 24), new THREE.MeshStandardMaterial({ color: 0x3a0a0a, roughness: 0.6 }));
-    toilet.add(bowl, seat, tank, plinth);
+    const tank = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.46, 0.24), porcelain);
+    tank.position.set(0, 0.82, -0.32);
+    const tankLid = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.06, 0.28), brass);
+    tankLid.position.set(0, 1.07, -0.32);
+    const flushPipe = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.45, 10), brass);
+    flushPipe.position.set(0, 0.55, -0.26);
+    const plinth = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.64, 0.74, 0.2, 24),
+      new THREE.MeshStandardMaterial({ ...basalt, color: 0x381814, roughness: 0.5, metalness: 0.25 }),
+    );
+    const plinthTrim = new THREE.Mesh(new THREE.TorusGeometry(0.65, 0.03, 8, 32), brass);
+    plinthTrim.rotation.x = Math.PI / 2;
+    plinthTrim.position.y = 0.08;
+    toilet.add(bowl, seat, tank, tankLid, flushPipe, plinth, plinthTrim);
     shadowed(toilet);
-    // the toilet faces south, toward the camera
+    // the throne faces south, toward the camera
     toilet.position.set(0, 0.08, 0);
     sc.add(toilet);
-    this.halo = new THREE.Mesh(new THREE.TorusGeometry(0.35, 0.03, 8, 32), new THREE.MeshBasicMaterial({ color: 0xffe9a0 }));
+    this.halo = new THREE.Mesh(new THREE.TorusGeometry(0.36, 0.025, 8, 32), new THREE.MeshBasicMaterial({ color: 0xffdfa0 }));
     this.halo.rotation.x = Math.PI / 2;
     this.halo.position.set(0, 1.55, -0.3);
     sc.add(this.halo);
-    this.toiletGlow = new THREE.PointLight(0xffe2a0, 25, 6, 2);
+    this.toiletGlow = new THREE.PointLight(0xffd890, 11, 6.5, 2);
     this.toiletGlow.position.set(0, 2.2, 0);
     sc.add(this.toiletGlow);
     const beam = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.4, 0.9, 14, 24, 1, true),
-      new THREE.MeshBasicMaterial({ color: 0xfff0b0, transparent: true, opacity: 0.08, side: THREE.DoubleSide, depthWrite: false }),
+      new THREE.CylinderGeometry(0.42, 0.95, 14, 24, 1, true),
+      new THREE.MeshBasicMaterial({ color: 0xffe4a0, transparent: true, opacity: 0.04, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending }),
     );
     beam.position.y = 7;
     sc.add(beam);
 
-    // rising embers
+    // Rising soft round embers
     const n = 400;
     const pos = new Float32Array(n * 3);
     for (let i = 0; i < n; i++) {
@@ -203,30 +249,48 @@ class HellToiletView extends StageView {
     }
     const eg = new THREE.BufferGeometry();
     eg.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-    this.embers = new THREE.Points(eg, new THREE.PointsMaterial({ color: 0xffa040, size: 0.09, transparent: true, opacity: 0.85 }));
+    this.embers = new THREE.Points(
+      eg,
+      new THREE.PointsMaterial({
+        color: 0xffa848,
+        map: dotTexture(),
+        alphaTest: 0.02,
+        size: 0.14,
+        transparent: true,
+        opacity: 0.88,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      }),
+    );
     sc.add(this.embers);
 
-    // tiers of rock behind the hellfire, packed with the damned; they bounce harder the louder it gets
-    const tierMat = new THREE.MeshStandardMaterial({ color: 0x140806, roughness: 1, side: THREE.DoubleSide });
+    // Tiered Victorian brickwork gallery behind the Sump, packed with the Shambles crowd
+    const galleryBrick = surface("stone", 16, 2);
+    const tierMat = new THREE.MeshStandardMaterial({ ...galleryBrick, color: 0x281410, roughness: 0.88, side: THREE.DoubleSide });
     for (let i = 0; i < 3; i++) {
       const r0 = LAVA_R + 3.2 + i * 1.4;
-      const tier = new THREE.Mesh(new THREE.CylinderGeometry(r0 + 1.4, r0 + 1.4, 0.6 + i * 0.9, 64, 1, true), tierMat);
-      tier.position.y = (0.6 + i * 0.9) / 2 - 0.4;
+      const h = 0.6 + i * 0.9;
+      const tier = new THREE.Mesh(new THREE.CylinderGeometry(r0 + 1.4, r0 + 1.4, h, 64, 1, true), tierMat);
+      tier.position.y = h / 2 - 0.4;
       sc.add(tier);
       const top = new THREE.Mesh(new THREE.RingGeometry(r0, r0 + 1.4, 64), tierMat);
       top.rotation.x = -Math.PI / 2;
       top.position.y = 0.2 + i * 0.9 - 0.4 + 0.2;
       sc.add(top);
+      const rail = new THREE.Mesh(new THREE.TorusGeometry(r0 + 0.08, 0.05, 8, 64), castIron);
+      rail.rotation.x = Math.PI / 2;
+      rail.position.y = 0.2 + i * 0.9 + 0.18;
+      sc.add(rail);
     }
     const cn = 220;
-    this.crowd = new THREE.InstancedMesh(new THREE.CapsuleGeometry(0.2, 0.55, 3, 8), new THREE.MeshStandardMaterial({ roughness: 0.8, emissive: 0x300000 }), cn);
+    this.crowd = new THREE.InstancedMesh(new THREE.CapsuleGeometry(0.2, 0.55, 4, 8), new THREE.MeshStandardMaterial({ roughness: 0.72, emissive: 0x1c0604 }), cn);
     const col = new THREE.Color();
     for (let i = 0; i < cn; i++) {
       const tierI = i % 3;
       const a = (i / cn) * Math.PI * 2 * 3 + tierI * 0.37;
       const r = LAVA_R + 3.9 + tierI * 1.4;
       this.crowdBase.push({ x: Math.cos(a) * r, y: 0.55 + tierI * 0.9, z: Math.sin(a) * r, ph: (i * 2.39) % (Math.PI * 2), sp: 5 + (i % 5) });
-      col.setHSL(0.0 + ((i * 37) % 10) / 120, 0.6, 0.12 + ((i * 13) % 7) / 60);
+      col.setHSL(0.03 + ((i * 37) % 10) / 140, 0.45, 0.16 + ((i * 13) % 7) / 55);
       this.crowd.setColorAt(i, col);
     }
     sc.add(this.crowd);
@@ -235,7 +299,7 @@ class HellToiletView extends StageView {
   update(w: World | null, time: number, dt: number, hype: number): void {
     this.lavaTex.offset.x = time * 0.02;
     this.lavaTex.offset.y = time * 0.05;
-    this.lavaLight.intensity = 55 + Math.sin(time * 7.3) * 5 + Math.sin(time * 3.1) * 4;
+    this.lavaLight.intensity = 46 + Math.sin(time * 7.3) * 4 + Math.sin(time * 3.1) * 3;
     const pos = this.embers.geometry.getAttribute("position") as THREE.BufferAttribute;
     for (let i = 0; i < pos.count; i++) {
       let y = pos.getY(i) + dt * (0.6 + (i % 7) * 0.15);
@@ -245,7 +309,7 @@ class HellToiletView extends StageView {
     pos.needsUpdate = true;
     this.halo.position.y = 1.55 + Math.sin(time * 2) * 0.06;
     this.halo.rotation.z = time;
-    this.toiletGlow.intensity = 20 + Math.sin(time * 3) * 6;
+    this.toiletGlow.intensity = 11 + Math.sin(time * 3) * 2.5;
     const amp = 0.04 + 0.3 * hype;
     this.crowdBase.forEach((c, i) => {
       this.dummy.position.set(c.x, c.y + Math.abs(Math.sin(time * c.sp + c.ph)) * amp, c.z);

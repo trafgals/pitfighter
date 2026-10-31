@@ -66,7 +66,7 @@ export function animate(v: Body, f: Fighter, w: World, time: number, dt: number,
   // nothing moves during a hitstop: the pose holds too
   // (a knee or a throw jumps onto its landing pose, so the freeze holds the blow, not the wind-up)
   applyPose(v, tp.p, f.stop > 0 ? 0 : tp.rate, (tp.snap && f.stop === 0) || tp.impact, dt, jitter, tp.drive, f.state === "attack" ? feelOf(f) : undefined);
-  footwork(v, tp.plant, dt, f.stop > 0);
+  footwork(v, f, tp.plant, dt, f.stop > 0);
   ragdoll(v, f, tp, dt, v.cue.from, v.cue.side, v.cue.face);
   // lying down, which way up: the get-up goes by it
   if (f.state === "down" || f.state === "ko") v.cue.lie = UP.set(0, 0, 1).transformDirection(v.spine.matrixWorld).y >= 0 ? 1 : -1;
@@ -242,7 +242,7 @@ export function solveLeg(b: Body, s: S, target: THREE.Vector3): { x: number; z: 
 const wrap = (a: number) => Math.atan2(Math.sin(a), Math.cos(a));
 
 /** Plant, step and swing the feet, drop the hips to keep the planted feet in reach, and lay the legs on them. */
-function footwork(b: Body, mode: Plant | "gait", dt: number, frozen: boolean): void {
+function footwork(b: Body, f: Fighter, mode: Plant | "gait", dt: number, frozen: boolean): void {
   b.root.updateMatrixWorld(true);
   const sc = b.body.scale.x;
   const floor = b.root.position.y + LEG.ankle * sc; // the ankle's height with the foot flat on the floor
@@ -257,6 +257,11 @@ function footwork(b: Body, mode: Plant | "gait", dt: number, frozen: boolean): v
   if (g.prev && dt > 0) vel.subVectors(b.root.position, g.prev).setY(0).divideScalar(dt);
   if (vel.length() > 12) vel.set(0, 0, 0); // a teleport (a respawn), not a run
   g.prev = (g.prev ?? new THREE.Vector3()).copy(b.root.position);
+  // In the browser, requestAnimationFrame runs between 60 Hz sim steps where b.root.position
+  // has not stepped yet (vel === 0), which would otherwise drop g.speed to 0, abort the swing,
+  // and reset g.phase on the next tick. Use the fighter's sim velocity when moving.
+  const simSpeedSq = f.velX * f.velX + f.velY * f.velY;
+  if (simSpeedSq > 1e-6) vel.set(f.velX * 60, 0, f.velY * 60);
   g.speed = vel.length();
   const walking = mode === "gait" && g.speed > GAIT_MIN;
   const target: Partial<Record<S, THREE.Vector3>> = {};
@@ -271,7 +276,13 @@ function footwork(b: Body, mode: Plant | "gait", dt: number, frozen: boolean): v
   if (walking) {
     const S = strideOf(g.speed);
     if (!frozen) g.phase = (g.phase + (g.speed * dt) / (2 * S)) % 1;
-    const lift = 0.06 + 0.02 * g.speed;
+    const lift = (simSpeedSq > 1e-6 ? 0.13 : 0.06) + 0.025 * g.speed;
+    if (simSpeedSq > 1e-6) {
+      // double-frequency walk bob: pelvis dips on heel strike and vaults over mid-stance
+      const stepU = (g.phase * 2) % 1;
+      b.body.position.y -= (1 - Math.sin(Math.PI * stepU)) * 0.045 * sc;
+      b.body.updateMatrixWorld(true);
+    }
     for (const s of SIDES) {
       const ft = b.feet[s];
       const u = ((g.phase + (s === "L" ? 0 : 0.5)) % 1) / 0.5; // 0..1 swinging, 1..2 on the floor

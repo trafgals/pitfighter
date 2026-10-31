@@ -301,6 +301,7 @@ export function buildBody(f: Fighter, skipGear?: ReadonlySet<string>): Body {
   // pores and mottling on the skin, a woven fabric on the shorts, wraps and boots
   const skin = new THREE.MeshStandardMaterial({ color: st.color, roughness: 0.62, emissive: 0x000000, ...surface("skin", 2, 1), bumpScale: 0.7 });
   const accent = new THREE.MeshStandardMaterial({ color: st.accent, roughness: 0.75, emissive: 0x000000, ...surface("cloth", 3, 2), bumpScale: 1.5 });
+  const brassMat = new THREE.MeshStandardMaterial({ color: 0xc8963e, roughness: 0.32, metalness: 0.82, emissive: 0x000000 });
   const eyeMat = new THREE.MeshBasicMaterial({ color: 0xffee55 });
   // the trunk, the arms and the head have their own skin, with the style's anatomy painted on it
   const look = lookOf(f.style, st);
@@ -440,30 +441,47 @@ export function buildBody(f: Fighter, skipGear?: ReadonlySet<string>): Body {
   for (const s of Object.values(skins)) s.bind(skeleton);
 
   // ---- what rides on the bones
-  // the shorts and the belt
+  // Victorian breeches, coat skirts, and brass-buckled belt
   const pelvis = mesh(new THREE.SphereGeometry(0.17, 24, 16), accent);
   pelvis.scale.set(1.2, 0.8, 0.85);
   pelvis.position.y = -0.02;
   hips.add(pelvis);
+  for (const s of [-1, 1]) {
+    const skirt = mesh(new THREE.BoxGeometry(0.11, 0.19, 0.21), accent);
+    skirt.position.set(0.145 * s, -0.04, -0.01);
+    skirt.rotation.z = -0.18 * s;
+    hips.add(skirt);
+  }
   const belt = mesh(new THREE.TorusGeometry(0.19, 0.035, 10, 32), accent);
   belt.rotation.x = Math.PI / 2;
   belt.scale.set(1.15, 0.85, 1);
   belt.position.y = 0.08;
   spine.add(belt);
-  // pecs and shoulder blades on the trunk (the six-pack is painted on its skin)
+  const buckle = mesh(new THREE.BoxGeometry(0.075, 0.065, 0.028), brassMat);
+  buckle.position.set(0, 0.08, 0.175);
+  spine.add(buckle);
+
+  // Upturned Victorian coat collar & tailored chest lapels
+  const collar = mesh(new THREE.CylinderGeometry(0.115, 0.135, 0.068, 20, 1, true, Math.PI * 0.22, Math.PI * 1.56), accent);
+  collar.position.set(0, 0.54, -0.005);
+  spine.add(collar);
   for (const s of [-1, 1]) {
     const pec = mesh(new THREE.SphereGeometry(0.1, 16, 12), skin);
     pec.scale.set(1.1, 0.62, 0.42);
     pec.position.set(0.085 * s, 0.39, 0.1);
     pec.rotation.z = 0.25 * s;
     spine.add(pec);
+    const lapel = mesh(new THREE.BoxGeometry(0.065, 0.24, 0.024), accent);
+    lapel.position.set(0.075 * s, 0.41, 0.138);
+    lapel.rotation.set(-0.12, 0.22 * s, -0.26 * s);
+    spine.add(lapel);
     const blade = mesh(new THREE.SphereGeometry(0.09, 12, 10), skin);
     blade.scale.set(1.1, 1.2, 0.45);
     blade.position.set(0.09 * s, 0.4, -0.095);
     spine.add(blade);
   }
 
-  // the head
+  // the head: skull, jaw, sculpted nose bridge, eyes, brows and ears
   const skull = mesh(new THREE.SphereGeometry(0.155, 28, 20), headSkin);
   skull.scale.set(1, 1.08, 1);
   skull.position.y = 0.15;
@@ -472,15 +490,19 @@ export function buildBody(f: Fighter, skipGear?: ReadonlySet<string>): Body {
   jaw.scale.set(1, 0.6, 1.05);
   jaw.position.set(0, 0.07, 0.04);
   head.add(jaw);
+  const nose = mesh(new THREE.ConeGeometry(0.024, 0.065, 6), headSkin);
+  nose.position.set(0, 0.155, 0.162);
+  nose.rotation.x = Math.PI * 0.38;
+  head.add(nose);
   for (const s of [-1, 1]) {
     const eye = new THREE.Mesh(new THREE.SphereGeometry(0.028, 8, 6), eyeMat);
     eye.position.set(0.055 * s, 0.17, 0.135);
     head.add(eye);
-    const brow = mesh(new THREE.BoxGeometry(0.07, 0.018, 0.03), accent);
-    brow.position.set(0.055 * s, 0.205, 0.14);
+    const brow = mesh(new THREE.BoxGeometry(0.074, 0.02, 0.034), accent);
+    brow.position.set(0.055 * s, 0.205, 0.142);
     brow.rotation.z = 0.35 * s;
     head.add(brow);
-    // pointed ears
+    // ears
     const ear = mesh(new THREE.ConeGeometry(0.03, 0.09, 8), skin);
     ear.scale.set(1, 1, 0.45);
     ear.position.set(0.152 * s, 0.17, -0.01);
@@ -488,7 +510,7 @@ export function buildBody(f: Fighter, skipGear?: ReadonlySet<string>): Body {
     head.add(ear);
   }
 
-  // the deltoids cap the shoulders; the elbows and knees keep their volume when they bend
+  // the deltoids cap the shoulders; the elbows and knees keep their volume when they bend, with Crutch Street craft cuffs
   const hands = { L: accent.clone(), R: accent.clone() };
   const fists = {} as Record<"L" | "R", THREE.Group>;
   for (const [side, sh, el] of [
@@ -500,6 +522,10 @@ export function buildBody(f: Fighter, skipGear?: ReadonlySet<string>): Body {
     delt.scale.set(1.08, 0.95, 1);
     sh.add(delt);
     el.add(mesh(new THREE.SphereGeometry(0.05, 12, 10), skin));
+    // Crutch Street brass/cloth wrist cuff
+    const wristCuff = mesh(new THREE.CylinderGeometry(0.048, 0.052, 0.045, 14), hand);
+    wristCuff.position.y = -FORE + 0.035;
+    el.add(wristCuff);
     // a wrapped fist: a squared-off knuckle ball with a thumb. The fist is its
     // own group at the wrist, so a fighter holding something can close the
     // hand around it instead of wearing a fist-sized ball.
@@ -521,14 +547,17 @@ export function buildBody(f: Fighter, skipGear?: ReadonlySet<string>): Body {
     [kneeL, ankles.L, boots.L],
     [kneeR, ankles.R, boots.R],
   ] as const) {
-    kn.add(mesh(new THREE.SphereGeometry(0.06, 12, 10), boot.accent));
+    kn.add(mesh(new THREE.SphereGeometry(0.062, 12, 10), boot.accent));
+    const bootTop = mesh(new THREE.CylinderGeometry(0.058, 0.052, 0.06, 14), boot.accent);
+    bootTop.position.y = -SHIN * 0.55;
+    kn.add(bootTop);
     an.position.y = -SHIN;
     kn.add(an);
-    // a rounded boot with a toe cap
+    // a rounded Victorian work-boot with a heavy sole and heel
     const foot = mesh(new THREE.SphereGeometry(0.075, 16, 12), boot.skin);
-    foot.scale.set(0.8, 0.5, 1.7);
+    foot.scale.set(0.82, 0.52, 1.72);
     foot.position.set(0, -0.03, 0.05);
-    const sole = mesh(new THREE.BoxGeometry(0.12, 0.02, 0.25), boot.accent);
+    const sole = mesh(new THREE.BoxGeometry(0.124, 0.024, 0.255), boot.accent);
     sole.position.set(0, -0.065, 0.05);
     an.add(foot, sole);
   }
@@ -581,7 +610,24 @@ export function buildBody(f: Fighter, skipGear?: ReadonlySet<string>): Body {
     settle: null,
     skeleton,
     skins,
-    mats: [skin, accent, torsoSkin, armSkinL, armSkinR, headSkin, jawSkin, legClothL, legClothR, hands.L, hands.R, boots.L.skin, boots.L.accent, boots.R.skin, boots.R.accent],
+    mats: [
+      skin,
+      accent,
+      brassMat,
+      torsoSkin,
+      armSkinL,
+      armSkinR,
+      headSkin,
+      jawSkin,
+      legClothL,
+      legClothR,
+      hands.L,
+      hands.R,
+      boots.L.skin,
+      boots.L.accent,
+      boots.R.skin,
+      boots.R.accent,
+    ],
     limbLook: {
       armL: { style: f.style, skin: [armSkinL], accent: [hands.L] },
       armR: { style: f.style, skin: [armSkinR], accent: [hands.R] },
@@ -719,12 +765,16 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
       p.legL = [-0.14, 0.05];
       p.legR = [0.02, -0.05];
       p.y -= 0.02;
-      // guard up while stalking: only a little arm swing, the hips sway with the stride
+      // guard up while stalking: counter-rotating shoulders against the pelvis stride and natural arm pump
       blade();
       p.hipY = 0.22 + sw * 0.08;
-      p.rz = sw * 0.035;
-      p.armL[0] += sw * 0.08;
-      p.armR[0] -= sw * 0.08;
+      p.spineY = -0.18 - sw * 0.09;
+      p.rz = sw * 0.045;
+      p.spineZ = -sw * 0.035;
+      p.armL[0] += sw * 0.16;
+      p.armR[0] -= sw * 0.16;
+      p.elbowL += sw * 0.08;
+      p.elbowR -= sw * 0.08;
       p.tail = Math.sin(time * 6) * 0.5;
       if (f.running) {
         // Cross held: a sprint, leaning into it, the arms pumping
@@ -981,8 +1031,8 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
     p.spineY += a * 0.3;
     const fwdVel = (f.velX ?? 0) * Math.cos(f.facing) + (f.velY ?? 0) * Math.sin(f.facing);
     const latVel = -(f.velX ?? 0) * Math.sin(f.facing) + (f.velY ?? 0) * Math.cos(f.facing);
-    p.spineX += Math.max(-0.18, Math.min(0.18, fwdVel * 1.4));
-    p.spineZ += Math.max(-0.16, Math.min(0.16, -latVel * 1.4));
+    p.spineX += Math.max(-0.22, Math.min(0.22, fwdVel * 1.6));
+    p.spineZ += Math.max(-0.18, Math.min(0.18, -latVel * 1.5));
   }
 
   // one leg: hop; no legs: bounce along on the torso
