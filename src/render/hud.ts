@@ -3,9 +3,10 @@
 // (throne time, KOs, banner) per fighter, the stage's headline (who holds the
 // objective) and a banner for big moments.
 import { PARTS, type Fighter, type PartId } from "../sim/types";
-import { FURY } from "../sim/moves";
+import { FURY, VIOLENCE } from "../sim/moves";
 import { STYLES } from "../sim/styles";
 import { VEHICLES } from "../sim/arena";
+import { PROP_BY_ID } from "../data/props";
 import { World } from "../sim/world";
 import { PLAYER_COLORS } from "./scene";
 
@@ -19,7 +20,7 @@ function hpColor(frac: number): string {
 }
 
 export class Hud {
-  private cards: { el: HTMLElement; parts: Record<PartId, HTMLElement>; bar: HTMLElement; fury: HTMLElement; kos: HTMLElement; state: HTMLElement }[] = [];
+  private cards: { el: HTMLElement; parts: Record<PartId, HTMLElement>; bar: HTMLElement; fury: HTMLElement; violence: HTMLElement; vbar: HTMLElement; kos: HTMLElement; state: HTMLElement }[] = [];
   private banner: HTMLElement;
   private bannerT = 0;
   private count: HTMLElement;
@@ -58,11 +59,12 @@ export class Hud {
           <div class="side"><div class="sty">${st.style}</div><div class="kos"></div><div class="state"></div></div>
         </div>
         <div class="tbar"><div class="tfill"></div></div>
+        <div class="vbar" title="violence: full, and a taunt appeals to the Gallery"><div class="vfill"></div><span class="vtag">VIOLENCE</span></div>
         <div class="fbar" title="fury"><div class="ffill"></div></div>`;
       wrap.appendChild(el);
       const parts = {} as Record<PartId, HTMLElement>;
       for (const p of PARTS) parts[p] = el.querySelector(`.${p}`)!;
-      return { el, parts, bar: el.querySelector(".tfill")!, fury: el.querySelector(".ffill")!, kos: el.querySelector(".kos")!, state: el.querySelector(".state")! };
+      return { el, parts, bar: el.querySelector(".tfill")!, fury: el.querySelector(".ffill")!, violence: el.querySelector(".vfill")!, vbar: el.querySelector(".vbar")!, kos: el.querySelector(".kos")!, state: el.querySelector(".state")! };
     });
   }
 
@@ -117,7 +119,8 @@ export class Hud {
       else if (e.kind === "reversal") this.say(e.what ? `${nm(e.a)} ${e.what.toUpperCase()}!` : `${nm(e.a)} REVERSAL!`, 45);
       else if (e.kind === "counter") this.say(`${nm(e.a)} COUNTER!`, 40);
       else if (e.kind === "wallsplat") this.say(`${nm(e.a)} WALL SPLAT!`, 45);
-      else if (e.kind === "appeal") this.say(`${nm(e.a)} APPEALS — ${(e.what ?? "GIFT").toUpperCase()}!`, 60);
+      else if (e.kind === "appeal") this.say(`THE GALLERY ANSWERS ${nm(e.a)} — ${(e.what ?? "A GIFT").toUpperCase()}!`, 110);
+      else if (e.kind === "break") this.say(`${nm(e.a)}'S ${(PROP_BY_ID[e.what ?? ""]?.name ?? "WEAPON").toUpperCase()} BREAKS`, 45);
       else if (e.kind === "throw" && e.what) this.say(`${nm(e.a)} ${e.what.toUpperCase()}!`, 45);
       else if (e.kind === "grab" && e.what) this.say(`${nm(e.a)} ${e.what.toUpperCase()}!`, 45);
       else if (e.kind === "detach" && e.part) this.say(`${nm(e.a)} LOST ${e.part.startsWith("arm") ? "AN ARM" : "A LEG"}!`, 50);
@@ -146,6 +149,8 @@ export class Hud {
     if (prog !== null) c.bar.style.width = `${100 * Math.min(1, prog)}%`;
     c.fury.style.width = `${(100 * f.fury) / FURY.max}%`;
     c.fury.classList.toggle("ready", f.fury >= FURY.cost);
+    c.violence.style.width = `${(100 * f.violence) / VIOLENCE.max}%`;
+    c.vbar.classList.toggle("full", f.violence >= VIOLENCE.max);
     c.kos.textContent = `☠ ${f.kos}`;
     c.state.textContent = cardState(world, f);
     c.el.classList.toggle("dead", f.state === "ko" || f.out);

@@ -10,7 +10,7 @@
 // (arena.ts): the hellfire, an edge, a cracking tile, the blimp's fire, a
 // vehicle bearing down; the toilet, the banner, a free vehicle.
 import { BTN, type Fighter, type PlayerInput } from "./types";
-import { FURY, MOVES } from "./moves";
+import { FURY, MOVES, VIOLENCE } from "./moves";
 import { STYLES } from "./styles";
 import { Rng } from "./rng";
 import { HAZARDS } from "./arena";
@@ -160,6 +160,12 @@ export class Bot {
         goal = p;
         use = dist(me, p) < 0.8;
       }
+    }
+
+    // the Gallery is hungry: appeal while nobody is close enough to punish it
+    if (me.violence >= VIOLENCE.max && !enemies.some((e) => dist(e, me) < 2.5) && this.rng.chance(0.1)) {
+      press(BTN.TAUNT);
+      return out;
     }
 
     // 3b. empty-handed: go and get a weapon off the floor

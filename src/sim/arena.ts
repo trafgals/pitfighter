@@ -7,7 +7,7 @@
 // Like the World, an Arena is deterministic: all randomness goes through
 // `w.rng`, in a fixed order.
 import { BTN, LAVA_R, LIMBS, RING_R, SPAWN_R, TOILET_FRAMES, TOILET_R, type ArenaState, type Fighter, type HazardKind, type OnFloor, type PlayerInput, type Vehicle, type VehicleKind } from "./types";
-import { GEYSER, HITSTOP, LAVA, SIT_FRAMES, type Move, hitstopFor } from "./moves";
+import { GEYSER, HITSTOP, LAVA, SIT_FRAMES, VIOLENCE, type Move, hitstopFor } from "./moves";
 import type { StageId } from "./stages";
 import { BODY_R, alive, dist, type World } from "./world";
 
@@ -654,6 +654,7 @@ class ConstructionSite extends Arena {
       v.hp = 0;
       v.speed = 0;
       w.ev({ kind: "wreck", a: v.driver, b: v.lastBy, x: v.x, y: v.y, what: v.kind });
+      if (v.lastBy >= 0 && v.lastBy !== v.driver) w.addViolence(s.fighters[v.lastBy], VIOLENCE.wreck);
       const drv = s.fighters[v.driver];
       if (drv && drv.state === "driving") this.eject(w, drv);
       v.driver = -1;

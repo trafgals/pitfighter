@@ -127,6 +127,11 @@ export const SPEED = { walk: 0.05, run: 0.1, hop: 0.045, bounce: 0.02, accel: 0.
 export const DASH = { dur: 20, move: 12, speed: 0.13, strikeFrom: 4 };
 export const EVADE = { dur: 34, move: 14, speed: 0.075, invuln: 15 };
 export const TAUNT = { dur: 70, fury: 25 };
+
+// Violence: the bar the Gallery watches. Hurting people fills it; when it is
+// full, a taunt is an appeal that empties it and gets a good weapon thrown in.
+// Per point of damage dealt, and per deed.
+export const VIOLENCE = { max: 100, dmg: 0.6, limb: 8, strip: 10, splat: 10, wreck: 15, fall: 12 };
 // The Gallery's gift: thrown from the boxes into the pit, and picked up with
 // L1 (BTN.USE) by anyone standing near it.
 export const GIFT = { range: 1.2, gravity: 0.008, bounce: 0.3, drop: 0.4 };

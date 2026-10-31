@@ -237,11 +237,11 @@ describe("combat depth: counter-hits, regional targeting, ground grapples, and G
     expect(b.parts.legL.hp + b.parts.legR.hp).toBeLessThan(legHpBefore);
   });
 
-  it("completing a taunt shortly after a big blow triggers the Gallery appeal gift drop", () => {
+  it("a taunt with a full violence bar is an appeal: the bar empties and a weapon lands right by the fighter", () => {
     const w = duel(1.0, [0, 0], false);
     const [a] = w.fighters;
-    a.lastBigBlow = w.s.frame;
-    const pickupsBefore = w.s.pickups.length;
+    a.violence = 100;
+    const before = w.s.gifts.length;
     tap(w, 0, BTN.TAUNT);
     let appealEv;
     for (let i = 0; i < 75; i++) {
@@ -249,6 +249,21 @@ describe("combat depth: counter-hits, regional targeting, ground grapples, and G
       appealEv ??= w.s.events.find((e) => e.kind === "appeal" && e.a === 0);
     }
     expect(appealEv).toBeTruthy();
-    expect(w.s.pickups.length).toBe(pickupsBefore + 1);
+    expect(a.violence).toBe(0);
+    expect(w.s.gifts.length).toBe(before + 1);
+    const g = w.s.gifts[w.s.gifts.length - 1];
+    expect(Math.hypot(g.x - a.x, g.y - a.y)).toBeLessThan(1.5);
+  });
+
+  it("a taunt with the bar not full only fills fury", () => {
+    const w = duel(1.0, [0, 0], false);
+    const [a] = w.fighters;
+    a.violence = 99;
+    const before = w.s.gifts.length;
+    tap(w, 0, BTN.TAUNT);
+    run(w, 80);
+    expect(w.s.gifts.length).toBe(before);
+    expect(a.fury).toBeGreaterThan(0);
+    expect(a.violence).toBe(99);
   });
 });

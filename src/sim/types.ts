@@ -124,6 +124,7 @@ export interface Fighter {
   charge: number; // frames the current strike was charged (0..CHARGE.max)
   stop: number; // hitstop: frames this fighter stays frozen after a hit it gave or took
   fury: number; // special meter, 0..FURY.max; filled by landing and taking hits
+  violence: number; // the Gallery's appetite, 0..VIOLENCE.max: filled by damage dealt, limbs torn off, strips, wall splats and wrecks; full, a taunt appeals
   revHeight: Height;
   target: number;
   parts: Record<PartId, Part>;

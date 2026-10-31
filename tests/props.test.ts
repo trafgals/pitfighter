@@ -117,6 +117,7 @@ describe("the props in a fight", () => {
 
   it("throws a gift into the pit when a fighter appeals", () => {
     const w = pit([2, 2]);
+    w.fighters[0].violence = 100; // a full bar: the taunt is an appeal
     tap(w, 0, BTN.TAUNT);
     expect(w.s.gifts).toHaveLength(0); // the appeal is still going
     run(w, 120);
@@ -126,6 +127,7 @@ describe("the props in a fight", () => {
 
   it("lands the gift on the floor", () => {
     const w = pit([2, 2]);
+    w.fighters[0].violence = 100; // a full bar: the taunt is an appeal
     tap(w, 0, BTN.TAUNT);
     run(w, 120);
     const gift = w.s.gifts[0];
@@ -136,6 +138,7 @@ describe("the props in a fight", () => {
 
   it("lets a fighter pick the gift up with the use button", () => {
     const w = pit([2, 2]);
+    w.fighters[0].violence = 100; // a full bar: the taunt is an appeal
     tap(w, 0, BTN.TAUNT);
     run(w, 120);
     const gift = w.s.gifts[0];
@@ -150,6 +153,7 @@ describe("the props in a fight", () => {
 
   it("leaves the gift to anyone, not just the fighter who appealed", () => {
     const w = pit([2, 2]);
+    w.fighters[0].violence = 100; // a full bar: the taunt is an appeal
     tap(w, 0, BTN.TAUNT);
     run(w, 120);
     const gift = w.s.gifts[0];
@@ -163,6 +167,7 @@ describe("the props in a fight", () => {
 
   it("drops the weapon a fighter was holding when they take a gift", () => {
     const w = pit([10, 2]); // Eleanor has the rapier; Sluice appeals
+    w.fighters[1].violence = 100; // a full bar: the taunt is an appeal
     tap(w, 1, BTN.TAUNT);
     run(w, 120);
     const gift = w.s.gifts[0];
@@ -190,6 +195,7 @@ describe("the props in a fight", () => {
       const w = new World({ seed, styles: [2, 2], humans: [true, true] });
       w.s.nextGeyser = 1e9;
       w.s.gifts = [];
+      w.fighters[0].violence = 100; // a full bar: the taunt is an appeal
       tap(w, 0, BTN.TAUNT);
       run(w, 240);
       expect(w.s.gifts).toHaveLength(1);
@@ -200,6 +206,7 @@ describe("the props in a fight", () => {
   });
 
   it("keeps the fighters and the gifts on the same footing: the sim stays whole", () => {    const w = pit([2, 5]);
+    w.fighters[0].violence = 100; // a full bar: the taunt is an appeal
     tap(w, 0, BTN.TAUNT);
     for (let i = 0; i < 600; i++) {
       const inp = idle(2);
