@@ -465,11 +465,13 @@ class ConstructionSite extends Arena {
       if (d > m.reach + VEHICLES[v.kind].r) continue;
       if (d > 0.35 && (dx * Math.cos(f.facing) + dy * Math.sin(f.facing)) / d < m.arc) continue;
       f.moveHits.push(key);
-      v.hp -= m.dmg;
+      const mult = m.knockdown || m.launch || m.bound || m.kind === "special" || f.charge >= 20 ? 1.8 : 1;
+      const dmg = Math.round(m.dmg * mult);
+      v.hp -= dmg;
       v.lastBy = f.id;
       f.moveLanded = true;
       w.freeze(f, undefined, HITSTOP.block);
-      w.ev({ kind: "crash", a: f.id, what: "strike", x: v.x, y: v.y, dmg: m.dmg });
+      w.ev({ kind: "crash", a: f.id, what: "strike", x: v.x, y: v.y, dmg });
     }
   }
 
@@ -605,7 +607,19 @@ class ConstructionSite extends Arena {
           const hx = Math.cos(v.facing) * Math.sign(v.speed) + (d > 0.01 ? dx / d : 0);
           const hy = Math.sin(v.facing) * Math.sign(v.speed) + (d > 0.01 ? dy / d : 0);
           const k = Math.hypot(hx, hy) || 1;
-          w.knockDown(f, hx / k, hy / k, 1.8);
+          const front = d > 0.01 && (dx * Math.cos(v.facing) + dy * Math.sin(v.facing)) / d > 0.35 && v.speed > RAM_MIN;
+          if (front && (v.kind === "bulldozer" || v.kind === "loader" || v.kind === "forklift")) {
+            w.setState(f, "air");
+            f.juggle = 1;
+            f.bounced = false;
+            f.z = 0;
+            f.vz = 0.068;
+            f.slideX = (hx / k) * 0.12;
+            f.slideY = (hy / k) * 0.12;
+            w.ev({ kind: "launch", a: v.driver, b: f.id });
+          } else {
+            w.knockDown(f, hx / k, hy / k, 1.8);
+          }
           w.freeze(f, undefined, hitstopFor(dmg, true));
         }
         v.speed *= 0.8;

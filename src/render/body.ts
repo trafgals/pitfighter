@@ -1033,6 +1033,15 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
     const latVel = -(f.velX ?? 0) * Math.sin(f.facing) + (f.velY ?? 0) * Math.cos(f.facing);
     p.spineX += Math.max(-0.22, Math.min(0.22, fwdVel * 1.6));
     p.spineZ += Math.max(-0.18, Math.min(0.18, -latVel * 1.5));
+    // fractured limb telegraph (<25% HP): a crippled arm hangs lower and trembles slightly
+    if (f.parts.armL.attached && f.parts.armL.hp < f.parts.armL.max * 0.25) {
+      p.armL[0] += 0.28;
+      p.elbowL += 0.35;
+    }
+    if (f.parts.armR.attached && f.parts.armR.hp < f.parts.armR.max * 0.25) {
+      p.armR[0] += 0.28;
+      p.elbowR += 0.35;
+    }
   }
 
   // one leg: hop; no legs: bounce along on the torso

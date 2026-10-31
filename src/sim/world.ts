@@ -391,19 +391,25 @@ export class World {
     let knockdown = m.knockdown;
     if (id === f.move && f.charge > 0) {
       const k = f.charge / CHARGE.max;
-      dmg *= 1 + CHARGE.dmg * k;
+      const sweet = f.charge >= 42 && f.charge <= 52 ? 1.25 : 1;
+      dmg *= (1 + CHARGE.dmg * k) * sweet;
       push *= 1 + CHARGE.push * k;
       knockdown ||= k >= 1;
     }
-    const e = { ...m, startup, dmg, push, knockdown, reach: m.reach * (by ? limbMod(f, by, "reach") : st.reach), total: startup + m.active + m.recovery };
     const limb = this.strikerOf(f, id);
+    if (limb && f.parts[limb].attached && f.parts[limb].hp < f.parts[limb].max * 0.25) {
+      dmg *= 0.88;
+    }
+    const e = { ...m, startup, dmg, push, knockdown, reach: m.reach * (by ? limbMod(f, by, "reach") : st.reach), total: startup + m.active + m.recovery };
     return limb ? shape(e, f.parts[limb].trait) : e;
   }
 
   /** The limb that throws a strike (the other one if it is gone), or null for the body's own moves. */
   strikerOf(f: Fighter, id: string): PartId | null {
+    if (!id || !MOVES[id]) return null;
     // the finisher comes from the hand the last jab did not
-    const want = id === "punchFin" ? (STYLES[f.style].string % 2 === 1 ? "armL" : "armR") : striker(id, MOVES[id].kind);
+    const isFin = id === "punchFin" || id === "wallFin" || id === "boundFin" || id === "cmdLaunch";
+    const want = isFin ? (STYLES[f.style].string % 2 === 1 ? "armL" : "armR") : striker(id, MOVES[id].kind);
     if (!want) return null;
     if (f.parts[want].attached) return want;
     const other = ({ armL: "armR", armR: "armL", legL: "legR", legR: "legL" } as const)[want as "armL"];
@@ -529,6 +535,18 @@ export class World {
         f.x *= 0.7;
         f.y *= 0.7;
         break;
+      case "down": {
+        if (f.t >= 2 && f.t <= 10 && f.invuln === 0 && legs(f) > 0 && (this.buffered(f, BTN.REV) || this.buffered(f, BTN.DASH))) {
+          this.consume(f, BTN.REV);
+          this.consume(f, BTN.DASH);
+          const st = this.stick(inp);
+          this.setState(f, "evade", EVADE.dur);
+          f.dirX = st.mag > 0.2 ? st.dx : -Math.cos(f.facing);
+          f.dirY = st.mag > 0.2 ? st.dy : -Math.sin(f.facing);
+          f.invuln = 18;
+        }
+        break;
+      }
       case "driving":
         this.arena.drive(this, f, inp);
         break;
@@ -673,6 +691,14 @@ export class World {
     }
     if (this.buffered(f, BTN.HIGH)) {
       this.consume(f, BTN.HIGH);
+      // Just-Frame Riposte: pressing High right after parrying a foe launches them immediately
+      if (f.invuln > 4 && nArms > 0) {
+        const revFoe = this.s.fighters.find((o) => o.id !== f.id && o.state === "reversed" && dist(f, o) < 2.2);
+        if (revFoe) {
+          this.startMove(f, "cmdLaunch");
+          return;
+        }
+      }
       const vx = f.velX;
       const vy = f.velY;
       // the stick pulled back, away from where the fighter faces: the low string
@@ -693,10 +719,17 @@ export class World {
       }
       return;
     }
-    if (this.buffered(f, BTN.LOW) && nLegs === 2) {
+    if (this.buffered(f, BTN.LOW)) {
       this.consume(f, BTN.LOW);
-      this.startMove(f, STRING_STARTS.low);
-      return;
+      const fwd = st.mag > 0.55 ? st.dx * Math.cos(f.facing) + st.dy * Math.sin(f.facing) : 0;
+      if (fwd > 0.55 && nArms > 0 && nLegs === 2) {
+        this.startMove(f, "cmdLaunch");
+        return;
+      }
+      if (nLegs === 2) {
+        this.startMove(f, STRING_STARTS.low);
+        return;
+      }
     }
     if (this.buffered(f, BTN.DASH) && nLegs > 0) {
       this.consume(f, BTN.DASH);
@@ -713,7 +746,10 @@ export class World {
       // Cross held: run (two legs, and not while locked on)
       const run = (inp.buttons & BTN.DASH) !== 0 && nLegs === 2 && !lockHeld;
       let sp: number;
-      if (nLegs === 2) sp = (run ? SPEED.run : SPEED.walk) * limbMod(f, LEGS, "speed");
+      if (nLegs === 2) {
+        const legCrippled = (f.parts.legL.attached && f.parts.legL.hp < f.parts.legL.max * 0.25) || (f.parts.legR.attached && f.parts.legR.hp < f.parts.legR.max * 0.25);
+        sp = (run ? SPEED.run : SPEED.walk) * limbMod(f, LEGS, "speed") * (legCrippled ? 0.85 : 1);
+      }
       else sp = f.hopPhase % HOP_CYCLE < HOP_AIR ? (nLegs === 1 ? SPEED.hop : SPEED.bounce) * (HOP_CYCLE / HOP_AIR) : 0;
       const wantX = st.dx * st.mag * sp;
       const wantY = st.dy * st.mag * sp;
@@ -802,6 +838,17 @@ export class World {
         if (t && dist(f, t) < 3.5) turnToward(f, Math.atan2(t.y - f.y, t.x - f.x), SPEED.track);
       }
     }
+    // Hit-Confirm Dash-Cancel: spend 15 Fury after landing a hit to dash-cancel into a combo extension
+    if (f.moveLanded && f.t >= m.startup && f.t <= m.startup + m.active + 8 && f.fury >= 15 && legs(f) > 0 && this.buffered(f, BTN.DASH)) {
+      this.consume(f, BTN.DASH);
+      f.fury -= 15;
+      const st = this.stick(inp);
+      this.setState(f, "dash", DASH.dur);
+      f.dirX = st.mag ? st.dx : Math.cos(f.facing);
+      f.dirY = st.mag ? st.dy : Math.sin(f.facing);
+      f.facing = Math.atan2(f.dirY, f.dirX);
+      return;
+    }
     const next = this.nextOf(f, f.move);
     if (!next) return;
     // presses during this move (not the one that started it) queue the follow-up
@@ -810,7 +857,8 @@ export class World {
     const low = f.t > 0 && this.buffered(f, BTN.LOW, since);
     if (circle || low) {
       const st = this.stick(inp);
-      const back = st.mag > 0 && st.dx * Math.cos(f.facing) + st.dy * Math.sin(f.facing) < -0.5;
+      const fwd = st.mag > 0 ? st.dx * Math.cos(f.facing) + st.dy * Math.sin(f.facing) : 0;
+      const back = st.mag > 0 && fwd < -0.5;
       const kicking = m.kind === "kick";
       // a press for the other string (plain Circle out of a kick, back + Circle out of a punch) flows into it,
       // while the combo has crossings left and the body has the limbs for it; otherwise the string goes on
@@ -818,7 +866,12 @@ export class World {
       const can = f.flows < FLOW.max && (kicking ? arms(f) > 0 : legs(f) === 2);
       this.consume(f, BTN.HIGH);
       this.consume(f, BTN.LOW);
-      f.chainTo = other && can ? (kicking ? STRING_STARTS.high : STRING_STARTS.low) : next;
+      let branch = next;
+      if (next === "punchFin" && !other) {
+        if (fwd > 0.6) branch = "wallFin";
+        else if (st.mag > 0.5 && st.dy > 0.6 && Math.abs(st.dx) < 0.4) branch = "boundFin";
+      }
+      f.chainTo = other && can ? (kicking ? STRING_STARTS.high : STRING_STARTS.low) : branch;
       f.chain = true;
     }
     if (!f.chain || !f.chainTo || !f.moveLanded) return;
@@ -829,7 +882,7 @@ export class World {
     if (f.t < m.startup + m.active + (same ? FLOW.same : 0)) return;
     if (MOVES[to].kind === "kick" && legs(f) < 2) return;
     if (MOVES[to].kind === "punch" && arms(f) === 0) return;
-    if (to !== next) f.flows++;
+    if (to !== next && to !== "wallFin" && to !== "boundFin") f.flows++;
     const flows = f.flows;
     this.startMove(f, to);
     f.flows = flows;
@@ -845,16 +898,25 @@ export class World {
     p.x = f.x + Math.cos(f.facing) * 0.7;
     p.y = f.y + Math.sin(f.facing) * 0.7;
     p.facing = f.facing + Math.PI;
-    if (this.buffered(f, BTN.HIGH) && f.holdCool === 0 && f.holdStrikes < HOLD.kneeMax) {
+    if ((this.buffered(f, BTN.HIGH) || this.buffered(f, BTN.LOW)) && f.holdCool === 0 && f.holdStrikes < HOLD.kneeMax) {
+      const wrench = this.buffered(f, BTN.LOW);
       this.consume(f, BTN.HIGH);
+      this.consume(f, BTN.LOW);
       f.holdCool = HOLD.kneeCool;
       f.holdStrikes++;
-      const dmg = HOLD.knee * limbMod(f, ARMS, "grab") * this.comboScale(p);
+      let targetPart: PartId = "torso";
+      if (wrench) {
+        const attached = LIMBS.filter((l) => p.parts[l].attached);
+        if (attached.length) {
+          targetPart = attached.reduce((best, cur) => (p.parts[cur].hp / p.parts[cur].max < p.parts[best].hp / p.parts[best].max ? cur : best), attached[0]);
+        }
+      }
+      const dmg = HOLD.knee * (wrench ? 1.65 : 1) * limbMod(f, ARMS, "grab") * this.comboScale(p);
       p.combo++;
-      this.damage(p, "torso", dmg, f.id);
+      this.damage(p, targetPart, dmg, f.id);
       this.addFury(f, FURY.hit);
       const stop = this.freeze(f, p, !alive(p) ? HITSTOP.ko : hitstopFor(dmg, false));
-      this.ev({ kind: "hit", a: f.id, b: p.id, part: "torso", dmg, stop });
+      this.ev({ kind: "hit", a: f.id, b: p.id, part: targetPart, dmg, stop });
       return;
     }
     if (f.t >= 6 && this.buffered(f, BTN.GRAB)) {
@@ -977,9 +1039,12 @@ export class World {
     for (const p of s.pickups) {
       if (p.owner === f.id || p.burning > 0 || p.z > 0.25) continue;
       if (Math.hypot(p.x - f.x, p.y - f.y) < REATTACH.range) {
-        p.vx = Math.cos(f.facing) * 0.2;
-        p.vy = Math.sin(f.facing) * 0.2;
+        const tgt = this.lockTarget(f);
+        const ang = tgt && this.inCone(f, tgt, 7, 0.5) ? Math.atan2(tgt.y - p.y, tgt.x - p.x) : f.facing;
+        p.vx = Math.cos(ang) * 0.26;
+        p.vy = Math.sin(ang) * 0.26;
         p.vz = 0.11;
+        p.spin = 0.45;
         this.ev({ kind: "punt", a: f.id, b: p.owner, part: p.part });
         return true;
       }
@@ -1177,10 +1242,28 @@ export class World {
     hit.stop = this.freeze(a, d, baseStop);
     if (d.state === "ko") return;
     if (otg) return;
+    // Hyper-Armor on deeply charged strikes (>= 30 frames): absorbs 1 non-knockdown blow without losing the attack
+    if (d.state === "attack" && !d.chargeHeld && d.charge >= 36 && !knock && !m.launch && !m.bound && m.kind !== "special") {
+      this.ev({ kind: "block", a: d.id, b: a.id });
+      return;
+    }
 
     if (d.state === "holding" || d.state === "held") this.release(d);
     if (d.state === "reattach") this.dropReattach(d);
-    if (d.state === "air" || (m.launch && !crowd)) {
+    // Ground-Bounce ("Bound"): overhead bound finishers slam airborne or counter-hit foes into a high bounce once per juggle
+    if (m.bound && !crowd && !d.bounced && (d.state === "air" || counter || d.state === "wallsplat")) {
+      this.setState(d, "air");
+      d.moveHits = [a.id];
+      d.juggle = Math.max(1, d.juggle + 1);
+      d.bounced = true;
+      d.z = Math.max(0.05, d.z * 0.25);
+      d.vz = AIR.launch * 0.92;
+      d.slideX = dx * 0.025;
+      d.slideY = dy * 0.025;
+      this.ev({ kind: "bounce", a: d.id });
+      return;
+    }
+    if (d.state === "air" || (m.launch && !crowd) || (d.state === "wallsplat" && !m.knockdown)) {
       this.juggle(d, a, dx, dy, m);
       return;
     }
@@ -1192,7 +1275,9 @@ export class World {
         this.ev({ kind: "crowd", a: d.id });
       }
     } else if (d.state !== "dizzy") {
-      const stun = Math.round(m.hitstun * (counter ? COUNTER.stun : 1) * (backHit ? COUNTER.backStun : 1));
+      const flashSweet = a.charge >= 42 && a.charge <= 52;
+      const crumpleBonus = (counter && m.dmg >= 5) || flashSweet ? 1.15 : 1;
+      const stun = Math.round(m.hitstun * (counter ? COUNTER.stun : 1) * (backHit ? COUNTER.backStun : 1) * crumpleBonus);
       this.setState(d, "hitstun", stun);
       if (backHit) d.facing = normAngle(d.facing + Math.PI * 0.65);
       d.slideX = (dx * m.push) / KNOCK.hitstun;
@@ -1250,6 +1335,10 @@ export class World {
 
   private reverse(d: Fighter, a: Fighter): void {
     const def = CHARACTERS[d.style]?.moves.deflects[d.revHeight === "low" ? 1 : 0];
+    const strikerLimb = a.move ? this.strikerOf(a, a.move) : null;
+    if (strikerLimb && a.parts[strikerLimb].attached && a.parts[strikerLimb].hp < a.parts[strikerLimb].max * 0.28) {
+      this.detach(a, strikerLimb, d.id);
+    }
     this.setState(a, "reversed", REVERSAL.stun);
     a.slideX = (Math.cos(d.facing) * 0.6) / 10;
     a.slideY = (Math.sin(d.facing) * 0.6) / 10;
@@ -1808,6 +1897,27 @@ export class World {
       p.y += p.vy;
       p.z += p.vz;
       p.vz -= 0.008;
+      const pSpeed = Math.hypot(p.vx, p.vy);
+      if (pSpeed > 0.14 && p.z > 0.04) {
+        for (const d of s.fighters) {
+          if (!alive(d) || d.invuln > 0 || d.state === "down" || d.state === "driving") continue;
+          const dx = d.x - p.x;
+          const dy = d.y - p.y;
+          if (Math.hypot(dx, dy) < 0.52 && dx * p.vx + dy * p.vy > 0.03) {
+            const dmg = 6;
+            this.damage(d, "torso", dmg, p.owner);
+            if (alive(d) && d.state !== "air") {
+              this.setState(d, "hitstun", 24);
+              d.slideX = p.vx * 0.35;
+              d.slideY = p.vy * 0.35;
+            }
+            this.ev({ kind: "hit", a: p.owner, b: d.id, part: "torso", dmg, what: "limb" });
+            p.vx *= -0.35;
+            p.vy *= -0.35;
+            break;
+          }
+        }
+      }
       if (p.z <= 0) {
         p.z = 0;
         p.vz = Math.abs(p.vz) > 0.03 ? -p.vz * 0.3 : 0;

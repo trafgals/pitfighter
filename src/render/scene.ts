@@ -504,10 +504,16 @@ export class Scene {
           this.hype = Math.min(1, this.hype + 0.2);
           break;
         case "launch": {
-          // up it goes: a ring at the feet, and the crowd likes it
+          // up it goes: golden shockwave ring at the feet, rising ember fountain, and camera punch-in
           const d = fs[q.b ?? -1];
-          if (d) this.fx.ring(at(d, 0.05), 0xffd060, 1.4, 0.3, true);
-          this.hype = Math.min(1, this.hype + 0.15);
+          if (d) {
+            const p = at(d, 0.05);
+            this.fx.ring(p, 0xffd850, 1.65, 0.32, true);
+            this.fx.burst(at(d, 0.5), { count: 24, speed: 3.8, color: 0xffe066, life: 0.42, gravity: 2, up: 3.6 });
+            this.punchIn(at(d, 1.0), 0.45);
+          }
+          this.shake = Math.min(1, this.shake + 0.25);
+          this.hype = Math.min(1, this.hype + 0.2);
           break;
         }
         case "airgrab": {
@@ -533,9 +539,14 @@ export class Scene {
         case "land": {
           const f = fs[q.a];
           if (!f) break;
-          this.fx.burst(at(f, 0.1), { count: 14, speed: 1.6, color: 0x3a2a24, life: 0.6, gravity: 0.5, up: 0.6, dust: true });
-          this.fx.ring(at(f, 0.04), 0xff7040, 1.2, 0.25, true);
-          this.shake = Math.min(1, this.shake + 0.2);
+          const isBound = q.kind === "bounce";
+          this.fx.burst(at(f, 0.1), { count: isBound ? 26 : 14, speed: isBound ? 2.8 : 1.6, color: 0x3a2a24, life: 0.65, gravity: 0.5, up: isBound ? 1.4 : 0.6, dust: true });
+          this.fx.ring(at(f, 0.04), isBound ? 0xff5018 : 0xff7040, isBound ? 1.85 : 1.2, 0.28, true);
+          if (isBound) {
+            this.fx.scorch(f.x, f.y, 1.35);
+            this.fx.burst(at(f, 0.2), { count: 20, speed: 4.2, color: 0xffa030, life: 0.35, gravity: 6, up: 2.2 });
+          }
+          this.shake = Math.min(1, this.shake + (isBound ? 0.38 : 0.2));
           break;
         }
         case "detach": {
@@ -588,6 +599,7 @@ export class Scene {
           if (q.what === "beam" || q.what === "boulder") {
             this.fx.burst(p, { count: 30, speed: 3, color: 0x6a5a48, life: 0.8, gravity: 1, up: 1.4, dust: true });
             this.fx.ring(p, q.what === "beam" ? 0xffd080 : 0xc0a080, 2.6, 0.35, true);
+            this.fx.scorch(q.x ?? 0, q.y ?? 0, 1.8);
             this.shake = Math.min(1, this.shake + 0.5);
           } else if (q.what === "arrows") this.fx.burst(p, { count: 14, speed: 1.5, color: 0x8a7050, life: 0.4, gravity: 3, dust: true });
           else this.shake = Math.min(1, this.shake + 0.35);
@@ -600,6 +612,7 @@ export class Scene {
           this.fx.burst(p, { count: big ? 60 : 16, speed: big ? 6 : 3, color: big ? 0xff8020 : 0xffe090, life: big ? 0.9 : 0.3, gravity: 5, up: big ? 2 : 0.5 });
           if (big) {
             this.fx.ring(toV(q.x ?? 0, q.y ?? 0, 0.05), 0xff5010, 4, 0.5, true);
+            this.fx.scorch(q.x ?? 0, q.y ?? 0, 2.6);
             this.punchIn(p, 0.8);
             this.hype = 1;
           }
@@ -664,6 +677,7 @@ export class Scene {
         }
       } else if (f.move === "spSlam" && at0) {
         this.fx.ring(at(f, 0.05), c, m.reach * 2.2, 0.35, true);
+        this.fx.scorch(f.x, f.y, 2.1);
         this.fx.burst(at(f, 0.1), { count: 30, speed: 2.5, color: 0x3a2a24, life: 0.7, gravity: 0.5, up: 1, dust: true });
         this.shake = Math.min(1, this.shake + 0.5);
       } else if (f.move === "spSpin" && at0) {
@@ -763,12 +777,46 @@ export class Scene {
       const jitter = f.stop > 0 && v.hurt.age < 0.3 ? 0.07 : 0;
       v.last = animate(v, f, w, time, dt, jitter);
       this.motion?.track(i, v, f, v.last, dt);
+      if (f.state === "attack" && f.stop === 0 && v.last.drive && (v.last.phase === "fire" || v.last.phase === "active")) {
+        v.root.updateMatrixWorld(true);
+        const mv = f.move ?? "";
+        const trailCol =
+          mv === "punchFin" || mv === "cmdLaunch"
+            ? 0xffd848
+            : mv === "boundFin" || mv === "spSlam"
+              ? 0xff5818
+              : mv === "wallFin" || f.charge >= 20
+                ? 0x78e8ff
+                : mv.startsWith("sp")
+                  ? (SPECIAL_COLOR[mv] ?? 0xffa030)
+                  : 0xffe8c0;
+        const sampleArm = (side: "L" | "R", slot: number) => {
+          const el = v.joints[side === "L" ? "elbowL" : "elbowR"];
+          const tip = el.localToWorld(new THREE.Vector3(0, -0.32, 0));
+          const base = el.localToWorld(new THREE.Vector3(0, -0.04, 0));
+          this.fx.trail(i * 4 + slot, tip, base, trailCol);
+        };
+        const sampleLeg = (side: "L" | "R", slot: number) => {
+          const kn = v.joints[side === "L" ? "kneeL" : "kneeR"];
+          const tip = v.ankles[side].getWorldPosition(new THREE.Vector3());
+          const base = kn.localToWorld(new THREE.Vector3(0, -0.06, 0));
+          this.fx.trail(i * 4 + slot, tip, base, trailCol);
+        };
+        if (v.last.drive === "armL") sampleArm("L", 0);
+        else if (v.last.drive === "armR") sampleArm("R", 1);
+        else if (v.last.drive === "both") {
+          sampleArm("L", 0);
+          sampleArm("R", 1);
+        } else if (v.last.drive === "legL") sampleLeg("L", 2);
+        else if (v.last.drive === "legR") sampleLeg("R", 3);
+      }
 
       const aura = v.aura.material as THREE.MeshBasicMaterial;
       aura.opacity = 0;
       if (f.state === "attack" && f.chargeHeld && f.charge > 0) {
-        aura.color.set(0x80e0ff);
-        aura.opacity = 0.08 + (0.3 * f.charge) / 60;
+        const sweet = f.charge >= 42 && f.charge <= 52;
+        aura.color.set(sweet ? 0xffe048 : f.charge >= 36 ? 0xff7830 : 0x80e0ff);
+        aura.opacity = sweet ? 0.38 : 0.08 + (0.3 * f.charge) / 60;
       } else if (f.state === "reversal" && f.t < 8) {
         aura.color.set(0x80e0ff);
         aura.opacity = 0.2;

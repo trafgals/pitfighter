@@ -31,6 +31,7 @@ export interface Move {
   kind: "punch" | "kick" | "head" | "special";
   dash?: number; // metres per frame the attacker travels during the active frames
   launch?: boolean; // a launcher: the victim goes up into a juggle instead of down
+  bound?: boolean; // overhead smash: slams an airborne or counter-hit target into a high ground-bounce
   rehit?: number; // the move can hit the same fighter again every `rehit` active frames
 }
 

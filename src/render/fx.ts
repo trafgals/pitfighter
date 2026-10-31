@@ -317,24 +317,177 @@ class Splats {
   }
 }
 
+
+/** Procedural cracked-earth & scorch crater decal texture for heavy slams, ground-bounces, and explosions. */
+function scorchTexture(): THREE.Texture {
+  if (typeof document === "undefined") return new THREE.Texture();
+  const c = document.createElement("canvas");
+  c.width = c.height = 64;
+  const g = c.getContext("2d");
+  if (!g) return new THREE.Texture();
+  const grd = g.createRadialGradient(32, 32, 4, 32, 32, 30);
+  grd.addColorStop(0, "rgba(255,255,255,0.95)");
+  grd.addColorStop(0.55, "rgba(200,200,200,0.65)");
+  grd.addColorStop(1, "rgba(255,255,255,0)");
+  g.fillStyle = grd;
+  g.fillRect(0, 0, 64, 64);
+  g.strokeStyle = "#ffffff";
+  g.lineWidth = 1.6;
+  for (let i = 0; i < 9; i++) {
+    const a = (i * Math.PI * 2) / 9 + 0.2;
+    g.beginPath();
+    g.moveTo(32 + Math.cos(a) * 5, 32 + Math.sin(a) * 5);
+    g.lineTo(32 + Math.cos(a + 0.12) * 16, 32 + Math.sin(a + 0.12) * 16);
+    g.lineTo(32 + Math.cos(a - 0.08) * 28, 32 + Math.sin(a - 0.08) * 28);
+    g.stroke();
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+
+const TRAIL_STEPS = 7;
+
+interface RibbonTrail {
+  key: number;
+  mesh: THREE.Mesh;
+  pos: Float32Array;
+  col: Float32Array;
+  age: number;
+  count: number;
+  color: THREE.Color;
+}
+
+/** Pooled 3D additive ribbon arcs that follow striking fists, elbows, knees, and boots during active/fire frames. */
+class SwingTrails {
+  readonly group = new THREE.Group();
+  private ribbons: RibbonTrail[] = [];
+
+  constructor(n = 16) {
+    for (let k = 0; k < n; k++) {
+      const verts = TRAIL_STEPS * 2;
+      const pos = new Float32Array(verts * 3);
+      const col = new Float32Array(verts * 3);
+      const idx: number[] = [];
+      for (let i = 0; i < TRAIL_STEPS - 1; i++) {
+        const a = i * 2;
+        const b = a + 1;
+        const c = a + 2;
+        const d = a + 3;
+        idx.push(a, b, c, b, d, c);
+      }
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+      geo.setAttribute("color", new THREE.BufferAttribute(col, 3));
+      geo.setIndex(idx);
+      const mat = new THREE.MeshBasicMaterial({
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.72,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+      });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.visible = false;
+      mesh.frustumCulled = false;
+      this.group.add(mesh);
+      this.ribbons.push({ key: -1, mesh, pos, col, age: 99, count: 0, color: new THREE.Color(0xffffff) });
+    }
+  }
+
+  sample(key: number, tip: THREE.Vector3, base: THREE.Vector3, hexColor: number): void {
+    let r = this.ribbons.find((x) => x.key === key && x.age < 0.09);
+    if (!r) {
+      r = this.ribbons.reduce((best, cur) => (cur.age > best.age ? cur : best), this.ribbons[0]);
+      r.key = key;
+      r.count = 0;
+    }
+    r.color.set(hexColor);
+    r.age = 0;
+    r.mesh.visible = true;
+    // Shift existing samples back one slot
+    for (let i = TRAIL_STEPS - 1; i > 0; i--) {
+      const dst = i * 6;
+      const src = (i - 1) * 6;
+      for (let j = 0; j < 6; j++) r.pos[dst + j] = r.pos[src + j];
+    }
+    r.pos[0] = tip.x;
+    r.pos[1] = tip.y;
+    r.pos[2] = tip.z;
+    r.pos[3] = base.x;
+    r.pos[4] = base.y;
+    r.pos[5] = base.z;
+    if (r.count === 0) {
+      for (let i = 1; i < TRAIL_STEPS; i++) {
+        const dst = i * 6;
+        for (let j = 0; j < 6; j++) r.pos[dst + j] = r.pos[j];
+      }
+    }
+    r.count = Math.min(TRAIL_STEPS, r.count + 1);
+    for (let i = 0; i < TRAIL_STEPS; i++) {
+      const fade = Math.pow(1 - i / (TRAIL_STEPS - 1), 1.5);
+      const dst = i * 6;
+      r.col[dst] = r.color.r * fade;
+      r.col[dst + 1] = r.color.g * fade;
+      r.col[dst + 2] = r.color.b * fade;
+      r.col[dst + 3] = r.color.r * fade * 0.45;
+      r.col[dst + 4] = r.color.g * fade * 0.45;
+      r.col[dst + 5] = r.color.b * fade * 0.45;
+    }
+    r.mesh.geometry.getAttribute("position").needsUpdate = true;
+    r.mesh.geometry.getAttribute("color").needsUpdate = true;
+  }
+
+  update(dt: number): void {
+    for (const r of this.ribbons) {
+      if (!r.mesh.visible) continue;
+      r.age += dt;
+      if (r.age >= 0.16) {
+        r.mesh.visible = false;
+        r.key = -1;
+        continue;
+      }
+      (r.mesh.material as THREE.MeshBasicMaterial).opacity = (1 - r.age / 0.16) * 0.72;
+    }
+  }
+
+  clear(): void {
+    for (const r of this.ribbons) {
+      r.mesh.visible = false;
+      r.age = 99;
+      r.key = -1;
+      r.count = 0;
+    }
+  }
+}
+
 export class Fx {
   readonly group = new THREE.Group();
   private sparks = new Particles(900, 0.14, THREE.AdditiveBlending);
   private dust = new Particles(300, 0.38, THREE.NormalBlending);
   private blood = new Particles(800, 0.09, THREE.NormalBlending);
   private splats = new Splats(1200);
+  private scorches = new Splats(160);
+  private trails = new SwingTrails(16);
   private rings: Ring[] = [];
   private nextRing = 0;
   private seed = 1;
   /** counters for the automated tests */
-  readonly stats = { bursts: 0, rings: 0, live: 0, drops: 0, splats: 0 };
+  readonly stats = { bursts: 0, rings: 0, live: 0, drops: 0, splats: 0, trails: 0, scorches: 0 };
 
   constructor() {
     (this.dust.points.material as THREE.PointsMaterial).opacity = 0.58;
     // a drop of blood is opaque and dark, not a glowing ember
     (this.blood.points.material as THREE.PointsMaterial).opacity = 0.95;
     this.blood.land = (x, z, i) => this.splats.add(x, z, 0.08 + 0.16 * this.blood.mark[i] * (0.5 + this.rnd()), this.rnd() * Math.PI * 2);
-    this.group.add(this.sparks.points, this.dust.points, this.blood.points, this.splats.mesh);
+    const scorchMat = this.scorches.mesh.material as THREE.MeshStandardMaterial;
+    scorchMat.color.set(0x14100d);
+    scorchMat.map = scorchTexture();
+    scorchMat.alphaTest = 0.18;
+    scorchMat.roughness = 0.92;
+    scorchMat.metalness = 0.02;
+    this.group.add(this.sparks.points, this.dust.points, this.blood.points, this.splats.mesh, this.scorches.mesh, this.trails.group);
     const geo = new THREE.RingGeometry(0.74, 1, 48);
     for (let i = 0; i < 24; i++) {
       const mesh = new THREE.Mesh(
@@ -395,9 +548,23 @@ export class Fx {
     this.splats.add(x, z, size, this.rnd() * Math.PI * 2);
   }
 
+  /** A cracked-stone/scorch crater mark on the arena floor at sim coordinates `(x, y)`. */
+  scorch(x: number, y: number, size: number): void {
+    this.scorches.add(x, -y, size, this.rnd() * Math.PI * 2);
+    this.stats.scorches = this.scorches.live;
+  }
+
+  /** Append a 3D ribbon swing-arc sample for `key` between `tip` and `base` in world space. */
+  trail(key: number, tip: THREE.Vector3, base: THREE.Vector3, color: number): void {
+    this.trails.sample(key, tip, base, color);
+    this.stats.trails++;
+  }
+
   /** A new match: the floor is clean. */
   clear(): void {
     this.splats.clear();
+    this.scorches.clear();
+    this.trails.clear();
   }
 
   /** An expanding flash ring; `flat` lies it on the floor, otherwise it faces the camera. */
@@ -417,7 +584,10 @@ export class Fx {
   update(dt: number, camera: THREE.Camera): void {
     this.stats.live = this.sparks.update(dt) + this.dust.update(dt) + this.blood.update(dt);
     this.splats.update(dt);
+    this.scorches.update(dt);
+    this.trails.update(dt);
     this.stats.splats = this.splats.live;
+    this.stats.scorches = this.scorches.live;
     for (const r of this.rings) {
       if (!r.mesh.visible) continue;
       r.t += dt;

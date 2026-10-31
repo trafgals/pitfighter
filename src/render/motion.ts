@@ -302,13 +302,53 @@ const P = {
       all(arm(s, -1.75, 0.95 + wide * 0.15, -1.0 + wide * 0.25), cover(other(s)), turn(s, 0.42 + wide * 0.15, 0.32 + wide * 0.15), { z: 0.05, y: -0.1, spineX: 0.18 }),
       { follow: turn(s, 0.55 + wide * 0.2, 0.45 + wide * 0.2) },
     ),
-  /** an uppercut: dip low on bent knees, then drive up off the legs, the fist rising in front of the chin */
+  /** an uppercut: dip low on bent knees, then drive skyward off the legs, the fist rising high above the brow */
   upper: (s: Side) =>
     strike(
       `arm${s}` as Limb,
-      all(arm(s, -0.25, 0.25, -1.55), turn(s, -0.2, -0.25), { y: -0.22, kneeL: 1.05, kneeR: 0.95, spineX: 0.35, spineZ: 0.1 * sgn(s) }),
-      all(arm(s, -1.6, 0.12, -1.85), cover(other(s)), turn(s, 0.5, 0.35), { z: 0.08, y: 0.02, kneeL: 0.25, kneeR: 0.3, spineX: -0.12, headX: -0.1, spineZ: 0 }),
-      { follow: { y: 0.05, spineX: -0.18 } },
+      all(arm(s, -0.15, 0.25, -1.5), turn(s, -0.25, -0.3), { y: -0.24, kneeL: 1.1, kneeR: 1.0, spineX: 0.38, spineZ: 0.12 * sgn(s) }),
+      all(arm(s, -1.92, 0.1, -1.55), cover(other(s)), turn(s, 0.55, 0.4), { z: 0.08, y: 0.05, kneeL: 0.2, kneeR: 0.25, spineX: -0.18, headX: -0.15, spineZ: 0 }),
+      { follow: { y: 0.07, spineX: -0.22 } },
+    ),
+  /** a rising dragon uppercut: deep horse-stance gather into a vertical skyward corkscrew punch */
+  risingDragon: (s: Side) =>
+    strike(
+      `arm${s}` as Limb,
+      all(arm(s, 0.28, 0.2, -2.2), arm(other(s), -0.9, 0.15, -1.8), turn(s, -0.3, -0.35), { y: -0.24, kneeL: 1.08, kneeR: 0.98, spineX: 0.36 }),
+      all(arm(s, -2.05, 0.06, -1.25), cover(other(s)), turn(s, 0.65, 0.48), { z: 0.1, y: 0.06, kneeL: 0.22, kneeR: 0.25, spineX: -0.22, headX: -0.18 }),
+      { follow: { y: 0.08, spineX: -0.26 } },
+    ),
+  /** twin rising lotus palms: scooped low at the waist, then thrust diagonally skyward */
+  heavenPalm: () =>
+    strike(
+      "both",
+      all(arm("L", 0.25, 0.28, -2.15), arm("R", 0.25, 0.28, -2.15), { y: -0.25, spineX: 0.34, kneeL: 1.1, kneeR: 0.95, hipY: 0.25, spineY: 0 }),
+      all(arm("L", -2.0, 0.14, -0.35), arm("R", -2.0, 0.14, -0.35), { z: 0.1, y: 0.05, spineX: -0.22, headX: -0.16, kneeL: 0.22, kneeR: 0.25, hipY: 0.18, spineY: 0 }),
+      { follow: { y: 0.07, spineX: -0.26 } },
+    ),
+  /** a street-fighter bolo uppercut: slung from down by the ankle up into the sky */
+  boloUpper: (s: Side) =>
+    strike(
+      `arm${s}` as Limb,
+      all(arm(s, 0.45, 0.55, -1.15), turn(s, -0.45, -0.5), { y: -0.24, kneeL: 1.05, kneeR: 0.95, spineX: 0.38, headX: -0.1 }),
+      all(arm(s, -2.05, 0.3, -1.1), arm(other(s), -0.6, 0.45, -1.5), turn(s, 0.78, 0.65), { z: 0.1, y: 0.05, kneeL: 0.25, kneeR: 0.3, spineX: -0.2, headX: -0.15 }),
+      { gather: 0.58, follow: { ...turn(s, 0.92, 0.78), y: 0.07, spineX: -0.24 } },
+    ),
+  /** a two-handed tectonic scoop: both arms dug low between the knees and heaved overhead */
+  tectonicScoop: () =>
+    strike(
+      "both",
+      all(arm("L", 0.35, 0.25, -1.45), arm("R", 0.35, 0.25, -1.45), { y: -0.26, spineX: 0.46, headX: -0.15, kneeL: 1.15, kneeR: 1.05, hipY: 0.1, spineY: 0 }),
+      all(arm("L", -2.18, 0.18, -0.45), arm("R", -2.18, 0.18, -0.45), { z: 0.1, y: 0.06, spineX: -0.28, headX: -0.2, kneeL: 0.2, kneeR: 0.22, hipY: 0.1, spineY: 0 }),
+      { gather: 0.6, follow: { y: 0.08, spineX: -0.34 } },
+    ),
+  /** an uprooting shoulder & forearm gore that lifts the opponent off their boots */
+  liftBarge: (s: Side) =>
+    strike(
+      `arm${s}` as Limb,
+      all(arm(s, 0.3, 0.25, -2.0), arm(other(s), -0.7, -0.25, -2.1), turn(s, -0.35, -0.35), { y: -0.25, kneeL: 1.1, kneeR: 0.95, spineX: 0.42 }),
+      all(arm(s, -1.95, 0.15, -1.35), arm(other(s), -0.9, -0.25, -2.0), turn(s, 0.72, 0.52), { z: 0.11, y: 0.05, kneeL: 0.22, kneeR: 0.28, spineX: -0.18, headX: -0.12 }),
+      { gather: 0.58, follow: { y: 0.07, spineX: -0.24 } },
     ),
   /** an overhand: loops up over the shoulder and comes down on top of the guard */
   overhand: (s: Side) =>
@@ -448,6 +488,22 @@ const K = {
       all(leg(s, 0.35, 0, 0.9), arm("L", -1.45, 0.1, -1.0), arm("R", -1.45, 0.1, -1.0), { y: 0.0, spineX: 0.05 }),
       all(leg(s, -1.55, 0.05, 2.25), arm("L", -1.15, -0.1, -1.6), arm("R", -1.15, -0.1, -1.6), { y: 0.05, spineX: -0.2, z: 0.1, hipY: 0.32 - sgn(s) * 0.3 }),
     ),
+  /** a skyward Tiger Knee: deep coil, hands yanking down while the knee erupts toward the jaw */
+  skyKnee: (s: Side) =>
+    strike(
+      `leg${s}` as Limb,
+      all(leg(s, 0.4, 0, 0.85), arm("L", -1.55, 0.12, -0.9), arm("R", -1.55, 0.12, -0.9), { y: -0.22, spineX: 0.32, kneeL: 0.95 }),
+      all(leg(s, -1.78, 0.05, 2.35), arm("L", -0.65, -0.15, -1.75), arm("R", -0.65, -0.15, -1.75), { y: 0.08, spineX: -0.26, headX: -0.15, z: 0.1, hipY: 0.32 - sgn(s) * 0.38 }),
+      { follow: { y: 0.1, spineX: -0.3 } },
+    ),
+  /** a rising flash crescent kick: deep crouch into a vertical sky-high kick */
+  flashKick: (s: Side) =>
+    strike(
+      `leg${s}` as Limb,
+      all(leg(s, 0.35, 0.1, 1.85), leg(other(s), -0.35, 0.04, 0.85), arm("L", -0.8, 0.35, -1.5), arm("R", 0.3, 0.35, -1.4), { y: -0.23, spineX: 0.32 }),
+      all(leg(s, -2.15, 0.12, 0.08), arm("L", 0.35, 0.45, -1.2), arm("R", 0.45, 0.45, -1.2), { y: 0.06, spineX: -0.38, headX: 0.18, z: 0.06 }),
+      { gather: 0.58, follow: { y: 0.08, spineX: -0.42 } },
+    ),
   /** a stomp: the knee comes up and the heel is driven down into the shin or knee */
   stomp: (s: Side) =>
     strike(
@@ -501,26 +557,26 @@ const reap = (s: Side): Clip =>
 const headbutt: Clip = strike("head", { spineX: -0.35, headX: -0.4, y: -0.02, z: -0.04 }, { spineX: 0.6, headX: 0.45, z: 0.18, y: -0.08 }, { gather: 0.65 });
 
 // ------------------------------------------------------------ the families
-export type MoveClips = Record<"jab1" | "jab2" | "jab3" | "punchFin" | "kick1" | "kick2" | "sweep" | "headbutt", Clip>;
+export type MoveClips = Record<"jab1" | "jab2" | "jab3" | "punchFin" | "wallFin" | "boundFin" | "kick1" | "kick2" | "sweep" | "headbutt", Clip>;
 const fam = (c: Omit<MoveClips, "headbutt">): MoveClips => ({ ...c, headbutt });
 
 export const FAMILIES: Record<Family, MoveClips> = {
-  // jab, cross, lead hook, rear uppercut; the kicks are scrappy
-  boxing: fam({ jab1: P.jab("L"), jab2: P.cross("R"), jab3: P.hook("L"), punchFin: P.upper("R"), kick1: K.stomp("R"), kick2: K.knee("L"), sweep: reap("R") }),
-  // straight lines: lead punch, reverse punch, backfist, a lunging punch; front kick, roundhouse, spinning sweep
-  karate: fam({ jab1: P.jab("L"), jab2: P.cross("R", 0.14), jab3: P.backfist("L"), punchFin: P.lunge("R"), kick1: K.front("R"), kick2: K.round("L"), sweep: sweep("R") }),
-  // jab, cross, lead elbow, a hopping down elbow; low kick, teep, spinning heel
-  muay: fam({ jab1: P.jab("L"), jab2: P.cross("R"), jab3: P.elbow("L"), punchFin: P.elbowDown("R"), kick1: K.low("R"), kick2: K.teep("L"), sweep: K.spinHeel("R") }),
-  // palm, vertical fist, backfist, double palm; snap kick, crescent, spinning sweep
-  kungfu: fam({ jab1: P.palm("L"), jab2: P.cross("R", 0.12), jab3: P.backfist("L"), punchFin: P.doublePalm(), kick1: K.front("L"), kick2: K.round("R", 0.6), sweep: sweep("R") }),
-  // a flicked jab, an overhand, a wide hook, the haymaker; stomp, knee, a scrappy sweep
-  brawler: fam({ jab1: P.jab("L"), jab2: P.overhand("R"), jab3: P.hook("L", 1), punchFin: P.haymaker("R"), kick1: K.stomp("R"), kick2: K.knee("L"), sweep: reap("R") }),
-  // clubbing overhand, a hook, the hammer fist, the double axe handle; stomp, knee, a low kick
-  power: fam({ jab1: P.overhand("R"), jab2: P.hook("L", 1), jab3: P.hammer("R"), punchFin: P.axeHandle(), kick1: K.stomp("R"), kick2: K.knee("L"), sweep: K.low("R") }),
-  // a palm into the chest, a short straight, a forearm, the shoulder barge; low kick, knee, foot sweep
-  grappler: fam({ jab1: P.palm("L"), jab2: P.cross("R", 0.06), jab3: P.elbow("L"), punchFin: P.barge("R"), kick1: K.low("R"), kick2: K.knee("L"), sweep: reap("L") }),
-  // the hands only set up the feet: roundhouse, axe kick, spinning heel
-  kicker: fam({ jab1: P.jab("L"), jab2: P.cross("R"), jab3: P.backfist("L"), punchFin: P.hook("R"), kick1: K.round("L"), kick2: K.axe("R"), sweep: K.spinHeel("R") }),
+  // jab, cross, lead hook, rear uppercut launcher (plus straight wall-carry and overhand bound smash)
+  boxing: fam({ jab1: P.jab("L"), jab2: P.cross("R"), jab3: P.hook("L"), punchFin: P.upper("R"), wallFin: P.cross("R", 0.26), boundFin: P.overhand("R"), kick1: K.stomp("R"), kick2: K.knee("L"), sweep: reap("R") }),
+  // straight lines: lead punch, reverse punch, backfist, rising dragon launcher (lunge wall-carry, hammer bound smash)
+  karate: fam({ jab1: P.jab("L"), jab2: P.cross("R", 0.14), jab3: P.backfist("L"), punchFin: P.risingDragon("R"), wallFin: P.lunge("R"), boundFin: P.hammer("R"), kick1: K.front("R"), kick2: K.round("L"), sweep: sweep("R") }),
+  // jab, cross, lead elbow, soaring sky knee launcher (teep wall-carry, hopping down elbow bound smash)
+  muay: fam({ jab1: P.jab("L"), jab2: P.cross("R"), jab3: P.elbow("L"), punchFin: K.skyKnee("R"), wallFin: K.teep("R"), boundFin: P.elbowDown("R"), kick1: K.low("R"), kick2: K.teep("L"), sweep: K.spinHeel("R") }),
+  // palm, vertical fist, backfist, twin heaven palms launcher (double palm wall-carry, hammer bound smash)
+  kungfu: fam({ jab1: P.palm("L"), jab2: P.cross("R", 0.12), jab3: P.backfist("L"), punchFin: P.heavenPalm(), wallFin: P.doublePalm(), boundFin: P.hammer("R"), kick1: K.front("L"), kick2: K.round("R", 0.6), sweep: sweep("R") }),
+  // a flicked jab, an overhand, a wide hook, bolo uppercut launcher (haymaker wall-carry, overhand bound smash)
+  brawler: fam({ jab1: P.jab("L"), jab2: P.overhand("R"), jab3: P.hook("L", 1), punchFin: P.boloUpper("R"), wallFin: P.haymaker("R"), boundFin: P.overhand("R"), kick1: K.stomp("R"), kick2: K.knee("L"), sweep: reap("R") }),
+  // clubbing overhand, a hook, the hammer fist, tectonic scoop launcher (barge wall-carry, double axe handle bound smash)
+  power: fam({ jab1: P.overhand("R"), jab2: P.hook("L", 1), jab3: P.hammer("R"), punchFin: P.tectonicScoop(), wallFin: P.barge("R"), boundFin: P.axeHandle(), kick1: K.stomp("R"), kick2: K.knee("L"), sweep: K.low("R") }),
+  // a palm into the chest, a short straight, a forearm, uprooting lift-barge launcher (shoulder barge wall-carry, axe handle bound smash)
+  grappler: fam({ jab1: P.palm("L"), jab2: P.cross("R", 0.06), jab3: P.elbow("L"), punchFin: P.liftBarge("R"), wallFin: P.barge("R"), boundFin: P.axeHandle(), kick1: K.low("R"), kick2: K.knee("L"), sweep: reap("L") }),
+  // the hands set up the feet: rising flash crescent kick launcher (high roundhouse wall-carry, axe kick bound smash)
+  kicker: fam({ jab1: P.jab("L"), jab2: P.cross("R"), jab3: P.backfist("L"), punchFin: K.flashKick("R"), wallFin: K.round("R", 0.7), boundFin: K.axe("R"), kick1: K.round("L"), kick2: K.axe("R"), sweep: K.spinHeel("R") }),
 };
 /** The family each Urban Reign style label fights in, from the character design. */
 export const FAMILY_OF: Record<string, Family> = CHARACTER_FAMILIES;
@@ -530,6 +586,7 @@ export const familyOf = (style: number): Family => FAMILY_OF[STYLES[style]?.styl
 /** The clip a style throws a move with, or null for the moves drawn by formula (the specials). */
 export function clipFor(style: number, move: string): Clip | null {
   const f = FAMILIES[familyOf(style)] as Record<string, Clip>;
+  if (move === "cmdLaunch") return f.punchFin;
   return f[move] ?? SPECIALS[move === "dashStrike" ? "spCharge" : move] ?? REACTIONS[move] ?? null;
 }
 
@@ -687,6 +744,16 @@ export const REACTIONS: Record<string, Clip> = {
     keys: [
       { at: ["s", 3], p: all({ spineX: -0.45, headX: -0.4, spineY: 0.45, hipY: 0.55, z: -0.05 }, arm("L", -0.6, 1.25, -0.3), arm("R", -0.6, 1.25, -0.3), leg("L", 0.3, 0.1, 0.4), leg("R", -0.3, -0.1, 0.5)), ease: "out" },
       { at: ["s", 9], p: { spineX: -0.25, spineY: 0.6, headX: -0.25, y: -0.08 } },
+    ],
+  },
+  // counter-hit crumple: knees buckle inward, hands clutch the solar plexus as the fighter sags forward
+  crumple: {
+    limb: "body",
+    rate: 28,
+    keys: [
+      { at: ["s", 4], p: all({ spineX: 0.52, headX: 0.32, y: -0.16, z: -0.06, kneeL: 0.85, kneeR: 0.9 }, arm("L", -0.75, -0.25, -1.6), arm("R", -0.75, -0.25, -1.6)), ease: "out" },
+      { at: ["s", 16], p: all({ spineX: 0.68, headX: 0.42, y: -0.28, z: -0.08, kneeL: 1.2, kneeR: 1.25 }, arm("L", -0.55, -0.15, -1.4), arm("R", -0.55, -0.15, -1.4)), ease: "io" },
+      { at: ["rec", 0.75], p: { spineX: 0.25, headX: 0.12, y: -0.1, kneeL: 0.65, kneeR: 0.6 }, ease: "io" },
     ],
   },
 };

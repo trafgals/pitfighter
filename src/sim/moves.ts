@@ -43,6 +43,10 @@ export const MOVES: Record<string, Move> = {
   jab3: { id: "jab3", startup: 11, active: 3, recovery: 24, dmg: 5, hitstun: 41, blockstun: 22, height: "high", reach: 1.3, arc: 0.55, push: 0.2, knockdown: false, next: "punchFin", kind: "punch" },
   // the string's finisher launches, as Urban Reign's neutral string does
   punchFin: { id: "punchFin", startup: 17, active: 4, recovery: 26, dmg: 9, hitstun: 0, blockstun: 25, height: "high", reach: 1.4, arc: 0.5, push: 1.4, knockdown: true, kind: "punch", launch: true },
+  // directional string finishers: forward+Circle for wall-carry, down+Circle for overhead ground-bounce, f+Low for command launcher
+  wallFin: { id: "wallFin", startup: 16, active: 4, recovery: 26, dmg: 10, hitstun: 0, blockstun: 25, height: "high", reach: 1.5, arc: 0.5, push: 2.3, knockdown: true, kind: "punch" },
+  boundFin: { id: "boundFin", startup: 18, active: 4, recovery: 26, dmg: 9, hitstun: 0, blockstun: 26, height: "high", reach: 1.45, arc: 0.5, push: 0.45, knockdown: true, kind: "punch", bound: true },
+  cmdLaunch: { id: "cmdLaunch", startup: 16, active: 4, recovery: 26, dmg: 8, hitstun: 0, blockstun: 25, height: "high", reach: 1.4, arc: 0.5, push: 1.2, knockdown: true, kind: "punch", launch: true },
   kick1: { id: "kick1", startup: 18, active: 3, recovery: 27, dmg: 5, hitstun: 41, blockstun: 25, height: "low", reach: 1.45, arc: 0.5, push: 0.2, knockdown: false, next: "kick2", kind: "kick" },
   kick2: { id: "kick2", startup: 20, active: 3, recovery: 28, dmg: 6, hitstun: 41, blockstun: 26, height: "low", reach: 1.45, arc: 0.5, push: 0.25, knockdown: false, next: "sweep", kind: "kick" },
   sweep: { id: "sweep", startup: 26, active: 4, recovery: 30, dmg: 7, hitstun: 0, blockstun: 29, height: "low", reach: 1.6, arc: 0.35, push: 0.8, knockdown: true, kind: "kick" },
