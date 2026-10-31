@@ -12,6 +12,7 @@
 import { BTN, type Fighter, type PlayerInput } from "./types";
 import { FURY, MOVES } from "./moves";
 import { STYLES } from "./styles";
+import { CHARACTERS } from "../data/characters";
 import { Rng } from "./rng";
 import { HAZARDS } from "./arena";
 import { AIR_GRAB } from "./airgrabs";
@@ -39,6 +40,7 @@ export class Bot {
   private plan: "string" | "low" | "grab" | "wait" = "wait";
   private planT = 0;
   private lastPress = 0;
+  private holdFor = 0;
 
   constructor(
     readonly id: number,
@@ -77,7 +79,8 @@ export class Bot {
     }
     if (me.state === "holding") {
       if (me.t > 8 && this.rng.chance(0.08)) {
-        if (me.holdStrikes < 2 && this.rng.chance(0.5)) press(BTN.HIGH);
+        const knees = CHARACTERS[me.style].family === "muay" ? 4 : 2; // the clinch is Muay's game: knee, knee, knee
+        if (me.holdStrikes < knees && this.rng.chance(0.5)) press(BTN.HIGH);
         else {
           // throw them into the hazard, or over the edge
           const a = w.arena.throwAngle(w, me);
@@ -91,6 +94,16 @@ export class Bot {
     if (me.state === "seated" || me.state === "sitting") return out;
     if (me.state === "driving") return this.drive(w, me, out, press);
     if (me.state === "attack") {
+      const m = this.chargeMove(w, me);
+      if (m?.chargeable && me.t <= m.startup) {
+        // karate: hold the finisher to charge it, let go when it is full (a worse CPU lets go early)
+        this.holdFor = this.holdFor || 12 + this.rng.int(18 + Math.round(30 * this.skill));
+        if (me.charge < this.holdFor) out.buttons |= BTN.HIGH;
+        return out;
+      }
+      this.holdFor = 0;
+      // power and grapple: the string ends in a command grab; kung fu and the rest cross with back + Circle
+      if (this.plan === "string" && me.moveLanded && this.rng.chance(0.06)) out.x = -Math.cos(me.facing);
       // keep the string going
       if (this.plan === "string" && this.rng.chance(0.3)) press(BTN.HIGH);
       if (this.plan === "low" && this.rng.chance(0.3)) press(BTN.LOW);
@@ -99,6 +112,11 @@ export class Bot {
         this.plan = "string";
         press(BTN.HIGH);
       }
+      return out;
+    }
+    if (me.state === "evade") {
+      // boxing: slip the blow, then weave out of it into a counter hook
+      if (this.moveset(w, me).moves.weave && me.t >= 3 && this.rng.chance(0.45 * this.skill)) press(BTN.HIGH);
       return out;
     }
     if (!actionable(me)) return out;
@@ -120,13 +138,14 @@ export class Bot {
       if (e.state !== "attack" || !e.move || dist(e, me) > 2.2) continue;
       const toMe = Math.atan2(me.y - e.y, me.x - e.x);
       if (Math.cos(toMe - e.facing) < 0.5) continue;
-      const m = e.move === "grab" ? null : MOVES[e.move];
+      const m = e.move === "grab" ? null : w.mv(e, e.move) ?? null;
       const startup = m ? m.startup : 5;
       if (e.t >= startup) continue;
       if (this.rng.chance(this.skill * 0.18)) {
         press(BTN.REV);
         return out;
       }
+      if (m && legs(me) > 0 && CHARACTERS[me.style].family === "karate") continue; // a karateka parries on the spot, it does not step aside
       if (m && legs(me) > 0 && this.rng.chance(this.skill * 0.12)) {
         // sidestep off the line of the blow
         const side = toMe + (me.id % 2 === 0 ? 1 : -1) * Math.PI * 0.5;
@@ -185,6 +204,26 @@ export class Bot {
           press(BTN.SPECIAL);
           return out;
         }
+        // the Status Art at a full bar, a Special Art when the fury allows
+        if (me.fury >= FURY.max && me.fx.tonic === 0 && d < 2.5 && this.rng.chance(0.03 + 0.05 * this.skill)) {
+          press(BTN.TAUNT | BTN.SPECIAL);
+          return out;
+        }
+        if (me.fury >= FURY.cost && d < 1.8 && this.rng.chance(0.02 * this.skill)) {
+          const art = ["art1", "art2", "art3"].filter((id) => this.moveset(w, me).moves[id]);
+          if (art.length) {
+            const id = art[this.rng.int(art.length)];
+            out.x = id === "art2" ? Math.cos(me.facing) : id === "art3" ? -Math.cos(me.facing) : -Math.sin(me.facing);
+            out.y = id === "art2" ? Math.sin(me.facing) : id === "art3" ? -Math.sin(me.facing) : Math.cos(me.facing);
+            press(BTN.SPECIAL);
+            return out;
+          }
+        }
+        // kung fu: change stance now and then
+        if (this.moveset(w, me).alt && me.fx.stanceLock === 0 && this.rng.chance(0.01)) {
+          press(BTN.USE);
+          return out;
+        }
         if (!hasToken(w, me, tgt)) return this.circle(w, out, me, tgt);
         if (d > 1.15) goal = tgt;
         else {
@@ -195,7 +234,16 @@ export class Bot {
             if (this.plan === "grab" && arms(me) === 0) this.plan = "string";
             this.planT = 10 + this.rng.int(25);
           }
-          if (this.plan === "string") press(BTN.HIGH);
+          const dirty = CHARACTERS[me.style].family === "brawler" && d < 1.3 && this.rng.chance(0.06);
+          const brawlerAim = (up: boolean) => {
+            // R1 + up throws dirt, R1 + down is the low blow (aimed with the stick, in the facing)
+            out.buttons |= BTN.LOCK;
+            out.x = Math.cos(me.facing) * (up ? 1 : -1);
+            out.y = Math.sin(me.facing) * (up ? 1 : -1);
+            press(BTN.HIGH);
+          };
+          if (dirty) brawlerAim(this.rng.chance(0.5));
+          else if (this.plan === "string") press(BTN.HIGH);
           else if (this.plan === "low") press(BTN.LOW);
           else if (this.plan === "grab") press(BTN.GRAB);
           return out;
@@ -210,6 +258,15 @@ export class Bot {
     }
     if (use) press(BTN.USE);
     return out;
+  }
+
+  private moveset(w: World, f: Fighter) {
+    return w.moveset(f);
+  }
+
+  /** The move the fighter is throwing, from its own table. */
+  private chargeMove(w: World, f: Fighter) {
+    return f.move ? w.mv(f, f.move) : undefined;
   }
 
   /** Wait for a turn: orbit the target at CIRCLE_R, locked on to it, taunting now and then. */

@@ -583,10 +583,15 @@ export const FAMILY_OF: Record<string, Family> = CHARACTER_FAMILIES;
 
 export const familyOf = (style: number): Family => FAMILY_OF[STYLES[style]?.style] ?? "karate";
 
+const SLOT_CLIP: Record<string, string> = { br1: "wallFin", br2: "boundFin", rgHead: "jab1", rgBody: "jab2", rgLegs: "kick1", art1: "punchFin", art2: "jab3", art3: "sweep", weave: "jab3" };
+
 /** The clip a style throws a move with, or null for the moves drawn by formula (the specials). */
 export function clipFor(style: number, move: string): Clip | null {
   const f = FAMILIES[familyOf(style)] as Record<string, Clip>;
   if (move === "cmdLaunch") return f.punchFin;
+  // the extra slots of the per-fighter movesets borrow the family clip that fits
+  const alias = SLOT_CLIP[move];
+  if (alias) return f[alias] ?? null;
   return f[move] ?? SPECIALS[move === "dashStrike" ? "spCharge" : move] ?? REACTIONS[move] ?? null;
 }
 

@@ -12,7 +12,7 @@ export type Cue =
   | { kind: "swing"; a: number; move: string; heavy: boolean }
   | { kind: "land"; a: number };
 
-const HEAVY = new Set(["punchFin", "wallFin", "boundFin", "cmdLaunch", "sweep", "spSpin", "spCharge", "spFlurry", "spSlam", "spBlade", "spFire"]);
+const HEAVY = new Set(["punchFin", "wallFin", "boundFin", "cmdLaunch", "br1", "br2", "art1", "art2", "art3", "sweep", "spSpin", "spCharge", "spFlurry", "spSlam", "spBlade", "spFire"]);
 // frames into "down" at which the body reaches the floor (the knockdown clips land on it)
 const LAND_AT = FALL_LAND;
 
