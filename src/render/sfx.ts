@@ -241,6 +241,16 @@ export class Sfx {
       this.tone(t + 0.1, o, "sawtooth", 40, 90, 0.25, 0.5, 0.05); // the engine catches
     },
     exit: (t, o) => this.noiseHit(t, o, "lowpass", 700, 250, 1, 0.4, 0.08),
+    deliver: (t, o) => {
+      // cement and rubble tipped into the pit
+      this.noiseHit(t, o, "lowpass", 1800, 300, 0.8, 0.45, 0.35);
+      this.tone(t, o, "triangle", 440, 660, 0.12, 0.2);
+    },
+    repair: (t, o) => {
+      // a spanner on steel
+      this.tone(t, o, "square", 900, 700, 0.1, 0.05);
+      this.noiseHit(t, o, "highpass", 3000, 2000, 2, 0.15, 0.05);
+    },
     crack: (t, o) => {
       this.noiseHit(t, o, "highpass", 2500, 1200, 1.5, 0.35, 0.12);
       this.tone(t, o, "sine", 120, 60, 0.25, 0.2);

@@ -229,6 +229,40 @@ export interface Vehicle {
   cool: number; // frames until the next boost
   wrecked: boolean;
   lastBy: number; // who damaged it last
+  act: number; // frames into the implement attack (0: none running)
+  actCool: number; // frames until the implement can be used again
+  actHit: number[]; // fighters this attack already hit
+  carry: number; // the fighter on the forks / in the bucket, -1 none
+  carryT: number; // frames they have been carried
+  load: number; // cement and rubble hauled (in sacks' worth), for the foundation
+  wreckT: number; // frames since it was wrecked
+  repair: number; // frames of repair done on the wreck
+  repairer: number; // the fighter at it, -1 none
+}
+
+/** A cement sack or a lump of rubble for the foundation. */
+export interface Sack {
+  id: number;
+  kind: "cement" | "rubble";
+  value: number; // how much of the foundation it fills
+  x: number;
+  y: number;
+  carrier: number; // the fighter carrying it, -1 on the ground
+}
+
+/** Wet cement a mixer has poured: it slows whoever is in it, then sets hard. */
+export interface Slick {
+  x: number;
+  y: number;
+  t: number;
+  by: number;
+}
+
+/** A load a dump truck tipped: whoever was under it is buried. */
+export interface Pile {
+  x: number;
+  y: number;
+  t: number;
 }
 
 /** Stage-specific state. Every stage has every field; the ones it does not use stay at their defaults. */
@@ -240,6 +274,11 @@ export interface ArenaState {
   wind: number; // Hindenburg Blimp: <0 a gust is coming (frames to go, counting up), >0 gust frames left
   windDir: number; // +1 / -1: the gust blows toward +y / -y
   nextWind: number;
+  sacks: Sack[]; // Construction Site: the foundation's cement and rubble
+  nextSack: number; // frame of the next delivery to the yard
+  nextSackId: number;
+  slicks: Slick[];
+  piles: Pile[];
 }
 
 export interface GameEvent {
@@ -266,7 +305,10 @@ export interface GameEvent {
     | "dizzy"
     | "special"
     | "fall" // went over the edge
-    | "crash" // a vehicle hit a wall, another vehicle or a strike
+    | "crash" // a vehicle hit a wall, another vehicle or a strike, or used its implement (what)
+    | "deliver" // sacks poured into the foundation (dmg: how much)
+    | "repair" // a wreck is being repaired (what: work) or is back on its wheels (done, tow)
+    | "supply" // a sack was dropped into the yard
     | "wreck"
     | "enter"
     | "exit"

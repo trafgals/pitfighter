@@ -6,7 +6,7 @@
 // only reads the World. The hazards, fighters and pickups are the Scene's.
 import * as THREE from "three";
 import { LAVA_R, RING_R, type Vehicle, type VehicleKind } from "../sim/types";
-import { BLIMP, CASTLE, TOWER, YARD, onDeck, tileCentre } from "../sim/arena";
+import { ACTS, BALL_R, BLIMP, CASTLE, PIT, REPAIR, SLICK, TOWER, YARD, onDeck, tileCentre } from "../sim/arena";
 import type { StageId } from "../sim/stages";
 import type { World } from "../sim/world";
 import { PLAYER_COLORS } from "./body";
@@ -840,6 +840,12 @@ class ConstructionView extends StageView {
   private smokeAge: Float32Array;
   private smokeN = 0;
   private beacons: THREE.PointLight[] = [];
+  private bars: { root: THREE.Group; fill: THREE.Mesh }[] = [];
+  private slices: THREE.Mesh[] = [];
+  private sackMeshes = new Map<number, THREE.Object3D>();
+  private slickMeshes: THREE.Mesh[] = [];
+  private pileMeshes: THREE.Mesh[] = [];
+  private ball: THREE.Group;
   private debris: { mesh: THREE.Object3D; vx: number; vy: number; vz: number; rx: number; rz: number; age: number }[] = [];
 
   constructor() {
@@ -1013,6 +1019,30 @@ class ConstructionView extends StageView {
     );
     this.smokeAge = new Float32Array(sn).fill(99);
     g.add(this.smoke);
+
+    // the foundation pit: a dark hole with a timber kerb, filled slice by slice with each fighter's share
+    const kerb = new THREE.Mesh(new THREE.CylinderGeometry(PIT.r + 0.3, PIT.r + 0.3, 0.08, 28), new THREE.MeshStandardMaterial({ color: 0x8a6a3a, roughness: 0.9 }));
+    kerb.position.y = 0.04;
+    kerb.receiveShadow = true;
+    g.add(kerb);
+    const hole = new THREE.Mesh(new THREE.CylinderGeometry(PIT.r, PIT.r, 0.1, 28), new THREE.MeshStandardMaterial({ color: 0x14100c, roughness: 1 }));
+    hole.position.y = 0.06;
+    g.add(hole);
+    for (let k = 0; k < 8; k++) {
+      const a = (k / 8) * Math.PI * 2 + 0.2;
+      const post = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.9, 6), new THREE.MeshStandardMaterial({ color: 0xff7a10, roughness: 0.6 }));
+      post.position.set(Math.cos(a) * (PIT.r + 0.45), 0.45, Math.sin(a) * (PIT.r + 0.45));
+      g.add(post);
+    }
+    // the wrecking ball
+    this.ball = new THREE.Group();
+    const bm = new THREE.Mesh(new THREE.SphereGeometry(0.55, 18, 14), new THREE.MeshStandardMaterial({ color: 0x3a3c40, roughness: 0.35, metalness: 0.85 }));
+    bm.castShadow = true;
+    const chain = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 2.4, 6), new THREE.MeshStandardMaterial({ color: 0x777b80, metalness: 0.8, roughness: 0.4 }));
+    chain.position.y = 1.2;
+    this.ball.add(bm, chain);
+    this.ball.visible = false;
+    g.add(this.ball);
   }
 
   seat(v: Vehicle): { pos: THREE.Vector3; facing: number } {
@@ -1032,6 +1062,108 @@ class ConstructionView extends StageView {
     this.debris.push({ mesh: part, vx, vy, vz, rx: (Math.random() - 0.5) * 9, rz: (Math.random() - 0.5) * 9, age: 0 });
   }
 
+  /** The foundation, the sacks, the poured cement, tipped loads and the wrecking ball. */
+  private updateYard(w: World | null, time: number): void {
+    const a = w?.s.arena;
+    const fs = w?.s.fighters ?? [];
+    while (this.slices.length < fs.length) {
+      const i = this.slices.length;
+      const n = fs.length;
+      const slice = new THREE.Mesh(
+        new THREE.CylinderGeometry(PIT.r * 0.96, PIT.r * 0.96, 1, 18, 1, false, (i / n) * Math.PI * 2, (1 / n) * Math.PI * 2 - 0.04),
+        new THREE.MeshStandardMaterial({ color: PLAYER_COLORS[i], roughness: 0.8 }),
+      );
+      this.group.add(slice);
+      this.slices.push(slice);
+    }
+    this.slices.forEach((sl, i) => {
+      const share = Math.min(1, (fs[i]?.toilet ?? 0) / PIT.need);
+      const h = 0.02 + share * 0.9;
+      sl.scale.y = h;
+      sl.position.y = 0.1 + h / 2;
+    });
+    // sacks: one mesh each, on the ground or on a carrier's shoulder
+    const seen = new Set<number>();
+    for (const sk of a?.sacks ?? []) {
+      seen.add(sk.id);
+      let m = this.sackMeshes.get(sk.id);
+      if (!m) {
+        m = new THREE.Group();
+        if (sk.kind === "cement") {
+          const bag = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.22, 0.4), new THREE.MeshStandardMaterial({ color: 0xcfc6a8, roughness: 0.95 }));
+          const band = new THREE.Mesh(new THREE.BoxGeometry(0.64, 0.225, 0.12), new THREE.MeshStandardMaterial({ color: 0xc03020, roughness: 0.9 }));
+          bag.position.y = 0.11;
+          band.position.y = 0.11;
+          m.add(bag, band);
+        } else {
+          const mat = new THREE.MeshStandardMaterial({ color: 0x7c7468, roughness: 1, flatShading: true });
+          for (let k = 0; k < 3; k++) {
+            const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(0.17 + 0.04 * k, 0), mat);
+            rock.position.set((k - 1) * 0.2, 0.15, (((k * 7) % 3) - 1) * 0.1);
+            rock.rotation.set(k, k * 2, 0);
+            m.add(rock);
+          }
+        }
+        m.traverse((o) => {
+          if ((o as THREE.Mesh).isMesh) (o as THREE.Mesh).castShadow = true;
+        });
+        this.group.add(m);
+        this.sackMeshes.set(sk.id, m);
+      }
+      m.position.set(sk.x, sk.carrier >= 0 ? 1.45 + Math.sin(time * 9) * 0.02 : 0, -sk.y);
+      m.rotation.y = sk.carrier >= 0 ? -(fs[sk.carrier]?.facing ?? 0) + Math.PI / 2 : sk.id * 1.7;
+    }
+    for (const [id, m] of this.sackMeshes) {
+      if (seen.has(id)) continue;
+      this.group.remove(m);
+      this.sackMeshes.delete(id);
+    }
+    // poured cement
+    const slicks = a?.slicks ?? [];
+    while (this.slickMeshes.length < slicks.length) {
+      const m = new THREE.Mesh(new THREE.CylinderGeometry(SLICK.r, SLICK.r, 0.04, 22), new THREE.MeshStandardMaterial({ color: 0x8c887c, roughness: 0.15, metalness: 0.1 }));
+      m.receiveShadow = true;
+      this.group.add(m);
+      this.slickMeshes.push(m);
+    }
+    this.slickMeshes.forEach((m, i) => {
+      const sl = slicks[i];
+      m.visible = !!sl;
+      if (!sl) return;
+      m.position.set(sl.x, 0.03, -sl.y);
+      const set = sl.t >= SLICK.set;
+      const grow = Math.min(1, sl.t / 12);
+      m.scale.set(grow, 1, grow);
+      const mat = m.material as THREE.MeshStandardMaterial;
+      mat.color.setHex(set ? 0xaaa69c : 0x7a766c);
+      mat.roughness = set ? 0.95 : 0.12;
+    });
+    // tipped loads
+    const piles = a?.piles ?? [];
+    while (this.pileMeshes.length < piles.length) {
+      const m = new THREE.Mesh(new THREE.ConeGeometry(1.5, 1.0, 9), new THREE.MeshStandardMaterial({ color: 0x8a7e6a, roughness: 1, flatShading: true }));
+      m.castShadow = true;
+      this.group.add(m);
+      this.pileMeshes.push(m);
+    }
+    this.pileMeshes.forEach((m, i) => {
+      const p = piles[i];
+      m.visible = !!p;
+      if (!p) return;
+      const k = Math.min(1, p.t / 10) * (p.t > 320 ? Math.max(0, 1 - (p.t - 320) / 100) : 1);
+      m.position.set(p.x, 0.5 * k, -p.y);
+      m.scale.set(1, Math.max(0.01, k), 1);
+    });
+    // the wrecking ball
+    this.ball.visible = false;
+    for (const v of a?.vehicles ?? []) {
+      if (v.kind !== "crane" || v.wrecked || v.act < ACTS.crane.hit) continue;
+      const ang = v.facing + ((v.act - ACTS.crane.hit) / (ACTS.crane.dur - ACTS.crane.hit)) * Math.PI * 2;
+      this.ball.visible = true;
+      this.ball.position.set(v.x + Math.cos(ang) * BALL_R, 0.7, -(v.y + Math.sin(ang) * BALL_R));
+    }
+  }
+
   update(w: World | null, time: number, dt: number): void {
     const vs = w?.s.arena.vehicles ?? [];
     while (this.views.length < vs.length) {
@@ -1043,6 +1175,15 @@ class ConstructionView extends StageView {
       b.position.set(-0.2, 2.0, 0);
       v.root.add(b);
       this.beacons.push(b);
+      const bar = new THREE.Group();
+      const back = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.16, 0.2), new THREE.MeshBasicMaterial({ color: 0x1a1a1a }));
+      const fill = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.2, 0.22), new THREE.MeshBasicMaterial({ color: 0x7ee05a }));
+      fill.geometry.translate(1.0, 0, 0);
+      fill.position.x = -1.0;
+      bar.add(back, fill);
+      bar.visible = false;
+      this.group.add(bar);
+      this.bars.push({ root: bar, fill });
     }
     const sp = this.smoke.geometry.getAttribute("position") as THREE.BufferAttribute;
     vs.forEach((v, i) => {
@@ -1070,6 +1211,25 @@ class ConstructionView extends StageView {
           view.implement.rotation.z = Math.sin(time * 1.8 + i) * 0.18;
         }
       }
+      // the machine's own attack: the implement does its thing
+      if (view.implement && !v.wrecked) {
+        const A = ACTS[v.kind];
+        const t = v.act;
+        const p = t > 0 ? Math.min(1, t / A.dur) : 0;
+        const pk = Math.sin(Math.PI * p);
+        const imp = view.implement;
+        if (v.kind === "bulldozer" && t > 0) imp.rotation.z = -0.14 + Math.sin(time * 40) * 0.02;
+        else if (v.kind === "excavator") {
+          if (v.carry >= 0) imp.rotation.z = -0.5;
+          else if (t > 0) imp.rotation.z = t < A.hit ? -0.7 * (t / A.hit) : -0.7 + 1.5 * Math.min(1, (t - A.hit) / 6) - 0.6 * Math.min(1, Math.max(0, (t - A.hit - 14) / 16));
+        } else if (v.kind === "dumptruck" && t > 0) imp.rotation.z = 0.05 + 0.8 * Math.min(1, t / A.hit) * (t > A.hit + 14 ? Math.max(0, 1 - (t - A.hit - 14) / 18) : 1);
+        else if (v.kind === "forklift") {
+          imp.position.x = t > 0 && t < 18 ? 0.35 * Math.sin((Math.PI * t) / 18) : 0;
+          if (v.carry >= 0) imp.position.y = 0.55;
+        } else if (v.kind === "loader" && t > 0) imp.rotation.z = -1.0 * pk;
+        else if (v.kind === "crane") imp.rotation.y = t >= A.hit ? ((t - A.hit) / (A.dur - A.hit)) * Math.PI * 2 : 0;
+      }
+      if (view.spin && view.kind === "mixer" && v.act > 0) view.spin.rotation.x += dt * 6;
       // Exhaust rain-cap chatter
       if (view.exhaust && !v.wrecked) {
         view.exhaust.rotation.z = Math.sin(time * (v.driver >= 0 ? 36 : 10) + i) * (v.driver >= 0 ? 0.04 : 0.01);
@@ -1129,7 +1289,23 @@ class ConstructionView extends StageView {
         });
         deformVehicle(view, new THREE.Vector3(0, 1.1, 0), 2.2, 0.26);
       }
+      if (!v.wrecked && view.wrecked) {
+        // repaired: patched up, back on its wheels (the dents and the doors stay gone)
+        view.stage = 1;
+        view.paint.color.set(v.kind === "mixer" ? 0xe8e4dc : v.kind === "forklift" ? 0xff7a10 : CAT_YELLOW);
+        view.paint.roughness = 0.48;
+        view.body.position.y = 0;
+        view.root.rotation.z = 0;
+        view.wheels.forEach((wh) => (wh.rotation.z = 0));
+        view.lastHp = v.hp;
+      }
       view.wrecked = v.wrecked;
+      const bar = this.bars[i];
+      bar.root.visible = v.wrecked && v.repair > 0;
+      if (bar.root.visible) {
+        bar.root.position.set(v.x - 1.0, 2.6, -v.y);
+        bar.fill.scale.x = Math.max(0.01, v.repair / REPAIR.frames);
+      }
       if (!v.wrecked) view.paint.emissive.setRGB(dmg > 0.6 ? 0.28 * (0.5 + 0.5 * Math.sin(time * 10)) : 0, 0, 0);
       // smoke: black from a wreck, a grey wisp from a badly damaged machine
       view.smoke += dt * (v.wrecked ? 16 : dmg > 0.45 ? 6 : 0);
@@ -1140,6 +1316,7 @@ class ConstructionView extends StageView {
         sp.setXYZ(k, v.x + (Math.random() - 0.5) * 0.65, 1.35, -v.y + (Math.random() - 0.5) * 0.65);
       }
     });
+    this.updateYard(w, time);
     // Step flying breakaway vehicle debris
     for (let d = this.debris.length - 1; d >= 0; d--) {
       const item = this.debris[d];
