@@ -7,6 +7,7 @@
 // Like the World, an Arena is deterministic: all randomness goes through
 // `w.rng`, in a fixed order.
 import { BTN, LAVA_R, LIMBS, RING_R, SPAWN_R, TOILET_FRAMES, TOILET_R, type ArenaState, type Fighter, type HazardKind, type OnFloor, type PlayerInput, type Vehicle, type VehicleKind } from "./types";
+import { WEAPONS } from "./weapons";
 import { GEYSER, HITSTOP, LAVA, SIT_FRAMES, VIOLENCE, type Move, hitstopFor } from "./moves";
 import type { StageId } from "./stages";
 import { BODY_R, alive, dist, type World } from "./world";
@@ -209,6 +210,7 @@ function runHazards(w: World, spawn: () => { kind: HazardKind; x: number; y: num
     const H = HAZARDS[g.kind];
     if (g.t !== H.warn) continue;
     w.ev({ kind: "geyser", a: -1, what: g.kind, x: g.x, y: g.y });
+    leaveDebris(w, g);
     for (const f of s.fighters) {
       if (!alive(f) || f.invuln > 0 || f.state === "down" || f.state === "seated" || f.state === "driving") continue;
       const dx = f.x - g.x;
@@ -230,6 +232,36 @@ function runHazards(w: World, spawn: () => { kind: HazardKind; x: number; y: num
   s.geysers = s.geysers.filter((g) => g.t < HAZARDS[g.kind].warn + HAZARDS[g.kind].erupt);
 }
 
+/** What a hazard leaves on the floor when it has struck: a weapon for whoever gets to it. */
+export const DEBRIS: Partial<Record<HazardKind, string>> = { beam: "debris_beam", boulder: "debris_stone", arrows: "debris_arrow" };
+/** No more than this much debris lies about at once (older pieces stay; the arena stops adding). */
+export const DEBRIS_MAX = 24;
+
+function leaveDebris(w: World, g: { kind: HazardKind; x: number; y: number }): void {
+  const prop = DEBRIS[g.kind];
+  if (!prop) return;
+  const s = w.s;
+  const spin = w.rng.range(-0.05, 0.05);
+  if (s.gifts.filter((x) => x.prop.startsWith("debris_")).length >= DEBRIS_MAX) return;
+  const at = w.arena.canLand(w, g.x, g.y) ? g : w.arena.floorNear(w, g.x, g.y);
+  s.gifts.push({
+    id: s.nextGiftId++,
+    prop,
+    throw: "",
+    owner: -1,
+    x: at.x,
+    y: at.y,
+    z: 2.5, // it comes down with the hazard
+    vx: 0,
+    vy: 0,
+    vz: 0,
+    burning: 0,
+    spin,
+    dur: WEAPONS[prop].dur,
+    hot: 0,
+  });
+}
+
 /** Burning ground: the fighter takes LAVA.dmg every LAVA.tick frames. */
 function burn(w: World, f: Fighter): void {
   if (alive(f) && w.s.frame % LAVA.tick === 0 && f.invuln === 0) {
@@ -240,12 +272,12 @@ function burn(w: World, f: Fighter): void {
 
 /**
  * A thing on the floor of an edge stage that slides off the edge (or into
- * fire) is gone, unless it is a limb: limbs never leave the map, so it is put
- * back on the nearest floor, where its owner can hobble over and pick it up.
+ * fire) washes back: nothing leaves the map. A limb, a gift or a piece of
+ * debris is put back on the nearest floor, where it can be picked up again.
  */
 function losePickup(w: World, p: OnFloor): void {
   if (p.burning > 0) return;
-  if ("part" in p) {
+  if ("part" in p || "prop" in p) {
     const at = w.arena.floorNear(w, p.x, p.y);
     p.x = at.x;
     p.y = at.y;

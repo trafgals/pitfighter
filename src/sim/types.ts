@@ -141,6 +141,8 @@ export interface Fighter {
   weapon: string;
   /** blows the held weapon has left in it (meaningless for one that never breaks) */
   weaponDur: number;
+  /** the severed limb being swung as a club (the weapon is then "limb"); it goes back on the floor when let go */
+  club: Pickup | null;
   prevButtons: number;
   pressed: number[]; // frame each button was last pressed (input buffer)
   toilet: number; // objective progress in frames (seated on the toilet, holding the banner), kept between turns

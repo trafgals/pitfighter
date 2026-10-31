@@ -51,7 +51,7 @@ export const WEAPONS: Record<string, WeaponStats> = {
   debris_stone: { class: "blunt", reach: 0.1, dmg: 1.3, startup: 3, dur: 3, throwDmg: 10, shapes: S(1, 1, 1.2) },
   debris_arrow: { class: "polearm", reach: 0.5, dmg: 1.1, startup: -1, dur: 3, throwDmg: 4, shapes: S(0.8, 1.3, 0.9) },
   // a severed limb, swung by the stump
-  limb: { class: "blunt", reach: 0.3, dmg: 1.2, startup: 0, dur: 6, throwDmg: 3, shapes: S(1, 0.9, 1.2) },
+  limb: { class: "blunt", reach: 0.3, dmg: 1.2, startup: 0, dur: 0, throwDmg: 3, shapes: S(1, 0.9, 1.2) },
 };
 
 /** The weapons the arena may put on the floor at the start of a match. */

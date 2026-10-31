@@ -12,6 +12,7 @@ import {
   type FighterState,
   type GameEvent,
   type Gift,
+  type Pickup,
   type Height,
   type PartId,
   type PlayerInput,
@@ -213,6 +214,7 @@ export class World {
         // it in their hand
         weapon: wieldedPropFor(CHARACTERS[style].id)?.id ?? "",
         weaponDur: 0,
+        club: null,
         prevButtons: 0,
         pressed: BUTTONS.map(() => -1000),
         toilet: 0,
@@ -711,6 +713,10 @@ export class World {
     }
     if (this.trySpecial(f)) return;
     if (this.buffered(f, BTN.GRAB)) {
+      if (this.tryWield(f, lockHeld)) {
+        this.consume(f, BTN.GRAB);
+        return;
+      }
       // standing over a limb that fits a gap: pick it up and put it on, whoever it came from
       if (this.takeLimb(f, true)) {
         this.consume(f, BTN.GRAB);
@@ -1083,6 +1089,10 @@ export class World {
         return true;
       }
     }
+    if (f.club) {
+      this.dropWeapon(f, f.weapon);
+      return true;
+    }
     return false;
   }
 
@@ -1181,6 +1191,15 @@ export class World {
   /** A fighter lets go of what they are holding, and it lands on the floor. */
   private dropWeapon(f: Fighter, prop: string): void {
     const s = this.s;
+    if (f.club) {
+      // a severed limb goes back on the floor as the limb it is
+      const c = f.club;
+      s.pickups.push({ ...c, x: f.x, y: f.y, z: GIFT.drop, vx: Math.cos(f.facing) * 0.06, vy: Math.sin(f.facing) * 0.06, vz: 0.04, burning: 0 });
+      f.club = null;
+      f.weapon = "";
+      f.weaponDur = 0;
+      return;
+    }
     const spec = PROP_BY_ID[prop];
     s.gifts.push({
       id: s.nextGiftId++,
@@ -1201,6 +1220,42 @@ export class World {
     f.weapon = "";
   }
 
+  /** The severed limb within reach, if there is one. */
+  private limbInReach(f: Fighter): Pickup | null {
+    let best: Pickup | null = null;
+    let bd = REATTACH.range;
+    for (const p of this.s.pickups) {
+      if (p.burning > 0 || p.z > 0.25) continue;
+      const d = Math.hypot(p.x - f.x, p.y - f.y);
+      if (d < bd) {
+        bd = d;
+        best = p;
+      }
+    }
+    return best;
+  }
+
+  /**
+   * Pick a severed limb up by the stump and swing it as a club. A fighter
+   * with a gap it fits reattaches it on a tap of Grab; with nothing missing,
+   * or with Lock held, Grab wields it instead.
+   */
+  private tryWield(f: Fighter, lockHeld: boolean): boolean {
+    if (f.weapon || arms(f) === 0) return false;
+    const p = this.limbInReach(f);
+    if (!p) return false;
+    const pair: readonly PartId[] = p.part.startsWith("arm") ? ARMS : LEGS;
+    const fits = pair.some((q) => !f.parts[q].attached);
+    const foe = this.s.fighters.some((o) => o.id !== f.id && alive(o) && dist(o, f) < 1.4);
+    if (!lockHeld && (fits || foe)) return false;
+    this.s.pickups = this.s.pickups.filter((x) => x.id !== p.id);
+    f.club = { ...p };
+    f.weapon = "limb";
+    f.weaponDur = 0;
+    this.ev({ kind: "gift", a: f.id, what: "limb", x: p.x, y: p.y });
+    return true;
+  }
+
   /** A blow landed with the weapon in hand: it wears, and at zero it breaks. */
   private wear(f: Fighter, n: number): void {
     const st = WEAPONS[f.weapon];
@@ -1219,6 +1274,15 @@ export class World {
     const s = this.s;
     const tgt = this.lockTarget(f);
     const ang = tgt && this.inCone(f, tgt, 8, 0.5) ? Math.atan2(tgt.y - f.y, tgt.x - f.x) : f.facing;
+    if (f.club) {
+      // a limb thrown flies as a limb does when it is punted
+      s.pickups.push({ ...f.club, x: f.x + Math.cos(ang) * 0.5, y: f.y + Math.sin(ang) * 0.5, z: 1.1, vx: Math.cos(ang) * 0.3, vy: Math.sin(ang) * 0.3, vz: 0.03, spin: 0.45, burning: 0 });
+      this.ev({ kind: "hurl", a: f.id, what: "limb" });
+      f.club = null;
+      f.weapon = "";
+      f.weaponDur = 0;
+      return true;
+    }
     s.gifts.push({
       id: s.nextGiftId++,
       prop: f.weapon,
@@ -2142,6 +2206,7 @@ export class World {
     }
     for (const f of s.fighters) {
       mix(f.weaponDur);
+      mix(f.club ? f.club.id + 1 : 0);
       mix(f.weapon.length);
     }
     return h;
