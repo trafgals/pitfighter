@@ -18,6 +18,8 @@ export function duel(gap = 1.0, styles = [0, 0], hitstop = true, limbs = false):
   b.y = 0;
   b.facing = Math.PI;
   w.s.nextGeyser = 1e9;
+  // the frame data is written for bare hands: no one's own weapon, nothing on the floor
+  disarm(w);
   return w;
 }
 
@@ -45,4 +47,10 @@ export function run(w: World, frames: number, f: (inp: PlayerInput[], frame: num
 export function chop(w: World, f: Fighter, part: PartId, by: number): void {
   f.parts.torso.hp = f.parts.torso.max;
   w.damage(f, part, f.parts[part].hp, by);
+}
+
+/** Bare hands and a bare floor, so the frame data of a strike is the table's. */
+export function disarm(w: World): void {
+  for (const f of w.fighters) f.weapon = "";
+  w.s.gifts = [];
 }

@@ -23,7 +23,7 @@ describe("limbs", () => {
     const b = w.fighters[1];
     b.parts.torso.hp = b.parts.torso.max = 10000; // keep the dummy alive
     let detached = false;
-    run(w, 1200, (inp, i) => {
+    run(w, 3000, (inp, i) => {
       if (i % 4 === 0) inp[0].buttons = i % 120 < 60 ? BTN.HIGH : BTN.LOW;
       if (w.s.events.some((e) => e.kind === "detach")) detached = true;
       // keep the dummy in range

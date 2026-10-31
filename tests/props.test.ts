@@ -100,6 +100,7 @@ describe("the props in a fight", () => {
   const pit = (styles: number[]): World => {
     const w = new World({ seed: 7, styles, humans: styles.map(() => true) });
     w.s.nextGeyser = 1e9;
+    w.s.gifts = []; // the stage's own floor weapons are not what these look at
     return w;
   };
 
@@ -188,6 +189,7 @@ describe("the props in a fight", () => {
     for (let seed = 1; seed <= 12; seed++) {
       const w = new World({ seed, styles: [2, 2], humans: [true, true] });
       w.s.nextGeyser = 1e9;
+      w.s.gifts = [];
       tap(w, 0, BTN.TAUNT);
       run(w, 240);
       expect(w.s.gifts).toHaveLength(1);

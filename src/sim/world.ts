@@ -18,6 +18,7 @@ import {
   type WorldState,
 } from "./types";
 import { CHARACTERS, THROW_BY_ID } from "../data/characters";
+import { WEAPONS, FLOOR_WEAPONS, AFFINITY_BONUS, shapeOf } from "./weapons";
 import { GIFT_PROPS, PROP_BY_ID, wieldedPropFor, type PropSpec } from "../data/props";
 import {
   AIR,
@@ -209,6 +210,7 @@ export class World {
         // a fighter whose own weapon has been built and approved starts with
         // it in their hand
         weapon: wieldedPropFor(CHARACTERS[style].id)?.id ?? "",
+        weaponDur: 0,
         prevButtons: 0,
         pressed: BUTTONS.map(() => -1000),
         toilet: 0,
@@ -231,6 +233,7 @@ export class World {
       arena: freshArenaState(),
     };
     this.arena.init(this);
+    this.seedWeapons();
   }
 
   get fighters(): Fighter[] {
@@ -400,7 +403,16 @@ export class World {
     if (limb && f.parts[limb].attached && f.parts[limb].hp < f.parts[limb].max * 0.25) {
       dmg *= 0.88;
     }
-    const e = { ...m, startup, dmg, push, knockdown, reach: m.reach * (by ? limbMod(f, by, "reach") : st.reach), total: startup + m.active + m.recovery };
+    let reach = m.reach * (by ? limbMod(f, by, "reach") : st.reach);
+    // a weapon in the hand changes the arms' strikes
+    const wp = m.kind === "punch" && arms(f) > 0 ? WEAPONS[f.weapon] : undefined;
+    if (wp) {
+      const fits = CHARACTERS[f.style].moves.weapons.affinity.includes(wp.class);
+      dmg *= wp.dmg * wp.shapes[shapeOf(m)] * (fits ? AFFINITY_BONUS : 1);
+      reach += wp.reach;
+      startup = Math.max(3, startup + wp.startup);
+    }
+    const e = { ...m, startup, dmg, push, knockdown, reach, total: startup + m.active + m.recovery };
     return limb ? shape(e, f.parts[limb].trait) : e;
   }
 
@@ -650,6 +662,12 @@ export class World {
     if (this.buffered(f, BTN.TARGET)) {
       this.consume(f, BTN.TARGET);
       this.cycleTarget(f);
+    }
+    // Triangle + L1 together: throw what is in the hand
+    if (f.weapon && this.buffered(f, BTN.USE) && this.buffered(f, BTN.GRAB) && this.hurlWeapon(f)) {
+      this.consume(f, BTN.USE);
+      this.consume(f, BTN.GRAB);
+      return;
     }
     if (this.buffered(f, BTN.USE)) {
       this.consume(f, BTN.USE);
@@ -1097,6 +1115,8 @@ export class World {
       vz: 0,
       burning: 0,
       spin: this.rng.range(-0.09, 0.09),
+      dur: WEAPONS[gift.id]?.dur ?? 0,
+      hot: 0,
     });
     this.ev({ kind: "gift", a: f.id, what: gift.throw, x, y });
   }
@@ -1134,6 +1154,7 @@ export class World {
     // is the better one, and the old one is still a weapon
     if (f.weapon) this.dropWeapon(f, f.weapon);
     f.weapon = g.prop;
+    f.weaponDur = g.dur;
     this.ev({ kind: "gift", a: f.id, what: g.throw, x: g.x, y: g.y });
   }
 
@@ -1154,8 +1175,83 @@ export class World {
       vz: 0.04,
       burning: 0,
       spin: this.rng.range(-0.2, 0.2),
+      dur: f.weaponDur,
+      hot: 0,
     });
     f.weapon = "";
+  }
+
+  /** A blow landed with the weapon in hand: it wears, and at zero it breaks. */
+  private wear(f: Fighter, n: number): void {
+    const st = WEAPONS[f.weapon];
+    if (!st || !st.dur) return;
+    f.weaponDur -= n;
+    if (f.weaponDur > 0) return;
+    this.ev({ kind: "break", a: f.id, what: f.weapon });
+    f.weapon = "";
+    f.weaponDur = 0;
+  }
+
+  /** Throw the weapon in the hand: it flies where the fighter aims and hurts what it hits. */
+  private hurlWeapon(f: Fighter): boolean {
+    const st = WEAPONS[f.weapon];
+    if (!st || st.throwDmg <= 0) return false;
+    const s = this.s;
+    const tgt = this.lockTarget(f);
+    const ang = tgt && this.inCone(f, tgt, 8, 0.5) ? Math.atan2(tgt.y - f.y, tgt.x - f.x) : f.facing;
+    s.gifts.push({
+      id: s.nextGiftId++,
+      prop: f.weapon,
+      throw: PROP_BY_ID[f.weapon]?.throw ?? "",
+      owner: f.id,
+      x: f.x + Math.cos(ang) * 0.5,
+      y: f.y + Math.sin(ang) * 0.5,
+      z: 1.1,
+      vx: Math.cos(ang) * 0.3,
+      vy: Math.sin(ang) * 0.3,
+      vz: 0.02,
+      burning: 0,
+      spin: 0.35,
+      dur: f.weaponDur,
+      hot: 90,
+    });
+    this.ev({ kind: "hurl", a: f.id, what: f.weapon });
+    f.weapon = "";
+    f.weaponDur = 0;
+    return true;
+  }
+
+  /** A few weapons lie on the floor of the stage when the match starts, for whoever gets to them first. */
+  private seedWeapons(): void {
+    const s = this.s;
+    const n = 2 + this.rng.int(2);
+    const placed: { x: number; y: number }[] = s.fighters.map((f) => ({ x: f.x, y: f.y }));
+    for (let i = 0; i < n; i++) {
+      const prop = FLOOR_WEAPONS[this.rng.int(FLOOR_WEAPONS.length)];
+      for (let tries = 0; tries < 24; tries++) {
+        const x = this.rng.range(-6.5, 6.5);
+        const y = this.rng.range(-6.5, 6.5);
+        if (placed.some((p) => Math.hypot(p.x - x, p.y - y) < 2.4) || !this.arena.canLand(this, x, y)) continue;
+        placed.push({ x, y });
+        s.gifts.push({
+          id: s.nextGiftId++,
+          prop,
+          throw: PROP_BY_ID[prop]?.throw ?? "",
+          owner: -1,
+          x,
+          y,
+          z: 0,
+          vx: 0,
+          vy: 0,
+          vz: 0,
+          burning: 0,
+          spin: 0,
+          dur: WEAPONS[prop].dur,
+          hot: 0,
+        });
+        break;
+      }
+    }
   }
 
   // ---------------------------------------------------------------- combat
@@ -1237,6 +1333,7 @@ export class World {
     this.addFury(a, FURY.hit);
     this.addFury(d, FURY.taken);
     this.damage(d, part, dmg, a.id);
+    if (m.kind === "punch" && WEAPONS[a.weapon]) this.wear(a, shapeOf(m) === "overhead" ? 2 : 1);
     this.arena.onHit(this, d);
     const baseStop = d.state === "ko" ? HITSTOP.ko : hitstopFor(dmg, knock && !otg) + (counter ? HITSTOP.counter : 0);
     hit.stop = this.freeze(a, d, baseStop);
@@ -1895,7 +1992,9 @@ export class World {
       g.y += g.vy;
       g.z += g.vz;
       g.vz -= GIFT.gravity;
+      if (g.hot > 0) this.hurtByThrown(g);
       if (g.z <= 0) {
+        g.hot = 0;
         g.z = 0;
         g.vz = Math.abs(g.vz) > 0.03 ? -g.vz * GIFT.bounce : 0;
         g.vx *= 0.8;
@@ -1906,6 +2005,35 @@ export class World {
       this.arena.boundPickup(this, g);
     }
     s.gifts = s.gifts.filter((g) => g.burning !== 1);
+  }
+
+  /** A weapon in flight: the first fighter (not its thrower) in its way takes it. */
+  private hurtByThrown(g: Gift): void {
+    g.hot--;
+    const dmg = WEAPONS[g.prop]?.throwDmg ?? 0;
+    if (Math.hypot(g.vx, g.vy) < 0.1 || dmg <= 0) {
+      g.hot = 0;
+      return;
+    }
+    for (const d of this.s.fighters) {
+      if (d.id === g.owner || !alive(d) || d.invuln > 0 || d.state === "down" || d.state === "driving" || d.state === "thrown") continue;
+      if (Math.hypot(d.x - g.x, d.y - g.y) >= 0.55 || g.z > 1.7) continue;
+      const part: PartId = g.z > 1.0 ? "head" : "torso";
+      this.damage(d, part, dmg, g.owner);
+      this.ev({ kind: "hit", a: g.owner, b: d.id, part, dmg, what: "thrown" });
+      if (alive(d) && d.state !== "air") {
+        if (dmg >= 8) this.knockDown(d, Math.sign(g.vx), Math.sign(g.vy), 0.8);
+        else {
+          this.setState(d, "hitstun", 24);
+          d.slideX = g.vx * 0.3;
+          d.slideY = g.vy * 0.3;
+        }
+      }
+      g.vx *= -0.25;
+      g.vy *= -0.25;
+      g.hot = 0;
+      break;
+    }
   }
 
   private updatePickups(): void {
@@ -2002,6 +2130,18 @@ export class World {
       mix(p.x);
       mix(p.y);
       mix(p.z);
+    }
+    for (const g of s.gifts) {
+      mix(g.x);
+      mix(g.y);
+      mix(g.z);
+      mix(g.dur);
+      mix(g.hot);
+      mix(g.prop.length);
+    }
+    for (const f of s.fighters) {
+      mix(f.weaponDur);
+      mix(f.weapon.length);
     }
     return h;
   }
