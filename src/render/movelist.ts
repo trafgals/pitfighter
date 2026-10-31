@@ -34,7 +34,9 @@ export class MoveList {
             <h3><span style="color:${c}">P${f.id + 1}</span> ${s.name} <small>${s.style}</small></h3>
             <ul class="limbs">${limbs}</ul>
             <table><tr><th>Move</th><th>Input</th><th>Limb</th><th>Startup</th><th>Total</th><th>Dmg</th><th>Reach</th></tr>
-              ${rows("Punch string", s.punches)}${rows("Kick string", s.kicks)}${rows("Specials", s.extras)}</table>
+              ${rows("Punch string", s.punches)}${rows("Kick string", s.kicks)}${s.more.length ? rows("Branches, aims, arts", s.more) : ""}${rows("Specials", s.extras)}${s.alt ? rows("Other stance: punches", s.alt.punches) + rows("Other stance: kicks", s.alt.kicks) : ""}</table>
+            <p class="mechanic"><b>Only this family:</b> ${s.mechanic}</p>
+            ${s.tonic ? `<p class="tonic">${s.tonic}</p>` : ""}
             <p class="airgrab"><b>Air grab: ${s.airGrab.name}</b> (△ on a juggled foe): ${s.airGrab.end}.</p>
             <p class="flow">${s.flow}</p>
           </section>`;

@@ -4,7 +4,8 @@
 // on, and the list changes with it. Reading it never changes the world.
 import type { AirGrabEnd } from "./sim/airgrabs";
 import type { LimbTrait } from "./sim/limbs";
-import { FLOW, MOVES, STRING_STARTS } from "./sim/moves";
+import { FLOW, STRING_STARTS } from "./sim/moves";
+import { familyRules, movesetOf } from "./sim/movesets";
 import { CHARACTERS } from "./data/characters";
 import { STYLES } from "./sim/styles";
 import { LIMBS, type Fighter, type PartId } from "./sim/types";
@@ -38,11 +39,15 @@ export interface MoveSheet {
   punches: MoveRow[]; // the punch string, opener to launcher
   kicks: MoveRow[]; // the kick string, opener to sweep
   extras: MoveRow[]; // the dash strike and the special
+  more: MoveRow[]; // branches, aimed strikes, Special Arts
+  alt: { punches: MoveRow[]; kicks: MoveRow[] } | null; // the other stance (kung fu)
+  mechanic: string; // what only this family does
+  tonic: string; // the Status Art
   airGrab: { name: string; dmg: number; end: string };
   flow: string;
 }
 
-const NAMES: Record<string, string> = { jab1: "Jab", jab2: "Jab", jab3: "Jab", punchFin: "Launcher", kick1: "Kick", kick2: "Kick", sweep: "Sweep", dashStrike: "Dash strike", headbutt: "Headbutt" };
+const NAMES: Record<string, string> = { br1: "Branch", br2: "Branch", rgHead: "Aim: head", rgBody: "Aim: body", rgLegs: "Aim: legs", art1: "Art", art2: "Art", art3: "Art", weave: "Weave hook", jab1: "Jab", jab2: "Jab", jab3: "Jab", punchFin: "Launcher", kick1: "Kick", kick2: "Kick", sweep: "Sweep", dashStrike: "Dash strike", headbutt: "Headbutt" };
 const ENDS: Record<AirGrabEnd, string> = {
   down: "slams them down",
   bounce: "bounces them back up into a fresh juggle",
@@ -60,12 +65,22 @@ function chain(w: World, f: Fighter, from: string): string[] {
 
 function row(w: World, f: Fighter, id: string, input: string): MoveRow {
   const e = w.eff(f, id);
-  const m = MOVES[id];
-  const note = m.launch ? "launches into a juggle" : m.knockdown ? "knocks down" : m.rehit ? `hits every ${m.rehit} frames` : "";
+  const m = w.mv(f, id);
+  const note = [
+    m.launch ? "launches into a juggle" : m.knockdown ? "knocks down" : m.rehit ? `hits every ${m.rehit} frames` : "",
+    m.armor ? "super armour" : "",
+    m.cmdGrab ? "command grab" : "",
+    m.bleed ? "opens a bleeding cut" : "",
+    m.blind ? "blinds" : "",
+    m.lowBlow ? "low blow" : "",
+    m.chargeable ? "hold to charge" : "",
+  ]
+    .filter(Boolean)
+    .join(", ");
   return {
     id,
-    name: m.kind === "special" ? STYLES[f.style].specialName : NAMES[id] ?? id,
-    input,
+    name: m.kind === "special" ? STYLES[f.style].specialName : m.name ?? NAMES[id] ?? id,
+    input: m.input ?? input,
     limb: w.strikerOf(f, id),
     startup: e.startup,
     active: e.active,
@@ -80,6 +95,15 @@ function row(w: World, f: Fighter, id: string, input: string): MoveRow {
 export function moveSheet(w: World, f: Fighter): MoveSheet {
   const st = STYLES[f.style];
   const grab = World.airGrab(f);
+  const set = movesetOf(f.style);
+  const tn = CHARACTERS[f.style]?.moves.status;
+  const stanceRows = (stance: number) => {
+    const saved = f.fx.stance;
+    f.fx.stance = stance;
+    const r = { punches: chain(w, f, STRING_STARTS.high).map((id) => row(w, f, id, "○")), kicks: chain(w, f, STRING_STARTS.low).map((id) => row(w, f, id, "back ○")) };
+    f.fx.stance = saved;
+    return r;
+  };
   return {
     id: f.id,
     name: st.name,
@@ -88,6 +112,10 @@ export function moveSheet(w: World, f: Fighter): MoveSheet {
     punches: chain(w, f, STRING_STARTS.high).map((id) => row(w, f, id, "○")),
     kicks: chain(w, f, STRING_STARTS.low).map((id) => row(w, f, id, "back ○")),
     extras: [row(w, f, "dashStrike", "✕ then ○"), row(w, f, st.special, "○ + △")],
+    more: set.extras.filter((id) => w.moveset(f).moves[id]).map((id) => row(w, f, id, "")),
+    alt: set.alt ? stanceRows(1 - f.fx.stance) : null,
+    mechanic: familyRules(CHARACTERS[f.style].family).mechanic,
+    tonic: tn ? `${tn.name} (L2 + R2 at a full bar): ${tn.effects.note}.` : "",
     airGrab: { name: grab.name, dmg: grab.dmg, end: ENDS[grab.end] },
     flow: `Mid-string, a landed punch flows into the kicks (back ○) and a landed kick into the punches (○), ${FLOW.max} times a combo. Hold R1 + ↑/•/↓ + ○ to aim at Head, Torso, or Legs. △ on a downed or wall-splatted foe triggers ${CHARACTERS[f.style]?.moves.ground.name ?? "Ground Grapple"} / ${CHARACTERS[f.style]?.moves.wall.name ?? "Wall Grapple"}; L2 after a big blow appeals for ${CHARACTERS[f.style]?.moves.appeal.gift ?? "a Gallery Gift"}.`,
   };
