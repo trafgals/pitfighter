@@ -1,0 +1,757 @@
+{
+  "version": "1.0.0",
+  "updated_at": "2026-10-31T00:48:00Z",
+  "target_worker": "mcode",
+  "target_cron_id": "1c3a5d96-c977-442f-baab-fb823bc39d0f",
+  "instruction": "Poll and build next approved assets for Pitfighter into public/models/props/ using Pixal3D and procedural pipelines.",
+  "waves": {
+    "wave1_limb_crafts": [
+      {
+        "id": "pickup_limb_hydraulic_steel",
+        "name": "Bulwark Hydraulic Steel Arm",
+        "character": "Bulwark",
+        "category": "modular_limb",
+        "slot": "limb_socket",
+        "tip": "fist",
+        "traits": {
+          "mass": 1.2,
+          "length": 1.05,
+          "swing": 1.05,
+          "arc": "tight",
+          "dmg": 1.25
+        },
+        "poly_budget": 30000,
+        "file_budget_bytes": 1572864,
+        "scale_dimensions_cm": {
+          "width": 18.0,
+          "height": 72.0,
+          "depth": 18.0
+        },
+        "status": "stage:minimax-code-3d",
+        "gate": "gate:2-rebuild-pixal3d",
+        "pivot": {
+          "convention": "limb_socket_normalized",
+          "origin": "proximal socket at (0, 0, 0), hangs along -Y, forward is +Z",
+          "elbow_split_y": -0.28,
+          "knee_split_y": -0.42
+        },
+        "alpha_file": "public/tex/props/flux3_pickup_limb_hydraulic_steel_alpha.png",
+        "turnaround_file": "public/tex/props/h3_pickup_limb_hydraulic_steel_turnaround.png",
+        "turntable_file": "docs/props/pickup_limb_hydraulic_steel/turntable.webp",
+        "glb_output": "public/models/props/pickup_limb_hydraulic_steel.glb",
+        "prompt": "Authentic Victorian industrial prosthetic arm, polished chrome cylinder forearm with twin brass dial pressure gauges, braided high-pressure steam hose, articulated riveted steel knuckle gauntlet, isolated on white background."
+      },
+      {
+        "id": "pickup_limb_foundry_iron",
+        "name": "Foundry Iron Piston Arm",
+        "character": "Hezekiah Smelt",
+        "category": "modular_limb",
+        "slot": "limb_socket",
+        "tip": "fist",
+        "traits": {
+          "mass": 1.3,
+          "length": 1.0,
+          "swing": 0.9,
+          "arc": "tight",
+          "dmg": 1.35
+        },
+        "poly_budget": 30000,
+        "file_budget_bytes": 1572864,
+        "scale_dimensions_cm": {
+          "width": 20.0,
+          "height": 68.0,
+          "depth": 20.0
+        },
+        "status": "stage:minimax-code-3d",
+        "gate": "gate:2-rebuild-pixal3d",
+        "pivot": {
+          "convention": "limb_socket_normalized",
+          "origin": "proximal socket at (0, 0, 0), hangs along -Y, forward is +Z",
+          "elbow_split_y": -0.28,
+          "knee_split_y": -0.42
+        },
+        "alpha_file": "public/tex/props/flux3_pickup_limb_foundry_iron_alpha.png",
+        "turnaround_file": "public/tex/props/h3_pickup_limb_foundry_iron_turnaround.png",
+        "turntable_file": "docs/props/pickup_limb_foundry_iron/turntable.webp",
+        "glb_output": "public/models/props/pickup_limb_foundry_iron.glb",
+        "prompt": "Heavy Victorian black pig-iron cast mechanical arm, reciprocating steam piston rod, exposed hardened steel gear ratchet, massive iron anvil knuckle block, isolated on white background."
+      },
+      {
+        "id": "pickup_limb_clockwork_brass",
+        "name": "Gilded Clockwork Brass Arm",
+        "character": "Professor Crump",
+        "category": "modular_limb",
+        "slot": "limb_socket",
+        "tip": "fist",
+        "traits": {
+          "mass": 0.85,
+          "length": 0.95,
+          "swing": 1.25,
+          "arc": "tight",
+          "dmg": 0.9
+        },
+        "poly_budget": 30000,
+        "file_budget_bytes": 1572864,
+        "scale_dimensions_cm": {
+          "width": 15.0,
+          "height": 65.0,
+          "depth": 15.0
+        },
+        "status": "stage:minimax-code-3d",
+        "gate": "gate:2-rebuild-pixal3d",
+        "pivot": {
+          "convention": "limb_socket_normalized",
+          "origin": "proximal socket at (0, 0, 0), hangs along -Y, forward is +Z",
+          "elbow_split_y": -0.28,
+          "knee_split_y": -0.42
+        },
+        "alpha_file": "public/tex/props/flux3_pickup_limb_clockwork_brass_alpha.png",
+        "turnaround_file": "public/tex/props/h3_pickup_limb_clockwork_brass_turnaround.png",
+        "turntable_file": "docs/props/pickup_limb_clockwork_brass/turntable.webp",
+        "glb_output": "public/models/props/pickup_limb_clockwork_brass.glb",
+        "prompt": "Intricate Victorian horological brass prosthetic arm, openwork skeletonized brass plates revealing jeweled balance wheel and coiled escapement mainspring, fluted brass knuckles, isolated on white background."
+      },
+      {
+        "id": "pickup_limb_cinder_iron",
+        "name": "Furnace Cinder Iron Claw",
+        "character": "Tilly Clinker",
+        "category": "modular_limb",
+        "slot": "limb_socket",
+        "tip": "claw",
+        "traits": {
+          "mass": 1.1,
+          "length": 1.05,
+          "swing": 1.0,
+          "arc": "wide",
+          "dmg": 1.15
+        },
+        "poly_budget": 30000,
+        "file_budget_bytes": 1572864,
+        "scale_dimensions_cm": {
+          "width": 22.0,
+          "height": 70.0,
+          "depth": 18.0
+        },
+        "status": "stage:minimax-code-3d",
+        "gate": "gate:2-rebuild-pixal3d",
+        "pivot": {
+          "convention": "limb_socket_normalized",
+          "origin": "proximal socket at (0, 0, 0), hangs along -Y, forward is +Z",
+          "elbow_split_y": -0.28,
+          "knee_split_y": -0.42
+        },
+        "alpha_file": "public/tex/props/flux3_pickup_limb_cinder_iron_alpha.png",
+        "turnaround_file": "public/tex/props/h3_pickup_limb_cinder_iron_turnaround.png",
+        "turntable_file": "docs/props/pickup_limb_cinder_iron/turntable.webp",
+        "glb_output": "public/models/props/pickup_limb_cinder_iron.glb",
+        "prompt": "Victorian stoker slag-crusted iron gauntlet prosthetic, black wrought iron arm sleeve terminating in three sharp curved glowing-hot clinker slag-hook claws, isolated on white background."
+      },
+      {
+        "id": "pickup_limb_grafted_bear",
+        "name": "Taxidermist's Grafted Bear Forelimb",
+        "character": "Skinner",
+        "category": "modular_limb",
+        "slot": "limb_socket",
+        "tip": "claw",
+        "traits": {
+          "mass": 1.25,
+          "length": 1.1,
+          "swing": 0.95,
+          "arc": "wide",
+          "dmg": 1.25
+        },
+        "poly_budget": 30000,
+        "file_budget_bytes": 1572864,
+        "scale_dimensions_cm": {
+          "width": 22.0,
+          "height": 75.0,
+          "depth": 22.0
+        },
+        "status": "stage:minimax-code-3d",
+        "gate": "gate:2-rebuild-pixal3d",
+        "pivot": {
+          "convention": "limb_socket_normalized",
+          "origin": "proximal socket at (0, 0, 0), hangs along -Y, forward is +Z",
+          "elbow_split_y": -0.28,
+          "knee_split_y": -0.42
+        },
+        "alpha_file": "public/tex/props/flux3_pickup_limb_grafted_bear_alpha.png",
+        "turnaround_file": "public/tex/props/h3_pickup_limb_grafted_bear_turnaround.png",
+        "turntable_file": "docs/props/pickup_limb_grafted_bear/turntable.webp",
+        "glb_output": "public/models/props/pickup_limb_grafted_bear.glb",
+        "prompt": "Macabre Victorian taxidermy grafted brown bear forelimb, coarse dark fur, iron-riveted harness splints around the humerus, massive curved yellowed bone claws, isolated on white background."
+      },
+      {
+        "id": "pickup_limb_bamboo_samovar",
+        "name": "Bamboo & Brass Samovar Arm",
+        "character": "Professor Crump",
+        "category": "modular_limb",
+        "slot": "limb_socket",
+        "tip": "fist",
+        "traits": {
+          "mass": 0.8,
+          "length": 1.15,
+          "swing": 1.2,
+          "arc": "tight",
+          "dmg": 0.85
+        },
+        "poly_budget": 30000,
+        "file_budget_bytes": 1572864,
+        "scale_dimensions_cm": {
+          "width": 16.0,
+          "height": 78.0,
+          "depth": 16.0
+        },
+        "status": "stage:minimax-code-3d",
+        "gate": "gate:2-rebuild-pixal3d",
+        "pivot": {
+          "convention": "limb_socket_normalized",
+          "origin": "proximal socket at (0, 0, 0), hangs along -Y, forward is +Z",
+          "elbow_split_y": -0.28,
+          "knee_split_y": -0.42
+        },
+        "alpha_file": "public/tex/props/flux3_pickup_limb_bamboo_samovar_alpha.png",
+        "turnaround_file": "public/tex/props/h3_pickup_limb_bamboo_samovar_turnaround.png",
+        "turntable_file": "docs/props/pickup_limb_bamboo_samovar/turntable.webp",
+        "glb_output": "public/models/props/pickup_limb_bamboo_samovar.glb",
+        "prompt": "Exotic Victorian tea merchant prosthetic arm, bundled dark lacquered bamboo staves bound with raw copper wire around a polished brass tea-steam pressure cylinder, brass ball knuckle tip, isolated on white background."
+      },
+      {
+        "id": "pickup_limb_kiln_porcelain",
+        "name": "Glazed Medical Porcelain Limb",
+        "character": "Nurse Kilnworth",
+        "category": "modular_limb",
+        "slot": "limb_socket",
+        "tip": "fist",
+        "traits": {
+          "mass": 0.9,
+          "length": 1.0,
+          "swing": 1.15,
+          "arc": "tight",
+          "dmg": 0.95
+        },
+        "poly_budget": 30000,
+        "file_budget_bytes": 1572864,
+        "scale_dimensions_cm": {
+          "width": 16.0,
+          "height": 68.0,
+          "depth": 16.0
+        },
+        "status": "stage:minimax-code-3d",
+        "gate": "gate:2-rebuild-pixal3d",
+        "pivot": {
+          "convention": "limb_socket_normalized",
+          "origin": "proximal socket at (0, 0, 0), hangs along -Y, forward is +Z",
+          "elbow_split_y": -0.28,
+          "knee_split_y": -0.42
+        },
+        "alpha_file": "public/tex/props/flux3_pickup_limb_kiln_porcelain_alpha.png",
+        "turnaround_file": "public/tex/props/h3_pickup_limb_kiln_porcelain_turnaround.png",
+        "turntable_file": "docs/props/pickup_limb_kiln_porcelain/turntable.webp",
+        "glb_output": "public/models/props/pickup_limb_kiln_porcelain.glb",
+        "prompt": "Victorian apothecary surgical prosthetic arm, glazed white Delftware porcelain casing with delicate cobalt blue crackle glaze lines, brass hinge rings and kid-leather lined socket, isolated on white background."
+      },
+      {
+        "id": "pickup_limb_jet_whalebone",
+        "name": "Whitby Jet & Whalebone Spike Arm",
+        "character": "Mistress Martha Crape",
+        "category": "modular_limb",
+        "slot": "limb_socket",
+        "tip": "spike",
+        "traits": {
+          "mass": 0.85,
+          "length": 1.15,
+          "swing": 1.15,
+          "arc": "piercing",
+          "dmg": 1.2
+        },
+        "poly_budget": 30000,
+        "file_budget_bytes": 1572864,
+        "scale_dimensions_cm": {
+          "width": 14.0,
+          "height": 80.0,
+          "depth": 14.0
+        },
+        "status": "stage:minimax-code-3d",
+        "gate": "gate:2-rebuild-pixal3d",
+        "pivot": {
+          "convention": "limb_socket_normalized",
+          "origin": "proximal socket at (0, 0, 0), hangs along -Y, forward is +Z",
+          "elbow_split_y": -0.28,
+          "knee_split_y": -0.42
+        },
+        "alpha_file": "public/tex/props/flux3_pickup_limb_jet_whalebone_alpha.png",
+        "turnaround_file": "public/tex/props/h3_pickup_limb_jet_whalebone_turnaround.png",
+        "turntable_file": "docs/props/pickup_limb_jet_whalebone/turntable.webp",
+        "glb_output": "public/models/props/pickup_limb_jet_whalebone.glb",
+        "prompt": "Sombre Victorian mourning prosthetic arm, ribbed black baleen whalebone corset-stay splints bound in matte black silk, tapering to a faceted needle-sharp Whitby jet stiletto spike, isolated on white background."
+      },
+      {
+        "id": "pickup_limb_silver_ebony",
+        "name": "Aristocratic Silver & Ebony Rapier Arm",
+        "character": "Lady Eleanor",
+        "category": "modular_limb",
+        "slot": "limb_socket",
+        "tip": "spike",
+        "traits": {
+          "mass": 0.8,
+          "length": 1.2,
+          "swing": 1.25,
+          "arc": "piercing",
+          "dmg": 1.25
+        },
+        "poly_budget": 30000,
+        "file_budget_bytes": 1572864,
+        "scale_dimensions_cm": {
+          "width": 14.0,
+          "height": 85.0,
+          "depth": 14.0
+        },
+        "status": "stage:minimax-code-3d",
+        "gate": "gate:2-rebuild-pixal3d",
+        "pivot": {
+          "convention": "limb_socket_normalized",
+          "origin": "proximal socket at (0, 0, 0), hangs along -Y, forward is +Z",
+          "elbow_split_y": -0.28,
+          "knee_split_y": -0.42
+        },
+        "alpha_file": "public/tex/props/flux3_pickup_limb_silver_ebony_alpha.png",
+        "turnaround_file": "public/tex/props/h3_pickup_limb_silver_ebony_turnaround.png",
+        "turntable_file": "docs/props/pickup_limb_silver_ebony/turntable.webp",
+        "glb_output": "public/models/props/pickup_limb_silver_ebony.glb",
+        "prompt": "Aristocratic Victorian prosthetic arm, fluted Gabon ebony shaft, hallmarked sterling silver acanthus leaf filigree casing, terminating in an etched triangular silver rapier stiletto spike, isolated on white background."
+      },
+      {
+        "id": "pickup_limb_cast_iron_lasts",
+        "name": "Cobbler's Cast-Iron Last Leg",
+        "character": "Mistress Tabitha Pegg",
+        "category": "modular_limb",
+        "slot": "limb_socket",
+        "tip": "club",
+        "traits": {
+          "mass": 1.25,
+          "length": 1.0,
+          "swing": 0.85,
+          "arc": "overhead",
+          "dmg": 1.3
+        },
+        "poly_budget": 30000,
+        "file_budget_bytes": 1572864,
+        "scale_dimensions_cm": {
+          "width": 18.0,
+          "height": 82.0,
+          "depth": 24.0
+        },
+        "status": "stage:minimax-code-3d",
+        "gate": "gate:2-rebuild-pixal3d",
+        "pivot": {
+          "convention": "limb_socket_normalized",
+          "origin": "proximal socket at (0, 0, 0), hangs along -Y, forward is +Z",
+          "elbow_split_y": -0.28,
+          "knee_split_y": -0.42
+        },
+        "alpha_file": "public/tex/props/flux3_pickup_limb_cast_iron_lasts_alpha.png",
+        "turnaround_file": "public/tex/props/h3_pickup_limb_cast_iron_lasts_turnaround.png",
+        "turntable_file": "docs/props/pickup_limb_cast_iron_lasts/turntable.webp",
+        "glb_output": "public/models/props/pickup_limb_cast_iron_lasts.glb",
+        "prompt": "Heavy Victorian shoe cobbler prosthetic leg, thick bridle leather strapping over calibrated brass rule shins, terminating in a solid blackened cast-iron cobbler shoe-last club foot, isolated on white background."
+      },
+      {
+        "id": "pickup_limb_drainpipe_lead",
+        "name": "Plumber's Drainpipe Lead Club Arm",
+        "character": "Nell Sluice",
+        "category": "modular_limb",
+        "slot": "limb_socket",
+        "tip": "club",
+        "traits": {
+          "mass": 1.35,
+          "length": 1.05,
+          "swing": 0.8,
+          "arc": "overhead",
+          "dmg": 1.4
+        },
+        "poly_budget": 30000,
+        "file_budget_bytes": 1572864,
+        "scale_dimensions_cm": {
+          "width": 20.0,
+          "height": 72.0,
+          "depth": 20.0
+        },
+        "status": "stage:minimax-code-3d",
+        "gate": "gate:2-rebuild-pixal3d",
+        "pivot": {
+          "convention": "limb_socket_normalized",
+          "origin": "proximal socket at (0, 0, 0), hangs along -Y, forward is +Z",
+          "elbow_split_y": -0.28,
+          "knee_split_y": -0.42
+        },
+        "alpha_file": "public/tex/props/flux3_pickup_limb_drainpipe_lead_alpha.png",
+        "turnaround_file": "public/tex/props/h3_pickup_limb_drainpipe_lead_turnaround.png",
+        "turntable_file": "docs/props/pickup_limb_drainpipe_lead/turntable.webp",
+        "glb_output": "public/models/props/pickup_limb_drainpipe_lead.glb",
+        "prompt": "Brutal Victorian night-soil plumber prosthetic club arm, tarnished grey cast-lead drainpipe casing with flanged brass bolt rings and a heavy brass gate-valve bludgeon knuckle head, isolated on white background."
+      },
+      {
+        "id": "pickup_limb_ship_oak",
+        "name": "Iron-Banded Ship Oak Peg-Leg",
+        "character": "Salt Rook",
+        "category": "modular_limb",
+        "slot": "limb_socket",
+        "tip": "club",
+        "traits": {
+          "mass": 1.2,
+          "length": 1.2,
+          "swing": 0.9,
+          "arc": "overhead",
+          "dmg": 1.25
+        },
+        "poly_budget": 30000,
+        "file_budget_bytes": 1572864,
+        "scale_dimensions_cm": {
+          "width": 16.0,
+          "height": 88.0,
+          "depth": 18.0
+        },
+        "status": "stage:minimax-code-3d",
+        "gate": "gate:2-rebuild-pixal3d",
+        "pivot": {
+          "convention": "limb_socket_normalized",
+          "origin": "proximal socket at (0, 0, 0), hangs along -Y, forward is +Z",
+          "elbow_split_y": -0.28,
+          "knee_split_y": -0.42
+        },
+        "alpha_file": "public/tex/props/flux3_pickup_limb_ship_oak_alpha.png",
+        "turnaround_file": "public/tex/props/h3_pickup_limb_ship_oak_turnaround.png",
+        "turntable_file": "docs/props/pickup_limb_ship_oak/turntable.webp",
+        "glb_output": "public/models/props/pickup_limb_ship_oak.glb",
+        "prompt": "Nautical Victorian prosthetic peg-leg, weathered dark ship English oak timber charred with pitch, bound in rusted iron cooper's barrel hoops with encrusted barnacles and iron ferrule foot, isolated on white background."
+      }
+    ],
+    "wave2_fighter_heads": [
+      {
+        "id": "head_obadiah_winch",
+        "name": "Constable Obadiah Winch 3D Head & Mutton Chops",
+        "character": "Constable Obadiah Winch",
+        "category": "head_3d",
+        "slot": "head_socket",
+        "poly_budget": 35000,
+        "file_budget_bytes": 1572864,
+        "scale_dimensions_cm": {
+          "width": 22.0,
+          "height": 28.0,
+          "depth": 24.0
+        },
+        "status": "stage:minimax-code-3d",
+        "gate": "gate:2-rebuild-pixal3d",
+        "pivot": {
+          "convention": "head_socket_normalized",
+          "origin": "base opening of neck / collar rim at y=0, centred on skull axis, forward +Z",
+          "up": "+Y",
+          "forward": "+Z"
+        },
+        "alpha_file": "public/tex/characters/flux3_head_obadiah_winch_alpha.png",
+        "turnaround_file": "public/tex/characters/h3_head_obadiah_winch_turnaround.png",
+        "turntable_file": "docs/characters/head_obadiah_winch/turntable.webp",
+        "glb_output": "public/models/characters/head_obadiah_winch.glb",
+        "prompt": "Victorian London police constable head, stern square jaw, weathered ruddy skin, heavy bushy dark-brown mutton chop sideburns, combed back short oiled hair, isolated on white background."
+      },
+      {
+        "id": "head_hezekiah_smelt",
+        "name": "Hezekiah Smelt 3D Smelter Head & Beard",
+        "character": "Hezekiah Smelt",
+        "category": "head_3d",
+        "slot": "head_socket",
+        "poly_budget": 35000,
+        "file_budget_bytes": 1572864,
+        "scale_dimensions_cm": {
+          "width": 26.0,
+          "height": 34.0,
+          "depth": 28.0
+        },
+        "status": "stage:minimax-code-3d",
+        "gate": "gate:2-rebuild-pixal3d",
+        "pivot": {
+          "convention": "head_socket_normalized",
+          "origin": "base opening of neck / collar rim at y=0, centred on skull axis, forward +Z",
+          "up": "+Y",
+          "forward": "+Z"
+        },
+        "alpha_file": "public/tex/characters/flux3_head_hezekiah_smelt_alpha.png",
+        "turnaround_file": "public/tex/characters/h3_head_hezekiah_smelt_turnaround.png",
+        "turntable_file": "docs/characters/head_hezekiah_smelt/turntable.webp",
+        "glb_output": "public/models/characters/head_hezekiah_smelt.glb",
+        "prompt": "Gigantic Victorian iron foundry master head, broad thick neck, soot-stained leathery pale skin, thick tangled ash-grey beard singed with embers, fierce coal-dark eyes, isolated on white background."
+      },
+      {
+        "id": "head_tabitha_pegg",
+        "name": "Mistress Tabitha Pegg 3D Cobbler Head",
+        "character": "Mistress Tabitha Pegg",
+        "category": "head_3d",
+        "slot": "head_socket",
+        "poly_budget": 35000,
+        "file_budget_bytes": 1572864,
+        "scale_dimensions_cm": {
+          "width": 20.0,
+          "height": 26.0,
+          "depth": 22.0
+        },
+        "status": "stage:minimax-code-3d",
+        "gate": "gate:2-rebuild-pixal3d",
+        "pivot": {
+          "convention": "head_socket_normalized",
+          "origin": "base opening of neck / collar rim at y=0, centred on skull axis, forward +Z",
+          "up": "+Y",
+          "forward": "+Z"
+        },
+        "alpha_file": "public/tex/characters/flux3_head_tabitha_pegg_alpha.png",
+        "turnaround_file": "public/tex/characters/h3_head_tabitha_pegg_turnaround.png",
+        "turntable_file": "docs/characters/head_tabitha_pegg/turntable.webp",
+        "glb_output": "public/models/characters/head_tabitha_pegg.glb",
+        "prompt": "Wiry sharp-featured Victorian shoemaker woman head, tight grey-streaked bun hair, leather aproned collar, intense piercing hawk eyes, wax-stained weathered pale skin, isolated on white background."
+      },
+      {
+        "id": "head_martha_crape",
+        "name": "Mistress Martha Crape 3D Mourner Head",
+        "character": "Mistress Martha Crape",
+        "category": "head_3d",
+        "slot": "head_socket",
+        "poly_budget": 35000,
+        "file_budget_bytes": 1572864,
+        "scale_dimensions_cm": {
+          "width": 20.0,
+          "height": 27.0,
+          "depth": 23.0
+        },
+        "status": "stage:minimax-code-3d",
+        "gate": "gate:2-rebuild-pixal3d",
+        "pivot": {
+          "convention": "head_socket_normalized",
+          "origin": "base opening of neck / collar rim at y=0, centred on skull axis, forward +Z",
+          "up": "+Y",
+          "forward": "+Z"
+        },
+        "alpha_file": "public/tex/characters/flux3_head_martha_crape_alpha.png",
+        "turnaround_file": "public/tex/characters/h3_head_martha_crape_turnaround.png",
+        "turntable_file": "docs/characters/head_martha_crape/turntable.webp",
+        "glb_output": "public/models/characters/head_martha_crape.glb",
+        "prompt": "Pale Victorian professional funeral mourner head, gaunt hollow cheeks, black crape widow's bonnet frill around hairline, solemn dark eyes with faint tear tracks, isolated on white background."
+      },
+      {
+        "id": "head_nell_sluice",
+        "name": "Nell Sluice 3D Sewer Scavenger Head",
+        "character": "Nell Sluice",
+        "category": "head_3d",
+        "slot": "head_socket",
+        "poly_budget": 35000,
+        "file_budget_bytes": 1572864,
+        "scale_dimensions_cm": {
+          "width": 20.0,
+          "height": 25.0,
+          "depth": 22.0
+        },
+        "status": "stage:minimax-code-3d",
+        "gate": "gate:2-rebuild-pixal3d",
+        "pivot": {
+          "convention": "head_socket_normalized",
+          "origin": "base opening of neck / collar rim at y=0, centred on skull axis, forward +Z",
+          "up": "+Y",
+          "forward": "+Z"
+        },
+        "alpha_file": "public/tex/characters/flux3_head_nell_sluice_alpha.png",
+        "turnaround_file": "public/tex/characters/h3_head_nell_sluice_turnaround.png",
+        "turntable_file": "docs/characters/head_nell_sluice/turntable.webp",
+        "glb_output": "public/models/characters/head_nell_sluice.glb",
+        "prompt": "Fierce young Victorian London mudlark toshing scavenger head, dirt-smudged freckled pale cheeks, unruly cropped ginger hair, cocky smirk, sharp cunning eyes, isolated on white background."
+      },
+      {
+        "id": "head_bulwark",
+        "name": "Bulwark 3D Armoured Bouncer Head",
+        "character": "Bulwark",
+        "category": "head_3d",
+        "slot": "head_socket",
+        "poly_budget": 35000,
+        "file_budget_bytes": 1572864,
+        "scale_dimensions_cm": {
+          "width": 25.0,
+          "height": 30.0,
+          "depth": 26.0
+        },
+        "status": "stage:minimax-code-3d",
+        "gate": "gate:2-rebuild-pixal3d",
+        "pivot": {
+          "convention": "head_socket_normalized",
+          "origin": "base opening of neck / collar rim at y=0, centred on skull axis, forward +Z",
+          "up": "+Y",
+          "forward": "+Z"
+        },
+        "alpha_file": "public/tex/characters/flux3_head_bulwark_alpha.png",
+        "turnaround_file": "public/tex/characters/h3_head_bulwark_turnaround.png",
+        "turntable_file": "docs/characters/head_bulwark/turntable.webp",
+        "glb_output": "public/models/characters/head_bulwark.glb",
+        "prompt": "Massive Victorian illegal pit-fight bouncer head, broken nose, cauliflower ears, close-shaved brutal stubble scalp with jagged scar across left temple, cold calculating eyes, isolated on white background."
+      },
+      {
+        "id": "head_nurse_kilnworth",
+        "name": "Nurse Florence Kilnworth 3D Surgical Head",
+        "character": "Nurse Kilnworth",
+        "category": "head_3d",
+        "slot": "head_socket",
+        "poly_budget": 35000,
+        "file_budget_bytes": 1572864,
+        "scale_dimensions_cm": {
+          "width": 20.0,
+          "height": 26.0,
+          "depth": 22.0
+        },
+        "status": "stage:minimax-code-3d",
+        "gate": "gate:2-rebuild-pixal3d",
+        "pivot": {
+          "convention": "head_socket_normalized",
+          "origin": "base opening of neck / collar rim at y=0, centred on skull axis, forward +Z",
+          "up": "+Y",
+          "forward": "+Z"
+        },
+        "alpha_file": "public/tex/characters/flux3_head_nurse_kilnworth_alpha.png",
+        "turnaround_file": "public/tex/characters/h3_head_nurse_kilnworth_turnaround.png",
+        "turntable_file": "docs/characters/head_nurse_kilnworth/turntable.webp",
+        "glb_output": "public/models/characters/head_nurse_kilnworth.glb",
+        "prompt": "Grim Victorian hospital asylum head nurse, pale austere aristocratic face, severe dark hair parted in center, cold clinical surgical stare, faint antiseptic pallor, isolated on white background."
+      },
+      {
+        "id": "head_professor_crump",
+        "name": "Professor Crump 3D Horologist Head & Monocle",
+        "character": "Professor Crump",
+        "category": "head_3d",
+        "slot": "head_socket",
+        "poly_budget": 35000,
+        "file_budget_bytes": 1572864,
+        "scale_dimensions_cm": {
+          "width": 21.0,
+          "height": 27.0,
+          "depth": 23.0
+        },
+        "status": "stage:minimax-code-3d",
+        "gate": "gate:2-rebuild-pixal3d",
+        "pivot": {
+          "convention": "head_socket_normalized",
+          "origin": "base opening of neck / collar rim at y=0, centred on skull axis, forward +Z",
+          "up": "+Y",
+          "forward": "+Z"
+        },
+        "alpha_file": "public/tex/characters/flux3_head_professor_crump_alpha.png",
+        "turnaround_file": "public/tex/characters/h3_head_professor_crump_turnaround.png",
+        "turntable_file": "docs/characters/head_professor_crump/turntable.webp",
+        "glb_output": "public/models/characters/head_professor_crump.glb",
+        "prompt": "Eccentric Victorian chronometer inventor head, wild thinning white side tufts, brass jeweler's monocle eyepiece over left eye, twitching thin mustache, furrowed scholarly brow, isolated on white background."
+      },
+      {
+        "id": "head_lady_eleanor",
+        "name": "Lady Eleanor 3D Disgraced Aristocrat Head",
+        "character": "Lady Eleanor",
+        "category": "head_3d",
+        "slot": "head_socket",
+        "poly_budget": 35000,
+        "file_budget_bytes": 1572864,
+        "scale_dimensions_cm": {
+          "width": 19.0,
+          "height": 26.0,
+          "depth": 22.0
+        },
+        "status": "stage:minimax-code-3d",
+        "gate": "gate:2-rebuild-pixal3d",
+        "pivot": {
+          "convention": "head_socket_normalized",
+          "origin": "base opening of neck / collar rim at y=0, centred on skull axis, forward +Z",
+          "up": "+Y",
+          "forward": "+Z"
+        },
+        "alpha_file": "public/tex/characters/flux3_head_lady_eleanor_alpha.png",
+        "turnaround_file": "public/tex/characters/h3_head_lady_eleanor_turnaround.png",
+        "turntable_file": "docs/characters/head_lady_eleanor/turntable.webp",
+        "glb_output": "public/models/characters/head_lady_eleanor.glb",
+        "prompt": "Haughty disgraced Victorian noblewoman duelist head, pale high cheekbones, elegant black hair with silver streaks swept into a duel knot, thin disdainful lips, cold steel-grey eyes, isolated on white background."
+      },
+      {
+        "id": "head_skinner",
+        "name": "Skinner 3D Taxidermist Head",
+        "character": "Skinner",
+        "category": "head_3d",
+        "slot": "head_socket",
+        "poly_budget": 35000,
+        "file_budget_bytes": 1572864,
+        "scale_dimensions_cm": {
+          "width": 21.0,
+          "height": 26.0,
+          "depth": 23.0
+        },
+        "status": "stage:minimax-code-3d",
+        "gate": "gate:2-rebuild-pixal3d",
+        "pivot": {
+          "convention": "head_socket_normalized",
+          "origin": "base opening of neck / collar rim at y=0, centred on skull axis, forward +Z",
+          "up": "+Y",
+          "forward": "+Z"
+        },
+        "alpha_file": "public/tex/characters/flux3_head_skinner_alpha.png",
+        "turnaround_file": "public/tex/characters/h3_head_skinner_turnaround.png",
+        "turntable_file": "docs/characters/head_skinner/turntable.webp",
+        "glb_output": "public/models/characters/head_skinner.glb",
+        "prompt": "Sinister Victorian Bermondsey tannery skinner head, greasy lank dark hair, tallow-stained sallow skin, patchy stubble, feral unblinking eyes, twitching grimace, isolated on white background."
+      },
+      {
+        "id": "head_mule",
+        "name": "Mule 3D Bare-Knuckle Champion Head",
+        "character": "Mule",
+        "category": "head_3d",
+        "slot": "head_socket",
+        "poly_budget": 35000,
+        "file_budget_bytes": 1572864,
+        "scale_dimensions_cm": {
+          "width": 24.0,
+          "height": 29.0,
+          "depth": 25.0
+        },
+        "status": "stage:minimax-code-3d",
+        "gate": "gate:2-rebuild-pixal3d",
+        "pivot": {
+          "convention": "head_socket_normalized",
+          "origin": "base opening of neck / collar rim at y=0, centred on skull axis, forward +Z",
+          "up": "+Y",
+          "forward": "+Z"
+        },
+        "alpha_file": "public/tex/characters/flux3_head_mule_alpha.png",
+        "turnaround_file": "public/tex/characters/h3_head_mule_turnaround.png",
+        "turntable_file": "docs/characters/head_mule/turntable.webp",
+        "glb_output": "public/models/characters/head_mule.glb",
+        "prompt": "Rugged Victorian bare-knuckle prize fighter head, broad jaw with prominent scar along jawline, cropped buzzcut, fierce bruised brow, heavy thick mustache, isolated on white background."
+      },
+      {
+        "id": "head_tilly_clinker",
+        "name": "Tilly Clinker 3D Stoker Head & Goggles",
+        "character": "Tilly Clinker",
+        "category": "head_3d",
+        "slot": "head_socket",
+        "poly_budget": 35000,
+        "file_budget_bytes": 1572864,
+        "scale_dimensions_cm": {
+          "width": 20.0,
+          "height": 26.0,
+          "depth": 22.0
+        },
+        "status": "stage:minimax-code-3d",
+        "gate": "gate:2-rebuild-pixal3d",
+        "pivot": {
+          "convention": "head_socket_normalized",
+          "origin": "base opening of neck / collar rim at y=0, centred on skull axis, forward +Z",
+          "up": "+Y",
+          "forward": "+Z"
+        },
+        "alpha_file": "public/tex/characters/flux3_head_tilly_clinker_alpha.png",
+        "turnaround_file": "public/tex/characters/h3_head_tilly_clinker_turnaround.png",
+        "turntable_file": "docs/characters/head_tilly_clinker/turntable.webp",
+        "glb_output": "public/models/characters/head_tilly_clinker.glb",
+        "prompt": "Tough Victorian steamship stoker woman head, soot-blackened cheekbones, wild curly dark hair tied back in kerchief, brass safety stoker goggles pushed up on brow, determined grit, isolated on white background."
+      }
+    ]
+  }
+}

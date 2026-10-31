@@ -20,6 +20,7 @@ import { alive, type World } from "../sim/world";
 import { CHARACTERS } from "../data/characters";
 import { PROP_BY_ID, gearPropsFor } from "../data/props";
 import { loadProp, layProp, placeProp, splitByX } from "./props";
+import { applyFighterTextures } from "./fighter_textures";
 import { PLAYER_COLORS, buildBody, limbGeometry, paintWounds, syncLimbs, type Body, type Target } from "./body";
 import { animate, onHit } from "./animate";
 import type { Cue } from "./cues";
@@ -196,6 +197,7 @@ export class Scene {
     // drawing of that piece of kit
     const gear = gearPropsFor(fighterId);
     const b = buildBody(f, new Set(gear.map((p) => p.gear)));
+    applyFighterTextures(fighterId, b);
     const pc = PLAYER_COLORS[f.id % PLAYER_COLORS.length];
     const ring = new THREE.Mesh(new THREE.RingGeometry(0.38, 0.48, 32), new THREE.MeshBasicMaterial({ color: pc, transparent: true, opacity: 0.85 }));
     ring.rotation.x = -Math.PI / 2;
@@ -342,7 +344,8 @@ export class Scene {
             const dd = Math.hypot(dx, dy) || 1;
             p.add(toV((dx / dd) * 0.3, (dy / dd) * 0.3));
           }
-          this.fx.burst(p, { count: Math.round(8 + dmg * 2.5), speed: 3 + dmg * 0.4, color: heavy ? 0xffe0a0 : 0xffa040, life: 0.3, gravity: 6 });
+          this.fx.burst(p, { count: Math.round(8 + dmg * 2.5), speed: 3 + dmg * 0.4, color: heavy ? 0xffe0a0 : 0xffa040, life: 0.3, gravity: 6 });
+          if (heavy) this.fx.steam(p, 10);
           if (a) {
             // the force of it carries on through: sparks out the far side, and the camera lurches with it
             const line = toV(d.x - a.x, d.y - a.y);
@@ -566,10 +569,16 @@ export class Scene {
         this.shake = Math.min(1, this.shake + 0.5);
       } else if (f.move === "spSpin" && at0) {
         this.fx.ring(at(f, 0.9), c, m.reach * 2, 0.3, true);
+        this.fx.steam(at(f, 0.9), 12);
       } else if (f.move === "spBlade" && at0) {
         this.fx.ring(at(f, 1.2), c, m.reach * 2, 0.25, true);
+        this.fx.steam(at(f, 1.1), 10);
       } else if (f.move === "spCharge" && active && f.t % 3 === 0) {
         this.fx.burst(at(f, 0.1), { count: 4, speed: 1, color: 0x3a2a24, life: 0.5, gravity: 0, up: 0.5, dust: true });
+        this.fx.steam(at(f, 0.6), 5);
+      }
+      if (f.style === 7 && f.state === "attack" && f.t % 8 === 0) {
+        this.fx.steam(at(f, 1.0), 4, 0.8);
       }
     }
   }

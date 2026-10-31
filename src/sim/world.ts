@@ -957,6 +957,14 @@ export class World {
 
   private doUse(f: Fighter): boolean {
     const s = this.s;
+    if (f.weapon === "pickup_tonic") {
+      f.weapon = "";
+      for (const p of Object.values(f.parts)) {
+        if (p.attached) p.hp = Math.min(p.max, p.hp + 30);
+      }
+      f.fury = Math.min(100, f.fury + 25);
+      return true;
+    }
     if (this.takeLimb(f, false)) return true;
     if (this.arena.use(this, f)) return true;
     // a gift the Gallery threw: it is for anyone, so any fighter may take it

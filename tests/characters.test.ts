@@ -47,15 +47,15 @@ const SPECIAL_SNAPSHOT: [string, string][] = [
   ["spFire", "GASLIGHT"],
 ];
 
-const HORNS = ["none", "goat", "bull", "ram", "long", "swept", "nubs", "spikes", "broken", "crown"];
-const TAILS = ["none", "spade", "long", "stub", "barbed"];
+const HORNS = ["none"];
+const TAILS = ["none"];
 const GEAR = [
-  "mohawk", "topknot", "beard", "headband", "gloves", "pauldrons", "spines", "wings",
-  "beret", "kasa", "stetson", "lanyard", "obi", "tusks", "title",
+  "topknot", "beard", "headband", "gloves", "pauldrons",
+  "obi", "title",
   "custodian", "whiskers", "pistons", "flatcap", "nursecap", "tophat", "monocle",
   "stovepipe", "bowler", "goggles", "weepers", "moustache",
 ];
-const FIGHTER_TEXTURES = ["skin.webp", "skin_h.webp", "cloth.webp", "cloth_h.webp", "face.webp"];
+const FIGHTER_TEXTURES = ["skin.webp", "skin_h.webp", "cloth.webp", "cloth_h.webp", "face.webp", "limb.webp", "limb_h.webp"];
 // every texture the pipeline shipped, so a folder for a fighter who is not on the roster is a bug
 const TEX_FILES = import.meta.glob("../public/tex/fighters/*/*.webp");
 const CONTACT_FILES = import.meta.glob("../public/tex/contact/*.png");

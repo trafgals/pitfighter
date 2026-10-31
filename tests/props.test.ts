@@ -207,6 +207,19 @@ describe("the props in a fight", () => {
       expect(w.fighters.every((f) => Number.isFinite(f.x + f.y + f.weapon.length))).toBe(true);
     }
   });
+
+  it("drinking the pickup_tonic restores health and fury, and consumes the bottle", () => {
+    const w = new World({ seed: 1, styles: [0, 0], humans: [true, true] });
+    const f = w.fighters[0];
+    f.weapon = "pickup_tonic";
+    f.parts.torso.hp = 20;
+    f.fury = 10;
+    tap(w, 0, BTN.USE);
+    w.step(idle(2));
+    expect(f.weapon).toBe("");
+    expect(f.parts.torso.hp).toBe(50);
+    expect(f.fury).toBe(35);
+  });
 });
 
 describe("the prop ids", () => {

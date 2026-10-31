@@ -33,92 +33,18 @@ export function taper(pts: THREE.Vector3[], r: number, end = 0.06, seg = 16, rad
 
 const V = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z);
 
-/** One horn's path on side s (head space, the skull's crown at y 0.3), and how thick it is at the root. */
-function hornPath(h: Horns, s: number, k: number): { pts: THREE.Vector3[]; r: number; end?: number } {
-  switch (h) {
-    case "goat":
-      return { pts: [V(0.09 * s, 0.27, 0.02), V(0.12 * s, 0.4, -0.05), V(0.15 * s, 0.47, -0.17)], r: 0.042 };
-    case "bull":
-      return { pts: [V(0.12 * s, 0.25, 0), V(0.26 * s, 0.29, 0.02), V(0.34 * s, 0.41, 0.08)], r: 0.05 };
-    case "ram":
-      return { pts: [V(0.1 * s, 0.27, -0.01), V(0.2 * s, 0.35, -0.09), V(0.27 * s, 0.27, -0.15), V(0.26 * s, 0.15, -0.08), V(0.21 * s, 0.13, 0.03)], r: 0.05 };
-    case "long":
-      return { pts: [V(0.08 * s, 0.27, 0), V(0.13 * s, 0.45, -0.04), V(0.17 * s, 0.62, -0.1)], r: 0.035 };
-    case "swept":
-      return { pts: [V(0.09 * s, 0.27, 0.02), V(0.14 * s, 0.35, -0.12), V(0.16 * s, 0.37, -0.33)], r: 0.04 };
-    case "nubs":
-      return { pts: [V(0.09 * s, 0.27, 0.02), V(0.1 * s, 0.33, 0.01)], r: 0.03, end: 0.35 };
-    case "broken":
-      // the left one snapped off in some alley
-      return s < 0
-        ? { pts: [V(0.09 * s, 0.27, 0.02), V(0.11 * s, 0.35, -0.02)], r: 0.042, end: 0.75 }
-        : { pts: [V(0.09 * s, 0.27, 0.02), V(0.12 * s, 0.4, -0.05), V(0.15 * s, 0.47, -0.17)], r: 0.042 };
-    case "crown":
-    case "spikes":
-    default:
-      return { pts: [V(0.1 * s * k, 0.27, 0), V(0.16 * s * k, 0.44, 0)], r: 0.04 };
-  }
-}
-
-/** The horns on the head bone. */
-export function buildHorns(h: Horns, mat: THREE.Material): THREE.Group {
+/** The horns on the head bone: the twelve fighters in Old Sorrow wear none. */
+export function buildHorns(h: Horns, _mat?: THREE.Material): THREE.Group {
   const g = new THREE.Group();
   g.name = `horns:${h}`;
-  if (h === "none") return g;
-  const add = (geo: THREE.BufferGeometry) => {
-    const m = new THREE.Mesh(geo, mat);
-    m.castShadow = true;
-    g.add(m);
-  };
-  if (h === "crown") {
-    // a ring of short spikes round the crown of the skull
-    for (let i = 0; i < 7; i++) {
-      const a = (i / 7) * Math.PI * 2;
-      const x = Math.sin(a);
-      const z = Math.cos(a);
-      add(taper([V(0.12 * x, 0.26, 0.12 * z), V(0.19 * x, 0.4, 0.19 * z)], 0.032));
-    }
-    return g;
-  }
-  for (const s of [-1, 1]) {
-    const p = hornPath(h, s, 1);
-    add(taper(p.pts, p.r, p.end));
-  }
   return g;
 }
 
-/** The tail on the hips: its curve, and the spade or barb at the end. */
-export function buildTail(t: Tail, mat: THREE.Material): THREE.Group {
+/** The tail on the hips: the twelve fighters in Old Sorrow wear none. */
+export function buildTail(t: Tail, _mat?: THREE.Material): THREE.Group {
   const g = new THREE.Group();
   g.name = `tail:${t}`;
   g.position.set(0, 0.02, -0.13);
-  if (t === "none") return g;
-  const pts =
-    t === "stub"
-      ? [V(0, 0, 0), V(0, -0.07, -0.08), V(0, -0.05, -0.17)]
-      : t === "long"
-        ? [V(0, 0, 0), V(0, -0.22, -0.18), V(0, -0.3, -0.45), V(0, -0.12, -0.7), V(0, 0.08, -0.78)]
-        : [V(0, 0, 0), V(0, -0.18, -0.15), V(0, -0.2, -0.38), V(0, 0.02, -0.5)];
-  const r = t === "stub" ? 0.035 : 0.024;
-  const m = new THREE.Mesh(taper(pts, r, t === "stub" ? 0.3 : 0.55, 24, 10), mat);
-  m.castShadow = true;
-  g.add(m);
-  const end = pts[pts.length - 1];
-  if (t === "spade" || t === "long") {
-    const tip = new THREE.Mesh(new THREE.ConeGeometry(t === "long" ? 0.04 : 0.05, 0.1, 4), mat); // the spade stays four-sided
-    tip.position.set(end.x, end.y + 0.05, end.z);
-    g.add(tip);
-  } else if (t === "barbed") {
-    // three barbs, raked back
-    for (const [x, y] of [
-      [0, 1],
-      [-0.7, 0.4],
-      [0.7, 0.4],
-    ]) {
-      const b = new THREE.Mesh(taper([end.clone(), V(end.x + x * 0.07, end.y + y * 0.08, end.z - 0.05)], 0.018), mat);
-      g.add(b);
-    }
-  }
   return g;
 }
 
@@ -174,15 +100,6 @@ export function buildGear(
   for (const k of gear) {
     if (skip.has(k)) continue;
     switch (k) {
-      case "mohawk": {
-        const fins = [];
-        for (let i = 0; i < 6; i++) {
-          const a = -0.5 + i * 0.26;
-          fins.push(at(new THREE.Mesh(new THREE.ConeGeometry(0.03, 0.14 - Math.abs(a) * 0.05, 4), mats.accent), 0, 0.15 + Math.cos(a) * 0.17, Math.sin(a) * 0.17, a));
-        }
-        put(b.head, "mohawk", ...fins);
-        break;
-      }
       case "topknot": {
         const knot = at(new THREE.Mesh(new THREE.SphereGeometry(0.055, 12, 10), dark), 0, 0.31, -0.06);
         const tail = at(new THREE.Mesh(taper([V(0, 0.3, -0.09), V(0, 0.22, -0.22), V(0, 0.05, -0.27)], 0.03, 0.3), dark), 0, 0, 0);
@@ -223,75 +140,12 @@ export function buildGear(
           put(arm, `pauldron${s < 0 ? "L" : "R"}`, plate, spike);
         }
         break;
-      case "spines": {
-        const sp = [];
-        for (let i = 0; i < 5; i++) {
-          const y = 0.12 + i * 0.1;
-          sp.push(at(new THREE.Mesh(new THREE.ConeGeometry(0.028, 0.11 + 0.02 * Math.sin(i), 6), mats.accent), 0, y, -0.15 + i * 0.006, -1.0));
-        }
-        put(b.spine, "spines", ...sp);
-        break;
-      }
-      case "wings":
-        put(
-          b.spine,
-          "wings",
-          ...[-1, 1].map((s) => {
-            // a small leathery bat wing: a fan of three fingers with the skin stretched over it
-            const shape = new THREE.Shape();
-            shape.moveTo(0, 0);
-            shape.lineTo(0.32, 0.22);
-            shape.lineTo(0.28, 0.04);
-            shape.lineTo(0.22, -0.02);
-            shape.lineTo(0.15, -0.08);
-            shape.lineTo(0.08, -0.06);
-            shape.closePath();
-            const w = new THREE.Mesh(new THREE.ShapeGeometry(shape), new THREE.MeshStandardMaterial({ color: mats.accentColour, roughness: 0.8, side: THREE.DoubleSide }));
-            w.scale.x = s;
-            return at(w, 0.06 * s, 0.42, -0.13, 0, -0.5 * s, 0);
-          }),
-        );
-        break;
-      case "beret": {
-        const cap = at(new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.16, 0.05, 20), std(0x2a3418, 0.9)), 0.03, 0.29, 0, 0, 0, -0.18);
-        const badge = at(new THREE.Mesh(new THREE.CircleGeometry(0.02, 10), std(0xd8b030, 0.3, 0.8)), -0.09, 0.27, 0.13, 0, -0.5, 0);
-        put(b.head, "beret", cap, badge);
-        break;
-      }
-      case "kasa": {
-        // a wide straw hat, the horns through it
-        const hat = at(new THREE.Mesh(new THREE.ConeGeometry(0.36, 0.14, 24, 1, true), new THREE.MeshStandardMaterial({ color: 0xb09050, roughness: 0.95, side: THREE.DoubleSide })), 0, 0.36, 0);
-        put(b.head, "kasa", hat);
-        break;
-      }
-      case "stetson": {
-        const felt = std(0x2a1a10, 0.85);
-        const brim = at(new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.015, 24), felt), 0, 0.29, 0);
-        brim.scale.set(1, 1, 0.85);
-        const crown = at(new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.15, 0.13, 18), felt), 0, 0.36, 0);
-        const band = at(new THREE.Mesh(new THREE.CylinderGeometry(0.152, 0.152, 0.025, 18), std(0xff6000, 0.5)), 0, 0.31, 0);
-        put(b.head, "stetson", brim, crown, band);
-        break;
-      }
-      case "lanyard": {
-        const cord = at(new THREE.Mesh(new THREE.TorusGeometry(0.15, 0.008, 6, 24, Math.PI), std(0x3a6aa0, 0.6)), 0, 0.5, 0.07, 0.5, 0, Math.PI);
-        const card = at(new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.1, 0.005), std(0xf4f4f0, 0.4)), 0, 0.31, 0.15, -0.1);
-        put(b.spine, "lanyard", cord, card);
-        break;
-      }
       case "obi": {
         const knot = at(new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.05, 0.04), dark), 0.05, 0.08, 0.19);
         const ends = [-1, 1].map((s) => at(new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.17, 0.01), dark), 0.05 + 0.03 * s, -0.01, 0.2, 0, 0, 0.15 * s));
         put(b.spine, "obi", knot, ...ends);
         break;
       }
-      case "tusks":
-        put(
-          b.head,
-          "tusks",
-          ...[-1, 1].map((s) => at(new THREE.Mesh(taper([V(0.05 * s, 0.05, 0.11), V(0.08 * s, 0.13, 0.15)], 0.016), std(0xe8dcc0, 0.5)), 0, 0, 0)),
-        );
-        break;
       case "title": {
         // the championship belt: a gold plate on the belly
         const plate = at(new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.02, 6), std(0xe0b030, 0.25, 0.9)), 0, 0.08, 0.2, Math.PI / 2);
