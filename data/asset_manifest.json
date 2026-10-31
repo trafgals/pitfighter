@@ -616,7 +616,7 @@
         "height": 9,
         "depth": 14.8
       },
-      "status": "gate:3-review-ingame-3d",
+      "status": "status:asset-approved",
       "pivot": {
         "convention": "head_socket_normalized",
         "origin": "the base opening: the crown's head-entry rim lies on the y=0 plane, centred on the hat's axis",
@@ -1258,7 +1258,7 @@
         "height": 38.5,
         "depth": 30.6
       },
-      "status": "gate:3-review-ingame-3d",
+      "status": "status:asset-approved",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",
@@ -1718,7 +1718,7 @@
         "height": 84,
         "depth": 28.2
       },
-      "status": "gate:3-review-ingame-3d",
+      "status": "status:asset-approved",
       "pivot": {
         "convention": "grip_socket_normalized",
         "origin": "center of handle grip: the grip axis lies at x=0, z=0, with y=0 centered on the handle grip",

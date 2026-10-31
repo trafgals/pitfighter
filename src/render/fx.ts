@@ -332,6 +332,24 @@ export class Fx {
     const d = dir.lengthSq() > 1e-8 ? dir.clone().normalize() : new THREE.Vector3(0, 1, 0);
     this.sparks.spray(at, d, { count: o.count, speed: o.speed, spread: o.speed * 0.3, life: 0.22, gravity: 4 }, o.color, this.rnd);
     this.stats.bursts++;
+  }
+
+  /** A puff of Victorian steam venting upward from boilers, valves or heavy strikes. */
+  steam(at: THREE.Vector3, count = 14, speed = 1.4): void {
+    this.dust.burst(
+      at,
+      {
+        count,
+        speed,
+        color: 0xd8d8d8,
+        life: 0.65,
+        gravity: -1.6,
+        up: 1.2,
+        dust: true,
+      },
+      this.rnd,
+    );
+    this.stats.bursts++;
   }
 
   /** A splat right on the floor (a pool under a body), `size` metres across. */

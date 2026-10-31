@@ -43,6 +43,27 @@
       "scale": 1
     },
     {
+      "id": "prop_crump_samovar",
+      "name": "Brass Tea Samovar Steam Boiler",
+      "kind": "gear",
+      "fighter": "percival-crump",
+      "gear": "obi",
+      "throw": "",
+      "url": "/public/models/props/prop_crump_samovar.glb",
+      "bone": "spine",
+      "offset": [
+        0,
+        0.08,
+        -0.22
+      ],
+      "turn": [
+        0,
+        3.1416,
+        0
+      ],
+      "scale": 1.1
+    },
+    {
       "id": "prop_eleanor_weeping_rapier",
       "name": "Weeping Rapier Swordstick",
       "kind": "wielded",
@@ -104,6 +125,27 @@
         1.5708
       ],
       "scale": 1
+    },
+    {
+      "id": "prop_sluice_flatcap",
+      "name": "Waterlogged Tweed Flatcap",
+      "kind": "gear",
+      "fighter": "nell-sluice",
+      "gear": "flatcap",
+      "throw": "",
+      "url": "/public/models/props/prop_sluice_flatcap.glb",
+      "bone": "head",
+      "offset": [
+        0,
+        0.25,
+        0
+      ],
+      "turn": [
+        0,
+        0,
+        0
+      ],
+      "scale": 1.45
     },
     {
       "id": "prop_smelt_stovepipe",
@@ -291,6 +333,27 @@
         0,
         0,
         -1.5708
+      ],
+      "scale": 1
+    },
+    {
+      "id": "weapon_nail_bat",
+      "name": "Studded Cricket Bat",
+      "kind": "gift",
+      "fighter": "",
+      "gear": "",
+      "throw": "nail-bat",
+      "url": "/public/models/props/weapon_nail_bat.glb",
+      "bone": "hand",
+      "offset": [
+        0,
+        -0.3,
+        0
+      ],
+      "turn": [
+        3.1416,
+        0,
+        0
       ],
       "scale": 1
     },

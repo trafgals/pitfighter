@@ -43,26 +43,18 @@ export interface Special {
   move: Move;
 }
 
-/** The shape of a fighter's horns. */
-export type Horns = "none" | "goat" | "bull" | "ram" | "long" | "swept" | "nubs" | "spikes" | "broken" | "crown";
-/** The shape of a fighter's tail. */
-export type Tail = "none" | "spade" | "long" | "stub" | "barbed";
-/** A piece of gear a fighter wears. */
+/** The shape of a fighter's horns: the twelve fighters of Old Sorrow wear none. */
+export type Horns = "none";
+/** The shape of a fighter's tail: the twelve fighters of Old Sorrow wear none. */
+export type Tail = "none";
+/** A piece of gear a fighter wears in Old Sorrow. */
 export type Gear =
-  | "mohawk"
   | "topknot"
   | "beard"
   | "headband"
   | "gloves"
   | "pauldrons"
-  | "spines"
-  | "wings"
-  | "beret"
-  | "kasa"
-  | "stetson"
-  | "lanyard"
   | "obi"
-  | "tusks"
   | "title"
   | "custodian"
   | "whiskers"

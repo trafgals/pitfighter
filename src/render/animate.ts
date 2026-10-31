@@ -16,6 +16,7 @@ import type { Fighter, PartId } from "../sim/types";
 import type { World } from "../sim/world";
 import { LEG, applyPose, copyPose, impulse, targetPose, type Body, type Foot, type Target } from "./body";
 import { ragdoll } from "./ragdoll";
+import { feelOf } from "./limbfeel";
 import { clipFor, heightOf, mix, reactionFor, type HitStrength, type Plant } from "./motion";
 
 /** Which side of the victim a blow comes from (1: its right, the +x side; -1: its left), and whether it comes from behind. */
@@ -64,7 +65,7 @@ export function animate(v: Body, f: Fighter, w: World, time: number, dt: number,
   if (f.state === "ko") tp.p.y -= Math.min(1.2, f.t / 120);
   // nothing moves during a hitstop: the pose holds too
   // (a knee or a throw jumps onto its landing pose, so the freeze holds the blow, not the wind-up)
-  applyPose(v, tp.p, f.stop > 0 ? 0 : tp.rate, (tp.snap && f.stop === 0) || tp.impact, dt, jitter, tp.drive);
+  applyPose(v, tp.p, f.stop > 0 ? 0 : tp.rate, (tp.snap && f.stop === 0) || tp.impact, dt, jitter, tp.drive, f.state === "attack" ? feelOf(f) : undefined);
   footwork(v, tp.plant, dt, f.stop > 0);
   ragdoll(v, f, tp, dt, v.cue.from, v.cue.side, v.cue.face);
   // lying down, which way up: the get-up goes by it
@@ -74,6 +75,7 @@ export function animate(v: Body, f: Fighter, w: World, time: number, dt: number,
 }
 
 const UP = new THREE.Vector3();
+
 
 /** A new state or move eases in from the pose the body was in over this many sim frames. */
 export const BLEND = 3;
@@ -114,6 +116,10 @@ type S = (typeof SIDES)[number];
 export const STEP_AT = 0.28;
 /** A foot the clip has this close (m) to the floor can be put down on it. */
 const TOUCH = 0.1;
+/** A planted foot this many steps (of STEP_AT) behind steps even while the other foot is in the air. */
+export const STEP_FAR = 1.85;
+/** A planted foot this far (m) over the midline, onto the other leg's side, steps back. */
+export const CROSS = 0.06;
 /** Seconds a recovering step takes. */
 const STEP_TIME = 0.14;
 /** Below this speed (m/s) a walking fighter stands on both feet. */
@@ -121,10 +127,33 @@ const GAIT_MIN = 0.25;
 /** Seconds for the IK to take over a foot, or let it go: about 3 frames. */
 const IK_IN = 0.05;
 
+/** How fast (1/s) the sole's roll follows the gait's. */
+const ROLL_RATE = 30;
+/** The sole's pitch (rad) at heel strike (toe up, negative) and at push-off (toe down), and where on the stance each begins to end. */
+export const HEEL_STRIKE = -0.3;
+export const PUSH_OFF = 0.5;
+/**
+ * The foot's roll through the walk cycle, u in 0..2 (0..1 swinging, 1..2 on the
+ * floor): it leaves the floor toe down, swings up to land on its heel, rolls
+ * flat, and lifts its heel to push off on the ball of the foot.
+ */
+export function rollOf(u: number): number {
+  if (u < 1) return PUSH_OFF * (1 - u) * (1 - u) + HEEL_STRIKE * u * u * u;
+  const s = u - 1; // 0..1 down
+  if (s < 0.2) return HEEL_STRIKE * (1 - s / 0.2);
+  if (s > 0.65) return PUSH_OFF * Math.min(1, (s - 0.65) / 0.35);
+  return 0;
+}
+
 /** A step's length (m) at a speed (m/s): longer strides as the fighter goes faster. */
 export const strideOf = (speed: number) => Math.min(0.75, 0.25 + 0.15 * speed);
 
 const Y = new THREE.Vector3(0, 1, 0);
+const X = new THREE.Vector3(1, 0, 0);
+const Z = new THREE.Vector3(0, 0, 1);
+const qx = new THREE.Quaternion();
+const qz = new THREE.Quaternion();
+const qt = new THREE.Quaternion();
 const tmp = new THREE.Vector3();
 const tmp2 = new THREE.Vector3();
 const q1 = new THREE.Quaternion();
@@ -138,26 +167,76 @@ export function ankleOf(b: Body, s: S, out = new THREE.Vector3()): THREE.Vector3
   return b.ankles[s].getWorldPosition(out);
 }
 
+/** How far a thigh may swing out (rad), and across the midline: a hip is not a frog's. */
+export const HIP_OUT_MAX = 1.1;
+export const HIP_IN_MAX = 0.45;
 /**
- * Two-bone IK for a leg, in the hip's frame: the leg's x and z swing and the
- * knee bend that put the ankle on `target` (world), the knee bending forward.
- * The leg bone turns (legX, -hipY, legZ) in YXZ order under the hips' hipY, so
- * in the hips' frame it is Ry(-hipY) Rx(legX) Rz(legZ).
+ * Where the knee points, in the root's frame: forward, and a little up so a foot straight ahead of the hip (a front kick) bulges the knee up rather than flips it.
+ * Not out: a knee that points out tilts the hinge off the pelvis's, and the ragdoll that starts from this pose seeds its hinge axes from it.
  */
-export function solveLeg(b: Body, s: S, target: THREE.Vector3): { x: number; z: number; knee: number; reach: number } {
+const POLE = { up: 0.25, lift: 3, fwd: 1 };
+
+const mBasis = new THREE.Matrix4();
+const eul = new THREE.Euler();
+const vDir = new THREE.Vector3();
+const vPole = new THREE.Vector3();
+const vThigh = new THREE.Vector3();
+const vShin = new THREE.Vector3();
+const vX = new THREE.Vector3();
+const vY = new THREE.Vector3();
+const vZ = new THREE.Vector3();
+
+/** The scale a grafted limb is drawn at: the bone carries it, so the leg is that much longer. */
+export const legHeft = (b: Body, s: S): number => b.limbs[s === "L" ? "legL" : "legR"].scale.x || 1;
+
+/**
+ * Two-bone IK for a leg with a pole: the thigh's swing (x, z), its twist about
+ * its own axis, and the knee bend that put the ankle on `target` (world).
+ *
+ * The knee lies in the plane through the hip, the ankle and a pole that points
+ * forward, a little out and a little up, so it always bends the way a knee
+ * does. The leg bone turns Ry(-hipY) Rx(x) Rz(z) Ry(twist) in the hips'
+ * frame: the twist is the third degree of freedom that keeps the knee's hinge
+ * on the pole when the foot is out to the side or up in a kick. Without it
+ * the thigh has to tip the hinge itself, and a bent knee with a foot out to
+ * the side folds the hinge over to the vertical (the splayed, backward legs).
+ * There is no atan2 branch cut to cross either: the whole frame is built from
+ * vectors, and the bone lengths follow the limb's own scale.
+ */
+export function solveLeg(b: Body, s: S, target: THREE.Vector3): { x: number; z: number; twist: number; knee: number; reach: number } {
   const leg = b.limbs[s === "L" ? "legL" : "legR"];
+  const heft = legHeft(b, s);
   const d = b.hips.worldToLocal(tmp.copy(target)).sub(leg.position).applyAxisAngle(Y, b.cur.hipY);
-  const L1 = LEG.thigh;
-  const L2 = LEG.shin;
+  const L1 = LEG.thigh * heft;
+  const L2 = LEG.shin * heft;
   const reach = d.length();
   const D = Math.min(L1 + L2 - 1e-4, Math.max(Math.abs(L1 - L2) + 1e-3, reach));
   const knee = Math.acos(Math.max(-1, Math.min(1, (D * D - L1 * L1 - L2 * L2) / (2 * L1 * L2))));
-  const P = L1 + L2 * Math.cos(knee);
-  const vz = -L2 * Math.sin(knee);
-  d.setLength(D);
-  const z = Math.asin(Math.max(-1, Math.min(1, d.x / P)));
-  const x = Math.atan2(d.z, d.y) - Math.atan2(vz, -P * Math.cos(z));
-  return { x, z, knee, reach: reach / (L1 + L2) };
+  // the hip-to-ankle line, and the knee's side of it
+  if (reach > 1e-6) vDir.copy(d).divideScalar(reach);
+  else vDir.set(0, -1, 0);
+  const out = s === "R" ? 1 : -1;
+  // a leg hanging down has its knee forward; as the foot comes up to the hip's height (a side or front kick) the knee comes up with it
+  const lift = Math.min(1, Math.max(0, (vDir.y + 0.85) / 0.6));
+  vPole.set(0, POLE.up + POLE.lift * lift * lift * (3 - 2 * lift), POLE.fwd);
+  vPole.addScaledVector(vDir, -vPole.dot(vDir));
+  if (vPole.lengthSq() < 1e-8) vPole.set(0, 1, 0).addScaledVector(vDir, -vDir.y);
+  vPole.normalize();
+  // the thigh: off the hip-ankle line toward the pole by the angle the law of cosines gives
+  const cosA = Math.max(-1, Math.min(1, (L1 * L1 + D * D - L2 * L2) / (2 * L1 * D)));
+  const sinA = Math.sqrt(1 - cosA * cosA);
+  vThigh.copy(vDir).multiplyScalar(cosA).addScaledVector(vPole, sinA);
+  // the shin, and the thigh's own frame: y up the bone, z where the knee faces (the shin bends back off it), x the hinge
+  vShin.copy(vDir).multiplyScalar(D).addScaledVector(vThigh, -L1).normalize();
+  vZ.copy(vShin).addScaledVector(vThigh, -vShin.dot(vThigh)).negate();
+  if (vZ.lengthSq() < 1e-10) vZ.copy(vPole);
+  vZ.addScaledVector(vThigh, -vZ.dot(vThigh)).normalize();
+  vY.copy(vThigh).negate();
+  vX.crossVectors(vY, vZ);
+  eul.setFromRotationMatrix(mBasis.makeBasis(vX, vY, vZ), "XZY");
+  // a thigh can swing only so far out, and not far across the other leg
+  const swing = Math.max(-HIP_IN_MAX, Math.min(HIP_OUT_MAX, eul.z * out));
+  return { x: eul.x, z: swing * out, twist: eul.y, knee, reach: reach / (L1 + L2) };
 }
 
 const wrap = (a: number) => Math.atan2(Math.sin(a), Math.cos(a));
@@ -181,6 +260,7 @@ function footwork(b: Body, mode: Plant | "gait", dt: number, frozen: boolean): v
   g.speed = vel.length();
   const walking = mode === "gait" && g.speed > GAIT_MIN;
   const target: Partial<Record<S, THREE.Vector3>> = {};
+  const roll: Record<S, number> = { L: 0, R: 0 };
 
   if (walking && !g.on) {
     // setting off: the foot further behind steps first
@@ -203,6 +283,7 @@ function footwork(b: Body, mode: Plant | "gait", dt: number, frozen: boolean): v
         const land = tmp2.copy(fk[s]).addScaledVector(vel, S / 2 / Math.max(g.speed, 1e-3));
         const k = smooth(u);
         target[s] = ft.swing.from.clone().lerp(land, k).setY(floor + Math.sin(Math.PI * u) * lift);
+        roll[s] = rollOf(u);
       } else {
         // put down where the swing was taking it (or, lifted off by the body, under its hip)
         if (!ft.down) {
@@ -212,6 +293,7 @@ function footwork(b: Body, mode: Plant | "gait", dt: number, frozen: boolean): v
         }
         ft.swing = null;
         target[s] = ft.at;
+        roll[s] = rollOf(u);
       }
     }
   } else {
@@ -231,7 +313,12 @@ function footwork(b: Body, mode: Plant | "gait", dt: number, frozen: boolean): v
       }
       // left behind by the body (a push, a lunge, a turn): one foot at a time steps back under it
       const other = b.feet[s === "L" ? "R" : "L"];
-      if (ft.down && !frozen && !other.swing && flat(ft.at, fk[s]) > STEP_AT) {
+      // one foot at a time, unless this one has been left far behind (a slide, a dash, a spin) or has crossed the other leg
+      const gap = flat(ft.at, fk[s]);
+      const localAt = b.root.worldToLocal(tmp.copy(ft.at));
+      const crossed = localAt.x * (s === "R" ? 1 : -1) < -CROSS;
+      const behind = localAt.z < -STEP_AT * 1.2;
+      if (ft.down && !frozen && gap > STEP_AT && (!other.swing || gap > STEP_AT * STEP_FAR || crossed || behind)) {
         ft.swing = { from: ft.at.clone(), u: 0, dur: STEP_TIME };
         ft.down = false;
       }
@@ -253,6 +340,7 @@ function footwork(b: Body, mode: Plant | "gait", dt: number, frozen: boolean): v
     const ft: Foot = b.feet[s];
     const step = dt / IK_IN;
     ft.w = target[s] ? Math.min(1, ft.w + step + 1e-9) : Math.max(0, ft.w - step);
+    ft.roll += (roll[s] - ft.roll) * Math.min(1, dt * ROLL_RATE);
   }
 
   // the hips drop until every planted foot is in reach
@@ -261,7 +349,7 @@ function footwork(b: Body, mode: Plant | "gait", dt: number, frozen: boolean): v
     const t = target[s];
     if (!t || b.feet[s].w <= 0) continue;
     const hip = b.limbs[s === "L" ? "legL" : "legR"].getWorldPosition(tmp);
-    const R = (LEG.thigh + LEG.shin) * sc * 0.985;
+    const R = (LEG.thigh + LEG.shin) * legHeft(b, s) * sc * 0.985;
     const r = flat(hip, t);
     const top = t.y + Math.sqrt(Math.max(0, R * R - r * r));
     drop = Math.max(drop, (hip.y - top) * b.feet[s].w);
@@ -276,7 +364,7 @@ function footwork(b: Body, mode: Plant | "gait", dt: number, frozen: boolean): v
     const ft = b.feet[s];
     if (!t || !ft.down) continue;
     const hip = b.limbs[s === "L" ? "legL" : "legR"].getWorldPosition(tmp);
-    if (hip.distanceTo(t) > (LEG.thigh + LEG.shin) * sc * 1.005) {
+    if (hip.distanceTo(t) > (LEG.thigh + LEG.shin) * legHeft(b, s) * sc * 1.005) {
       ft.down = false;
       delete target[s];
     }
@@ -295,12 +383,17 @@ function footwork(b: Body, mode: Plant | "gait", dt: number, frozen: boolean): v
     if (t && ft.w > 0) {
       const ik = solveLeg(b, s, t);
       const k = ft.w;
-      leg.rotation.set(fkLeg[0] + wrap(ik.x - fkLeg[0]) * k, -c.hipY, fkLeg[1] + wrap(ik.z - fkLeg[1]) * k, "YXZ");
+      // Ry(-hipY) Rx(x) Rz(z) Ry(twist): the clip's own leg has no twist, so it blends in from none
+      leg.quaternion
+        .setFromAxisAngle(Y, -c.hipY)
+        .multiply(qx.setFromAxisAngle(X, fkLeg[0] + wrap(ik.x - fkLeg[0]) * k))
+        .multiply(qz.setFromAxisAngle(Z, fkLeg[1] + wrap(ik.z - fkLeg[1]) * k))
+        .multiply(qt.setFromAxisAngle(Y, ik.twist * k));
       knee.rotation.x = fkKnee + (ik.knee - fkKnee) * k;
       leg.updateMatrixWorld(true);
       // the sole level with the floor, pointing the way the fighter faces
       knee.getWorldQuaternion(q2);
-      b.ankles[s].quaternion.copy(q2.invert().multiply(q1)).slerp(ID, 1 - k);
+      b.ankles[s].quaternion.copy(q2.invert().multiply(q1)).slerp(ID, 1 - k).multiply(qt.setFromAxisAngle(X, ft.roll * k));
     } else b.ankles[s].quaternion.identity();
   }
 }

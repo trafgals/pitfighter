@@ -95,10 +95,36 @@ PLACEMENT = {
         # points along the arm
         "bone": "hand", "offset": [0, -0.3, 0], "turn": [3.1416, 0, 0], "scale": 1,
     },
-    "prop_winch_gold_nightstick": {
-        "kind": "wielded", "fighter": "constable-winch", "gear": "",
-        # the heavy head of the nightstick stands up out of the grip, and it
-        # points along the arm
+    "prop_sluice_flatcap": {
+        "kind": "gear", "fighter": "nell-sluice", "gear": "flatcap",
+        # the flatcap's rim sits just above the brow
+        "bone": "head", "offset": [0, 0.25, 0], "turn": [0, 0, 0], "scale": 1.45,
+    },
+    "prop_kilnworth_nursecap": {
+        "kind": "gear", "fighter": "matron-kilnworth", "gear": "nursecap",
+        # the starched nurse's cap perches on the back of the head
+        "bone": "head", "offset": [0, 0.28, -0.05], "turn": [0, 0, 0], "scale": 1.3,
+    },
+    "prop_rook_souwester": {
+        "kind": "gear", "fighter": "bosun-rook", "gear": "",
+        # the broad-brimmed sou'wester sits over the brow with the neck flap back
+        "bone": "head", "offset": [0, 0.27, 0], "turn": [0, 0, 0], "scale": 1.4,
+    },
+    "prop_crump_samovar": {
+        "kind": "gear", "fighter": "percival-crump", "gear": "obi",
+        # the samovar steam boiler is strapped to the tea merchant's back
+        "bone": "spine", "offset": [0, 0.08, -0.22], "turn": [0, 3.1416, 0], "scale": 1.1,
+    },
+    "prop_crape_spiked_brolly": {
+        "kind": "wielded", "fighter": "martha-crape", "gear": "",
+        "throw": "brolly",
+        # the crook handle is in the fist and the ferrule spike points along the arm
+        "bone": "hand", "offset": [0, -0.3, 0], "turn": [3.1416, 0, 0], "scale": 1,
+    },
+    "weapon_nail_bat": {
+        "kind": "gift", "fighter": "", "gear": "",
+        "throw": "nail-bat",
+        # the bat's handle is gripped and the spiked blade leads along the arm
         "bone": "hand", "offset": [0, -0.3, 0], "turn": [3.1416, 0, 0], "scale": 1,
     },
     "weapon_knuckleduster": {

@@ -20,6 +20,7 @@ import { legs, type World } from "../sim/world";
 import { painted, surface, type Surface } from "./textures";
 import { armRecipe, faceRecipe, jawRecipe, lookOf, torsoRecipe } from "./anatomy";
 import { KITS, buildGear, buildHorns, buildTail } from "./kit";
+import { shapeStrike, type LimbFeel } from "./limbfeel";
 import {
   CLINCH,
   DOWN_BACK,
@@ -287,8 +288,10 @@ export interface Foot {
   at: THREE.Vector3;
   swing: { from: THREE.Vector3; u: number; dur: number } | null;
   w: number;
+  /** the sole's pitch (rad) on the ankle while walking: toe up at heel strike, toe down as it pushes off */
+  roll: number;
 }
-const newFoot = (): Foot => ({ down: false, at: new THREE.Vector3(), swing: null, w: 0 });
+const newFoot = (): Foot => ({ down: false, at: new THREE.Vector3(), swing: null, w: 0, roll: 0 });
 
 /** Bone lengths and the ankle's height over the floor standing straight (body units, before the style's scale). */
 export const LEG = { thigh: THIGH, shin: SHIN, hipY: HIP_Y, ankle: HIP_Y - THIGH - SHIN, footX: 0.11 };
@@ -681,6 +684,8 @@ export function targetPose(f: Fighter, w: World, time: number, hurt: Body["hurt"
     if (swap) q = mirror(q);
     limbOf = swap ? (({ armL: "armR", armR: "armL", legL: "legR", legR: "legL" }) as Record<string, Limb>)[clip.limb] : clip.limb;
     Object.assign(p, q);
+    // a limb the fighter grew throws the strike in its own line
+    if (limbOf === "armL" || limbOf === "armR" || limbOf === "legL" || limbOf === "legR") shapeStrike(p, base, limbOf, f.parts[limbOf].trait);
     rate = clip.rate ?? rate;
   };
 
@@ -1044,6 +1049,17 @@ const DRIVEN: Record<Limb, number[]> = (() => {
   const armR = [...chest, n + 3, n + 4, n + 5, k("elbowR")];
   return { armL, armR, legL: [n + 6, n + 7, k("kneeL")], legR: [n + 8, n + 9, k("kneeR")], both: [...new Set([...armL, ...armR])], head: [], body: [] };
 })();
+/** Which limb each spring belongs to (indices into flat()): the arm's three and its elbow, the leg's two and its knee. */
+const FEEL_OF: (keyof LimbFeel | undefined)[] = (() => {
+  const out: (keyof LimbFeel | undefined)[] = new Array(N_DOF).fill(undefined);
+  const n = KEYS.length;
+  const set = (limb: keyof LimbFeel, ...is: number[]) => is.forEach((i) => (out[i] = limb));
+  set("armL", n, n + 1, n + 2, KEYS.indexOf("elbowL"));
+  set("armR", n + 3, n + 4, n + 5, KEYS.indexOf("elbowR"));
+  set("legL", n + 6, n + 7, KEYS.indexOf("kneeL"));
+  set("legR", n + 8, n + 9, KEYS.indexOf("kneeR"));
+  return out;
+})();
 const SPRING = [...KEYS.map((k) => JOINT_SPRINGS[k]), ...(["armL", "armL", "armL", "armR", "armR", "armR", "legL", "legL", "legR", "legR"] as const).map((k) => JOINT_SPRINGS[k])].map((j) => j ?? { k: 1, damp: DAMPING });
 
 /**
@@ -1052,7 +1068,7 @@ const SPRING = [...KEYS.map((k) => JOINT_SPRINGS[k]), ...(["armL", "armL", "armL
  * its velocity kept for when it lets go. snap jumps to the target, and the
  * speed of that jump carries on as a follow-through.
  */
-export function applyPose(b: Body, target: Pose, rate: number, snap: boolean, dt: number, jitter: number, drive: Limb | null = null): void {
+export function applyPose(b: Body, target: Pose, rate: number, snap: boolean, dt: number, jitter: number, drive: Limb | null = null, feel?: LimbFeel): void {
   const x = flat(b.cur);
   const t = flat(target);
   const v = b.vel;
@@ -1076,9 +1092,11 @@ export function applyPose(b: Body, target: Pose, rate: number, snap: boolean, dt
     }
     for (let i = 0; i < x.length; i++) {
       if (kin.includes(i)) continue;
-      const r = rate * SPRING[i].k;
+      // a grown limb swings on its own spring: a heavy one is slow to start and carries on past the pose
+      const fl = feel && FEEL_OF[i] ? feel[FEEL_OF[i]!] : undefined;
+      const r = rate * SPRING[i].k * (fl?.k ?? 1);
       const w2 = r * r;
-      const c2 = 2 * SPRING[i].damp * r;
+      const c2 = 2 * SPRING[i].damp * (fl?.damp ?? 1) * r;
       for (let s = 0; s < n; s++) {
         v[i] += (w2 * (t[i] - x[i]) - c2 * v[i]) * h;
         x[i] += v[i] * h;

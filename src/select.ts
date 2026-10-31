@@ -40,7 +40,7 @@ export function cameoSvg(ch: Character | undefined, bodyHex: string, accHex: str
   if (gear.has("pauldrons")) {
     parts.push(`<path d="M5 32 Q9 26 14 29 L12 34 Z M35 32 Q31 26 26 29 L28 34 Z" fill="${accHex}"/>`);
   }
-  if (gear.has("lanyard") || gear.has("obi") || gear.has("title")) {
+  if (gear.has("obi") || gear.has("title")) {
     parts.push(`<circle cx="20" cy="33" r="2.6" fill="#e5be6b"/>`);
   }
   // Head
@@ -54,9 +54,6 @@ export function cameoSvg(ch: Character | undefined, bodyHex: string, accHex: str
   }
   if (gear.has("moustache")) {
     parts.push(`<path d="M13 22 Q17 20 20 22 Q23 20 27 22 Q24 24 20 23 Q16 24 13 22 Z" fill="#2a1a10"/>`);
-  }
-  if (gear.has("tusks")) {
-    parts.push(`<path d="M16 24 L15 20 L17.5 23 Z M24 24 L25 20 L22.5 23 Z" fill="#f2ead8"/>`);
   }
   if (gear.has("monocle")) {
     parts.push(`<circle cx="22.8" cy="19.5" r="2.2" fill="none" stroke="#e5be6b" stroke-width="1.1"/>`);
@@ -98,12 +95,8 @@ export function cameoSvg(ch: Character | undefined, bodyHex: string, accHex: str
       `<polygon points="13,15 15,8.5 25,8.5 27,15" fill="#f2efe8" stroke="#221a16" stroke-width="0.8"/>` +
         `<path d="M20 10 L20 14 M18 12 L22 12" stroke="#b81d18" stroke-width="1.4"/>`,
     );
-  } else if (gear.has("beret")) {
-    parts.push(`<ellipse cx="21" cy="13.5" rx="8" ry="3.2" transform="rotate(-10 21 13.5)" fill="#2d381c" stroke="${accHex}" stroke-width="0.9"/>`);
   } else if (gear.has("topknot")) {
     parts.push(`<circle cx="20" cy="10.5" r="3.2" fill="#181412" stroke="${accHex}" stroke-width="0.9"/>`);
-  } else if (gear.has("mohawk")) {
-    parts.push(`<polygon points="17,14 20,6 23,14" fill="${accHex}"/>`);
   }
   return `<svg class="cameo-svg" viewBox="0 0 40 40" aria-hidden="true">${parts.join("")}</svg>`;
 }
