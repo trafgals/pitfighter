@@ -2,7 +2,7 @@
 // one is deterministic and ends with a winner.
 import { describe, expect, it } from "vitest";
 import { Bot } from "../src/sim/ai";
-import { BLIMP, CASTLE, KO_TARGET, TOWER, VEHICLE_KINDS, onDeck, tileRing } from "../src/sim/arena";
+import { BLIMP, CASTLE, PIT, TOWER, VEHICLE_KINDS, onDeck, tileRing } from "../src/sim/arena";
 import { FALL_FRAMES, KO_FRAMES } from "../src/sim/moves";
 import { DEFAULT_STAGE, PLAYABLE_STAGES, STAGES, type StageId } from "../src/sim/stages";
 import { BTN, NO_INPUT, type GameEvent, type PlayerInput } from "../src/sim/types";
@@ -86,7 +86,8 @@ describe("Construction Site", () => {
     run(w, 2, (i) => [NO_INPUT, i === 0 ? press(BTN.USE) : NO_INPUT]);
     const v = w.s.arena.vehicles[0];
     Object.assign(b, { x: v.x + Math.cos(v.facing) * 4, y: v.y + Math.sin(v.facing) * 4 });
-    const evs = run(w, 120, () => [press(0, Math.cos(v.facing), Math.sin(v.facing)), NO_INPUT]);
+    const evs: GameEvent[] = [];
+    for (let i = 0; i < 120 && !evs.some((e) => e.kind === "hit" && e.what === "ram"); i++) evs.push(...run(w, 1, () => [press(0, Math.cos(v.facing), Math.sin(v.facing)), NO_INPUT]));
     const ram = evs.find((e) => e.kind === "hit" && e.what === "ram");
     expect(ram).toMatchObject({ a: a.id, b: b.id });
     expect(b.parts.torso.hp).toBeLessThan(b.parts.torso.max);
@@ -110,10 +111,14 @@ describe("Construction Site", () => {
     expect(a.vehicle).toBe(-1);
   });
 
-  it(`the first to ${KO_TARGET} KOs owns the yard`, () => {
+  it("the first to fill the foundation wins the yard", () => {
     const w = two("construction-site");
-    w.fighters[1].kos = KO_TARGET;
-    const evs = run(w, 1);
+    w.fighters[1].toilet = PIT.need - 1;
+    w.setState(w.fighters[1], "idle");
+    w.fighters[1].vehicle = -1;
+    Object.assign(w.fighters[1], { x: PIT.x, y: PIT.y });
+    w.s.arena.sacks.push({ id: 99, kind: "rubble", value: 1, x: PIT.x, y: PIT.y, carrier: 1 });
+    const evs = run(w, 2);
     expect(w.s.winner).toBe(1);
     expect(evs.some((e) => e.kind === "win")).toBe(true);
   });

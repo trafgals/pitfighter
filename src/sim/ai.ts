@@ -14,7 +14,7 @@ import { FURY, MOVES, VIOLENCE } from "./moves";
 import { STYLES } from "./styles";
 import { CHARACTERS } from "../data/characters";
 import { Rng } from "./rng";
-import { HAZARDS } from "./arena";
+import { ACTS, HAUL, HAZARDS, PIT, VEHICLES } from "./arena";
 import { WEAPONS } from "./weapons";
 import { AIR_GRAB } from "./airgrabs";
 import { actionable, alive, arms, dist, legs, type World } from "./world";
@@ -159,6 +159,7 @@ export class Bot {
 
     let goal: { x: number; y: number } | null = null;
     let use = false;
+    let hold = false;
 
     // 2. get away from a hazard about to strike, and out of danger (fire, an edge, a vehicle)
     for (const g of s.geysers) {
@@ -203,6 +204,7 @@ export class Bot {
       if (g) {
         goal = g;
         use = g.use;
+        hold = !!g.hold;
       }
     }
 
@@ -279,6 +281,7 @@ export class Bot {
       if (dist(me, goal) > 4 && legs(me) === 2) out.buttons |= BTN.DASH;
     }
     if (use) press(BTN.USE);
+    if (hold) out.buttons |= BTN.USE; // repairing: USE is held, not tapped
     return out;
   }
 
@@ -309,23 +312,61 @@ export class Bot {
     return out;
   }
 
-  /** At the wheel: run down the nearest fighter on foot (else ram the nearest machine), boost when lined up. */
+  /** Where each machine's implement lands, relative to the cab (ahead is positive), and how wide: the bots swing when someone is there. */
+  private static readonly REACH: Record<string, [number, number]> = {
+    bulldozer: [1.9, 1.3],
+    excavator: [2.7, 2.0],
+    dumptruck: [-2.6, 2.1],
+    forklift: [1.7, 1.1],
+    roller: [1.8, 1.3],
+    mixer: [-2.4, 2.4],
+    loader: [1.9, 1.5],
+    crane: [0, 3.2],
+  };
+
+  /** At the wheel: haul if the machine can, else run down the nearest fighter on foot (else ram the nearest machine); swing the implement when someone is in reach. */
   private drive(w: World, me: Fighter, out: PlayerInput, press: (b: number) => void): PlayerInput {
     const v = w.s.arena.vehicles[me.vehicle];
     if (!v) return out;
     // bail out of a machine about to go up, and now and then to fight on foot
-    if ((v.hp < v.max * 0.2 && this.rng.chance(0.06)) || this.rng.chance(0.0012)) {
+    // (a machine that cannot haul is swapped for a sack now and then while there are sacks about)
+    const sacksAbout = w.s.arena.sacks.some((k) => k.carrier < 0);
+    const swap = !HAUL[v.kind] && sacksAbout && me.id % 2 === 0 ? 0.003 : 0;
+    if ((v.hp < v.max * 0.2 && this.rng.chance(0.06)) || this.rng.chance(0.0012 + swap)) {
       press(BTN.USE);
       return out;
     }
     const prey = w.s.fighters.filter((o) => o.id !== me.id && alive(o) && o.state !== "driving" && o.invuln === 0);
-    let tgt: { x: number; y: number } | undefined = prey.reduce<Fighter | undefined>((a, b) => (!a || dist(v, b) < dist(v, a) ? b : a), undefined);
+    // whoever the machine holds is thrown (or slammed) after a moment
+    if (v.carry >= 0) {
+      if (v.carryT > 40 && this.rng.chance(0.08)) press(BTN.HIGH);
+    } else if (v.act === 0 && v.actCool === 0 && ACTS[v.kind]) {
+      const [ahead, rad] = Bot.REACH[v.kind];
+      const px = v.x + Math.cos(v.facing) * ahead;
+      const py = v.y + Math.sin(v.facing) * ahead;
+      if (prey.some((o) => Math.hypot(o.x - px, o.y - py) < rad) && this.rng.chance(0.2 + 0.3 * this.skill)) press(BTN.HIGH);
+      else if ((v.kind === "excavator" || v.kind === "loader" || v.kind === "forklift") && prey.some((o) => dist(o, v) < VEHICLES[v.kind].r + 1.6) && this.rng.chance(0.1)) press(BTN.GRAB);
+    }
+    let tgt: { x: number; y: number } | undefined;
+    const cap = HAUL[v.kind] ?? 0;
+    if (cap > 0 && v.carry < 0) {
+      // a hauler takes its load to the pit, and fetches more when it has room (bots with an even id would sooner haul than fight)
+      const hauling = v.load > 0 && (v.load >= cap * 0.5 || this.rng.chance(0.002) || w.s.arena.sacks.every((s) => s.carrier >= 0));
+      if (hauling) tgt = { x: PIT.x, y: PIT.y };
+      else if (me.id % 2 === 0 || v.load > 0) {
+        const sacks = w.s.arena.sacks.filter((s) => s.carrier < 0);
+        tgt = sacks.reduce<{ x: number; y: number } | undefined>((a, b) => (!a || dist(v, b) < dist(v, a) ? b : a), undefined);
+        if (tgt && v.kind === "loader" && dist(v, tgt) < VEHICLES.loader.r + 1.6 && this.rng.chance(0.5)) press(BTN.GRAB);
+        if (!tgt && v.load > 0) tgt = { x: PIT.x, y: PIT.y };
+      }
+    }
+    if (!tgt) tgt = prey.reduce<Fighter | undefined>((a, b) => (!a || dist(v, b) < dist(v, a) ? b : a), undefined);
     if (!tgt) tgt = w.s.arena.vehicles.filter((o) => o.id !== v.id && !o.wrecked).reduce<typeof v | undefined>((a, b) => (!a || dist(v, b) < dist(v, a) ? b : a), undefined);
     if (!tgt) return out;
     const a = Math.atan2(tgt.y - v.y, tgt.x - v.x);
     out.x = Math.cos(a);
     out.y = Math.sin(a);
-    if (Math.cos(a - v.facing) > 0.92 && dist(v, tgt) < 7 && v.cool === 0 && this.rng.chance(0.04 + 0.05 * this.skill)) press(BTN.HIGH);
+    if (Math.cos(a - v.facing) > 0.92 && dist(v, tgt) < 7 && v.cool === 0 && this.rng.chance(0.04 + 0.05 * this.skill)) press(BTN.DASH);
     return out;
   }
 

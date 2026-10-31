@@ -111,6 +111,9 @@ export class Hud {
       if (e.kind === "ko") this.say(koLine(s.stage, e.what, e.a, e.b), 70);
       else if (e.kind === "strip") this.say(e.b !== undefined && e.b >= 0 && e.b !== e.a ? `${nm(e.b)} TORE ${nm(e.a)} APART` : `${nm(e.a)} IS IN PIECES`, 70);
       else if (e.kind === "fall") this.say(e.b !== undefined && e.b >= 0 ? `${nm(e.b)} SENT ${nm(e.a)} OVER THE EDGE` : `${nm(e.a)} WENT OVER THE EDGE`, 70);
+      else if (e.kind === "deliver") this.say(`${nm(e.a)} POURS ${e.dmg} INTO THE FOUNDATION`, 40);
+      else if (e.kind === "repair" && e.what === "done") this.say(`${nm(e.a)} GETS THE MACHINE RUNNING`, 50);
+      else if (e.kind === "repair" && e.what === "tow") this.say("THE TOW TRUCK BRINGS A MACHINE BACK", 50);
       else if (e.kind === "wreck") this.say(e.b !== undefined && e.b >= 0 ? `${nm(e.b)} WRECKED THE ${(VEHICLES[e.what as keyof typeof VEHICLES]?.name ?? "MACHINE").toUpperCase()}` : "WRECKED!", 60);
       else if (e.kind === "collapse") this.say("THE ROOF IS GIVING WAY!", 40);
       else if (e.kind === "wind" && e.what === "warn") this.say("GUST INCOMING!", 45);
@@ -187,7 +190,17 @@ function cardState(w: World, f: Fighter): string {
   if (f.state === "falling") return "FALLING";
   if (f.state === "ko") return "DEAD";
   if (f.state === "seated") return "ON THE THRONE";
-  if (f.state === "driving") return VEHICLES[w.s.arena.vehicles[f.vehicle]?.kind ?? "bulldozer"].name.toUpperCase();
+  if (f.state === "driving") {
+    const v = w.s.arena.vehicles[f.vehicle];
+    const name = VEHICLES[v?.kind ?? "bulldozer"].name.toUpperCase();
+    if (v?.carry >= 0) return `${name} HOLDING P${v.carry + 1}`;
+    return v?.load > 0 ? `${name} + ${v.load} LOAD` : name;
+  }
+  if (w.s.stage === "construction-site") {
+    const sack = w.s.arena.sacks.find((k) => k.carrier === f.id);
+    if (sack) return sack.kind === "cement" ? "CARRYING CEMENT" : "CARRYING RUBBLE";
+    if (w.s.arena.vehicles.some((v) => v.repairer === f.id && v.wrecked && v.repair > 0)) return "REPAIRING";
+  }
   if (f.state === "dizzy") return "DIZZY";
   if (w.s.stage === "castle-under-siege" && w.s.toiletOccupant === f.id) return "AT THE POLE";
   return "";

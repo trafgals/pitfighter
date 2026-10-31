@@ -6,7 +6,7 @@
 //
 // Like the World, an Arena is deterministic: all randomness goes through
 // `w.rng`, in a fixed order.
-import { BTN, LAVA_R, LIMBS, RING_R, SPAWN_R, TOILET_FRAMES, TOILET_R, type ArenaState, type Fighter, type HazardKind, type OnFloor, type PlayerInput, type Vehicle, type VehicleKind } from "./types";
+import { BTN, LAVA_R, LIMBS, RING_R, SPAWN_R, TOILET_FRAMES, TOILET_R, type ArenaState, type Fighter, type HazardKind, type OnFloor, type PlayerInput, type Sack, type Vehicle, type VehicleKind } from "./types";
 import { WEAPONS } from "./weapons";
 import { GEYSER, HITSTOP, LAVA, SIT_FRAMES, VIOLENCE, type Move, hitstopFor } from "./moves";
 import type { StageId } from "./stages";
@@ -26,23 +26,46 @@ export const HAZARDS: Record<HazardKind, { warn: number; erupt: number; radius: 
   arrows: { warn: 55, erupt: 16, radius: 2.0, dmg: 5, knock: false }, // Castle Under Siege: an arrow volley
 };
 
-/** Construction Site and Castle Under Siege are won by KOs and by the banner; this many KOs win the yard. */
-export const KO_TARGET = 4;
 
 export const YARD = { hx: 10, hy: 7 };
 export const VEHICLE_KINDS: VehicleKind[] = ["bulldozer", "excavator", "dumptruck", "forklift", "roller", "mixer", "loader", "crane"];
 /** speed m/frame, accel m/frame², turn rad/frame, hp, ram damage at full speed, collision radius m */
 export const VEHICLES: Record<VehicleKind, { name: string; speed: number; accel: number; turn: number; hp: number; ram: number; r: number }> = {
-  bulldozer: { name: "Bulldozer", speed: 0.11, accel: 0.004, turn: 0.035, hp: 130, ram: 16, r: 1.15 },
-  excavator: { name: "Excavator", speed: 0.09, accel: 0.0035, turn: 0.03, hp: 150, ram: 15, r: 1.2 },
-  dumptruck: { name: "Dump Truck", speed: 0.15, accel: 0.005, turn: 0.034, hp: 100, ram: 14, r: 1.15 },
-  forklift: { name: "Forklift", speed: 0.16, accel: 0.007, turn: 0.06, hp: 80, ram: 9, r: 0.8 },
-  roller: { name: "Steamroller", speed: 0.08, accel: 0.003, turn: 0.03, hp: 160, ram: 22, r: 1.1 },
-  mixer: { name: "Cement Mixer", speed: 0.13, accel: 0.0045, turn: 0.034, hp: 115, ram: 14, r: 1.15 },
-  loader: { name: "Loader", speed: 0.12, accel: 0.005, turn: 0.045, hp: 100, ram: 12, r: 1.0 },
-  crane: { name: "Crane Truck", speed: 0.1, accel: 0.0038, turn: 0.03, hp: 140, ram: 15, r: 1.2 },
+  bulldozer: { name: "Bulldozer", speed: 0.11, accel: 0.004, turn: 0.035, hp: 130, ram: 28, r: 1.15 },
+  excavator: { name: "Excavator", speed: 0.09, accel: 0.0035, turn: 0.03, hp: 150, ram: 26, r: 1.2 },
+  dumptruck: { name: "Dump Truck", speed: 0.15, accel: 0.005, turn: 0.034, hp: 100, ram: 26, r: 1.15 },
+  forklift: { name: "Forklift", speed: 0.16, accel: 0.007, turn: 0.06, hp: 80, ram: 17, r: 0.8 },
+  roller: { name: "Steamroller", speed: 0.08, accel: 0.003, turn: 0.03, hp: 160, ram: 40, r: 1.1 },
+  mixer: { name: "Cement Mixer", speed: 0.13, accel: 0.0045, turn: 0.034, hp: 115, ram: 26, r: 1.15 },
+  loader: { name: "Loader", speed: 0.12, accel: 0.005, turn: 0.045, hp: 100, ram: 22, r: 1.0 },
+  crane: { name: "Crane Truck", speed: 0.1, accel: 0.0038, turn: 0.03, hp: 140, ram: 27, r: 1.2 },
 };
 export const BOOST = { dur: 30, cool: 150, mult: 1.6 };
+export const PIT = { x: 0, y: 0, r: 1.7, need: 14 }; // the foundation pit: fill it first
+export const SACKS = { start: 5, first: 120, gap: [100, 190] as const, cap: 5, pick: 0.95 }; // cap: sacks in the yard, plus one per fighter
+/** how much (in sacks' worth) each machine hauls */
+export const HAUL: Partial<Record<VehicleKind, number>> = { dumptruck: 6, loader: 4, forklift: 2 };
+/** how far past its own radius each machine can grab someone (the strike button's partner) */
+const GRAB: Partial<Record<VehicleKind, number>> = { excavator: 2.6, forklift: 1.4, loader: 2.0 };
+/** the implement attack on the strike button: length, cooldown after it, the frame it lands, the surge it drives the machine forward at */
+export const ACTS: Record<VehicleKind, { name: string; dur: number; cool: number; hit: number; surge?: number; surgeFor?: number }> = {
+  bulldozer: { name: "Blade pin", dur: 44, cool: 120, hit: 0, surge: 1.3 },
+  excavator: { name: "Bucket slam", dur: 44, cool: 100, hit: 24 },
+  dumptruck: { name: "Tip the load", dur: 70, cool: 200, hit: 36 },
+  forklift: { name: "Skewer", dur: 28, cool: 60, hit: 8, surge: 1.6, surgeFor: 14 },
+  roller: { name: "Roll out", dur: 48, cool: 140, hit: 0, surge: 1.9 },
+  mixer: { name: "Pour cement", dur: 56, cool: 160, hit: 0 },
+  loader: { name: "Scoop", dur: 26, cool: 70, hit: 8 },
+  crane: { name: "Wrecking ball", dur: 80, cool: 200, hit: 16 },
+};
+export const BALL_R = 3.4; // the wrecking ball's swing
+export const SLICK = { r: 1.15, set: 200, gone: 720, max: 14 }; // poured cement: wet for `set` frames, hard till `gone`
+export const REPAIR = { frames: 300, hpFrac: 0.5, range: 1.1, tow: 900 }; // hold USE at a wreck for 5 s; the tow truck brings one back after 15 s if too few run
+const BURIED = 170; // frames down under a tipped load
+const STUCK = 140; // frames down in set cement
+const FLAT = 130; // frames down under a steamroller
+const CARRY_MAX = 220; // a machine drops whoever it holds after this long
+const CARRYING = new Set(["idle", "walk", "dash", "evade", "attack", "taunt", "reversal"]); // states a fighter keeps a sack in
 const RAM_MIN = 0.045; // slower than this, a vehicle only shoves
 const CRASH_MIN = 0.085; // closing speed (m/frame) at which two machines crash
 
@@ -86,7 +109,7 @@ export const CASTLE = {
 };
 
 export function freshArenaState(): ArenaState {
-  return { vehicles: [], tiles: [], nextCrack: 0, fireX: BLIMP.half + 1, wind: 0, windDir: 1, nextWind: 0 };
+  return { vehicles: [], tiles: [], nextCrack: 0, fireX: BLIMP.half + 1, wind: 0, windDir: 1, nextWind: 0, sacks: [], nextSack: 0, nextSackId: 0, slicks: [], piles: [] };
 }
 
 /** The Hell Toilet spawns: a ring around the edge of the floor, everyone facing the toilet. */
@@ -115,6 +138,8 @@ export interface Goal {
   x: number;
   y: number;
   use: boolean;
+  /** hold USE rather than tapping it (repairing a wreck) */
+  hold?: boolean;
 }
 
 /** The line over the scoreboard: who holds the objective and how far along they are. */
@@ -410,18 +435,81 @@ class ConstructionSite extends Arena {
     return ellipseSpawns(n, 7.4, 4.4);
   }
 
-  /** Everyone starts in a different construction vehicle. */
+  /** Everyone starts in a different construction vehicle, and the first sacks are already in the yard. */
   init(w: World): void {
     const vs = w.s.arena.vehicles;
     for (const f of w.s.fighters) {
       const kind = VEHICLE_KINDS[f.id % VEHICLE_KINDS.length];
       const st = VEHICLES[kind];
-      vs.push({ id: f.id, kind, x: f.x, y: f.y, facing: f.facing, speed: 0, hp: st.hp, max: st.hp, driver: f.id, boost: 0, cool: 0, wrecked: false, lastBy: -1 });
+      vs.push({
+        id: f.id,
+        kind,
+        x: f.x,
+        y: f.y,
+        facing: f.facing,
+        speed: 0,
+        hp: st.hp,
+        max: st.hp,
+        driver: f.id,
+        boost: 0,
+        cool: 0,
+        wrecked: false,
+        lastBy: -1,
+        act: 0,
+        actCool: 0,
+        actHit: [],
+        carry: -1,
+        carryT: 0,
+        load: 0,
+        wreckT: 0,
+        repair: 0,
+        repairer: -1,
+      });
       f.vehicle = f.id;
       w.setState(f, "driving");
     }
+    const n = SACKS.start;
+    for (let i = 0; i < n; i++) {
+      const a = (Math.PI * 2 * i) / n + 0.4;
+      this.addSack(w, Math.cos(a) * 4.6, Math.sin(a) * 3.2, i % 3 === 0 ? "cement" : "rubble");
+    }
+    w.s.arena.nextSack = SACKS.first;
   }
 
+  // ------------------------------------------------------------ sacks and the pit
+  private addSack(w: World, x: number, y: number, kind: Sack["kind"]): Sack {
+    const a = w.s.arena;
+    const sack: Sack = { id: a.nextSackId++, kind, value: kind === "cement" ? 2 : 1, x, y, carrier: -1 };
+    a.sacks.push(sack);
+    return sack;
+  }
+
+  private carried(w: World, f: Fighter): Sack | undefined {
+    return w.s.arena.sacks.find((s) => s.carrier === f.id);
+  }
+
+  private fill(w: World, f: Fighter, value: number, what: string, x: number, y: number): void {
+    f.toilet += value;
+    w.ev({ kind: "deliver", a: f.id, dmg: value, what, x, y });
+    if (f.toilet >= PIT.need) w.win(f.id);
+  }
+
+  private dropSack(w: World, f: Fighter): void {
+    const sack = this.carried(w, f);
+    if (!sack) return;
+    sack.carrier = -1;
+    const a = w.rng.range(0, Math.PI * 2);
+    sack.x = clamp(f.x + Math.cos(a) * 0.6, -YARD.hx + 0.5, YARD.hx - 0.5);
+    sack.y = clamp(f.y + Math.sin(a) * 0.6, -YARD.hy + 0.5, YARD.hy - 0.5);
+    w.ev({ kind: "crash", a: f.id, what: "sack", x: sack.x, y: sack.y });
+  }
+
+  /** What the machine hauls, and how much (sacks' worth). */
+  private capacity(v: Vehicle): number {
+    return HAUL[v.kind] ?? 0;
+  }
+
+  // ------------------------------------------------------------ driving
   drive(w: World, f: Fighter, inp: PlayerInput): void {
     const v = w.s.arena.vehicles[f.vehicle];
     if (!v || v.wrecked) {
@@ -433,14 +521,22 @@ class ConstructionSite extends Arena {
       this.leave(w, f, v);
       return;
     }
-    if (w.buffered(f, BTN.HIGH)) {
-      w.consume(f, BTN.HIGH);
+    if (w.buffered(f, BTN.DASH)) {
+      w.consume(f, BTN.DASH);
       if (v.cool === 0) {
         v.boost = BOOST.dur;
         v.cool = BOOST.cool;
       }
     }
-    for (const b of [BTN.LOW, BTN.GRAB, BTN.REV, BTN.SPECIAL, BTN.TARGET, BTN.TAUNT, BTN.DASH]) w.consume(f, b);
+    if (w.buffered(f, BTN.HIGH)) {
+      w.consume(f, BTN.HIGH);
+      this.primary(w, f, v);
+    }
+    if (w.buffered(f, BTN.GRAB)) {
+      w.consume(f, BTN.GRAB);
+      this.secondary(w, f, v);
+    }
+    for (const b of [BTN.LOW, BTN.REV, BTN.SPECIAL, BTN.TARGET, BTN.TAUNT]) w.consume(f, b);
     const st = VEHICLES[v.kind];
     const mag = Math.min(1, Math.hypot(inp.x, inp.y));
     let want = 0;
@@ -453,8 +549,169 @@ class ConstructionSite extends Arena {
       v.facing += clamp(d, -st.turn, st.turn);
       want = st.speed * mag * Math.max(0, Math.cos(d));
     }
+    const surge = this.surge(v);
+    if (surge > 0) want = st.speed * surge;
     if (v.boost > 0) want = st.speed * BOOST.mult;
-    v.speed += clamp(want - v.speed, -st.accel * 2, st.accel * (v.boost > 0 ? 3 : 1));
+    v.speed += clamp(want - v.speed, -st.accel * 2, st.accel * (v.boost > 0 || surge > 0 ? 3 : 1));
+  }
+
+  /** How hard the implement attack drives the machine forward right now (0: it does not). */
+  private surge(v: Vehicle): number {
+    const A = ACTS[v.kind];
+    if (!A.surge || v.act <= 0 || v.act > (A.surgeFor ?? A.dur)) return 0;
+    return A.surge;
+  }
+
+  /** Strike button: the implement's attack, or what the machine is holding. */
+  private primary(w: World, f: Fighter, v: Vehicle): void {
+    if (v.carry >= 0) {
+      this.release(w, v, v.kind === "excavator" ? "slam" : "throw");
+      return;
+    }
+    if (v.act > 0 || v.actCool > 0) return;
+    const A = ACTS[v.kind];
+    v.act = 1;
+    v.actHit = [];
+    v.actCool = A.dur + A.cool;
+    w.ev({ kind: "crash", a: f.id, what: `${v.kind}-wind`, x: v.x, y: v.y });
+  }
+
+  /** Grab button: take hold of someone (or sacks), or let go of them. */
+  private secondary(w: World, _f: Fighter, v: Vehicle): void {
+    if (v.carry >= 0) {
+      this.release(w, v, v.kind === "excavator" ? "drop" : "set");
+      return;
+    }
+    const reach = GRAB[v.kind];
+    if (!reach) return;
+    const st = VEHICLES[v.kind];
+    let best: Fighter | null = null;
+    let bd = 1e9;
+    for (const o of w.s.fighters) {
+      if (!this.prey(w, o, v)) continue;
+      const dx = o.x - v.x;
+      const dy = o.y - v.y;
+      const d = Math.hypot(dx, dy);
+      if (d > st.r + reach || (dx * Math.cos(v.facing) + dy * Math.sin(v.facing)) / (d || 1) < 0.35) continue;
+      if (d < bd) {
+        bd = d;
+        best = o;
+      }
+    }
+    if (best) {
+      this.seize(w, v, best, v.driver);
+      this.maul(w, best, 6, 0.1, v.driver, "grab");
+      return;
+    }
+    if (v.kind === "loader") this.scoopSacks(w, v, st.r + reach);
+  }
+
+  /** The loader's bucket takes every sack in front of it. */
+  private scoopSacks(w: World, v: Vehicle, reach: number): void {
+    const room = this.capacity(v) - v.load;
+    let got = 0;
+    for (const s of w.s.arena.sacks) {
+      if (s.carrier >= 0 || got + s.value > room) continue;
+      const dx = s.x - v.x;
+      const dy = s.y - v.y;
+      const d = Math.hypot(dx, dy);
+      if (d > reach || (dx * Math.cos(v.facing) + dy * Math.sin(v.facing)) / (d || 1) < 0.2) continue;
+      got += s.value;
+      s.carrier = -2; // gone into the bucket
+    }
+    if (got > 0) {
+      v.load += got;
+      w.s.arena.sacks = w.s.arena.sacks.filter((s) => s.carrier !== -2);
+      w.ev({ kind: "crash", a: v.driver, what: "scoop", x: v.x, y: v.y });
+    }
+  }
+
+  /** Someone worth hitting: on their feet, not in a machine, not already caught. */
+  private prey(w: World, f: Fighter, v: Vehicle): boolean {
+    return f.id !== v.driver && alive(f) && f.invuln === 0 && !["driving", "down", "wakeup", "thrown", "air"].includes(f.state) && !this.held(w, f);
+  }
+
+  /** Carried in a bucket or on forks, or being shoved along by a blade: the machine decides where they are. */
+  private held(w: World, f: Fighter): boolean {
+    return w.s.arena.vehicles.some((v) => v.carry === f.id || (v.act > 0 && v.kind === "bulldozer" && v.actHit.includes(f.id)));
+  }
+
+  private seize(w: World, v: Vehicle, f: Fighter, by: number): void {
+    if (f.state === "holding" || f.state === "held") w.knockDown(f, 0, 0, 0.1);
+    this.dropSack(w, f);
+    w.knockDown(f, Math.cos(v.facing), Math.sin(v.facing), 0.1);
+    f.dur = 100000;
+    v.carry = f.id;
+    v.carryT = 0;
+    v.lastBy = by;
+    w.ev({ kind: "crash", a: by, b: f.id, what: "seize", x: v.x, y: v.y });
+  }
+
+  /** Where a carried fighter is held, and how high. */
+  private carryPoint(v: Vehicle): { x: number; y: number; z: number } {
+    const r = VEHICLES[v.kind].r;
+    const off = v.kind === "excavator" ? r + 1.5 : v.kind === "forklift" ? r + 0.7 : r + 0.8;
+    const z = v.kind === "excavator" ? 2.2 : v.kind === "forklift" ? 0.9 : 1.0;
+    return { x: v.x + Math.cos(v.facing) * off, y: v.y + Math.sin(v.facing) * off, z };
+  }
+
+  /** Let go of whoever the machine is holding. */
+  private release(w: World, v: Vehicle, how: "drop" | "slam" | "throw" | "set"): void {
+    const f = w.s.fighters[v.carry];
+    v.carry = -1;
+    v.carryT = 0;
+    if (!f || !alive(f)) return;
+    const c = this.carryPoint(v);
+    f.x = c.x;
+    f.y = c.y;
+    f.z = 0;
+    f.vz = 0;
+    const by = v.driver >= 0 ? v.driver : v.lastBy;
+    if (how === "throw") {
+      this.maul(w, f, 14, 0.3, by, "throw");
+      if (!alive(f)) return;
+      w.setState(f, "air");
+      f.juggle = 1;
+      f.bounced = false;
+      f.z = 0.4;
+      f.vz = 0.1;
+      f.slideX = Math.cos(v.facing) * 0.26;
+      f.slideY = Math.sin(v.facing) * 0.26;
+      w.ev({ kind: "launch", a: by, b: f.id });
+      return;
+    }
+    if (how === "set") {
+      w.knockDown(f, Math.cos(v.facing), Math.sin(v.facing), 0.6);
+      return;
+    }
+    w.knockDown(f, Math.cos(v.facing), Math.sin(v.facing), 0.8);
+    this.maul(w, f, how === "slam" ? 30 : 20, how === "slam" ? 0.7 : 0.45, by, how);
+    this.smash(w, c.x, c.y, 1.4, 12, by, v);
+    w.ev({ kind: "crash", a: by, what: "slam", x: c.x, y: c.y, dmg: 24 });
+  }
+
+  /** A hit by a machine: the damage, and often a limb comes off with it. */
+  private maul(w: World, f: Fighter, dmg: number, sever: number, by: number, what: string): void {
+    if (!alive(f)) return;
+    w.ev({ kind: "hit", a: by, b: f.id, part: "torso", dmg, what });
+    w.damage(f, "torso", dmg, by);
+    if (alive(f)) this.sever(w, f, sever, by);
+  }
+
+  private sever(w: World, f: Fighter, chance: number, by: number): void {
+    const have = LIMBS.filter((p) => f.parts[p].attached);
+    if (!have.length || !w.rng.chance(chance)) return;
+    const p = have[w.rng.int(have.length)];
+    w.damage(f, p, f.parts[p].hp, by);
+  }
+
+  /** Damage every machine within `rad` of a point, except `skip`. */
+  private smash(w: World, x: number, y: number, rad: number, dmg: number, by: number, skip: Vehicle): void {
+    for (const o of w.s.arena.vehicles) {
+      if (o === skip || o.wrecked || Math.hypot(o.x - x, o.y - y) > rad + VEHICLES[o.kind].r) continue;
+      o.hp -= dmg;
+      o.lastBy = by;
+    }
   }
 
   /** Get out of the cab, beside it. */
@@ -482,9 +739,10 @@ class ConstructionSite extends Arena {
   }
 
   use(w: World, f: Fighter): boolean {
+    const a = w.s.arena;
     let best: Vehicle | null = null;
     let bd = 1e9;
-    for (const v of w.s.arena.vehicles) {
+    for (const v of a.vehicles) {
       if (v.wrecked || v.driver >= 0) continue;
       const d = dist(f, v) - VEHICLES[v.kind].r;
       if (d < 0.9 && d < bd) {
@@ -492,7 +750,38 @@ class ConstructionSite extends Arena {
         best = v;
       }
     }
-    if (!best) return false;
+    const mine = this.carried(w, f);
+    // a sack on the ground, or one in someone's arms, is there for the taking
+    let sack: Sack | null = null;
+    let sd = 1e9;
+    if (!mine) {
+      for (const s of a.sacks) {
+        const d = s.carrier >= 0 ? dist(f, w.s.fighters[s.carrier]) - 0.2 : dist(f, s);
+        if (s.carrier === f.id || d > SACKS.pick || d >= sd) continue;
+        sd = d;
+        sack = s;
+      }
+    }
+    if (sack && sd <= bd) {
+      if (sack.carrier >= 0) w.ev({ kind: "crash", a: f.id, b: sack.carrier, what: "steal", x: f.x, y: f.y });
+      sack.carrier = f.id;
+      w.ev({ kind: "crash", a: f.id, what: "lift", x: sack.x, y: sack.y });
+      return true;
+    }
+    if (!best) {
+      if (mine) {
+        this.dropSack(w, f);
+        return true;
+      }
+      return false;
+    }
+    // into the cab: a sack in the arms goes on the machine if it can haul, and on the floor if not
+    if (mine) {
+      if (best.load + mine.value <= this.capacity(best)) {
+        best.load += mine.value;
+        a.sacks = a.sacks.filter((s) => s !== mine);
+      } else this.dropSack(w, f);
+    }
     best.driver = f.id;
     best.speed = 0;
     f.vehicle = best.id;
@@ -503,10 +792,15 @@ class ConstructionSite extends Arena {
     return true;
   }
 
+  onHit(w: World, d: Fighter): void {
+    this.dropSack(w, d);
+  }
+
   onKo(w: World, d: Fighter): void {
     const v = w.s.arena.vehicles[d.vehicle];
     if (v && v.driver === d.id) v.driver = -1;
     d.vehicle = -1;
+    this.dropSack(w, d);
   }
 
   strikeObjects(w: World, f: Fighter, m: Move & { total: number }): void {
@@ -531,6 +825,7 @@ class ConstructionSite extends Arena {
 
   bound(w: World, f: Fighter): void {
     if (f.state === "driving") return;
+    if (this.held(w, f)) return;
     // vehicles are solid; a wreck is rubble you climb over (or people get pinned behind it for good)
     for (const v of w.s.arena.vehicles) {
       if (v.wrecked) continue;
@@ -564,6 +859,7 @@ class ConstructionSite extends Arena {
     return Math.abs(x) <= YARD.hx && Math.abs(y) <= YARD.hy;
   }
 
+  // ------------------------------------------------------------ the step
   update(w: World): void {
     const s = w.s;
     const vs = s.arena.vehicles;
@@ -571,6 +867,7 @@ class ConstructionSite extends Arena {
     for (const v of vs) {
       if (v.boost > 0) v.boost--;
       if (v.cool > 0) v.cool--;
+      if (v.actCool > 0) v.actCool--;
       if (v.wrecked) continue;
       const drv = s.fighters[v.driver];
       if (!drv || drv.state !== "driving") v.speed *= 0.9; // parked: rolls to a stop
@@ -583,11 +880,12 @@ class ConstructionSite extends Arena {
       if (Math.abs(v.x) > hx || Math.abs(v.y) > hy) {
         v.x = clamp(v.x, -hx, hx);
         v.y = clamp(v.y, -hy, hy);
-        if (Math.abs(v.speed) > 0.06) {
+        const plowing = v.kind === "bulldozer" && v.act > 0;
+        if (Math.abs(v.speed) > 0.06 && !plowing) {
           v.hp -= Math.abs(v.speed) * 60;
           w.ev({ kind: "crash", a: v.driver, what: "wall", x: v.x, y: v.y });
         }
-        v.speed *= -0.3;
+        v.speed *= plowing ? 0 : -0.3;
       }
     }
     // vehicles collide with each other
@@ -644,49 +942,24 @@ class ConstructionSite extends Arena {
         drv.slideX = drv.slideY = 0;
       }
     }
-    // run people over
-    for (const v of vs) {
-      if (v.wrecked || Math.abs(v.speed) < RAM_MIN) continue;
-      const st = VEHICLES[v.kind];
-      for (const f of s.fighters) {
-        if (f.id === v.driver || !alive(f) || f.invuln > 0 || ["driving", "down", "wakeup", "thrown"].includes(f.state)) continue;
-        const dx = f.x - v.x;
-        const dy = f.y - v.y;
-        const d = Math.hypot(dx, dy);
-        if (d > st.r + BODY_R + 0.05) continue;
-        const dmg = st.ram * Math.min(1.5, Math.abs(v.speed) / st.speed);
-        w.ev({ kind: "hit", a: v.driver, b: f.id, part: "torso", dmg, what: "ram" });
-        w.damage(f, "torso", dmg, v.driver);
-        if (alive(f)) {
-          const hx = Math.cos(v.facing) * Math.sign(v.speed) + (d > 0.01 ? dx / d : 0);
-          const hy = Math.sin(v.facing) * Math.sign(v.speed) + (d > 0.01 ? dy / d : 0);
-          const k = Math.hypot(hx, hy) || 1;
-          const front = d > 0.01 && (dx * Math.cos(v.facing) + dy * Math.sin(v.facing)) / d > 0.35 && v.speed > RAM_MIN;
-          if (front && (v.kind === "bulldozer" || v.kind === "loader" || v.kind === "forklift")) {
-            w.setState(f, "air");
-            f.juggle = 1;
-            f.bounced = false;
-            f.z = 0;
-            f.vz = 0.068;
-            f.slideX = (hx / k) * 0.12;
-            f.slideY = (hy / k) * 0.12;
-            w.ev({ kind: "launch", a: v.driver, b: f.id });
-          } else {
-            w.knockDown(f, hx / k, hy / k, 1.8);
-          }
-          w.freeze(f, undefined, hitstopFor(dmg, true));
-        }
-        v.speed *= 0.8;
-      }
-    }
+    for (const v of vs) this.implement(w, v);
+    this.hold(w);
+    this.runOver(w);
+    this.slicks(w);
     // wrecks
     for (const v of vs) {
       if (v.wrecked || v.hp > 0) continue;
       v.wrecked = true;
       v.hp = 0;
       v.speed = 0;
+      v.wreckT = 0;
+      v.repair = 0;
+      v.repairer = -1;
+      v.act = 0;
       w.ev({ kind: "wreck", a: v.driver, b: v.lastBy, x: v.x, y: v.y, what: v.kind });
       if (v.lastBy >= 0 && v.lastBy !== v.driver) w.addViolence(s.fighters[v.lastBy], VIOLENCE.wreck);
+      if (v.carry >= 0) this.release(w, v, "set");
+      this.spill(w, v, v.x, v.y);
       const drv = s.fighters[v.driver];
       if (drv && drv.state === "driving") this.eject(w, drv);
       v.driver = -1;
@@ -697,24 +970,410 @@ class ConstructionSite extends Arena {
         if (alive(f) && f.state !== "down") w.knockDown(f, (f.x - v.x) / (dist(f, v) || 1), (f.y - v.y) / (dist(f, v) || 1), 1.2);
       }
     }
+    this.repairs(w);
     // the crane drops steel
     runHazards(w, () => ({ kind: "beam", x: w.rng.range(-YARD.hx + 1.5, YARD.hx - 1.5), y: w.rng.range(-YARD.hy + 1.5, YARD.hy - 1.5) }), [300, 480]);
-    for (const f of s.fighters) {
-      if (f.kos >= KO_TARGET) {
-        w.win(f.id);
+    this.foundation(w);
+  }
+
+  /** What a machine hauled goes back on the ground when it is wrecked or tips its load. */
+  private spill(w: World, v: Vehicle, x: number, y: number): void {
+    let left = v.load;
+    v.load = 0;
+    for (let i = 0; left > 0 && i < 8; i++) {
+      const a = i * 2.4;
+      const kind: Sack["kind"] = left >= 2 && i % 3 === 0 ? "cement" : "rubble";
+      const sack = this.addSack(w, clamp(x + Math.cos(a) * (0.8 + i * 0.12), -YARD.hx + 0.5, YARD.hx - 0.5), clamp(y + Math.sin(a) * (0.8 + i * 0.12), -YARD.hy + 0.5, YARD.hy - 0.5), kind);
+      left -= sack.value;
+    }
+  }
+
+  /** The implement attacks: each machine does something different on the strike button. */
+  private implement(w: World, v: Vehicle): void {
+    if (v.wrecked || v.act <= 0) return;
+    const drv = w.s.fighters[v.driver];
+    if (drv && drv.stop > 0) return;
+    const st = VEHICLES[v.kind];
+    const A = ACTS[v.kind];
+    const by = v.driver >= 0 ? v.driver : v.lastBy;
+    const cx = Math.cos(v.facing);
+    const cy = Math.sin(v.facing);
+    const t = v.act;
+    switch (v.kind) {
+      case "bulldozer": {
+        // the blade shoves everyone in front of it along; against a wall they are pinned and crushed
+        const front = st.r + BODY_R + 0.05;
+        for (const f of w.s.fighters) {
+          const mine = v.actHit.includes(f.id);
+          if (!mine && !this.prey(w, f, v)) continue;
+          if (mine && !alive(f)) continue;
+          const dx = f.x - v.x;
+          const dy = f.y - v.y;
+          const ahead = dx * cx + dy * cy;
+          const side = -dx * cy + dy * cx;
+          if (!mine && (ahead < 0 || ahead > front + 0.8 || Math.abs(side) > st.r + 0.4)) continue;
+          if (!mine) v.actHit.push(f.id);
+          let nx = v.x + cx * front + -cy * clamp(side, -st.r, st.r);
+          let ny = v.y + cy * front + cx * clamp(side, -st.r, st.r);
+          const hx = YARD.hx - BODY_R;
+          const hy = YARD.hy - BODY_R;
+          const pinned = Math.abs(nx) > hx || Math.abs(ny) > hy;
+          nx = clamp(nx, -hx, hx);
+          ny = clamp(ny, -hy, hy);
+          f.x = nx;
+          f.y = ny;
+          w.setState(f, "hitstun", 5);
+          f.slideX = f.slideY = 0;
+          if (pinned && t % 10 === 0) {
+            this.maul(w, f, 11, 0.55, by, "pin");
+            w.ev({ kind: "crash", a: by, b: f.id, what: "pin", x: f.x, y: f.y, dmg: 14 });
+          }
+        }
+        if (t >= A.dur) {
+          for (const id of v.actHit) {
+            const f = w.s.fighters[id];
+            if (f && alive(f) && f.state === "hitstun") w.knockDown(f, cx, cy, 1.6);
+          }
+        }
         break;
+      }
+      case "excavator":
+        if (t === A.hit) {
+          const px = v.x + cx * (st.r + 1.5);
+          const py = v.y + cy * (st.r + 1.5);
+          for (const f of w.s.fighters) {
+            if (f.id === v.driver || !alive(f) || f.invuln > 0 || f.state === "driving" || this.held(w, f) || Math.hypot(f.x - px, f.y - py) > 2.0) continue;
+            const d = dist(f, { x: px, y: py });
+            w.knockDown(f, d > 0.05 ? (f.x - px) / d : cx, d > 0.05 ? (f.y - py) / d : cy, 1.5);
+            this.maul(w, f, 30, 0.5, by, "slam");
+          }
+          this.smash(w, px, py, 2.0, 30, by, v);
+          w.ev({ kind: "crash", a: by, what: "slam", x: px, y: py, dmg: 30 });
+        }
+        break;
+      case "dumptruck":
+        if (t === A.hit) {
+          const px = v.x - cx * (st.r + 1.5);
+          const py = v.y - cy * (st.r + 1.5);
+          if (v.load > 0 && Math.hypot(v.x - PIT.x, v.y - PIT.y) < PIT.r + 1.4 && v.driver >= 0) {
+            this.fill(w, w.s.fighters[v.driver], v.load, "tip", px, py);
+            v.load = 0;
+          } else {
+            this.spill(w, v, px, py);
+            w.s.arena.piles.push({ x: px, y: py, t: 0 });
+            if (w.s.arena.piles.length > 6) w.s.arena.piles.shift();
+            for (const f of w.s.fighters) {
+              if (f.id === v.driver || !alive(f) || f.invuln > 0 || f.state === "driving" || this.held(w, f) || Math.hypot(f.x - px, f.y - py) > 2.1) continue;
+              this.bury(w, f, v, by);
+            }
+            w.ev({ kind: "crash", a: by, what: "tip", x: px, y: py, dmg: 20 });
+          }
+        }
+        break;
+      case "forklift":
+        if (t === A.hit && v.carry < 0) {
+          const px = v.x + cx * (st.r + 0.9);
+          const py = v.y + cy * (st.r + 0.9);
+          let best: Fighter | null = null;
+          let bd = 1.1;
+          for (const f of w.s.fighters) {
+            if (!this.prey(w, f, v)) continue;
+            const d = Math.hypot(f.x - px, f.y - py);
+            if (d < bd) {
+              bd = d;
+              best = f;
+            }
+          }
+          if (best) {
+            this.seize(w, v, best, by);
+            this.maul(w, best, 18, 0.6, by, "skewer");
+            w.ev({ kind: "crash", a: by, b: best.id, what: "skewer", x: px, y: py, dmg: 18 });
+          }
+        }
+        break;
+      case "mixer":
+        if (t >= 4 && t % 8 === 4) {
+          const a = w.s.arena;
+          a.slicks.push({ x: v.x - cx * (st.r + 0.3), y: v.y - cy * (st.r + 0.3), t: 0, by });
+          if (a.slicks.length > SLICK.max) a.slicks.shift();
+          if (t === 4) w.ev({ kind: "crash", a: by, what: "pour", x: v.x, y: v.y });
+        }
+        break;
+      case "loader":
+        if (t === A.hit) {
+          const px = v.x + cx * (st.r + 0.9);
+          const py = v.y + cy * (st.r + 0.9);
+          for (const f of w.s.fighters) {
+            if (!this.prey(w, f, v) || Math.hypot(f.x - px, f.y - py) > 1.5) continue;
+            this.maul(w, f, 18, 0.4, by, "scoop");
+            if (!alive(f)) continue;
+            w.setState(f, "air");
+            f.juggle = 1;
+            f.bounced = false;
+            f.z = 0;
+            f.vz = 0.09;
+            f.slideX = cx * 0.12;
+            f.slideY = cy * 0.12;
+            w.ev({ kind: "launch", a: by, b: f.id });
+          }
+          w.ev({ kind: "crash", a: by, what: "scoop", x: px, y: py, dmg: 14 });
+        }
+        break;
+      case "roller":
+        break; // the roller's attack is the surge: everything it touches is flattened (runOver)
+      case "crane":
+        if (t >= A.hit && t <= A.dur) {
+          // the wrecking ball swings once round the cab
+          const ang = v.facing + ((t - A.hit) / (A.dur - A.hit)) * Math.PI * 2;
+          const bx = v.x + Math.cos(ang) * BALL_R;
+          const by2 = v.y + Math.sin(ang) * BALL_R;
+          for (const f of w.s.fighters) {
+            if (f.id === v.driver || !alive(f) || f.invuln > 0 || f.state === "driving" || v.actHit.includes(f.id) || this.held(w, f)) continue;
+            if (Math.hypot(f.x - bx, f.y - by2) > 1.0) continue;
+            v.actHit.push(f.id);
+            const d = dist(f, v) || 1;
+            w.knockDown(f, (f.x - v.x) / d, (f.y - v.y) / d, 1.8);
+            this.maul(w, f, 28, 0.55, by, "wrecking-ball");
+            w.ev({ kind: "crash", a: by, b: f.id, what: "ball", x: bx, y: by2, dmg: 28 });
+          }
+          for (const o of w.s.arena.vehicles) {
+            if (o === v || o.wrecked || v.actHit.includes(-1 - o.id) || Math.hypot(o.x - bx, o.y - by2) > 1.0 + VEHICLES[o.kind].r) continue;
+            v.actHit.push(-1 - o.id);
+            o.hp -= 35;
+            o.lastBy = by;
+            w.ev({ kind: "crash", a: by, what: "ball", x: bx, y: by2, dmg: 35 });
+          }
+        }
+        break;
+    }
+    v.act++;
+    if (v.act > A.dur) {
+      v.act = 0;
+      v.actHit = [];
+    }
+  }
+
+  /** Under a tipped load: knocked flat, and stuck there a good while. */
+  private bury(w: World, f: Fighter, v: Vehicle, by: number): void {
+    w.knockDown(f, -Math.cos(v.facing), -Math.sin(v.facing), 0.5);
+    f.dur = BURIED;
+    this.maul(w, f, 16, 0.3, by, "buried");
+  }
+
+  /** Carried fighters ride the bucket or the forks. */
+  private hold(w: World): void {
+    for (const v of w.s.arena.vehicles) {
+      if (v.carry < 0) continue;
+      const f = w.s.fighters[v.carry];
+      if (!f || !alive(f) || v.wrecked || f.state !== "down" || v.carryT > CARRY_MAX) {
+        this.release(w, v, "set");
+        continue;
+      }
+      const c = this.carryPoint(v);
+      f.x = c.x;
+      f.y = c.y;
+      f.z = c.z;
+      f.vz = 0;
+      f.slideX = f.slideY = 0;
+      f.t = 0; // they stay down while they are held
+      v.carryT++;
+    }
+  }
+
+  /** Machines run people over: harder than before, and often a limb goes. */
+  private runOver(w: World): void {
+    const s = w.s;
+    for (const v of s.arena.vehicles) {
+      if (v.wrecked || Math.abs(v.speed) < RAM_MIN) continue;
+      const st = VEHICLES[v.kind];
+      const power = v.act > 0 && (v.kind === "roller" || v.kind === "forklift") ? 1.4 : 1;
+      for (const f of s.fighters) {
+        if (f.id === v.driver || !alive(f) || f.invuln > 0 || ["driving", "down", "wakeup", "thrown"].includes(f.state) || this.held(w, f)) continue;
+        const dx = f.x - v.x;
+        const dy = f.y - v.y;
+        const d = Math.hypot(dx, dy);
+        if (d > st.r + BODY_R + 0.05) continue;
+        const k0 = Math.min(1.5, Math.abs(v.speed) / st.speed);
+        const dmg = st.ram * k0 * power;
+        w.ev({ kind: "hit", a: v.driver, b: f.id, part: "torso", dmg, what: "ram" });
+        w.damage(f, "torso", dmg, v.driver);
+        if (alive(f)) {
+          const hx = Math.cos(v.facing) * Math.sign(v.speed) + (d > 0.01 ? dx / d : 0);
+          const hy = Math.sin(v.facing) * Math.sign(v.speed) + (d > 0.01 ? dy / d : 0);
+          const k = Math.hypot(hx, hy) || 1;
+          const front = d > 0.01 && (dx * Math.cos(v.facing) + dy * Math.sin(v.facing)) / d > 0.35 && v.speed > RAM_MIN;
+          if (v.kind === "roller") {
+            // flattened: down for a long time, and limbs come off under the drum
+            w.knockDown(f, hx / k, hy / k, 0.6);
+            f.dur = v.act > 0 ? FLAT * 1.5 : FLAT;
+            this.sever(w, f, 1, v.driver);
+            if (v.act > 0) this.sever(w, f, 1, v.driver);
+            w.ev({ kind: "crash", a: v.driver, b: f.id, what: "flatten", x: f.x, y: f.y, dmg });
+          } else if (front && (v.kind === "bulldozer" || v.kind === "loader" || v.kind === "forklift")) {
+            w.setState(f, "air");
+            f.juggle = 1;
+            f.bounced = false;
+            f.z = 0;
+            f.vz = 0.068;
+            f.slideX = (hx / k) * 0.12;
+            f.slideY = (hy / k) * 0.12;
+            w.ev({ kind: "launch", a: v.driver, b: f.id });
+            this.sever(w, f, 0.3 + 0.3 * Math.min(1, k0), v.driver);
+          } else {
+            w.knockDown(f, hx / k, hy / k, 1.8);
+            this.sever(w, f, 0.3 + 0.3 * Math.min(1, k0), v.driver);
+          }
+          w.freeze(f, undefined, hitstopFor(dmg, true));
+        }
+        v.speed *= v.kind === "roller" ? 0.95 : 0.8;
       }
     }
   }
 
+  /** Wet cement slows whoever is in it, then sets with them stuck in it. */
+  private slicks(w: World): void {
+    const a = w.s.arena;
+    for (const sl of a.slicks) {
+      sl.t++;
+      if (sl.t < SLICK.set) {
+        for (const f of w.s.fighters) {
+          if (!alive(f) || f.state === "driving" || f.z > 0.3 || Math.hypot(f.x - sl.x, f.y - sl.y) > SLICK.r) continue;
+          f.velX *= 0.55;
+          f.velY *= 0.55;
+        }
+        for (const v of a.vehicles) {
+          if (!v.wrecked && Math.hypot(v.x - sl.x, v.y - sl.y) < SLICK.r + VEHICLES[v.kind].r * 0.5) v.speed *= 0.95;
+        }
+      } else if (sl.t === SLICK.set) {
+        for (const f of w.s.fighters) {
+          if (!alive(f) || f.state === "driving" || f.state === "down" || f.z > 0.3 || this.held(w, f) || Math.hypot(f.x - sl.x, f.y - sl.y) > SLICK.r) continue;
+          w.knockDown(f, 0, 0, 0.1);
+          f.dur = STUCK;
+          w.damage(f, "torso", 6, sl.by);
+          w.ev({ kind: "crash", a: sl.by, b: f.id, what: "set", x: f.x, y: f.y, dmg: 6 });
+        }
+      }
+    }
+    a.slicks = a.slicks.filter((sl) => sl.t < SLICK.gone);
+    for (const p of a.piles) p.t++;
+    a.piles = a.piles.filter((p) => p.t < 420);
+  }
+
+  /** Repairs, and the yard's supply of machines. */
+  private repairs(w: World): void {
+    const s = w.s;
+    const vs = s.arena.vehicles;
+    for (const v of vs) {
+      if (!v.wrecked) continue;
+      v.wreckT++;
+      const st = VEHICLES[v.kind];
+      const rep = s.fighters.find((f) => alive(f) && (f.state === "idle" || f.state === "walk") && (f.prevButtons & BTN.USE) !== 0 && dist(f, v) < st.r + REPAIR.range);
+      if (rep) {
+        if (v.repairer !== rep.id) v.repairer = rep.id;
+        v.repair++;
+        if (v.repair % 40 === 1) w.ev({ kind: "repair", a: rep.id, what: "work", x: v.x, y: v.y });
+        if (v.repair >= REPAIR.frames) this.fix(w, v, rep.id, "done");
+      } else if (v.repairer >= 0) {
+        // whoever was at it stopped: a hit loses the work, putting the spanner down only pauses it
+        const was = s.fighters[v.repairer];
+        if (!was || s.frame - was.hurtAt <= 3 || !alive(was)) v.repair = 0;
+        v.repairer = -1;
+      }
+    }
+    // the yard is never left without machines: if too few run, the tow truck brings the longest-wrecked one back
+    const working = vs.filter((v) => !v.wrecked).length;
+    const need = Math.max(1, Math.ceil(s.fighters.length / 2));
+    if (working < need) {
+      let pick: Vehicle | null = null;
+      for (const v of vs) if (v.wrecked && v.wreckT >= REPAIR.tow && (!pick || v.wreckT > pick.wreckT)) pick = v;
+      if (pick) this.fix(w, pick, -1, "tow");
+    }
+  }
+
+  private fix(w: World, v: Vehicle, by: number, what: string): void {
+    v.wrecked = false;
+    v.hp = Math.round(v.max * REPAIR.hpFrac);
+    v.repair = 0;
+    v.repairer = -1;
+    v.wreckT = 0;
+    v.speed = 0;
+    v.act = 0;
+    v.actCool = 0;
+    v.load = 0;
+    w.ev({ kind: "repair", a: by, what, x: v.x, y: v.y });
+  }
+
+  /** The foundation: sacks arrive, are carried, and filled in. */
+  private foundation(w: World): void {
+    const s = w.s;
+    const a = s.arena;
+    // deliveries to the yard
+    if (s.frame >= a.nextSack) {
+      const room = SACKS.cap + s.fighters.length - a.sacks.length;
+      if (room > 0) {
+        const x = w.rng.range(-YARD.hx + 1.5, YARD.hx - 1.5);
+        const y = w.rng.range(-YARD.hy + 1.5, YARD.hy - 1.5);
+        const kind: Sack["kind"] = w.rng.chance(0.3) ? "cement" : "rubble";
+        if (Math.hypot(x - PIT.x, y - PIT.y) > PIT.r + 1.2) {
+          const sack = this.addSack(w, x, y, kind);
+          w.ev({ kind: "supply", a: -1, what: kind, x: sack.x, y: sack.y });
+        }
+      }
+      a.nextSack = s.frame + Math.round(w.rng.range(SACKS.gap[0], SACKS.gap[1]));
+    }
+    for (const sk of a.sacks) {
+      if (sk.carrier < 0) continue;
+      const f = s.fighters[sk.carrier];
+      if (!f || !alive(f) || !CARRYING.has(f.state)) {
+        // hit, knocked down, ... whatever they were carrying drops
+        if (f) this.dropSack(w, f);
+        else sk.carrier = -1;
+        continue;
+      }
+      sk.x = f.x;
+      sk.y = f.y;
+      f.velX *= 0.93; // heavy
+      f.velY *= 0.93;
+      if (Math.hypot(f.x - PIT.x, f.y - PIT.y) < PIT.r + 0.3) {
+        sk.carrier = -2;
+        this.fill(w, f, sk.value, "foot", f.x, f.y);
+      }
+    }
+    a.sacks = a.sacks.filter((sk) => sk.carrier !== -2);
+    // machines
+    for (const v of a.vehicles) {
+      if (v.wrecked) continue;
+      const cap = this.capacity(v);
+      const drv = s.fighters[v.driver];
+      if (cap > 0 && drv && drv.state === "driving") {
+        // haulers scoop up what they drive over
+        for (const sk of a.sacks) {
+          if (sk.carrier >= 0 || v.load + sk.value > cap) continue;
+          if (v.kind === "loader") continue; // the loader scoops with the grab button
+          if (Math.hypot(sk.x - v.x, sk.y - v.y) > VEHICLES[v.kind].r + 0.5) continue;
+          v.load += sk.value;
+          sk.carrier = -2;
+          w.ev({ kind: "crash", a: drv.id, what: "load", x: sk.x, y: sk.y });
+        }
+        if (v.load > 0 && Math.hypot(v.x - PIT.x, v.y - PIT.y) < PIT.r + VEHICLES[v.kind].r * 0.6) {
+          this.fill(w, drv, v.load, "haul", v.x, v.y);
+          v.load = 0;
+        }
+      }
+    }
+    a.sacks = a.sacks.filter((sk) => sk.carrier !== -2);
+  }
+
+  // ------------------------------------------------------------ bots
   danger(w: World, me: Fighter, x: number, y: number): boolean {
     // the barriers only stop you; the danger is being in front of a moving vehicle
     for (const v of w.s.arena.vehicles) {
-      if (v.wrecked || v.driver === me.id || Math.abs(v.speed) < RAM_MIN) continue;
+      if (v.wrecked || v.driver === me.id || (Math.abs(v.speed) < RAM_MIN && v.act === 0)) continue;
       const dx = x - v.x;
       const dy = y - v.y;
       const d = Math.hypot(dx, dy);
-      if (d < 3.5 && (dx * Math.cos(v.facing) + dy * Math.sin(v.facing)) * Math.sign(v.speed) > d * 0.7) return true;
+      if (v.kind === "crane" && v.act > 0 && d < BALL_R + 1.2) return true;
+      if (d < 3.5 && (dx * Math.cos(v.facing) + dy * Math.sin(v.facing)) * Math.sign(v.speed || 1) > d * 0.7) return true;
     }
     return false;
   }
@@ -722,7 +1381,7 @@ class ConstructionSite extends Arena {
   safe(w: World, me: Fighter): { x: number; y: number } {
     // step sideways out of the path of the nearest moving vehicle
     let best: Vehicle | null = null;
-    for (const v of w.s.arena.vehicles) if (!v.wrecked && v.driver !== me.id && Math.abs(v.speed) >= RAM_MIN && (!best || dist(me, v) < dist(me, best))) best = v;
+    for (const v of w.s.arena.vehicles) if (!v.wrecked && v.driver !== me.id && (Math.abs(v.speed) >= RAM_MIN || v.act > 0) && (!best || dist(me, v) < dist(me, best))) best = v;
     if (!best) return { x: 0, y: 0 };
     const side = best.facing + Math.PI / 2;
     const s = (me.x - best.x) * Math.cos(side) + (me.y - best.y) * Math.sin(side) >= 0 ? 1 : -1;
@@ -731,13 +1390,25 @@ class ConstructionSite extends Arena {
 
   botGoal(w: World, me: Fighter, enemies: Fighter[]): Goal | null {
     if (enemies.some((e) => e.state !== "driving" && dist(e, me) < 1.6)) return null;
-    let best: Vehicle | null = null;
-    for (const v of w.s.arena.vehicles) {
+    const a = w.s.arena;
+    // carrying: to the pit
+    if (this.carried(w, me)) return { x: PIT.x, y: PIT.y, use: false };
+    // a free machine close by (odd bots like driving now and then), else the nearest sack
+    let car: Vehicle | null = null;
+    for (const v of a.vehicles) {
       if (v.wrecked || v.driver >= 0 || v.hp < v.max * 0.25 || dist(me, v) > 7) continue;
-      if (!best || dist(me, v) < dist(me, best)) best = v;
+      if (!car || dist(me, v) < dist(me, car)) car = v;
     }
-    if (!best) return null;
-    return { x: best.x, y: best.y, use: dist(me, best) < VEHICLES[best.kind].r + 0.75 };
+    let sack: Sack | null = null;
+    for (const sk of a.sacks) if (sk.carrier < 0 && (!sack || dist(me, sk) < dist(me, sack))) sack = sk;
+    const wantCar = car && (!sack || dist(me, sack) > 6 || (me.id % 2 === 1 && (w.s.frame >> 9) % 3 === 0));
+    if (car && wantCar) return { x: car.x, y: car.y, use: dist(me, car) < VEHICLES[car.kind].r + 0.75 };
+    if (sack) return { x: sack.x, y: sack.y, use: dist(me, sack) < 0.8 };
+    // nothing to ride or carry: repair the nearest wreck (hold USE at it)
+    let wreck: Vehicle | null = null;
+    for (const v of a.vehicles) if (v.wrecked && (!wreck || dist(me, v) < dist(me, wreck))) wreck = v;
+    if (wreck) return { x: wreck.x, y: wreck.y, use: false, hold: dist(me, wreck) < VEHICLES[wreck.kind].r + REPAIR.range - 0.15 };
+    return null;
   }
 
   clampGoal(x: number, y: number): { x: number; y: number } {
@@ -745,13 +1416,14 @@ class ConstructionSite extends Arena {
   }
 
   progress(f: Fighter): number {
-    return Math.min(1, f.kos / KO_TARGET);
+    return Math.min(1, f.toilet / PIT.need);
   }
 
   headline(w: World): Headline | null {
-    const lead = w.s.fighters.reduce((a, b) => (b.kos > a.kos ? b : a));
-    if (lead.kos === 0) return { text: `First to ${KO_TARGET} KOs owns the yard`, frac: 0, who: -1 };
-    return { text: `${nm(lead)} leads with ${lead.kos} of ${KO_TARGET} KOs`, frac: lead.kos / KO_TARGET, who: lead.id };
+    const lead = w.s.fighters.reduce((a, b) => (b.toilet > a.toilet ? b : a));
+    const sack = this.carried(w, lead);
+    if (lead.toilet === 0) return { text: `Pour the Foundation: first to fill ${PIT.need}`, frac: 0, who: -1 };
+    return { text: `${nm(lead)} has poured ${lead.toilet} of ${PIT.need}${sack ? " (and is carrying more)" : ""}`, frac: lead.toilet / PIT.need, who: lead.id };
   }
 
   hash(mix: (v: number) => void, a: ArenaState): void {
@@ -762,6 +1434,34 @@ class ConstructionSite extends Arena {
       mix(v.speed);
       mix(v.hp);
       mix(v.driver);
+      mix(v.act);
+      mix(v.actCool);
+      mix(v.carry);
+      mix(v.carryT);
+      mix(v.load);
+      mix(v.wrecked ? v.wreckT + 1 : 0);
+      mix(v.repair);
+      mix(v.repairer);
+      for (const id of v.actHit) mix(id);
+    }
+    mix(a.nextSack);
+    mix(a.nextSackId);
+    for (const sk of a.sacks) {
+      mix(sk.id);
+      mix(sk.x);
+      mix(sk.y);
+      mix(sk.carrier);
+      mix(sk.value);
+    }
+    for (const sl of a.slicks) {
+      mix(sl.x);
+      mix(sl.y);
+      mix(sl.t);
+    }
+    for (const p of a.piles) {
+      mix(p.x);
+      mix(p.y);
+      mix(p.t);
     }
   }
 }

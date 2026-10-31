@@ -606,10 +606,26 @@ export class Scene {
           else this.shake = Math.min(1, this.shake + 0.35);
           break;
         }
+        case "deliver": {
+          // a pour: cement dust over the pit
+          const p = toV(q.x ?? 0, q.y ?? 0, 0.5);
+          this.fx.burst(p, { count: 24, speed: 2.2, color: 0xb8b4aa, life: 0.7, gravity: 1.5, up: 1.4, dust: true });
+          break;
+        }
+        case "repair":
+          if (q.what !== "work") this.fx.ring(toV(q.x ?? 0, q.y ?? 0, 0.1), 0x7ee05a, 3, 0.5, true);
+          else this.fx.burst(toV(q.x ?? 0, q.y ?? 0, 1.0), { count: 6, speed: 2, color: 0xffe090, life: 0.25, gravity: 5, up: 0.8 });
+          break;
         case "crash":
         case "wreck": {
+          if (typeof q.what === "string" && q.what.endsWith("-wind")) break; // an attack winding up: nothing has landed yet
           const p = toV(q.x ?? 0, q.y ?? 0, 0.9);
           const big = q.kind === "wreck";
+          const heavy = q.what === "slam" || q.what === "tip" || q.what === "ball" || q.what === "flatten" || q.what === "pin";
+          if (heavy) {
+            this.fx.burst(toV(q.x ?? 0, q.y ?? 0, 0.1), { count: 26, speed: 3.2, color: 0x8a7a60, life: 0.8, gravity: 1.5, up: 1.2, dust: true });
+            this.fx.ring(toV(q.x ?? 0, q.y ?? 0, 0.05), 0xe8d8b0, 2.4, 0.35, true);
+          }
           this.fx.burst(p, { count: big ? 60 : 16, speed: big ? 6 : 3, color: big ? 0xff8020 : 0xffe090, life: big ? 0.9 : 0.3, gravity: 5, up: big ? 2 : 0.5 });
           if (big) {
             this.fx.ring(toV(q.x ?? 0, q.y ?? 0, 0.05), 0xff5010, 4, 0.5, true);
@@ -617,7 +633,7 @@ export class Scene {
             this.punchIn(p, 0.8);
             this.hype = 1;
           }
-          this.shake = Math.min(1, this.shake + (big ? 0.8 : q.what === "vehicle" ? 0.35 : 0.12));
+          this.shake = Math.min(1, this.shake + (big ? 0.8 : heavy ? 0.45 : q.what === "vehicle" ? 0.35 : 0.12));
           break;
         }
         case "crack":

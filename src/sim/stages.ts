@@ -21,7 +21,7 @@ export const STAGES: readonly Stage[] = [
   {
     id: "construction-site",
     name: "Construction Site",
-    blurb: "Everyone starts in a different construction vehicle. Run people over, wreck the machines and dodge the crane's falling steel. First to 4 KOs owns the yard.",
+    blurb: "Pour the Foundation: everyone starts in a different construction machine, each with its own attack, and cement sacks and rubble land across the yard. Carry them to the pit in the middle (or haul a load in a dump truck, loader or forklift) and the first to fill their share wins. Hit a carrier and they drop it. Wrecks can be repaired: hold USE at one.",
     playable: true,
   },
   {
@@ -80,7 +80,7 @@ export const MATCH_TYPES: readonly MatchType[] = [
     blurb: "Knock them off the edge. Nobody comes back, and the arena is falling apart under all of you.",
     stages: ["collapsing-tower", "hindenburg-blimp"],
   },
-  { id: "kos", name: "KO Race", blurb: "First to 4 KOs. The knocked-out come back, so keep knocking them out.", stages: ["construction-site"] },
+  { id: "kos", name: "Foundation Race", blurb: "Be first to fill the foundation pit with cement and rubble. Carry it, haul it, steal it; the beaten come back, so keep taking it back.", stages: ["construction-site"] },
 ];
 
 export function matchTypeById(id: MatchTypeId): MatchType {
