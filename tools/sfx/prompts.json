@@ -89,6 +89,148 @@
       "category": "voice",
       "note": "an experiment: can the same model carry a fighter's voice?",
       "prompt": "A very large heavy fighter grunts with effort while striking: a low rough wordless exhale, chesty and strained. Close microphone, dry room, one single vocalisation."
+    },
+    {
+      "id": "crowd-murmur",
+      "file": "crowd-murmur.mp3",
+      "seed": 5001,
+      "category": "crowd",
+      "seconds": 8.0,
+      "note": "the bed under every match, loopable",
+      "prompt": "A large crowd murmuring and chattering in an arena: hundreds of overlapping voices, no single word clear, a low steady hum of anticipation with no sudden peaks. Constant level so it can loop seamlessly. Recorded from the middle of a packed stadium crowd.",
+      "pending": true,
+      "loop": true
+    },
+    {
+      "id": "crowd-cheer-1",
+      "file": "crowd-cheer-1.mp3",
+      "seed": 5011,
+      "category": "crowd",
+      "seconds": 3.0,
+      "note": "cheer on a win",
+      "prompt": "A crowd erupts into a big, ragged burst of cheering and applause, then settles. Recorded from the middle of a packed stadium crowd.",
+      "pending": true
+    },
+    {
+      "id": "crowd-cheer-2",
+      "file": "crowd-cheer-2.mp3",
+      "seed": 5012,
+      "category": "crowd",
+      "seconds": 3.0,
+      "note": "cheer on a win",
+      "prompt": "A crowd erupts into an excited whooping cheer that rises and fades, then settles. Recorded from the middle of a packed stadium crowd.",
+      "pending": true
+    },
+    {
+      "id": "crowd-roar-1",
+      "file": "crowd-roar-1.mp3",
+      "seed": 5021,
+      "category": "crowd",
+      "seconds": 2.5,
+      "note": "roar on strip, KO, wall splat, special",
+      "prompt": "A packed arena lets out a deep, sustained roar of approval. Recorded from the middle of a packed stadium crowd.",
+      "pending": true
+    },
+    {
+      "id": "crowd-roar-2",
+      "file": "crowd-roar-2.mp3",
+      "seed": 5022,
+      "category": "crowd",
+      "seconds": 2.5,
+      "note": "roar on strip, KO, wall splat, special",
+      "prompt": "A packed arena lets out a short, violent roar with whistles and shouting. Recorded from the middle of a packed stadium crowd.",
+      "pending": true
+    },
+    {
+      "id": "crowd-boo-1",
+      "file": "crowd-boo-1.mp3",
+      "seed": 5031,
+      "category": "crowd",
+      "seconds": 2.5,
+      "note": "boo on a whiffed taunt",
+      "prompt": "A disappointed crowd gives a long, low boo. Recorded from the middle of a packed stadium crowd.",
+      "pending": true
+    },
+    {
+      "id": "crowd-boo-2",
+      "file": "crowd-boo-2.mp3",
+      "seed": 5032,
+      "category": "crowd",
+      "seconds": 2.5,
+      "note": "boo on a whiffed taunt",
+      "prompt": "A disappointed crowd gives jeering boos with a few whistles. Recorded from the middle of a packed stadium crowd.",
+      "pending": true
+    },
+    {
+      "id": "crowd-gasp-1",
+      "file": "crowd-gasp-1.mp3",
+      "seed": 5041,
+      "category": "crowd",
+      "seconds": 1.5,
+      "note": "gasp on a limb coming off",
+      "prompt": "A crowd lets out a sharp collective gasp, a single moment of shock. Recorded from the middle of a packed stadium crowd.",
+      "pending": true
+    },
+    {
+      "id": "crowd-gasp-2",
+      "file": "crowd-gasp-2.mp3",
+      "seed": 5042,
+      "category": "crowd",
+      "seconds": 1.5,
+      "note": "gasp on a limb coming off",
+      "prompt": "A crowd lets out a wincing intake of breath with a few shrieks, a single moment of shock. Recorded from the middle of a packed stadium crowd.",
+      "pending": true
+    },
+    {
+      "id": "crowd-laugh-1",
+      "file": "crowd-laugh-1.mp3",
+      "seed": 5051,
+      "category": "crowd",
+      "seconds": 2.0,
+      "note": "laugh at a fumble",
+      "prompt": "A crowd breaks into a ripple of mocking laughter. Recorded from the middle of a packed stadium crowd.",
+      "pending": true
+    },
+    {
+      "id": "crowd-laugh-2",
+      "file": "crowd-laugh-2.mp3",
+      "seed": 5052,
+      "category": "crowd",
+      "seconds": 2.0,
+      "note": "laugh at a fumble",
+      "prompt": "A crowd breaks into a burst of hearty laughter and a few hoots. Recorded from the middle of a packed stadium crowd.",
+      "pending": true
+    },
+    {
+      "id": "crowd-wooo-1",
+      "file": "crowd-wooo-1.mp3",
+      "seed": 5061,
+      "category": "crowd",
+      "seconds": 2.0,
+      "note": "a 'wooo' for a good hit",
+      "prompt": "A crowd calls out a drawn-out 'wooo' from many voices. Recorded from the middle of a packed stadium crowd.",
+      "pending": true
+    },
+    {
+      "id": "crowd-wooo-2",
+      "file": "crowd-wooo-2.mp3",
+      "seed": 5062,
+      "category": "crowd",
+      "seconds": 2.0,
+      "note": "a 'wooo' for a good hit",
+      "prompt": "A crowd calls out a rising 'woooo' from a group of fans. Recorded from the middle of a packed stadium crowd.",
+      "pending": true
+    },
+    {
+      "id": "crowd-chant",
+      "file": "crowd-chant.mp3",
+      "seed": 5071,
+      "category": "crowd",
+      "seconds": 6.0,
+      "note": "the chant that builds with hype, loopable",
+      "prompt": "A stadium crowd chants a simple rhythmic two-beat chant, stamping and clapping in time, voices unified and energetic, steady tempo so it can loop. Recorded from the middle of a packed stadium crowd.",
+      "pending": true,
+      "loop": true
     }
   ]
 }
