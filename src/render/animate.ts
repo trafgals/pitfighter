@@ -17,7 +17,7 @@ import type { World } from "../sim/world";
 import { LEG, applyPose, copyPose, impulse, targetPose, type Body, type Foot, type Target } from "./body";
 import { ragdoll } from "./ragdoll";
 import { feelOf } from "./limbfeel";
-import { clipFor, heightOf, mix, reactionFor, type HitStrength, type Plant } from "./motion";
+import { GAITS, clipFor, familyOf, heightOf, mix, reactionFor, type Family, type HitStrength, type Plant } from "./motion";
 
 /** Which side of the victim a blow comes from (1: its right, the +x side; -1: its left), and whether it comes from behind. */
 export function hitSide(a: Fighter | undefined, d: Fighter): { side: 1 | -1; behind: boolean } {
@@ -60,6 +60,7 @@ export function animate(v: Body, f: Fighter, w: World, time: number, dt: number,
     v.cue.last = f.state;
   }
   if (f.state !== "hitstun") v.cue.react = null;
+  v.cue.gait = v.gait; // the upper body swings with the feet
   const tp = targetPose(f, w, time, v.hurt, v.cue);
   blendIn(v, f, tp, dt);
   if (f.state === "ko") tp.p.y -= Math.min(1.2, f.t / 120);
@@ -145,8 +146,12 @@ export function rollOf(u: number): number {
   return 0;
 }
 
+/** Past this speed (m/s) a walk becomes a run: the feet leave the floor together for a moment. */
+const RUN_FROM = 4;
 /** A step's length (m) at a speed (m/s): longer strides as the fighter goes faster. */
-export const strideOf = (speed: number) => Math.min(0.75, 0.25 + 0.15 * speed);
+export const strideOf = (speed: number, family?: Family) => Math.min(1.25, 0.3 + 0.17 * speed) * (family ? GAITS[family].stride : 1);
+/** The share of a cycle a foot is in the air: half at a walk, more as it breaks into a run. */
+export const airOf = (speed: number, family?: Family) => 0.5 + ((family ? GAITS[family].air : 0.6) - 0.5) * Math.min(1, Math.max(0, (speed - 2.5) / (RUN_FROM - 2.5)));
 
 const Y = new THREE.Vector3(0, 1, 0);
 const X = new THREE.Vector3(1, 0, 0);
@@ -263,7 +268,13 @@ function footwork(b: Body, f: Fighter, mode: Plant | "gait", dt: number, frozen:
   const simSpeedSq = f.velX * f.velX + f.velY * f.velY;
   if (simSpeedSq > 1e-6) vel.set(f.velX * 60, 0, f.velY * 60);
   g.speed = vel.length();
-  const walking = mode === "gait" && g.speed > GAIT_MIN;
+  // which way it moves against the way it faces: sideways or backwards is a shuffle, not a walk
+  if (g.speed > 0.05 && g.speed > GAIT_MIN * 0.5) {
+    const lv = vel.clone().applyQuaternion(b.root.getWorldQuaternion(q1).invert());
+    const ang = Math.atan2(Math.abs(lv.x), lv.z); // 0 straight ahead .. pi straight back
+    g.strafe += (smooth(Math.min(1, Math.max(0, (ang - 0.6) / 0.7))) - g.strafe) * Math.min(1, dt * 8);
+  } else g.strafe -= g.strafe * Math.min(1, dt * 8);
+  const walking = mode === "gait" && g.speed > (g.on ? GAIT_MIN * 0.5 : GAIT_MIN);
   const target: Partial<Record<S, THREE.Vector3>> = {};
   const roll: Record<S, number> = { L: 0, R: 0 };
 
@@ -274,37 +285,57 @@ function footwork(b: Body, f: Fighter, mode: Plant | "gait", dt: number, frozen:
   }
   g.on = walking;
   if (walking) {
-    const S = strideOf(g.speed);
+    const fam = familyOf(f.style);
+    const gt = GAITS[fam];
+    const st = g.strafe;
+    const S = strideOf(g.speed, fam) * (1 - 0.4 * st);
+    // the share of the cycle a foot swings: half at a walk (one foot always down), more at a run (both leave the floor)
+    const sf = airOf(g.speed, fam) * (1 - st) + 0.5 * st;
+    const run = Math.min(1, Math.max(0, (g.speed - 2.5) / (RUN_FROM - 2.5))) * (1 - st);
     if (!frozen) g.phase = (g.phase + (g.speed * dt) / (2 * S)) % 1;
-    const lift = (simSpeedSq > 1e-6 ? 0.13 : 0.06) + 0.025 * g.speed;
-    if (simSpeedSq > 1e-6) {
-      // double-frequency walk bob: pelvis dips on heel strike and vaults over mid-stance
-      const stepU = (g.phase * 2) % 1;
-      b.body.position.y -= (1 - Math.sin(Math.PI * stepU)) * 0.045 * sc;
-      b.body.updateMatrixWorld(true);
-    }
+    const lift = (0.12 + 0.02 * g.speed) * gt.lift * (1 - 0.55 * st);
+    // a foot lands ahead of its hip by half the ground the body covers while it is down, so it passes under the body without sliding
+    const ahead = S * (1 - sf);
+    const dir = tmp.copy(vel).divideScalar(Math.max(g.speed, 1e-3));
+    const landing = (s: S, out: THREE.Vector3) => {
+      out.copy(fk[s]).addScaledVector(dir, ahead);
+      if (st > 0.5) {
+        // a shuffle: the feet stay either side of the midline instead of crossing
+        b.root.worldToLocal(out);
+        out.x = s === "R" ? Math.max(out.x, 0.07 * sc) : Math.min(out.x, -0.07 * sc);
+        b.root.localToWorld(out);
+      }
+      return out;
+    };
+    // the pelvis: dips as a foot lands and vaults over the stance leg walking, springs off it running, and shifts over the foot it stands on
+    const x = (((g.phase - sf) * 2) % 1 + 1) % 1;
+    const bob = gt.bob * Math.min(1, g.speed / 3) * (1 - 0.5 * st);
+    b.body.position.y -= ((1 - run) * (1 - Math.sin(Math.PI * x)) + run * 0.8 * Math.sin(Math.PI * x)) * bob * sc;
+    b.body.position.x += Math.sin(2 * Math.PI * g.phase) * gt.shift * Math.min(1, g.speed / 3) * (1 - 0.5 * run) * sc;
+    b.body.updateMatrixWorld(true);
     for (const s of SIDES) {
       const ft = b.feet[s];
-      const u = ((g.phase + (s === "L" ? 0 : 0.5)) % 1) / 0.5; // 0..1 swinging, 1..2 on the floor
+      const ph = (g.phase + (s === "L" ? 0 : 0.5)) % 1;
+      const u = ph < sf ? ph / sf : 1 + (ph - sf) / (1 - sf); // 0..1 swinging, 1..2 on the floor
       if (u < 1) {
         if (!ft.swing) ft.swing = { from: (ft.down ? ft.at : fk[s]).clone(), u: 0, dur: 0 };
         ft.down = false;
         ft.swing.u = u;
-        // it lands ahead of its hip by half a stride, so it passes under the body while it carries the weight
-        const land = tmp2.copy(fk[s]).addScaledVector(vel, S / 2 / Math.max(g.speed, 1e-3));
+        const land = landing(s, tmp2);
         const k = smooth(u);
         target[s] = ft.swing.from.clone().lerp(land, k).setY(floor + Math.sin(Math.PI * u) * lift);
-        roll[s] = rollOf(u);
+        ft.swing.pos = target[s]!.clone();
+        roll[s] = rollOf(u) * (1 - 0.7 * st);
       } else {
         // put down where the swing was taking it (or, lifted off by the body, under its hip)
         if (!ft.down) {
           ft.at.copy(fk[s]);
-          if (ft.swing) ft.at.addScaledVector(vel, S / 2 / Math.max(g.speed, 1e-3));
+          if (ft.swing) landing(s, ft.at);
           ft.down = true;
         }
         ft.swing = null;
         target[s] = ft.at;
-        roll[s] = rollOf(u);
+        roll[s] = rollOf(u) * (1 - 0.7 * st);
       }
     }
   } else {
@@ -316,6 +347,8 @@ function footwork(b: Body, f: Fighter, mode: Plant | "gait", dt: number, frozen:
         ft.swing = null;
         continue;
       }
+      // the gait stopping mid-step: the foot finishes the step from where it is, over a step's time, not in one frame
+      if (ft.swing && ft.swing.dur === 0) ft.swing = { from: ft.swing.pos ?? ft.swing.from, u: 0, dur: STEP_TIME };
       // a foot is put down when the clip brings it to the floor (a landing from a jump plants it on touching down)
       if (!ft.down && !ft.swing) {
         if (lifted[s] > TOUCH) continue;
