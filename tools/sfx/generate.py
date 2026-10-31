@@ -7,6 +7,11 @@ whole set can be regenerated from the file that ships with the game.
 
     python tools/sfx/generate.py
     python tools/sfx/generate.py --only hit-claw-skin
+    python tools/sfx/generate.py --only crowd-murmur,crowd-chant
+
+Cues in the "crowd" category are also copied to `public/sfx/`, where
+`src/render/sfx.ts` loads them; cues flagged "loop" get their tail crossfaded
+into their head so the bed repeats without a seam.
 
 Each cue is generated once and written twice: the untouched model output, and
 the trimmed, normalised, one channel mp3 the game will play. The raw output is
@@ -240,6 +245,18 @@ def shape(data: np.ndarray, rate: int) -> np.ndarray:
     return out
 
 
+def make_loop(data: np.ndarray, rate: int, xfade_s: float = 0.6) -> np.ndarray:
+    """Make a bed loop seamlessly: the tail fades into the head and is cut off,
+    so the file's end flows into its start when the player wraps it."""
+    n = int(xfade_s * rate)
+    if data.size < n * 3:
+        return data
+    ramp = np.linspace(0.0, 1.0, n, dtype=np.float32)
+    body = data[:-n].copy()
+    body[:n] = body[:n] * np.sqrt(ramp) + data[-n:] * np.sqrt(1.0 - ramp)
+    return body
+
+
 def write_sample(path: Path, data: np.ndarray, rate: int) -> None:
     """Write the sample the game will play."""
     write_mp3(path, data, rate)
@@ -263,6 +280,7 @@ def main() -> int:
     # the candidates live beside the tool, not in public/, until something
     # actually loads them: a file in public/ is shipped in the build
     ap.add_argument("--out", type=Path, default=ROOT / "samples")
+    ap.add_argument("--serve", type=Path, default=ROOT.parent.parent / "public" / "sfx", help="where crowd cues are copied for the game to load")
     ap.add_argument("--server", default=DEFAULT_SERVER)
     ap.add_argument("--only", default="", help="comma separated cue ids")
     ap.add_argument("--keep-raw", action="store_true", help="also keep the untouched model output")
@@ -305,8 +323,15 @@ def main() -> int:
             raw_dir.mkdir(parents=True, exist_ok=True)
             (raw_dir / raw_name).write_bytes(raw)
         data, rate = to_mono(raw)
-        data = shape(trim(data, rate), rate)
+        data = trim(data, rate)
+        if cue.get("loop"):
+            data = make_loop(data, rate)
+        data = shape(data, rate)
         write_sample(dest, data, rate)
+        # the crowd is played by the game, so it ships; the hit candidates stay put
+        if cue.get("category") == "crowd":
+            args.serve.mkdir(parents=True, exist_ok=True)
+            (args.serve / cue["file"]).write_bytes(dest.read_bytes())
         print(f"  {cue['id']:<20} {len(data) / rate:.2f}s  {dest.name}  ({time.time() - started:.0f}s)")
 
     print("done")

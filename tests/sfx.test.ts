@@ -8,13 +8,18 @@ import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import prompts from "../tools/sfx/prompts.json";
+import { CROWD_CHANT, CROWD_FILES, CROWD_MURMUR } from "../src/render/sfx";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SAMPLES = join(ROOT, "tools", "sfx", "samples");
 const REFERENCE = join(ROOT, "tools", "sfx", "reference");
 
-type Cue = { id: string; file: string; prompt: string; seed: number; category: string; note: string };
-const CUES = prompts.cues as Cue[];
+type Cue = { id: string; file: string; prompt: string; seed: number; category: string; note: string; seconds?: number; pending?: boolean };
+const ALL = prompts.cues as Cue[];
+// the crowd's cues are beds and long reactions, not one dry hit, and may be
+// flagged pending until the generator has been run for them
+const CUES = ALL.filter((c) => c.category !== "crowd");
+const CROWD = ALL.filter((c) => c.category === "crowd");
 
 /** The header of the first mpeg audio frame: rate, channels and bitrate. */
 function mp3Header(path: string): { rate: number; channels: number; kbps: number } | null {
@@ -65,13 +70,13 @@ describe("the sound cues", () => {
   });
 
   it("every cue has a generated sample on disk", () => {
-    for (const cue of CUES) {
+    for (const cue of ALL.filter((c) => !c.pending)) {
       expect(existsSync(join(SAMPLES, cue.file)), `${cue.file} is missing`).toBe(true);
     }
   });
 
   it("every sample is a 44.1 kHz mono mp3 at 128 kbit/s", () => {
-    for (const cue of CUES) {
+    for (const cue of ALL.filter((c) => existsSync(join(SAMPLES, c.file)))) {
       const path = join(SAMPLES, cue.file);
       const h = mp3Header(path);
       expect(h, `${cue.file} is not an mp3`).not.toBeNull();
@@ -88,6 +93,16 @@ describe("the sound cues", () => {
       const size = readFileSync(join(SAMPLES, cue.file)).length;
       expect(size, `${cue.file} size`).toBeLessThan(44100);
     }
+  });
+
+  it("the crowd has every sample the game loads, and a long enough prompt for each", () => {
+    expect(new Set(CROWD.map((c) => c.id))).toEqual(new Set(CROWD_FILES));
+    for (const cue of CROWD) {
+      expect(cue.file, cue.id).toBe(`${cue.id}.mp3`);
+      expect(cue.prompt.length, cue.id).toBeGreaterThan(20);
+      expect(cue.seconds, `${cue.id} length`).toBeGreaterThan(1);
+    }
+    for (const id of [CROWD_MURMUR, CROWD_CHANT]) expect(CROWD.find((c) => c.id === id)).toMatchObject({ loop: true });
   });
 
   it("the reference renders of the current synthesis are there", () => {

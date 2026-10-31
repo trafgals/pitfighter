@@ -1,8 +1,13 @@
-// Sound, synthesised with Web Audio: no sample files, so the game stays a
-// static page. Every cue of a step maps to a short voice (filtered noise and
-// pitched oscillators), panned by where it happened. A bed for the stage (the
-// lava's rumble, idling engines, wind at altitude, propellers, a siege) and a
-// crowd loop under the match; the crowd swells on big moments.
+// Sound, mostly synthesised with Web Audio. Every cue of a step maps to a
+// short voice (filtered noise and pitched oscillators), panned by where it
+// happened. A bed for the stage (the lava's rumble, idling engines, wind at
+// altitude, propellers, a siege).
+//
+// The crowd is recorded, not synthesised (noise reads as hiss): mp3 samples in
+// public/sfx, made by tools/sfx/generate.py. A murmur bed plays under the whole
+// match, a chant fades in and speeds up as the hype builds, and the big moments
+// get a reaction on top (a gasp, a roar, a cheer, a boo). Samples that are not
+// there yet are skipped, and a missing murmur falls back to the old noise bed.
 //
 // The AudioContext is only created after a key press, click or touch (the
 // browser's autoplay rule). M mutes; ?mute=1 starts muted.
@@ -13,6 +18,65 @@ import { CHARACTERS } from "../data/characters";
 
 type Voice = (t: number, out: AudioNode, k: number) => void;
 
+// ------------------------------------------------------------ the crowd's samples
+/** One-shot reactions; each has two takes, so the same one never plays twice running. */
+export type CrowdReaction = "cheer" | "roar" | "boo" | "gasp" | "laugh" | "wooo";
+
+export const CROWD_TAKES: Record<CrowdReaction, string[]> = {
+  cheer: ["crowd-cheer-1", "crowd-cheer-2"],
+  roar: ["crowd-roar-1", "crowd-roar-2"],
+  boo: ["crowd-boo-1", "crowd-boo-2"],
+  gasp: ["crowd-gasp-1", "crowd-gasp-2"],
+  laugh: ["crowd-laugh-1", "crowd-laugh-2"],
+  wooo: ["crowd-wooo-1", "crowd-wooo-2"],
+};
+export const CROWD_MURMUR = "crowd-murmur";
+export const CROWD_CHANT = "crowd-chant";
+/** every file the crowd loads, from public/sfx */
+export const CROWD_FILES: string[] = [CROWD_MURMUR, CROWD_CHANT, ...Object.values(CROWD_TAKES).flat()];
+
+/** How loud each reaction is, before the hype scales it. */
+const REACTION_GAIN: Record<CrowdReaction, number> = { cheer: 0.7, roar: 0.85, boo: 0.6, gasp: 0.55, laugh: 0.45, wooo: 0.5 };
+/** The least time between two of one reaction, in seconds. */
+const REACTION_GAP: Record<CrowdReaction, number> = { cheer: 3, roar: 1.2, boo: 3, gasp: 0.8, laugh: 3, wooo: 1.5 };
+
+/** What the crowd does about an event of this kind (a "taunt-whiff" is a finished taunt the Gallery did not answer). */
+export function crowdReactions(kind: string): CrowdReaction[] {
+  switch (kind) {
+    case "detach":
+      return ["gasp"];
+    case "strip":
+    case "ko":
+    case "wallsplat":
+    case "special":
+      return ["roar"];
+    case "win":
+      return ["cheer"];
+    case "taunt-whiff":
+      return ["boo"];
+    case "reversal":
+    case "crunch":
+    case "airgrab":
+      return ["wooo"];
+    case "fall":
+      return ["laugh"];
+    default:
+      return [];
+  }
+}
+
+/** Pick a take other than the last one used. */
+export function pickTake(takes: string[], last: string | undefined, rnd: () => number = Math.random): string {
+  const pool = takes.length > 1 ? takes.filter((t) => t !== last) : takes;
+  return pool[Math.min(pool.length - 1, Math.floor(rnd() * pool.length))];
+}
+
+/** The crowd's levels at a hype in 0..1: the murmur lifts a little, the chant only comes in past the middle and speeds up. */
+export function crowdMix(hype: number): { murmur: number; chant: number; chantRate: number } {
+  const h = Math.max(0, Math.min(1, hype));
+  return { murmur: 0.18 + 0.2 * h, chant: Math.max(0, (h - 0.35) / 0.65) * 0.35, chantRate: 0.95 + 0.15 * h };
+}
+
 const MUTE_KEY = "pitfighter.mute";
 
 export class Sfx {
@@ -20,7 +84,17 @@ export class Sfx {
   private master!: GainNode;
   private noise!: AudioBuffer;
   private brown!: AudioBuffer;
+  /** the murmur bed's level (or the noise bed's, when the murmur sample is missing) */
   private crowd: GainNode | null = null;
+  private chant: GainNode | null = null;
+  private chantSrc: AudioBufferSourceNode | null = null;
+  private crowdStarted = false;
+  private ambientOn = false;
+  private samples = new Map<string, AudioBuffer>();
+  private samplesSettled = false;
+  private lastTake: Partial<Record<CrowdReaction, string>> = {};
+  private lastReaction: Partial<Record<CrowdReaction, number>> = {};
+  private prevState: string[] = [];
   private bed: AudioScheduledSourceNode[] = [];
   private bedStage: StageId | null = null;
   private hype = 0;
@@ -78,6 +152,23 @@ export class Sfx {
       last = (last + 0.02 * (Math.random() * 2 - 1)) / 1.02;
       b[i] = last * 3.5;
     }
+    void this.loadSamples(ctx);
+  }
+
+  /** Fetch and decode the crowd's samples; whatever fails to load is left out. */
+  private async loadSamples(ctx: AudioContext): Promise<void> {
+    await Promise.all(
+      CROWD_FILES.map(async (id) => {
+        try {
+          const res = await fetch(`./sfx/${id}.mp3`);
+          if (!res.ok) return;
+          this.samples.set(id, await ctx.decodeAudioData(await res.arrayBuffer()));
+        } catch {
+          /* not there yet: that reaction stays quiet */
+        }
+      }),
+    );
+    this.samplesSettled = true;
   }
 
   // ------------------------------------------------------------ building blocks
@@ -327,28 +418,85 @@ export class Sfx {
         this.bed.push(o);
       }
     }
-    if (this.crowd) return;
-    const crowd = c.createBufferSource();
-    crowd.buffer = this.noise;
-    crowd.loop = true;
-    const cf = c.createBiquadFilter();
-    cf.type = "bandpass";
-    cf.frequency.value = 650;
-    cf.Q.value = 0.6;
+    this.ambientOn = true;
+    this.startCrowd();
+  }
+
+  /** The murmur under the match and the chant above it; once the samples have loaded (or failed to). */
+  private startCrowd(): void {
+    const c = this.ctx;
+    if (!c || this.crowdStarted) return;
+    const murmur = this.samples.get(CROWD_MURMUR);
+    if (!murmur && !this.samplesSettled) return;
+    this.crowdStarted = true;
     this.crowd = c.createGain();
-    this.crowd.gain.value = 0.05;
-    crowd.connect(cf).connect(this.crowd).connect(this.master);
-    crowd.start();
+    this.crowd.connect(this.master);
+    const bed = c.createBufferSource();
+    bed.loop = true;
+    if (murmur) {
+      bed.buffer = murmur;
+      this.crowd.gain.value = crowdMix(0).murmur;
+      bed.connect(this.crowd);
+    } else {
+      // no recording: the old bandpassed noise, quiet, so the match is not bare
+      bed.buffer = this.noise;
+      const cf = c.createBiquadFilter();
+      cf.type = "bandpass";
+      cf.frequency.value = 650;
+      cf.Q.value = 0.6;
+      this.crowd.gain.value = 0.05;
+      bed.connect(cf).connect(this.crowd);
+    }
+    bed.start();
+    const chant = this.samples.get(CROWD_CHANT);
+    if (chant) {
+      this.chant = c.createGain();
+      this.chant.gain.value = 0;
+      this.chant.connect(this.master);
+      this.chantSrc = c.createBufferSource();
+      this.chantSrc.buffer = chant;
+      this.chantSrc.loop = true;
+      this.chantSrc.connect(this.chant);
+      this.chantSrc.start();
+    }
+  }
+
+  /** A one-shot reaction from the crowd: another take than the last, a little off in pitch, level and place. */
+  private react(r: CrowdReaction, t: number): void {
+    const c = this.ctx;
+    if (!c) return;
+    if (t - (this.lastReaction[r] ?? -99) < REACTION_GAP[r]) return;
+    const id = pickTake(CROWD_TAKES[r], this.lastTake[r]);
+    const buf = this.samples.get(id);
+    if (!buf) return;
+    this.lastReaction[r] = t;
+    this.lastTake[r] = id;
+    const src = c.createBufferSource();
+    src.buffer = buf;
+    src.playbackRate.value = 0.92 + Math.random() * 0.16;
+    const g = c.createGain();
+    g.gain.value = REACTION_GAIN[r] * (0.85 + Math.random() * 0.25) * (0.7 + 0.3 * this.hype);
+    const pan = c.createStereoPanner();
+    pan.pan.value = (Math.random() * 2 - 1) * 0.3;
+    src.connect(g).connect(pan).connect(this.master);
+    src.start(t);
   }
 
   /** Play one step's cues. */
   cue(cues: Cue[], w: World): void {
     const c = this.ctx;
     if (!c || c.state !== "running") return;
-    if (!this.crowd || this.bedStage !== w.s.stage) this.startAmbient(w.s.stage);
+    if (!this.ambientOn || this.bedStage !== w.s.stage) this.startAmbient(w.s.stage);
+    else this.startCrowd();
     const t = c.currentTime + 0.005;
     const perKind: Record<string, number> = {};
+    // a taunt that ended with no appeal from the Gallery is a whiff: boo
+    for (const f of w.s.fighters) {
+      if (this.prevState[f.id] === "taunt" && f.state === "idle" && !cues.some((q) => q.kind === "appeal" && q.a === f.id)) this.react("boo", t);
+      this.prevState[f.id] = f.state;
+    }
     for (const q of cues) {
+      for (const r of crowdReactions(q.kind)) this.react(r, t);
       // a stage's own take on a cue: the hazard that struck, a win that is not a flush
       const what = (q as { what?: string }).what;
       const key = q.kind === "geyser" && what && what !== "geyser" ? `geyser:${what}` : q.kind === "win" && w.s.stage !== "hell-toilet" ? "win:other" : q.kind;
@@ -386,7 +534,13 @@ export class Sfx {
     }
     if (this.crowd) {
       this.hype *= 0.985;
-      this.crowd.gain.setTargetAtTime(0.05 + 0.35 * this.hype, t, 0.15);
+      const mix = crowdMix(this.hype);
+      // the noise fallback keeps its old, quieter range
+      this.crowd.gain.setTargetAtTime(this.samples.has(CROWD_MURMUR) ? mix.murmur : 0.05 + 0.35 * this.hype, t, 0.15);
+      if (this.chant && this.chantSrc) {
+        this.chant.gain.setTargetAtTime(mix.chant, t, 0.4);
+        this.chantSrc.playbackRate.setTargetAtTime(mix.chantRate, t, 0.4);
+      }
     }
   }
 }
