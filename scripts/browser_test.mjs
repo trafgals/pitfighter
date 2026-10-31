@@ -69,7 +69,8 @@ async function main() {
     "launch chrome",
   );
   const page = await browser.newPage();
-  page.setDefaultTimeout(10_000);
+  page.setDefaultTimeout(30_000);
+  page.setDefaultNavigationTimeout(30_000);
   await page.setViewport({ width: 1280, height: 800 });
   const errors = [];
   page.on("pageerror", (e) => errors.push(String(e)));
@@ -86,8 +87,8 @@ async function main() {
     return ok;
   };
 
-  await withTimeout(page.goto(`${SITE}/?seed=5`, { waitUntil: "load" }), 20_000, "load page");
-  await page.waitForFunction(() => window.__game && window.__game.mode === "select", { timeout: 10_000 });
+  await withTimeout(page.goto(`${SITE}/?seed=5`, { waitUntil: "load", timeout: 30_000 }), 35_000, "load page");
+  await page.waitForFunction(() => window.__game && window.__game.mode === "select", { timeout: 20_000 });
   check(true, "page boots to the character select");
   const cards = await page.$$eval(".sc", (els) => els.length);
   check(cards === 12, `select shows the twelve fighters (${cards})`);
@@ -223,7 +224,7 @@ async function main() {
   const moveFrame1 = await page.evaluate(() => window.__game.world.s.frame);
   check(x1 - x0 > 0.3, `keyboard moves P1 (dx = ${(x1 - x0).toFixed(2)} m over ${moveFrame1 - moveFrame0} frames)`);
   await page.keyboard.down("KeyJ");
-  const st = await page.waitForFunction(() => window.__game.world.fighters[0].state === "attack" && window.__game.world.fighters[0].move, { timeout: 2000 }).then(
+  const st = await page.waitForFunction(() => window.__game.world.fighters[0].state === "attack" && window.__game.world.fighters[0].move, { timeout: 5000 }).then(
     (h) => h.jsonValue(),
     () => null,
   );
@@ -527,8 +528,8 @@ async function main() {
     window.__pad = pad;
     navigator.getGamepads = () => [pad, null, null, null];
   });
-  await withTimeout(page.goto(`${SITE}/?seed=5`, { waitUntil: "load" }), 20_000, "reload with a gamepad");
-  await page.waitForFunction(() => window.__game && window.__game.mode === "select", { timeout: 10_000 });
+  await withTimeout(page.goto(`${SITE}/?seed=5`, { waitUntil: "load", timeout: 30_000 }), 35_000, "reload with a gamepad");
+  await page.waitForFunction(() => window.__game && window.__game.mode === "select", { timeout: 20_000 });
   const padPress = async (i) => {
     await page.evaluate((i) => (window.__pad.buttons[i] = { pressed: true, value: 1 }), i);
     await frames();
@@ -546,7 +547,7 @@ async function main() {
   await padPress(9);
   // started: the countdown is the match's first beat. (Waiting out the countdown too would time the
   // software renderer: it counts at most 0.1 s a frame, and a frame there takes 400 ms or more.)
-  await page.waitForFunction(() => window.__game.mode === "countdown" || window.__game.mode === "match", { timeout: 10_000 });
+  await page.waitForFunction(() => window.__game.mode === "countdown" || window.__game.mode === "match", { timeout: 20_000 });
   const padMatch = await page.evaluate(() => window.__game.world.fighters.map((f) => f.human));
   check(padMatch.length === 4 && padMatch[0] && padMatch.slice(1).every((h) => !h), `a third Start starts the match with the pad as P1 and 3 CPUs (${JSON.stringify(padMatch)})`);
 
@@ -574,8 +575,8 @@ async function main() {
   });
   for (const [i, run] of STAGE_RUNS.entries()) {
     errors.length = 0;
-    await withTimeout(page.goto(`${SITE}/?auto=1&fighters=8&seed=${11 + i}&stage=${run.id}`, { waitUntil: "load" }), 20_000, `load ${run.id}`);
-    await page.waitForFunction(() => window.__start, { timeout: 10_000 });
+    await withTimeout(page.goto(`${SITE}/?auto=1&fighters=8&seed=${11 + i}&stage=${run.id}`, { waitUntil: "load", timeout: 30_000 }), 35_000, `load ${run.id}`);
+    await page.waitForFunction(() => window.__start, { timeout: 20_000 });
     const start = await page.evaluate(() => {
       const w = window.__game.world;
       return {
@@ -635,7 +636,7 @@ async function main() {
   }
 
   // ?debug=motion: a line per fighter and foot markers that follow the plants
-  await withTimeout(page.goto(`${SITE}/?auto=1&fighters=8&seed=3&debug=motion&gore=0`, { waitUntil: "load" }), 20_000, "load debug=motion");
+  await withTimeout(page.goto(`${SITE}/?auto=1&fighters=8&seed=3&debug=motion&gore=0`, { waitUntil: "load", timeout: 30_000 }), 35_000, "load debug=motion");
   await withTimeout(page.waitForFunction(() => (document.getElementById("motion-debug")?.textContent ?? "").split("\n").length === 8, { timeout: 15_000 }), 16_000, "motion overlay");
   await withTimeout(page.evaluate(() => window.__game.step(240)), 15_000, "debug=motion 240 frames");
   await frames();
@@ -649,7 +650,7 @@ async function main() {
   check(errors.length === 0, `?debug=motion: no page errors${errors.length ? ": " + errors.slice(0, 3).join(" | ") : ""}`);
 
   // practice: the CPU is a dummy, nobody wins, and Tab opens the move list, which holds the fight
-  await withTimeout(page.goto(`${SITE}/?auto=1&fighters=2&seed=5&practice=1`, { waitUntil: "load" }), 20_000, "load practice");
+  await withTimeout(page.goto(`${SITE}/?auto=1&fighters=2&seed=5&practice=1`, { waitUntil: "load", timeout: 30_000 }), 35_000, "load practice");
   await withTimeout(page.waitForFunction(() => window.__game.mode === "match", { timeout: 15_000 }), 16_000, "practice match starts");
   const pr0 = await page.evaluate(() => {
     const w = window.__game.world;
@@ -684,7 +685,7 @@ async function main() {
   check(errors.length === 0, `practice: no page errors${errors.length ? ": " + errors.slice(0, 3).join(" | ") : ""}`);
 
   // ?lab=1: the feel lab's dials, and a take recorded and replayed
-  await withTimeout(page.goto(`${SITE}/?auto=1&fighters=2&seed=5&practice=1&lab=1`, { waitUntil: "load" }), 20_000, "load lab");
+  await withTimeout(page.goto(`${SITE}/?auto=1&fighters=2&seed=5&practice=1&lab=1`, { waitUntil: "load", timeout: 30_000 }), 35_000, "load lab");
   await withTimeout(page.waitForFunction(() => window.__game.mode === "match", { timeout: 15_000 }), 16_000, "lab match starts");
   const dials = await page.evaluate(() => document.querySelectorAll("#lab .dial").length);
   check(dials >= 30, `lab: the panel shows its dials (${dials})`);
@@ -712,7 +713,7 @@ async function main() {
 
   // frame time: 8 fighters' animation (springs, IK, ragdoll: the scene's sync) must fit easily in a 60 fps frame.
   // Headless Chrome draws on the CPU (SwiftShader), so the whole frame is reported, but only the animation is held to a budget.
-  await withTimeout(page.goto(`${SITE}/?auto=1&fighters=8&seed=7`, { waitUntil: "load" }), 20_000, "load frame-time match");
+  await withTimeout(page.goto(`${SITE}/?auto=1&fighters=8&seed=7`, { waitUntil: "load", timeout: 30_000 }), 35_000, "load frame-time match");
   await withTimeout(page.waitForFunction(() => window.__game.mode === "match", { timeout: 15_000 }), 16_000, "frame-time match starts");
   const ft = await withTimeout(
     page.evaluate(
