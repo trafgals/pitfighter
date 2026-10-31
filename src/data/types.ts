@@ -276,6 +276,8 @@ export interface Art {
   intro: string;
   victory: string;
   defeat: string;
+  /** the concept painting, relative to public/ (the lobby shows it) */
+  concept: string;
   portrait: string;
 }
 

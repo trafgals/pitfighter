@@ -1835,6 +1835,7 @@
         "intro": "Steps out from under a lamp, blows his whistle, opens his notebook, licks the pencil and writes the opponent's name.",
         "victory": "Tears the page out of his notebook and lays it on the body. Touches his helmet to the Gallery. Walks off at the regulation pace.",
         "defeat": "Kneels; the ticking slows to nothing; his hand still on his notebook.",
+        "concept": "tex/characters/obadiah_winch.jpg",
         "portrait": "Three-quarter view under a gas lamp, rain running off the helmet's brim, notebook open in a brass hand."
       },
       "sound": {
@@ -2598,6 +2599,7 @@
         "intro": "Steps down off a steam lorry, offers his hand to the camera, and crushes the nothing in it.",
         "victory": "Hands his hat to an orphan who runs on, counts the Gallery's coins, and lights a cigar off his own palm.",
         "defeat": "His furnace goes out with a long sigh; the smoke stops; the iron cools grey.",
+        "concept": "tex/characters/hezekiah_smelt.jpg",
         "portrait": "Low angle, the stovepipe hat smoking against a sky of rain and furnace glow, one iron hand offered."
       },
       "sound": {
@@ -3376,6 +3378,7 @@
         "intro": "Climbs up out of a drain grate, shakes herself like a dog, and says grace.",
         "victory": "Kneels, says a short prayer over the body, and goes through its pockets.",
         "defeat": "Sits down in the puddle with her arms full and her head bowed.",
+        "concept": "tex/characters/nell_sluice.jpg",
         "portrait": "Up to her knees in black water under a bridge arch, grinning, a gold tooth held up in a lead hand."
       },
       "sound": {
@@ -4152,6 +4155,7 @@
         "intro": "Marches in, stops, turns on her heel, and pulls on a pair of rubber gloves over the porcelain.",
         "victory": "Writes the time of death on a card and pins it to the body.",
         "defeat": "Kneels upright; a crack runs down her face as if it were porcelain too.",
+        "concept": "tex/characters/prudence_kilnworth.jpg",
         "portrait": "Straight-on, hands folded, porcelain gleaming under the gaslight, her cap stark white against the rain."
       },
       "sound": {
@@ -4932,6 +4936,7 @@
         "intro": "Bursts through a paper hoop, throws his shako into the Gallery, and flexes.",
         "victory": "Lifts the defeated over his head and walks a lap of the Sump, then bows so low his moustache touches the water.",
         "defeat": "Falls back with his arms out and weeps for Ursula.",
+        "concept": "tex/characters/bartholomew_mule.jpg",
         "portrait": "Flexing in a spotlight, sweat and rain flying off him, the belt shining, his moustache magnificent."
       },
       "sound": {
@@ -5707,6 +5712,7 @@
         "intro": "Pipes the side on his bosun's call, salutes, and asks permission to come aboard.",
         "victory": "Bows his head, removes his hat, and recites a prayer for the drowned.",
         "defeat": "Kneels, takes off his hat, and says 'Strike the colours.'",
+        "concept": "tex/characters/absalom_rook.jpg",
         "portrait": "In the rain on the deck of a hulk, beard blowing, an oak elbow raised to the camera."
       },
       "sound": {
@@ -6519,6 +6525,7 @@
         "intro": "Removes a long white glove with her teeth, folds it, and hands it to no one.",
         "victory": "Curtsies over the body, then bleeds off her pressure in a long, polite sigh of steam.",
         "defeat": "Kneels, hair falling, the gauges dropping to zero.",
+        "concept": "tex/characters/hester_bulwark.jpg",
         "portrait": "Profile, fists up in the classical stance, steam curling off the rams, the rain catching the light on her hair."
       },
       "sound": {
@@ -7330,6 +7337,7 @@
         "intro": "Wanders in from the Gallery's tea stall with a cup and saucer, sets them down on the pit's edge, and bows.",
         "victory": "Pours himself a fresh cup over the body and toasts the Gallery.",
         "defeat": "Sits down heavily, takes one last sip, and tips slowly over onto his side, steaming.",
+        "concept": "tex/characters/percival_crump.jpg",
         "portrait": "Close-up, a cup raised in a bamboo hand, steam curling off the boiler, eyes twinkling over the moustache, warm lamplight from a tea-room window."
       },
       "sound": {
@@ -8127,6 +8135,7 @@
         "intro": "Pulls a wooden ruler from her apron pocket, measures the distance to the opponent, taps her iron heel to engage the ratchet, and raises her fists.",
         "victory": "Chalks a tick on the defeated opponent and pushes her goggles up to inspect her work.",
         "defeat": "A knee ratchet gives way with a sharp metallic snap; she falls to one knee, gripping the broken spring with a furious scowl.",
+        "concept": "tex/characters/tabitha_pegg.png",
         "portrait": "Three-quarter in her Spitalfields workshop, apron tied, goggles glinting on her brow, one iron last resting on a wooden cobbler's bench."
       },
       "sound": {
@@ -8907,6 +8916,7 @@
         "intro": "Walks in behind a small funeral procession of mutes, unrolls his tape and measures the opponent from across the Sump.",
         "victory": "Places two pennies on the eyes, removes his hat, and the mutes carry the body away.",
         "defeat": "Lies down neatly on his back with his arms crossed, and closes his own eyes.",
+        "concept": "tex/characters/martha_crape.png",
         "portrait": "Straight on in the rain, tall and black, his hat's weepers blowing sideways, a tape measure in his long hands."
       },
       "sound": {
@@ -9702,6 +9712,7 @@
         "intro": "Steps out of a carriage, removes his hat to the opponent, and says how terribly sorry he is.",
         "victory": "Wipes the blade with a handkerchief, sheathes it, writes a condolence card, places it on the body, bows, and puts his hat on.",
         "defeat": "Kneels, places his hat beside him, and dies with perfect posture.",
+        "concept": "tex/characters/eleanor_ashby.png",
         "portrait": "Three-quarter view, hat tipped, the swordstick drawn an inch to show the blade, the carnation bright red, the rain on his silver hand."
       },
       "sound": {
@@ -10482,6 +10493,7 @@
         "intro": "Hurries in late with a ledger, trips on the step, apologises to the step.",
         "victory": "Stares at his hands, then at the body, then at the Gallery, and bursts into tears.",
         "defeat": "Sits down in the puddle and writes a note in his ledger: 'Sorry, Mother.'",
+        "concept": "tex/characters/tilly_tongs.png",
         "portrait": "Hunched at a high desk with a candle, a mismatched hand holding the pen, the pawn ticket at his wrist, rain on the window."
       },
       "sound": {
