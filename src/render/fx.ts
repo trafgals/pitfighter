@@ -30,9 +30,14 @@ interface SprayOpts extends BleedOpts {
   gravity?: number;
 }
 
-/** How long (s) a splat stays on the floor, and how long of that it takes to soak away at the end. */
+/** How long (s) a scorch mark stays on the floor, and how long of that it takes to soak away at the end. Blood never goes. */
 export const SPLAT_LIFE = 45;
 const SPLAT_FADE = 6;
+/** Blood stays all match: this many splats are live meshes, and the oldest are baked into the floor's stain texture. */
+export const BLOOD_SPLATS = 3000;
+/** The stain texture covers the floor out to this many metres each way, at this many pixels. */
+const STAIN_SPAN = 14;
+const STAIN_PX = 2048;
 
 /** Soft radial particle sprite (64x64 RGBA DataTexture) so sparks, steam, and blood render as round orbs instead of hard square boxes. */
 let cachedDotTex: THREE.DataTexture | null = null;
@@ -226,7 +231,83 @@ function splatTexture(): THREE.Texture {
   return t;
 }
 
-/** Splats on the floor: one instanced quad each, in a ring buffer, soaking away at the end of their life. */
+/**
+ * The floor's old blood: when the ring of live splats wraps, the splat it
+ * overwrites is painted here, dried dark, so it costs nothing more to keep.
+ */
+class FloorStains {
+  readonly mesh: THREE.Mesh;
+  /** how many splats have been painted in */
+  baked = 0;
+  private g: CanvasRenderingContext2D | null = null;
+  private tex: THREE.CanvasTexture | null = null;
+  private sprite: HTMLCanvasElement | null = null;
+  private dirty = false;
+
+  constructor() {
+    const geo = new THREE.PlaneGeometry(STAIN_SPAN * 2, STAIN_SPAN * 2);
+    geo.rotateX(-Math.PI / 2);
+    const mat = new THREE.MeshStandardMaterial({ transparent: true, roughness: 0.3, metalness: 0.05, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
+    if (typeof document !== "undefined") {
+      const c = document.createElement("canvas");
+      c.width = c.height = STAIN_PX;
+      this.g = c.getContext("2d");
+      const src = splatTexture().image as HTMLCanvasElement | undefined;
+      if (this.g && src && src.width) {
+        // the splat sprite, tinted the colour of dried blood
+        const s = document.createElement("canvas");
+        s.width = s.height = src.width;
+        const sg = s.getContext("2d")!;
+        sg.drawImage(src, 0, 0);
+        sg.globalCompositeOperation = "source-in";
+        sg.fillStyle = "#6e0a0a";
+        sg.fillRect(0, 0, s.width, s.height);
+        this.sprite = s;
+        this.tex = new THREE.CanvasTexture(c);
+        this.tex.colorSpace = THREE.SRGBColorSpace;
+        mat.map = this.tex;
+      }
+    }
+    this.mesh = new THREE.Mesh(geo, mat);
+    this.mesh.position.y = 0.004;
+    this.mesh.receiveShadow = true;
+    this.mesh.renderOrder = 0;
+    this.mesh.frustumCulled = false;
+  }
+
+  bake(x: number, z: number, size: number, spin: number): void {
+    this.baked++;
+    if (!this.g || !this.sprite) return;
+    const k = STAIN_PX / (STAIN_SPAN * 2);
+    const px = (x + STAIN_SPAN) * k;
+    const py = (z + STAIN_SPAN) * k;
+    if (px < 0 || py < 0 || px > STAIN_PX || py > STAIN_PX) return;
+    const s = size * k;
+    this.g.save();
+    this.g.translate(px, py);
+    this.g.rotate(-spin);
+    this.g.drawImage(this.sprite, -s / 2, -s / 2, s, s);
+    this.g.restore();
+    this.dirty = true;
+  }
+
+  /** Upload what has been painted since the last frame. */
+  flush(): void {
+    if (!this.dirty || !this.tex) return;
+    this.tex.needsUpdate = true;
+    this.dirty = false;
+  }
+
+  clear(): void {
+    this.baked = 0;
+    if (this.g) {
+      this.g.clearRect(0, 0, STAIN_PX, STAIN_PX);
+      this.dirty = true;
+    }
+  }
+}
+
+/** Splats on the floor: one instanced quad each, in a ring buffer; a finite life soaks away at the end, an endless one is baked into the floor when the ring wraps. */
 class Splats {
   readonly mesh: THREE.InstancedMesh;
   private age: Float32Array;
@@ -240,7 +321,11 @@ class Splats {
   private p = new THREE.Vector3();
   private s = new THREE.Vector3();
 
-  constructor(readonly n: number) {
+  constructor(
+    readonly n: number,
+    private readonly life = SPLAT_LIFE,
+    private readonly bake?: (x: number, z: number, size: number, spin: number) => void,
+  ) {
     const geo = new THREE.PlaneGeometry(1, 1);
     geo.rotateX(-Math.PI / 2);
     this.mesh = new THREE.InstancedMesh(
@@ -264,7 +349,7 @@ class Splats {
     this.mesh.receiveShadow = true;
     this.mesh.renderOrder = 1;
     this.mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-    this.age = new Float32Array(n).fill(SPLAT_LIFE);
+    this.age = new Float32Array(n).fill(life);
     this.size = new Float32Array(n);
     this.spin = new Float32Array(n);
     this.at = new Float32Array(n * 2);
@@ -272,6 +357,8 @@ class Splats {
 
   add(x: number, z: number, size: number, spin: number): void {
     const i = this.next;
+    // the oldest splat is about to be covered: it goes into the floor
+    if (this.bake && this.age[i] < this.life) this.bake(this.at[i * 2], this.at[i * 2 + 1], this.size[i], this.spin[i]);
     this.next = (this.next + 1) % this.n;
     this.mesh.count = Math.max(this.mesh.count, i + 1);
     this.age[i] = 0;
@@ -285,12 +372,12 @@ class Splats {
   /** How many splats are on the floor. */
   get live(): number {
     let n = 0;
-    for (let i = 0; i < this.mesh.count; i++) if (this.age[i] < SPLAT_LIFE) n++;
+    for (let i = 0; i < this.mesh.count; i++) if (this.age[i] < this.life) n++;
     return n;
   }
 
   clear(): void {
-    this.age.fill(SPLAT_LIFE);
+    this.age.fill(this.life);
     this.mesh.count = 0;
     this.next = 0;
   }
@@ -306,13 +393,13 @@ class Splats {
 
   update(dt: number): void {
     for (let i = 0; i < this.mesh.count; i++) {
-      if (this.age[i] >= SPLAT_LIFE) continue;
-      // a fresh splat spreads out over its first fifth of a second, and soaks away at the end
+      if (this.age[i] >= this.life) continue;
+      // a fresh splat spreads out over its first fifth of a second, and a finite one soaks away at the end
       const was = this.age[i];
-      this.age[i] += dt;
+      this.age[i] = Math.min(was + dt, 1e6);
       const a = this.age[i];
       if (was < 0.2) this.put(i, this.size[i] * (0.5 + 0.5 * Math.min(1, a / 0.2)));
-      else if (a > SPLAT_LIFE - SPLAT_FADE) this.put(i, a >= SPLAT_LIFE ? 0 : this.size[i] * ((SPLAT_LIFE - a) / SPLAT_FADE));
+      else if (a > this.life - SPLAT_FADE) this.put(i, a >= this.life ? 0 : this.size[i] * ((this.life - a) / SPLAT_FADE));
     }
   }
 }
@@ -467,14 +554,15 @@ export class Fx {
   private sparks = new Particles(900, 0.14, THREE.AdditiveBlending);
   private dust = new Particles(300, 0.38, THREE.NormalBlending);
   private blood = new Particles(800, 0.09, THREE.NormalBlending);
-  private splats = new Splats(1200);
+  private stains = new FloorStains();
+  private splats = new Splats(BLOOD_SPLATS, Infinity, (x, z, size, spin) => this.stains.bake(x, z, size, spin));
   private scorches = new Splats(160);
   private trails = new SwingTrails(16);
   private rings: Ring[] = [];
   private nextRing = 0;
   private seed = 1;
   /** counters for the automated tests */
-  readonly stats = { bursts: 0, rings: 0, live: 0, drops: 0, splats: 0, trails: 0, scorches: 0 };
+  readonly stats = { bursts: 0, rings: 0, live: 0, drops: 0, splats: 0, baked: 0, trails: 0, scorches: 0 };
 
   constructor() {
     (this.dust.points.material as THREE.PointsMaterial).opacity = 0.58;
@@ -487,7 +575,7 @@ export class Fx {
     scorchMat.alphaTest = 0.18;
     scorchMat.roughness = 0.92;
     scorchMat.metalness = 0.02;
-    this.group.add(this.sparks.points, this.dust.points, this.blood.points, this.splats.mesh, this.scorches.mesh, this.trails.group);
+    this.group.add(this.sparks.points, this.dust.points, this.blood.points, this.stains.mesh, this.splats.mesh, this.scorches.mesh, this.trails.group);
     const geo = new THREE.RingGeometry(0.74, 1, 48);
     for (let i = 0; i < 24; i++) {
       const mesh = new THREE.Mesh(
@@ -563,6 +651,7 @@ export class Fx {
   /** A new match: the floor is clean. */
   clear(): void {
     this.splats.clear();
+    this.stains.clear();
     this.scorches.clear();
     this.trails.clear();
   }
@@ -584,9 +673,11 @@ export class Fx {
   update(dt: number, camera: THREE.Camera): void {
     this.stats.live = this.sparks.update(dt) + this.dust.update(dt) + this.blood.update(dt);
     this.splats.update(dt);
+    this.stains.flush();
     this.scorches.update(dt);
     this.trails.update(dt);
     this.stats.splats = this.splats.live;
+    this.stats.baked = this.stains.baked;
     this.stats.scorches = this.scorches.live;
     for (const r of this.rings) {
       if (!r.mesh.visible) continue;

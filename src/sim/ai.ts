@@ -10,11 +10,12 @@
 // (arena.ts): the hellfire, an edge, a cracking tile, the blimp's fire, a
 // vehicle bearing down; the toilet, the banner, a free vehicle.
 import { BTN, type Fighter, type PlayerInput } from "./types";
-import { FURY, MOVES } from "./moves";
+import { FURY, MOVES, VIOLENCE } from "./moves";
 import { STYLES } from "./styles";
 import { CHARACTERS } from "../data/characters";
 import { Rng } from "./rng";
 import { HAZARDS } from "./arena";
+import { WEAPONS } from "./weapons";
 import { AIR_GRAB } from "./airgrabs";
 import { actionable, alive, arms, dist, legs, type World } from "./world";
 
@@ -180,6 +181,22 @@ export class Bot {
       }
     }
 
+    // the Gallery is hungry: appeal while nobody is close enough to punish it
+    if (me.violence >= VIOLENCE.max && !enemies.some((e) => dist(e, me) < 2.5) && this.rng.chance(0.1)) {
+      press(BTN.TAUNT);
+      return out;
+    }
+
+    // 3b. empty-handed: go and get a weapon off the floor
+    if (!goal && !me.weapon && arms(me) > 0) {
+      const guns = s.gifts.filter((g) => WEAPONS[g.prop] && g.burning === 0 && g.hot === 0 && g.z < 0.25 && dist(me, g) < 7 && !w.arena.danger(w, me, g.x, g.y));
+      if (guns.length && !enemies.some((e) => dist(e, me) < 1.5)) {
+        const g = guns.reduce((a, b) => (dist(me, a) < dist(me, b) ? a : b));
+        goal = g;
+        use = dist(me, g) < 0.9;
+      }
+    }
+
     // 4. the stage's objective (the toilet, the banner, a free vehicle)
     if (!goal) {
       const g = w.arena.botGoal(w, me, enemies);
@@ -222,6 +239,11 @@ export class Bot {
         // kung fu: change stance now and then
         if (this.moveset(w, me).alt && me.fx.stanceLock === 0 && this.rng.chance(0.01)) {
           press(BTN.USE);
+          return out;
+        }
+        // a throwable weapon, at a target out of arm's reach
+        if (me.weapon && (WEAPONS[me.weapon]?.throwDmg ?? 0) > 0 && d > 2.5 && d < 6 && this.rng.chance(0.02 * (1 + this.skill))) {
+          press(BTN.GRAB | BTN.USE);
           return out;
         }
         if (!hasToken(w, me, tgt)) return this.circle(w, out, me, tgt);

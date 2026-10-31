@@ -4,6 +4,7 @@
 // within 1 cm of where the clip's contact pose puts it, relative to the pelvis) and the frame the
 // striking point is fastest. Contact must land on the hit frame and the speed
 // peak within two frames of it. Run with UPDATE_DOCS=1 to rewrite the table.
+import { disarm } from "./helpers";
 import { describe, expect, it } from "vitest";
 import fs from "node:fs";
 import * as THREE from "three";
@@ -45,6 +46,7 @@ function measure(style: number, move: string, seed?: number): Row | null {
   const clip = clipFor(style, move);
   if (!clip || clip.limb === "body" || clip.limb === "head" || clip.limb === "both") return null;
   const w = new World({ seed: seed ?? 3, styles: [style, 0], humans: [true, true], limbs: seed !== undefined });
+  disarm(w);
   const f = w.fighters[0];
   const b = buildBody(f);
   Object.assign(f, { state: "idle", t: 0, stop: 0 });

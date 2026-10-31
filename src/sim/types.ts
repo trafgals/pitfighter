@@ -136,6 +136,7 @@ export interface Fighter {
   charge: number; // frames the current strike was charged (0..CHARGE.max)
   stop: number; // hitstop: frames this fighter stays frozen after a hit it gave or took
   fury: number; // special meter, 0..FURY.max; filled by landing and taking hits
+  violence: number; // the Gallery's appetite, 0..VIOLENCE.max: filled by damage dealt, limbs torn off, strips, wall splats and wrecks; full, a taunt appeals
   revHeight: Height;
   target: number;
   parts: Record<PartId, Part>;
@@ -150,6 +151,10 @@ export interface Fighter {
   reattachPickup: number;
   /** the prop they are holding, if any ("" for empty hands) */
   weapon: string;
+  /** blows the held weapon has left in it (meaningless for one that never breaks) */
+  weaponDur: number;
+  /** the severed limb being swung as a club (the weapon is then "limb"); it goes back on the floor when let go */
+  club: Pickup | null;
   prevButtons: number;
   pressed: number[]; // frame each button was last pressed (input buffer)
   toilet: number; // objective progress in frames (seated on the toilet, holding the banner), kept between turns
@@ -216,6 +221,10 @@ export interface Gift extends OnFloor {
   /** the Gallery's throw it is */
   throw: string;
   spin: number;
+  /** blows it has left in it */
+  dur: number;
+  /** frames of dangerous flight left: a thrown weapon hurts whoever it hits until it lands */
+  hot: number;
 }
 
 export interface Geyser {
@@ -294,6 +303,8 @@ export interface GameEvent {
     | "crunch" // a flying body hits a wall, a prop or another fighter
     | "wallsplat" // a flying body sticks to the outer wall
     | "counter" // a strike caught the victim during attack startup
+    | "break" // a weapon broke in a fighter's hand (what: the prop)
+    | "hurl" // a fighter threw their weapon (what: the prop)
     | "appeal"; // the Gallery answers a well-earned taunt with a gift
   a: number; // actor
   b?: number; // other party

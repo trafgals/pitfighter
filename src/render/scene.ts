@@ -19,7 +19,7 @@ import { STYLES } from "../sim/styles";
 import { alive, type World } from "../sim/world";
 import { CHARACTERS } from "../data/characters";
 import { PROP_BY_ID, gearPropsFor } from "../data/props";
-import { loadProp, layProp, placeProp, splitByX } from "./props";
+import { loadProp, layProp, placeProp, specFor, splitByX } from "./props";
 import { applyFighterTextures } from "./fighter_textures";
 import { PLAYER_COLORS, buildBody, limbGeometry, paintWounds, syncLimbs, type Body, type Target } from "./body";
 import { animate, onHit } from "./animate";
@@ -394,7 +394,7 @@ export class Scene {
     v.heldProp = f.weapon;
     v.hands.R.scale.setScalar(f.weapon ? 0.75 : 1);
     if (!f.weapon) return;
-    const spec = PROP_BY_ID[f.weapon];
+    const spec = specFor(f.weapon, PROP_BY_ID);
     if (!spec) return;
     loadProp(spec, (model) => {
       // they may have dropped it, or taken another, while it was loading
@@ -892,7 +892,7 @@ export class Scene {
         gm = new THREE.Group();
         this.gifts.set(g.id, gm);
         this.scene.add(gm);
-        const spec = PROP_BY_ID[g.prop];
+        const spec = specFor(g.prop, PROP_BY_ID);
         if (spec) {
           loadProp(spec, (model) => {
             // it may have been picked up while the model was loading

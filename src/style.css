@@ -125,6 +125,41 @@ body.playing #hud {
   width: 0;
   background: var(--gold);
 }
+/* violence: fills with damage dealt; full, a taunt is an appeal that gets a weapon thrown in */
+.vbar {
+  position: relative;
+  height: 11px;
+  margin-top: 4px;
+  background: #1c0a0a;
+  border: 1px solid #5a1a14;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.vfill {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, #6a1010, #e0301c);
+}
+.vtag {
+  position: absolute;
+  inset: 0;
+  font-size: 8px;
+  line-height: 11px;
+  letter-spacing: 2px;
+  text-align: center;
+  color: #f0d0c0;
+  text-shadow: 0 0 2px #000;
+}
+.vbar.full .vtag::after {
+  content: " — TAUNT TO APPEAL";
+}
+.vbar.full {
+  animation: vpulse 0.6s ease-in-out infinite alternate;
+}
+@keyframes vpulse {
+  from { box-shadow: 0 0 2px #e0301c; }
+  to { box-shadow: 0 0 10px #ff6a40; }
+}
 /* fury: two segments, one per special */
 .fbar {
   position: relative;

@@ -21,10 +21,61 @@ const models = new Map<string, THREE.Group>();
 /** Whoever is waiting for a model that has not arrived yet. */
 const waiting = new Map<string, ((model: THREE.Group) => void)[]>();
 
+/**
+ * What the arena leaves on the floor has no modelled asset: a steel beam, a
+ * boulder, an arrow, a severed limb. Each is drawn here, to the same pivot
+ * rule as a weapon (the grip at the origin, the length along y).
+ */
+export const DEBRIS_SPECS: Record<string, PropSpec> = Object.fromEntries(
+  ["debris_beam", "debris_stone", "debris_arrow", "limb"].map((id) => [
+    id,
+    { id, name: id, kind: "gift", fighter: "", gear: "", throw: "", url: "", bone: "hand", offset: [0, -0.3, 0], turn: [Math.PI, 0, 0], scale: 1 } as PropSpec,
+  ]),
+);
+
+/** A prop's spec, whether it is an approved asset or something the arena dropped. */
+export function specFor(id: string, approved: Record<string, PropSpec>): PropSpec | undefined {
+  return approved[id] ?? DEBRIS_SPECS[id];
+}
+
+function debrisModel(id: string): THREE.Group {
+  const g = new THREE.Group();
+  const steel = new THREE.MeshStandardMaterial({ color: 0x5a5e66, roughness: 0.55, metalness: 0.7 });
+  const stone = new THREE.MeshStandardMaterial({ color: 0x77706a, roughness: 0.95, metalness: 0 });
+  const wood = new THREE.MeshStandardMaterial({ color: 0x7a5a38, roughness: 0.8, metalness: 0 });
+  const flesh = new THREE.MeshStandardMaterial({ color: 0xc4967a, roughness: 0.7, metalness: 0 });
+  const part = (geo: THREE.BufferGeometry, mat: THREE.Material, x = 0, y = 0, z = 0) => {
+    const m = new THREE.Mesh(geo, mat);
+    m.position.set(x, y, z);
+    m.castShadow = true;
+    g.add(m);
+  };
+  if (id === "debris_beam") {
+    // an I-beam, 2.2 m long
+    part(new THREE.BoxGeometry(0.28, 2.2, 0.06), steel, 0, -0.7, 0);
+    part(new THREE.BoxGeometry(0.28, 2.2, 0.06), steel, 0, -0.7, 0.2);
+    part(new THREE.BoxGeometry(0.06, 2.2, 0.26), steel, 0, -0.7, 0.1);
+  } else if (id === "debris_stone") {
+    part(new THREE.DodecahedronGeometry(0.3), stone, 0, -0.25, 0);
+  } else if (id === "debris_arrow") {
+    part(new THREE.CylinderGeometry(0.015, 0.015, 0.9), wood, 0, -0.3, 0);
+    part(new THREE.ConeGeometry(0.04, 0.12, 6), steel, 0, 0.2, 0);
+  } else {
+    // a limb: the stump end in the hand
+    part(new THREE.CylinderGeometry(0.07, 0.06, 0.6), flesh, 0, -0.25, 0);
+  }
+  return g;
+}
+
 /** Start loading a prop. It arrives later; the callback is told when it does. */
 export function loadProp(spec: PropSpec, onLoad?: (model: THREE.Group) => void): void {
+  if (spec.id in DEBRIS_SPECS) {
+    onLoad?.(debrisModel(spec.id));
+    return;
+  }
   if (models.has(spec.id)) {
-    if (onLoad) onLoad(models.get(spec.id)!);
+    // each place a prop is shown gets its own copy of the model: one scene graph can have only one parent
+    if (onLoad) onLoad(models.get(spec.id)!.clone(true));
     return;
   }
   if (onLoad) {
@@ -39,7 +90,7 @@ export function loadProp(spec: PropSpec, onLoad?: (model: THREE.Group) => void):
       models.set(spec.id, gltf.scene);
       const list = waiting.get(spec.id) ?? [];
       waiting.delete(spec.id);
-      for (const fn of list) fn(gltf.scene);
+      for (const fn of list) fn(gltf.scene.clone(true));
     },
     undefined,
     () => {

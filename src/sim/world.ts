@@ -12,12 +12,14 @@ import {
   type FighterState,
   type GameEvent,
   type Gift,
+  type Pickup,
   type Height,
   type PartId,
   type PlayerInput,
   type WorldState,
 } from "./types";
 import { CHARACTERS, THROW_BY_ID } from "../data/characters";
+import { WEAPONS, FLOOR_WEAPONS, AFFINITY_BONUS, shapeOf } from "./weapons";
 import { GIFT_PROPS, PROP_BY_ID, wieldedPropFor, type PropSpec } from "../data/props";
 import {
   AIR,
@@ -55,6 +57,7 @@ import {
   SPEED,
   STRING_STARTS,
   TAUNT,
+  VIOLENCE,
   THROW,
   type Move,
 } from "./moves";
@@ -199,6 +202,7 @@ export class World {
         charge: 0,
         stop: 0,
         fury: 0,
+        violence: 0,
         revHeight: "high",
         target: -1,
         parts: freshParts(style, (p) => this.roll(id, p, 0, style)),
@@ -214,6 +218,8 @@ export class World {
         // a fighter whose own weapon has been built and approved starts with
         // it in their hand
         weapon: wieldedPropFor(CHARACTERS[style].id)?.id ?? "",
+        weaponDur: 0,
+        club: null,
         prevButtons: 0,
         pressed: BUTTONS.map(() => -1000),
         toilet: 0,
@@ -237,6 +243,7 @@ export class World {
       arena: freshArenaState(),
     };
     this.arena.init(this);
+    this.seedWeapons();
   }
 
   get fighters(): Fighter[] {
@@ -303,6 +310,24 @@ export class World {
     if (!this.hitstop) return 0;
     for (const f of [a, b]) if (f) f.stop = Math.max(f.stop, frames);
     return frames;
+  }
+
+  /** Hurting people fills the bar the Gallery watches. */
+  addViolence(f: Fighter | undefined, n: number): void {
+    if (f && f.state !== "ko") f.violence = Math.min(VIOLENCE.max, f.violence + n);
+  }
+
+  /**
+   * The Gallery answers a full bar: it empties, and a good weapon (the
+   * fighter's signature, if the Gallery has it) is thrown in to land right by
+   * them.
+   */
+  private appeal(f: Fighter): void {
+    f.violence = 0;
+    const gift = this.giftFor(f, true);
+    if (!gift) return;
+    this.throwGift(f, gift, true);
+    this.ev({ kind: "appeal", a: f.id, what: PROP_BY_ID[gift.id]?.name ?? gift.throw, x: f.x, y: f.y });
   }
 
   private addFury(f: Fighter | undefined, n: number): void {
@@ -519,7 +544,15 @@ export class World {
     if (limb && f.parts[limb].attached && f.parts[limb].hp < f.parts[limb].max * 0.25) {
       dmg *= 0.88;
     }
-    const reach = m.own ? m.reach * (tn.reach ?? 1) : m.reach * (by ? limbMod(f, by, "reach") : st.reach);
+    let reach = m.own ? m.reach * (tn.reach ?? 1) : m.reach * (by ? limbMod(f, by, "reach") : st.reach);
+    // a weapon in the hand changes the arms' strikes
+    const wp = m.kind === "punch" && arms(f) > 0 ? WEAPONS[f.weapon] : undefined;
+    if (wp) {
+      const fits = CHARACTERS[f.style].moves.weapons.affinity.includes(wp.class);
+      dmg *= wp.dmg * wp.shapes[shapeOf(m)] * (fits ? AFFINITY_BONUS : 1);
+      reach += wp.reach;
+      startup = Math.max(3, startup + wp.startup);
+    }
     const e = { ...m, startup, dmg, push, knockdown, rehit, reach, total: startup + m.active + m.recovery };
     if (!limb) return e;
     const shaped = shape(e, f.parts[limb].trait);
@@ -732,12 +765,8 @@ export class World {
           break;
         }
         this.addFury(f, TAUNT.fury);
-        // the appeal: the Gallery answers and throws a gift into the pit
-        this.throwGift(f);
-        if (this.s.frame - f.lastBigBlow <= 120) {
-          f.lastBigBlow = -1000;
-          this.spawnAppealGift(f);
-        }
+        // a full violence bar makes the taunt an appeal: the Gallery answers with a good weapon
+        if (f.violence >= VIOLENCE.max) this.appeal(f);
         this.setState(f, "idle");
         break;
       case "airslammed":
@@ -786,6 +815,12 @@ export class World {
       this.consume(f, BTN.TARGET);
       this.cycleTarget(f);
     }
+    // Triangle + L1 together: throw what is in the hand
+    if (f.weapon && this.buffered(f, BTN.USE) && this.buffered(f, BTN.GRAB) && this.hurlWeapon(f)) {
+      this.consume(f, BTN.USE);
+      this.consume(f, BTN.GRAB);
+      return;
+    }
     if (this.buffered(f, BTN.USE)) {
       this.consume(f, BTN.USE);
       if (this.doUse(f)) return;
@@ -814,6 +849,10 @@ export class World {
     }
     if (this.trySpecial(f)) return;
     if (this.buffered(f, BTN.GRAB)) {
+      if (this.tryWield(f, lockHeld)) {
+        this.consume(f, BTN.GRAB);
+        return;
+      }
       // standing over a limb that fits a gap: pick it up and put it on, whoever it came from
       if (this.takeLimb(f, true)) {
         this.consume(f, BTN.GRAB);
@@ -1196,6 +1235,10 @@ export class World {
         return true;
       }
     }
+    if (f.club) {
+      this.dropWeapon(f, f.weapon);
+      return true;
+    }
     return false;
   }
 
@@ -1207,9 +1250,7 @@ export class World {
    * affinity suits, and what they favour most of all. A fighter whose
    * affinity suits nothing the Gallery has gets whatever it has.
    */
-  private throwGift(f: Fighter): void {
-    const gift = this.giftFor(f);
-    if (!gift) return;
+  private throwGift(f: Fighter, gift: PropSpec, near = false): void {
     const s = this.s;
     const a = this.rng.range(0, Math.PI * 2);
     // the gift comes down out of the boxes and lands beside the fighter who
@@ -1217,7 +1258,7 @@ export class World {
     // edge of the pit and the gaps in the ground are not places a gift stays,
     // so the landing spot is pulled in towards the fighter until the arena
     // says it is good.
-    let r = this.rng.range(0.6, 2.4);
+    let r = near ? this.rng.range(0.7, 1.3) : this.rng.range(0.6, 2.4);
     let x = f.x;
     let y = f.y;
     for (let i = 0; i < 8; i++) {
@@ -1244,13 +1285,16 @@ export class World {
       vz: 0,
       burning: 0,
       spin: this.rng.range(-0.09, 0.09),
+      dur: WEAPONS[gift.id]?.dur ?? 0,
+      hot: 0,
     });
     this.ev({ kind: "gift", a: f.id, what: gift.throw, x, y });
   }
 
   /** The gift the Gallery would throw this fighter: none, if it has none. */
-  private giftFor(f: Fighter): PropSpec | null {
-    const pool = GIFT_PROPS;
+  private giftFor(f: Fighter, good = false): PropSpec | null {
+    // a good gift is a weapon, never a drink, and the best the fighter's affinity allows
+    const pool = good ? GIFT_PROPS.filter((p) => WEAPONS[p.id]) : GIFT_PROPS;
     if (!pool.length) return null;
     const fighter = CHARACTERS[f.style];
     const affinity = fighter.moves.weapons.affinity;
@@ -1260,6 +1304,11 @@ export class World {
       return t ? affinity.includes(t.class) : false;
     });
     const candidates = suits.length ? suits : pool;
+    if (good) {
+      const own = pool.find((p) => p.throw === signature);
+      if (own) return own;
+      return candidates.reduce((a, b) => ((THROW_BY_ID[b.throw]?.favour ?? 0) > (THROW_BY_ID[a.throw]?.favour ?? 0) ? b : a));
+    }
     const weights = candidates.map((p) => {
       const favour = Math.max(1, THROW_BY_ID[p.throw]?.favour ?? 1);
       // the fighter's own signature is what they would most like to be handed
@@ -1281,12 +1330,22 @@ export class World {
     // is the better one, and the old one is still a weapon
     if (f.weapon) this.dropWeapon(f, f.weapon);
     f.weapon = g.prop;
+    f.weaponDur = g.dur;
     this.ev({ kind: "gift", a: f.id, what: g.throw, x: g.x, y: g.y });
   }
 
   /** A fighter lets go of what they are holding, and it lands on the floor. */
   private dropWeapon(f: Fighter, prop: string): void {
     const s = this.s;
+    if (f.club) {
+      // a severed limb goes back on the floor as the limb it is
+      const c = f.club;
+      s.pickups.push({ ...c, x: f.x, y: f.y, z: GIFT.drop, vx: Math.cos(f.facing) * 0.06, vy: Math.sin(f.facing) * 0.06, vz: 0.04, burning: 0 });
+      f.club = null;
+      f.weapon = "";
+      f.weaponDur = 0;
+      return;
+    }
     const spec = PROP_BY_ID[prop];
     s.gifts.push({
       id: s.nextGiftId++,
@@ -1301,8 +1360,128 @@ export class World {
       vz: 0.04,
       burning: 0,
       spin: this.rng.range(-0.2, 0.2),
+      dur: f.weaponDur,
+      hot: 0,
     });
     f.weapon = "";
+  }
+
+  /** The severed limb within reach, if there is one. */
+  private limbInReach(f: Fighter): Pickup | null {
+    let best: Pickup | null = null;
+    let bd = REATTACH.range;
+    for (const p of this.s.pickups) {
+      if (p.burning > 0 || p.z > 0.25) continue;
+      const d = Math.hypot(p.x - f.x, p.y - f.y);
+      if (d < bd) {
+        bd = d;
+        best = p;
+      }
+    }
+    return best;
+  }
+
+  /**
+   * Pick a severed limb up by the stump and swing it as a club. A fighter
+   * with a gap it fits reattaches it on a tap of Grab; with nothing missing,
+   * or with Lock held, Grab wields it instead.
+   */
+  private tryWield(f: Fighter, lockHeld: boolean): boolean {
+    if (f.weapon || arms(f) === 0) return false;
+    const p = this.limbInReach(f);
+    if (!p) return false;
+    const pair: readonly PartId[] = p.part.startsWith("arm") ? ARMS : LEGS;
+    const fits = pair.some((q) => !f.parts[q].attached);
+    const foe = this.s.fighters.some((o) => o.id !== f.id && alive(o) && dist(o, f) < 1.4);
+    if (!lockHeld && (fits || foe)) return false;
+    this.s.pickups = this.s.pickups.filter((x) => x.id !== p.id);
+    f.club = { ...p };
+    f.weapon = "limb";
+    f.weaponDur = 0;
+    this.ev({ kind: "gift", a: f.id, what: "limb", x: p.x, y: p.y });
+    return true;
+  }
+
+  /** A blow landed with the weapon in hand: it wears, and at zero it breaks. */
+  private wear(f: Fighter, n: number): void {
+    const st = WEAPONS[f.weapon];
+    if (!st || !st.dur) return;
+    f.weaponDur -= n;
+    if (f.weaponDur > 0) return;
+    this.ev({ kind: "break", a: f.id, what: f.weapon });
+    f.weapon = "";
+    f.weaponDur = 0;
+  }
+
+  /** Throw the weapon in the hand: it flies where the fighter aims and hurts what it hits. */
+  private hurlWeapon(f: Fighter): boolean {
+    const st = WEAPONS[f.weapon];
+    if (!st || st.throwDmg <= 0) return false;
+    const s = this.s;
+    const tgt = this.lockTarget(f);
+    const ang = tgt && this.inCone(f, tgt, 8, 0.5) ? Math.atan2(tgt.y - f.y, tgt.x - f.x) : f.facing;
+    if (f.club) {
+      // a limb thrown flies as a limb does when it is punted
+      s.pickups.push({ ...f.club, x: f.x + Math.cos(ang) * 0.5, y: f.y + Math.sin(ang) * 0.5, z: 1.1, vx: Math.cos(ang) * 0.3, vy: Math.sin(ang) * 0.3, vz: 0.03, spin: 0.45, burning: 0 });
+      this.ev({ kind: "hurl", a: f.id, what: "limb" });
+      f.club = null;
+      f.weapon = "";
+      f.weaponDur = 0;
+      return true;
+    }
+    s.gifts.push({
+      id: s.nextGiftId++,
+      prop: f.weapon,
+      throw: PROP_BY_ID[f.weapon]?.throw ?? "",
+      owner: f.id,
+      x: f.x + Math.cos(ang) * 0.5,
+      y: f.y + Math.sin(ang) * 0.5,
+      z: 1.1,
+      vx: Math.cos(ang) * 0.3,
+      vy: Math.sin(ang) * 0.3,
+      vz: 0.02,
+      burning: 0,
+      spin: 0.35,
+      dur: f.weaponDur,
+      hot: 90,
+    });
+    this.ev({ kind: "hurl", a: f.id, what: f.weapon });
+    f.weapon = "";
+    f.weaponDur = 0;
+    return true;
+  }
+
+  /** A few weapons lie on the floor of the stage when the match starts, for whoever gets to them first. */
+  private seedWeapons(): void {
+    const s = this.s;
+    const n = 2 + this.rng.int(2);
+    const placed: { x: number; y: number }[] = s.fighters.map((f) => ({ x: f.x, y: f.y }));
+    for (let i = 0; i < n; i++) {
+      const prop = FLOOR_WEAPONS[this.rng.int(FLOOR_WEAPONS.length)];
+      for (let tries = 0; tries < 24; tries++) {
+        const x = this.rng.range(-6.5, 6.5);
+        const y = this.rng.range(-6.5, 6.5);
+        if (placed.some((p) => Math.hypot(p.x - x, p.y - y) < 2.4) || !this.arena.canLand(this, x, y)) continue;
+        placed.push({ x, y });
+        s.gifts.push({
+          id: s.nextGiftId++,
+          prop,
+          throw: PROP_BY_ID[prop]?.throw ?? "",
+          owner: -1,
+          x,
+          y,
+          z: 0,
+          vx: 0,
+          vy: 0,
+          vz: 0,
+          burning: 0,
+          spin: 0,
+          dur: WEAPONS[prop].dur,
+          hot: 0,
+        });
+        break;
+      }
+    }
   }
 
   // ---------------------------------------------------------------- combat
@@ -1393,6 +1572,7 @@ export class World {
     this.addFury(d, FURY.taken);
     this.damage(d, part, dmg, a.id);
     this.onHitFx(a, d, m, part, dmg);
+    if (m.kind === "punch" && WEAPONS[a.weapon]) this.wear(a, shapeOf(m) === "overhead" ? 2 : 1);
     this.arena.onHit(this, d);
     const baseStop = d.state === "ko" ? HITSTOP.ko : hitstopFor(dmg, knock && !otg) + (counter ? HITSTOP.counter : 0);
     hit.stop = this.freeze(a, d, baseStop);
@@ -1591,6 +1771,7 @@ export class World {
   damage(d: Fighter, part: PartId, dmg: number, by: number): void {
     if (!alive(d)) return;
     if (by >= 0) d.lastHitBy = by;
+    if (by >= 0 && by !== d.id) this.addViolence(this.s.fighters[by], dmg * VIOLENCE.dmg);
     d.hurtAt = this.s.frame;
     const p = d.parts[part];
     p.hp -= dmg;
@@ -1632,6 +1813,7 @@ export class World {
       spin: this.rng.range(-0.4, 0.4),
       burning: 0,
     });
+    if (by !== d.id) this.addViolence(this.s.fighters[by], VIOLENCE.limb);
     this.ev({ kind: "detach", a: d.id, b: by, part });
   }
 
@@ -1677,6 +1859,7 @@ export class World {
     const src = this.s.fighters[by];
     const ang = src && src.id !== d.id ? Math.atan2(d.y - src.y, d.x - src.x) : d.facing + Math.PI;
     this.knockDown(d, Math.cos(ang), Math.sin(ang), 1.2);
+    if (by !== d.id) this.addViolence(this.s.fighters[by], VIOLENCE.strip);
     this.ev({ kind: "strip", a: d.id, b: by });
   }
 
@@ -1689,6 +1872,7 @@ export class World {
     this.arena.onKo(this, d);
     d.parts.torso.hp = 0;
     d.fury = 0;
+    if (fell && by !== d.id) this.addViolence(this.s.fighters[by], VIOLENCE.fall);
     this.setState(d, "ko", KO_FRAMES);
     d.deaths++;
     if (!this.arena.respawn && !this.practice) d.out = true;
@@ -1844,31 +2028,6 @@ export class World {
     f.t = this.eff(f, "headbutt").startup + this.eff(f, "headbutt").active;
     this.ev({ kind: "grab", a: f.id, b: best.id, dmg, stop, what: CHARACTERS[f.style]?.moves.ground.name });
     return true;
-  }
-
-  /** Gallery's Appeal: completing a taunt shortly after a big blow makes the Gallery toss a fresh limb gift. */
-  private spawnAppealGift(f: Fighter): void {
-    const missing = LIMBS.find((p) => !f.parts[p].attached);
-    const part: PartId = missing ?? "armR";
-    const trait = this.grow(f, part);
-    const ang = f.facing;
-    this.s.pickups.push({
-      id: this.s.nextPickupId++,
-      owner: f.id,
-      part,
-      style: f.style,
-      trait,
-      hp: f.parts[part].max,
-      x: f.x + Math.cos(ang) * 1.1,
-      y: f.y + Math.sin(ang) * 1.1,
-      z: 2.2,
-      vx: 0,
-      vy: 0,
-      vz: -0.02,
-      spin: 0.25,
-      burning: 0,
-    });
-    this.ev({ kind: "appeal", a: f.id, what: CHARACTERS[f.style]?.moves.appeal.gift });
   }
 
   /** A thrown body, or a juggled one flying fast enough, is a missile: it knocks down whoever it hits. */
@@ -2044,6 +2203,7 @@ export class World {
       f.vz = 0;
       f.slideX = f.slideY = 0;
       f.facing = Math.atan2(ny, nx);
+      if (by !== f.id) this.addViolence(this.s.fighters[by], VIOLENCE.splat);
       this.ev({ kind: "wallsplat", a: f.id, b: by, part, dmg });
     } else {
       // bounce off: the part of the move into the surface comes back, softened
@@ -2096,7 +2256,9 @@ export class World {
       g.y += g.vy;
       g.z += g.vz;
       g.vz -= GIFT.gravity;
+      if (g.hot > 0) this.hurtByThrown(g);
       if (g.z <= 0) {
+        g.hot = 0;
         g.z = 0;
         g.vz = Math.abs(g.vz) > 0.03 ? -g.vz * GIFT.bounce : 0;
         g.vx *= 0.8;
@@ -2107,6 +2269,35 @@ export class World {
       this.arena.boundPickup(this, g);
     }
     s.gifts = s.gifts.filter((g) => g.burning !== 1);
+  }
+
+  /** A weapon in flight: the first fighter (not its thrower) in its way takes it. */
+  private hurtByThrown(g: Gift): void {
+    g.hot--;
+    const dmg = WEAPONS[g.prop]?.throwDmg ?? 0;
+    if (Math.hypot(g.vx, g.vy) < 0.1 || dmg <= 0) {
+      g.hot = 0;
+      return;
+    }
+    for (const d of this.s.fighters) {
+      if (d.id === g.owner || !alive(d) || d.invuln > 0 || d.state === "down" || d.state === "driving" || d.state === "thrown") continue;
+      if (Math.hypot(d.x - g.x, d.y - g.y) >= 0.55 || g.z > 1.7) continue;
+      const part: PartId = g.z > 1.0 ? "head" : "torso";
+      this.damage(d, part, dmg, g.owner);
+      this.ev({ kind: "hit", a: g.owner, b: d.id, part, dmg, what: "thrown" });
+      if (alive(d) && d.state !== "air") {
+        if (dmg >= 8) this.knockDown(d, Math.sign(g.vx), Math.sign(g.vy), 0.8);
+        else {
+          this.setState(d, "hitstun", 24);
+          d.slideX = g.vx * 0.3;
+          d.slideY = g.vy * 0.3;
+        }
+      }
+      g.vx *= -0.25;
+      g.vy *= -0.25;
+      g.hot = 0;
+      break;
+    }
   }
 
   private updatePickups(): void {
@@ -2188,6 +2379,7 @@ export class World {
       mix(f.charge);
       mix(f.stop);
       mix(f.fury);
+      mix(f.violence);
       mix(f.vehicle);
       mix(f.running ? 1 : 0);
       mix(f.z);
@@ -2207,6 +2399,19 @@ export class World {
       mix(p.x);
       mix(p.y);
       mix(p.z);
+    }
+    for (const g of s.gifts) {
+      mix(g.x);
+      mix(g.y);
+      mix(g.z);
+      mix(g.dur);
+      mix(g.hot);
+      mix(g.prop.length);
+    }
+    for (const f of s.fighters) {
+      mix(f.weaponDur);
+      mix(f.club ? f.club.id + 1 : 0);
+      mix(f.weapon.length);
     }
     return h;
   }
