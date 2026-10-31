@@ -41,7 +41,6 @@ describe("Urban Reign calibration", () => {
 
   it("a four-hit string spaces its hits 12 / 14 / 20 frames apart", () => {
     const style = STYLES.findIndex((s) => s.string === 3);
-    const st = STYLES[style].startup; // the style's tempo shifts every startup alike
     const w = duel(1.0, [style, ALL_ROUND], RAW);
     const hits: number[] = [];
     run(w, 120, (inp, i) => {
@@ -49,8 +48,13 @@ describe("Urban Reign calibration", () => {
       if (hitOn(w)) hits.push(w.s.frame);
     });
     expect(hits.length).toBe(4);
-    const gaps = hits.slice(1).map((h, i) => h - hits[i] - st);
-    expect(gaps).toEqual(ur.neutralString.hitGaps);
+    // each follow-up starts 3 frames after the previous hit, so the gap is its own startup (the fighter's
+    // designed tempo, not the shared 9 / 11 / 17) plus those 3 frames
+    const gaps = hits.slice(1).map((h, i) => h - hits[i]);
+    const ids = ["jab2", "jab3", "punchFin"];
+    expect(gaps).toEqual(ids.map((id) => w.mv(w.fighters[0], id).startup + ur.neutralString.cancelAfterHit));
+    // and with the shared frame data (the reference fighter) they are exactly Urban Reign's
+    expect(ids.map((id) => MOVES[id].startup + ur.neutralString.cancelAfterHit)).toEqual(ur.neutralString.hitGaps);
   });
 
   it("each follow-up starts 3 frames after the previous hit, and the finisher matches", () => {

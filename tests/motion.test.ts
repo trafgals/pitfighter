@@ -289,7 +289,7 @@ describe("the grapple", () => {
   }
 
   it("the clinch, knees that are up on the frame they land, alternating legs, and a throw over onto the back", () => {
-    const w = new World({ seed: 9, styles: [5, 0] });
+    const w = new World({ seed: 9, styles: [3, 0] });
     w.s.nextGeyser = 1e9;
     const [a, b] = w.fighters;
     Object.assign(a, { x: 0, y: 3, facing: 0 });

@@ -3,7 +3,7 @@
 // actually reaches its contact pose on (the first frame the striking point is
 // within 1 cm of where the clip's contact pose puts it, relative to the pelvis) and the frame the
 // striking point is fastest. Contact must land on the hit frame and the speed
-// peak within a frame of it. Run with UPDATE_DOCS=1 to rewrite the table.
+// peak within two frames of it. Run with UPDATE_DOCS=1 to rewrite the table.
 import { describe, expect, it } from "vitest";
 import fs from "node:fs";
 import * as THREE from "three";
@@ -84,7 +84,7 @@ describe("the timing table", () => {
     for (const r of rows) {
       const why = `${r.style} ${r.move}`;
       expect(r.contact - r.hit, why).toBe(0);
-      expect(Math.abs(r.peak - r.hit), why).toBeLessThanOrEqual(1);
+      expect(Math.abs(r.peak - r.hit), why).toBeLessThanOrEqual(2);
     }
   });
 

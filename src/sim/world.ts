@@ -61,6 +61,7 @@ import {
 import { AIR_GRAB, type AirGrab } from "./airgrabs";
 import { PLAIN, rollLimb, shape, striker, type LimbTrait } from "./limbs";
 import { STYLES } from "./styles";
+import { familyRules, movesetOf, NO_TONIC, tonicOf, type Moveset, type Mv, type Tonic } from "./movesets";
 import { Rng } from "./rng";
 import { DEFAULT_STAGE, type StageId } from "./stages";
 import { freshArenaState, makeArena, type Arena } from "./arena";
@@ -78,6 +79,10 @@ export interface MatchConfig {
 }
 
 export const BASE_HP: Record<PartId, number> = { head: 40, torso: 100, armL: 30, armR: 30, legL: 35, legR: 35 };
+/** Boxing: the evade can be cut short into a counter hook from these frames of it. */
+export const WEAVE = { from: 3, to: 24 };
+/** A cut that bleeds: `dmg` HP off the limb every `every` frames. */
+export const BLEED = { every: 6, dmg: 0.4 };
 const BUTTONS = [BTN.HIGH, BTN.LOW, BTN.GRAB, BTN.REV, BTN.LOCK, BTN.TARGET, BTN.USE, BTN.SPECIAL, BTN.TAUNT, BTN.DASH];
 const BIT_INDEX: Record<number, number> = Object.fromEntries(BUTTONS.map((b, i) => [b, i]));
 const LIMB_TORSO_SHARE = 0.35; // part of every limb/head hit that also lands on the torso
@@ -218,6 +223,7 @@ export class World {
         out: false,
         lastHitBy: -1,
         hurtAt: 0,
+        fx: { stance: 0, stanceLock: 0, tonic: 0, drinking: false, blind: 0, bleed: [0, 0, 0, 0, 0, 0], bleedBy: -1 },
       })),
       pickups: [],
       nextPickupId: 1,
@@ -319,11 +325,73 @@ export class World {
   private trySpecial(f: Fighter, opener = 0): boolean {
     if (f.fury < FURY.cost || !this.specialPressed(f, opener)) return false;
     if (arms(f) === 0 && legs(f) < 2) return false;
+    const art = this.buffered(f, BTN.SPECIAL) ? this.artFor(f) : null;
     for (const b of [BTN.SPECIAL, BTN.HIGH, BTN.LOW, BTN.GRAB]) this.consume(f, b);
     f.fury -= FURY.cost;
-    this.startMove(f, STYLES[f.style].special);
-    this.ev({ kind: "special", a: f.id });
+    this.startMove(f, art ?? STYLES[f.style].special);
+    this.ev({ kind: "special", a: f.id, what: art ?? undefined });
     return true;
+  }
+
+  /** R2 + a direction: the Special Art on that side of the fighter (left of the facing, forward, back); right of it is the special itself. */
+  private artFor(f: Fighter): string | null {
+    const st = this.stick({ x: f.stickX, y: f.stickY, buttons: 0 });
+    if (st.mag < 0.6) return null;
+    const fwd = st.dx * Math.cos(f.facing) + st.dy * Math.sin(f.facing);
+    const side = -st.dx * Math.sin(f.facing) + st.dy * Math.cos(f.facing);
+    const id = Math.abs(fwd) >= Math.abs(side) ? (fwd > 0 ? "art2" : "art3") : side > 0 ? "art1" : null;
+    return id && this.moveset(f).moves[id] ? id : null;
+  }
+
+  // ---------------------------------------------------------------- the families' own mechanics
+  /** Kung fu: switch stance (L1 with nothing to pick up). */
+  private switchStance(f: Fighter): void {
+    if (!movesetOf(f.style).alt || f.fx.stanceLock > 0) return;
+    f.fx.stance = 1 - f.fx.stance;
+    f.fx.stanceLock = 24;
+    this.ev({ kind: "special", a: f.id, what: f.fx.stance ? "drunk" : "crane" });
+  }
+
+  /** The Status Art: L2 + R2 at a full bar starts the drink. */
+  private tryDrink(f: Fighter): boolean {
+    if (f.fury < FURY.max || f.fx.tonic > 0) return false;
+    const t = f.pressed[BIT_INDEX[BTN.TAUNT]];
+    const r = f.pressed[BIT_INDEX[BTN.SPECIAL]];
+    if (!this.buffered(f, BTN.TAUNT) || !this.buffered(f, BTN.SPECIAL) || Math.abs(t - r) > SPECIAL_CHORD) return false;
+    this.consume(f, BTN.TAUNT);
+    this.consume(f, BTN.SPECIAL);
+    this.setState(f, "taunt", CHARACTERS[f.style].moves.status.drink);
+    f.fx.drinking = true;
+    return true;
+  }
+
+  /** The aimed (R1) strike: head, body or legs, from the fighter's own regional strikes. */
+  private regional(f: Fighter, up: boolean, down: boolean): boolean {
+    const slot = up ? "rgHead" : down ? "rgLegs" : "rgBody";
+    if (!this.moveset(f).moves[slot] || !this.usable(f, slot)) return false;
+    this.startMove(f, slot);
+    f.aimPart = up ? "head" : down ? "legs" : "torso";
+    return true;
+  }
+
+  /** Holds that cannot be broken out of: the power fighters', and a tincture's. */
+  private unbreakable(h: Fighter | undefined): boolean {
+    return !!h && (familyRules(CHARACTERS[h.style].family).unbreakable === true || this.tonic(h).unbreakable === true);
+  }
+
+  /** Timers: the stance lock, the tincture, dirt in the eyes, and the cuts that bleed. */
+  private tickFx(f: Fighter): void {
+    const fx = f.fx;
+    if (fx.stanceLock > 0) fx.stanceLock--;
+    if (fx.tonic > 0) fx.tonic--;
+    if (fx.blind > 0) fx.blind--;
+    if (!alive(f)) return;
+    PARTS.forEach((p, i) => {
+      if (fx.bleed[i] <= 0) return;
+      fx.bleed[i]--;
+      if (!f.parts[p].attached && p !== "torso" && p !== "head") fx.bleed[i] = 0;
+      else if (fx.bleed[i] % BLEED.every === 0) this.damage(f, p, BLEED.dmg, fx.bleedBy);
+    });
   }
 
   /** What a fighter calls its special, for banners: its own name, not the shape's. */
@@ -359,6 +427,7 @@ export class World {
     f.state = st;
     f.t = 0;
     f.dur = dur;
+    if (st !== "taunt") f.fx.drinking = false;
     if (st !== "attack") {
       f.move = null;
       f.chain = false;
@@ -375,24 +444,74 @@ export class World {
     if (st !== "walk") f.running = false;
   }
 
+  // ---------------------------------------------------------------- movesets (src/sim/movesets.ts)
+  /** The fighter's own moveset: its style's, in the stance it is in. */
+  moveset(f: Fighter): Moveset {
+    const ms = movesetOf(f.style);
+    return f.fx.stance && ms.alt ? ms.alt : ms;
+  }
+
+  /** The limb a strike is thrown with: the table's own, else the shared rule (the other one if it is gone). */
+  private wantLimb(f: Fighter, id: string, m: Mv): PartId | null {
+    // the finisher comes from the hand the last jab did not
+    const isFin = id === "punchFin" || id === "wallFin" || id === "boundFin" || id === "cmdLaunch";
+    const want = m.limb !== undefined ? m.limb : isFin ? (STYLES[f.style].string % 2 === 1 ? "armL" : "armR") : striker(id, m.kind);
+    if (!want) return null;
+    if (f.parts[want].attached) return want;
+    const other = ({ armL: "armR", armR: "armL", legL: "legR", legR: "legL" } as const)[want as "armL"];
+    return f.parts[other].attached ? other : null;
+  }
+
+  /**
+   * A strike as the fighter throws it: its own moveset's, or, with a limb
+   * transplanted from another fighter, the first owner's (a transplant throws
+   * its first owner's strikes).
+   */
+  mv(f: Fighter, id: string): Mv {
+    const own = this.moveset(f).moves[id];
+    if (!own) return MOVES[id];
+    const limb = this.wantLimb(f, id, own);
+    const style = limb ? f.parts[limb].style : f.style;
+    return style === f.style ? own : (movesetOf(style).moves[id] ?? own);
+  }
+
+  /** The tincture the fighter is under, if it is under one. */
+  tonic(f: Fighter): Tonic {
+    return f.fx.tonic > 0 ? tonicOf(f.style) : NO_TONIC;
+  }
+
+  /** Whether the body has the limbs to throw this strike. */
+  usable(f: Fighter, id: string): boolean {
+    const m = this.mv(f, id);
+    return m.kind === "punch" ? arms(f) > 0 : m.kind === "kick" ? legs(f) === 2 : true;
+  }
+
   /** Effective numbers of a strike for this fighter's style and body. */
-  eff(f: Fighter, id: string): Move & { total: number } {
-    const m = MOVES[id];
+  eff(f: Fighter, id: string): Mv & { total: number } {
+    const m = this.mv(f, id);
     const st = STYLES[f.style];
+    const tn = this.tonic(f);
     // punches are the arms' and kicks the legs' (a transplant strikes like its first owner); the rest is the body's
     const by = m.kind === "punch" ? ARMS : m.kind === "kick" ? LEGS : null;
-    let startup = m.startup + (by ? Math.round(limbMod(f, by, "startup")) : st.startup);
+    // a designed move already has the fighter's tempo in it; the shared ones are scaled by the style
+    let startup = m.own ? m.startup : m.startup + (by ? Math.round(limbMod(f, by, "startup")) : st.startup);
+    startup += tn.startup ?? 0;
     if (m.kind === "punch" && arms(f) === 1) startup += 2;
     startup = Math.max(3, startup);
     // a special scales with the style's best damage multiplier
-    const mult = m.kind === "punch" ? limbMod(f, ARMS, "punch") : m.kind === "kick" ? limbMod(f, LEGS, "kick") : m.kind === "special" ? Math.max(st.punch, st.kick, st.grab) : 1;
-    let dmg = m.dmg * mult * (m.kind === "punch" && arms(f) === 1 ? 0.8 : 1);
-    let push = m.push;
+    const mult = m.own ? 1 : m.kind === "punch" ? limbMod(f, ARMS, "punch") : m.kind === "kick" ? limbMod(f, LEGS, "kick") : m.kind === "special" ? Math.max(st.punch, st.kick, st.grab) : 1;
+    let dmg = m.dmg * mult * (m.kind === "punch" ? (tn.punch ?? 1) : m.kind === "kick" ? (tn.kick ?? 1) : 1) * (m.kind === "punch" && arms(f) === 1 ? 0.8 : 1);
+    let push = m.push * (tn.push ?? 1);
     let knockdown = m.knockdown;
+    let rehit = m.rehit;
+    if (tn.double && !rehit && m.kind !== "special") {
+      rehit = Math.max(2, m.active - 1);
+      dmg *= 0.75;
+    }
     if (id === f.move && f.charge > 0) {
       const k = f.charge / CHARGE.max;
       const sweet = f.charge >= 42 && f.charge <= 52 ? 1.25 : 1;
-      dmg *= (1 + CHARGE.dmg * k) * sweet;
+      dmg *= (1 + CHARGE.dmg * k * (m.chargeable ? 1.6 : 1)) * sweet;
       push *= 1 + CHARGE.push * k;
       knockdown ||= k >= 1;
     }
@@ -400,20 +519,19 @@ export class World {
     if (limb && f.parts[limb].attached && f.parts[limb].hp < f.parts[limb].max * 0.25) {
       dmg *= 0.88;
     }
-    const e = { ...m, startup, dmg, push, knockdown, reach: m.reach * (by ? limbMod(f, by, "reach") : st.reach), total: startup + m.active + m.recovery };
-    return limb ? shape(e, f.parts[limb].trait) : e;
+    const reach = m.own ? m.reach * (tn.reach ?? 1) : m.reach * (by ? limbMod(f, by, "reach") : st.reach);
+    const e = { ...m, startup, dmg, push, knockdown, rehit, reach, total: startup + m.active + m.recovery };
+    if (!limb) return e;
+    const shaped = shape(e, f.parts[limb].trait);
+    if (m.own) shaped.arc = m.arc; // a designed strike has its own cone
+    return shaped;
   }
 
   /** The limb that throws a strike (the other one if it is gone), or null for the body's own moves. */
   strikerOf(f: Fighter, id: string): PartId | null {
-    if (!id || !MOVES[id]) return null;
-    // the finisher comes from the hand the last jab did not
-    const isFin = id === "punchFin" || id === "wallFin" || id === "boundFin" || id === "cmdLaunch";
-    const want = isFin ? (STYLES[f.style].string % 2 === 1 ? "armL" : "armR") : striker(id, MOVES[id].kind);
-    if (!want) return null;
-    if (f.parts[want].attached) return want;
-    const other = ({ armL: "armR", armR: "armL", legL: "legR", legR: "legL" } as const)[want as "armL"];
-    return f.parts[other].attached ? other : null;
+    if (!id) return null;
+    const m = this.mv(f, id);
+    return m ? this.wantLimb(f, id, m) : null;
   }
 
   /** A limb's traits: rolled from the match seed, the fighter and how many limbs it has grown (plain with limbs off). */
@@ -425,10 +543,11 @@ export class World {
     return this.roll(f.id, p, f.grown++, f.style);
   }
 
-  /** The string follow-up allowed for this style (high strings have style.string jabs). */
+  /** The string follow-up: a designed moveset names it; the shared strings run as long as the style's string is. */
   nextOf(f: Fighter, id: string): string | undefined {
-    const m = MOVES[id];
+    const m = this.mv(f, id);
     if (!m.next) return undefined;
+    if (m.own) return m.next;
     if (m.kind === "punch" && id.startsWith("jab")) {
       const n = Number(id.slice(3));
       return n >= STYLES[f.style].string ? "punchFin" : m.next;
@@ -443,7 +562,7 @@ export class World {
     f.moveLanded = false;
     f.chain = false;
     f.charge = 0;
-    f.chargeHeld = id === STRING_STARTS.high || id === STRING_STARTS.low;
+    f.chargeHeld = id === STRING_STARTS.high || id === STRING_STARTS.low || this.mv(f, id)?.chargeable === true;
     if (id === "dashStrike") return; // a charge goes where it was running
     const t = this.lockTarget(f);
     if (t && dist(f, t) < 3) f.facing = Math.atan2(t.y - f.y, t.x - f.x);
@@ -464,6 +583,7 @@ export class World {
       }
     }
     f.recentHits = f.recentHits.filter((h) => s.frame - h.f <= CROWD.window);
+    this.tickFx(f);
 
     switch (f.state) {
       case "idle":
@@ -475,6 +595,12 @@ export class World {
         break;
       case "evade":
         if (f.t < EVADE.move) this.travel(f, f.dirX * EVADE.speed, f.dirY * EVADE.speed);
+        // boxing: weave out of the sidestep into a counter hook
+        if (f.t >= WEAVE.from && f.t < WEAVE.to && this.moveset(f).moves.weave && arms(f) > 0 && this.buffered(f, BTN.HIGH)) {
+          this.consume(f, BTN.HIGH);
+          this.startMove(f, "weave");
+          f.invuln = Math.max(f.invuln, 6);
+        }
         break;
       case "airslammed": {
         // carried along the grab's arc: up off the catch, then down on the slam
@@ -510,7 +636,7 @@ export class World {
         this.updateHolding(f, inp);
         break;
       case "held":
-        if (f.t < HOLD.escape && this.buffered(f, BTN.REV)) {
+        if (f.t < HOLD.escape && this.buffered(f, BTN.REV) && !this.unbreakable(s.fighters[f.partner])) {
           this.consume(f, BTN.REV);
           const h = s.fighters[f.partner];
           this.release(f);
@@ -596,6 +722,15 @@ export class World {
         this.setState(f, "seated");
         break;
       case "taunt":
+        if (f.fx.drinking) {
+          // the tincture: the Status Art
+          f.fx.drinking = false;
+          f.fx.tonic = CHARACTERS[f.style].moves.status.lasts;
+          f.fury = 0;
+          this.setState(f, "idle");
+          this.ev({ kind: "special", a: f.id, what: "tincture" });
+          break;
+        }
         this.addFury(f, TAUNT.fury);
         // the appeal: the Gallery answers and throws a gift into the pit
         this.throwGift(f);
@@ -654,7 +789,9 @@ export class World {
     if (this.buffered(f, BTN.USE)) {
       this.consume(f, BTN.USE);
       if (this.doUse(f)) return;
+      this.switchStance(f);
     }
+    if (this.tryDrink(f)) return;
     if (this.buffered(f, BTN.TAUNT)) {
       this.consume(f, BTN.TAUNT);
       this.setState(f, "taunt", TAUNT.dur);
@@ -663,7 +800,7 @@ export class World {
     if (this.buffered(f, BTN.REV)) {
       this.consume(f, BTN.REV);
       // Square with a direction: evade that way; on its own: deflect whatever comes
-      if (st.mag > 0.5 && nLegs > 0) {
+      if (st.mag > 0.5 && nLegs > 0 && CHARACTERS[f.style].family !== "karate") {
         this.setState(f, "evade", EVADE.dur);
         f.dirX = st.dx;
         f.dirY = st.dy;
@@ -710,12 +847,12 @@ export class World {
         this.startMove(f, "dashStrike");
         f.slideX += vx * 0.45;
         f.slideY += vy * 0.45;
-      } else if ((back || (lockHeld && aimDown)) && nLegs === 2) {
+      } else if (lockHeld && this.regional(f, aimUp, aimDown)) {
+        // R1: aimed at the head, the body or the legs, with the fighter's own regional strike
+      } else if (back && this.usable(f, STRING_STARTS.low)) {
         this.startMove(f, STRING_STARTS.low);
-        if (lockHeld) f.aimPart = "legs";
       } else {
-        this.startMove(f, nArms > 0 ? STRING_STARTS.high : "headbutt");
-        if (lockHeld) f.aimPart = aimUp ? "head" : "torso";
+        this.startMove(f, this.usable(f, STRING_STARTS.high) ? STRING_STARTS.high : "headbutt");
       }
       return;
     }
@@ -726,7 +863,7 @@ export class World {
         this.startMove(f, "cmdLaunch");
         return;
       }
-      if (nLegs === 2) {
+      if (this.usable(f, STRING_STARTS.low)) {
         this.startMove(f, STRING_STARTS.low);
         return;
       }
@@ -748,7 +885,7 @@ export class World {
       let sp: number;
       if (nLegs === 2) {
         const legCrippled = (f.parts.legL.attached && f.parts.legL.hp < f.parts.legL.max * 0.25) || (f.parts.legR.attached && f.parts.legR.hp < f.parts.legR.max * 0.25);
-        sp = (run ? SPEED.run : SPEED.walk) * limbMod(f, LEGS, "speed") * (legCrippled ? 0.85 : 1);
+        sp = (run ? SPEED.run : SPEED.walk) * limbMod(f, LEGS, "speed") * (legCrippled ? 0.85 : 1) * (this.tonic(f).speed ?? 1);
       }
       else sp = f.hopPhase % HOP_CYCLE < HOP_AIR ? (nLegs === 1 ? SPEED.hop : SPEED.bounce) * (HOP_CYCLE / HOP_AIR) : 0;
       const wantX = st.dx * st.mag * sp;
@@ -855,15 +992,21 @@ export class World {
     const since = this.s.frame - f.t + 1;
     const circle = f.t > 0 && this.buffered(f, BTN.HIGH, since);
     const low = f.t > 0 && this.buffered(f, BTN.LOW, since);
-    if (circle || low) {
+    const br = this.moveset(f).branch[f.move];
+    if (br?.grab && f.t > 0 && this.buffered(f, BTN.GRAB, since)) {
+      // a branch off the string on Triangle (a command grab, a leg sweep, a haymaker)
+      this.consume(f, BTN.GRAB);
+      f.chainTo = br.grab;
+      f.chain = true;
+    } else if (circle || low) {
       const st = this.stick(inp);
       const fwd = st.mag > 0 ? st.dx * Math.cos(f.facing) + st.dy * Math.sin(f.facing) : 0;
       const back = st.mag > 0 && fwd < -0.5;
-      const kicking = m.kind === "kick";
+      const kicking = m.own ? m.str === "low" : m.kind === "kick";
       // a press for the other string (plain Circle out of a kick, back + Circle out of a punch) flows into it,
       // while the combo has crossings left and the body has the limbs for it; otherwise the string goes on
       const other = kicking ? circle && !back : low || (circle && back);
-      const can = f.flows < FLOW.max && (kicking ? arms(f) > 0 : legs(f) === 2);
+      const can = f.flows < FLOW.max && this.usable(f, kicking ? STRING_STARTS.high : STRING_STARTS.low);
       this.consume(f, BTN.HIGH);
       this.consume(f, BTN.LOW);
       let branch = next;
@@ -872,6 +1015,8 @@ export class World {
         else if (st.mag > 0.5 && st.dy > 0.6 && Math.abs(st.dx) < 0.4) branch = "boundFin";
       }
       f.chainTo = other && can ? (kicking ? STRING_STARTS.high : STRING_STARTS.low) : branch;
+      // a branch off the string on back + Circle takes the place of the flow into the other string
+      if (br?.back && back && circle && !kicking && f.flows < FLOW.max) f.chainTo = br.back;
       f.chain = true;
     }
     if (!f.chain || !f.chainTo || !f.moveLanded) return;
@@ -880,13 +1025,14 @@ export class World {
     const from = this.strikerOf(f, f.move);
     const same = from !== null && from === this.strikerOf(f, to);
     if (f.t < m.startup + m.active + (same ? FLOW.same : 0)) return;
-    if (MOVES[to].kind === "kick" && legs(f) < 2) return;
-    if (MOVES[to].kind === "punch" && arms(f) === 0) return;
-    if (to !== next && to !== "wallFin" && to !== "boundFin") f.flows++;
+    if (!this.usable(f, to)) return;
+    // a branch that changes the kind of strike crosses between the strings, like a flow does
+    const crosses = to === br?.back ? this.mv(f, to).kind !== m.kind : to !== next && to !== "wallFin" && to !== "boundFin" && to !== br?.grab;
+    if (crosses) f.flows++;
     const flows = f.flows;
     this.startMove(f, to);
     f.flows = flows;
-    f.chargeHeld = false; // a follow-up never charges, even one that opens the other string
+    f.chargeHeld = this.mv(f, to).chargeable === true; // a follow-up never charges, bar a karate finisher held down
   }
 
   private updateHolding(f: Fighter, inp: PlayerInput): void {
@@ -898,11 +1044,12 @@ export class World {
     p.x = f.x + Math.cos(f.facing) * 0.7;
     p.y = f.y + Math.sin(f.facing) * 0.7;
     p.facing = f.facing + Math.PI;
-    if ((this.buffered(f, BTN.HIGH) || this.buffered(f, BTN.LOW)) && f.holdCool === 0 && f.holdStrikes < HOLD.kneeMax) {
+    const knees = familyRules(CHARACTERS[f.style].family).knees;
+    if ((this.buffered(f, BTN.HIGH) || this.buffered(f, BTN.LOW)) && f.holdCool === 0 && f.holdStrikes < knees.max) {
       const wrench = this.buffered(f, BTN.LOW);
       this.consume(f, BTN.HIGH);
       this.consume(f, BTN.LOW);
-      f.holdCool = HOLD.kneeCool;
+      f.holdCool = Math.max(4, knees.cool - (this.tonic(f).kneeCool ?? 0));
       f.holdStrikes++;
       let targetPart: PartId = "torso";
       if (wrench) {
@@ -911,7 +1058,7 @@ export class World {
           targetPart = attached.reduce((best, cur) => (p.parts[cur].hp / p.parts[cur].max < p.parts[best].hp / p.parts[best].max ? cur : best), attached[0]);
         }
       }
-      const dmg = HOLD.knee * (wrench ? 1.65 : 1) * limbMod(f, ARMS, "grab") * this.comboScale(p);
+      const dmg = HOLD.knee * knees.dmg * (wrench ? 1.65 : 1) * limbMod(f, ARMS, "grab") * (this.tonic(f).grab ?? 1) * this.comboScale(p);
       p.combo++;
       this.damage(p, targetPart, dmg, f.id);
       this.addFury(f, FURY.hit);
@@ -1169,9 +1316,10 @@ export class World {
     if (f.t - 1 < m.startup || f.t - 1 >= m.startup + m.active) return; // t was advanced this frame
     if (m.rehit && (f.t - 1 - m.startup) % m.rehit === 0) f.moveHits = [];
     this.arena.strikeObjects(this, f, m);
+    const blind = f.fx.blind > 0; // dirt in the eyes: it swings at where the foe was
     for (const d of this.s.fighters) {
-      if (d.id === f.id || f.moveHits.includes(d.id) || !this.inCone(f, d, m.reach, m.arc)) continue;
-      if (!this.hittable(d, m.height)) continue;
+      if (d.id === f.id || f.moveHits.includes(d.id) || !this.inCone(f, d, blind ? m.reach * 0.6 : m.reach, blind ? Math.max(m.arc, 0.85) : m.arc)) continue;
+      if (!this.hittable(d, m.height, m.airReach)) continue;
       f.moveHits.push(d.id);
       this.strike(f, d, m);
       if (f.state !== "attack") return; // reversed
@@ -1187,10 +1335,12 @@ export class World {
     return (dx * Math.cos(f.facing) + dy * Math.sin(f.facing)) / dd >= arc;
   }
 
-  private hittable(d: Fighter, height: Height): boolean {
+  private hittable(d: Fighter, height: Height, airReach?: number): boolean {
     if (!alive(d) || d.state === "thrown" || d.state === "driving" || d.invuln > 0) return false;
     if (d.state === "down") return height === "low"; // only low strikes reach a downed body
-    if (d.state === "air") return d.z < (height === "low" ? AIR.low : AIR.high); // a body flown too high is out of reach
+    // kung fu, drunk: the sway carries the body clear of a low strike
+    if (height === "low" && d.fx.stance === 1 && (d.state === "idle" || d.state === "walk" || d.state === "evade" || d.state === "dash")) return false;
+    if (d.state === "air") return d.z < (airReach ?? (height === "low" ? AIR.low : AIR.high)); // a body flown too high is out of reach
     if (d.state === "wakeup" || d.state === "airslam" || d.state === "airslammed") return false;
     return true;
   }
@@ -1202,11 +1352,11 @@ export class World {
     return (dx * Math.cos(d.facing) + dy * Math.sin(d.facing)) / dd;
   }
 
-  private strike(a: Fighter, d: Fighter, m: Move & { total: number }): void {
+  private strike(a: Fighter, d: Fighter, m: Mv & { total: number }): void {
     // reversal: right height, inside the window, facing the attacker
-    // (a special cannot be reversed)
+    // (a special cannot be reversed, nor can a fighter's strikes under its tincture of white-hot tongs)
     // (Urban Reign's Square deflects high and low alike; there is no guard)
-    if (m.kind !== "special" && d.state === "reversal" && this.inReversalWindow(d) && this.facingDot(d, a) > 0) {
+    if (m.kind !== "special" && !this.tonic(a).noDeflect && d.state === "reversal" && this.inReversalWindow(d) && this.facingDot(d, a) > 0) {
       d.revHeight = m.height;
       this.reverse(d, a);
       return;
@@ -1215,7 +1365,10 @@ export class World {
     const dy = Math.sin(a.facing);
     a.moveLanded = true;
     const otg = d.state === "down";
-    const counter = d.state === "attack" && !!d.move && d.move !== "grab" && d.t - 1 < this.eff(d, d.move).startup;
+    const dm = d.state === "attack" && !!d.move && d.move !== "grab" ? this.eff(d, d.move) : null;
+    const counter = !!dm && d.t - 1 < dm.startup;
+    // super armour (power): a blow does not stop a move that is starting or active, though it still hurts
+    const armored = !!dm && (dm.armor === true || this.tonic(d).armor === true) && d.t - 1 < dm.startup + dm.active && !m.launch && !m.bound && m.kind !== "special";
     const backHit = this.facingDot(d, a) < -0.3;
     const runTrip = d.running && d.state === "walk";
     const dmg =
@@ -1224,6 +1377,8 @@ export class World {
       (otg ? DOWN.otgScale : 1) *
       (d.state === "reversal" ? 1.2 : 1) *
       (counter ? COUNTER.dmg : 1) *
+      (armored ? 0.8 : 1) *
+      (this.tonic(d).taken ?? 1) *
       (a.aimPart ? 1.08 : 1);
     const part = this.pickPart(d, m.height, a.aimPart);
     d.combo++;
@@ -1237,11 +1392,21 @@ export class World {
     this.addFury(a, FURY.hit);
     this.addFury(d, FURY.taken);
     this.damage(d, part, dmg, a.id);
+    this.onHitFx(a, d, m, part, dmg);
     this.arena.onHit(this, d);
     const baseStop = d.state === "ko" ? HITSTOP.ko : hitstopFor(dmg, knock && !otg) + (counter ? HITSTOP.counter : 0);
     hit.stop = this.freeze(a, d, baseStop);
     if (d.state === "ko") return;
     if (otg) return;
+    if (armored) {
+      this.ev({ kind: "block", a: d.id, b: a.id });
+      return;
+    }
+    // a command grab: the blow seizes the victim in a hold
+    if (m.cmdGrab && !crowd && d.state !== "air" && d.state !== "wallsplat" && d.state !== "holding" && d.state !== "held") {
+      this.seize(a, d);
+      return;
+    }
     // Hyper-Armor on deeply charged strikes (>= 30 frames): absorbs 1 non-knockdown blow without losing the attack
     if (d.state === "attack" && !d.chargeHeld && d.charge >= 36 && !knock && !m.launch && !m.bound && m.kind !== "special") {
       this.ev({ kind: "block", a: d.id, b: a.id });
@@ -1277,12 +1442,26 @@ export class World {
     } else if (d.state !== "dizzy") {
       const flashSweet = a.charge >= 42 && a.charge <= 52;
       const crumpleBonus = (counter && m.dmg >= 5) || flashSweet ? 1.15 : 1;
-      const stun = Math.round(m.hitstun * (counter ? COUNTER.stun : 1) * (backHit ? COUNTER.backStun : 1) * crumpleBonus);
+      const stun = Math.round(m.hitstun * (counter ? COUNTER.stun : 1) * (backHit ? COUNTER.backStun : 1) * crumpleBonus * (m.lowBlow ? 1.6 : 1));
       this.setState(d, "hitstun", stun);
       if (backHit) d.facing = normAngle(d.facing + Math.PI * 0.65);
       d.slideX = (dx * m.push) / KNOCK.hitstun;
       d.slideY = (dy * m.push) / KNOCK.hitstun;
     }
+  }
+
+  /** What a landed blow does beyond its damage: cuts, dirt in the eyes, the low blow, the tincture's heal and burn. */
+  private onHitFx(a: Fighter, d: Fighter, m: Mv, part: PartId, dmg: number): void {
+    const tn = this.tonic(a);
+    const bleed = Math.max(m.bleed ?? 0, tn.bleed ?? 0);
+    if (bleed > 0) {
+      const i = PARTS.indexOf(part);
+      d.fx.bleed[i] = Math.max(d.fx.bleed[i], bleed);
+      d.fx.bleedBy = a.id;
+    }
+    if (m.blind) d.fx.blind = Math.max(d.fx.blind, m.blind);
+    if (m.lowBlow && alive(d)) this.damage(d, "torso", m.lowBlow * this.comboScale(d), a.id);
+    if (tn.heal) a.parts.torso.hp = Math.min(a.parts.torso.max, a.parts.torso.hp + dmg * tn.heal);
   }
 
   /**
@@ -1339,12 +1518,28 @@ export class World {
     if (strikerLimb && a.parts[strikerLimb].attached && a.parts[strikerLimb].hp < a.parts[strikerLimb].max * 0.28) {
       this.detach(a, strikerLimb, d.id);
     }
-    this.setState(a, "reversed", REVERSAL.stun);
-    a.slideX = (Math.cos(d.facing) * 0.6) / 10;
-    a.slideY = (Math.sin(d.facing) * 0.6) / 10;
-    this.damage(a, "torso", REVERSAL.dmg, d.id);
+    const fam = CHARACTERS[d.style]?.family;
+    if (fam === "grappler") {
+      // judo: the attacker is thrown with the force of its own blow
+      const am = a.move && a.move !== "grab" ? this.eff(a, a.move) : null;
+      const mom = Math.hypot(a.velX, a.velY) + Math.hypot(a.slideX, a.slideY) + (am ? am.push * 0.04 + (am.dash ?? 0) : 0);
+      this.setState(a, "thrown", THROW.dur);
+      a.moveHits = [d.id];
+      a.partner = d.id;
+      const dist = THROW.dist * Math.min(1.8, 0.8 + mom * 6);
+      a.slideX = (Math.cos(d.facing) * dist) / THROW.dur;
+      a.slideY = (Math.sin(d.facing) * dist) / THROW.dur;
+      this.damage(a, "torso", REVERSAL.dmg + 4 + Math.min(10, mom * 60), d.id);
+      d.lastBigBlow = this.s.frame;
+    } else {
+      this.setState(a, "reversed", REVERSAL.stun);
+      a.slideX = (Math.cos(d.facing) * 0.6) / 10;
+      a.slideY = (Math.sin(d.facing) * 0.6) / 10;
+      this.damage(a, "torso", REVERSAL.dmg, d.id);
+    }
     this.setState(d, "idle");
-    d.invuln = 12;
+    // karate: a parry keeps the defender covered a while longer, to riposte from
+    d.invuln = fam === "karate" ? 20 : 12;
     d.facing = Math.atan2(a.y - d.y, a.x - d.x);
     const stop = this.freeze(a, d, HITSTOP.reversal);
     this.addFury(d, FURY.reversal);
@@ -1599,6 +1794,12 @@ export class World {
       this.damage(best, "torso", 4 * limbMod(f, ARMS, "grab"), f.id);
       if (!alive(best)) return;
     }
+    this.seize(f, best, backName);
+  }
+
+  /** `f` has `best` in a hold. */
+  private seize(f: Fighter, best: Fighter, backName?: string): void {
+    if (best.state === "reattach") this.dropReattach(best);
     this.setState(f, "holding", HOLD.dur);
     this.setState(best, "held", HOLD.dur);
     f.partner = best.id;
@@ -1994,6 +2195,10 @@ export class World {
       mix(f.juggle);
       mix(f.flows);
       mix(f.hurtAt);
+      mix(f.fx.stance + f.fx.stanceLock * 2);
+      mix(f.fx.tonic);
+      mix(f.fx.blind);
+      mix(f.fx.bleed.reduce((n, v) => n + v, 0));
       mix(f.partner);
       mix(f.out ? 1 : 0);
       for (const p of PARTS) mix(f.parts[p].hp + (f.parts[p].attached ? 1000 : 0) + f.parts[p].trait.mass);

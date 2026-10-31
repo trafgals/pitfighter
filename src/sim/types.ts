@@ -85,8 +85,20 @@ export type FighterState =
   | "falling" // off the edge: eliminated, or dead and respawning, when it ends
   | "ko";
 
+/** What the families' own mechanics keep on a fighter (src/sim/movesets.ts, the "family" functions in world.ts). */
+export interface FighterFx {
+  stance: number; // kung fu: 0 Crane, 1 Drunk
+  stanceLock: number; // frames until the stance can switch again
+  tonic: number; // frames of the tincture left (0: not drunk)
+  drinking: boolean; // the taunt in progress is a drink, not a taunt
+  blind: number; // frames left of dirt in the eyes
+  bleed: number[]; // per part (PARTS order): frames left bleeding
+  bleedBy: number; // who opened the cuts (credited with the damage)
+}
+
 export interface Fighter {
   id: number;
+  fx: FighterFx;
   style: number;
   human: boolean;
   spawnX: number;

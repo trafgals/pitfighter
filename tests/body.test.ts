@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { movesetOf } from "../src/sim/movesets";
 import { STYLES } from "../src/sim/styles";
 import { REATTACH, SPEED } from "../src/sim/moves";
 import { RING_R } from "../src/sim/types";
@@ -128,9 +129,11 @@ describe("limbs", () => {
     expect(a.parts.armR.attached).toBe(true);
     expect(a.parts.armR.style).toBe(boxer);
     expect(w.s.pickups).toHaveLength(0);
-    // one boxer's arm and one of Dale's: the punches land halfway between the two
-    const both = (STYLES[constable].punch + STYLES[boxer].punch) / 2;
-    expect(w.eff(a, "jab1").dmg).toBeCloseTo((jab / STYLES[constable].punch) * both, 5);
+    // a boxer's arm throws the boxer's jab, with the boxer's frames and damage
+    expect(w.mv(a, "jab1")).toBe(movesetOf(boxer).moves.jab1);
+    expect(w.eff(a, "jab1").startup).toBe(movesetOf(boxer).moves.jab1.startup);
+    expect(w.eff(a, "jab1").dmg).not.toBeCloseTo(jab, 3);
+    expect(w.mv(a, "jab2")).toBe(movesetOf(constable).moves.jab2); // the arm that is still his own throws his own
     // and the boxer grows a new one
     expect(b.parts.armL.regrow).toBeGreaterThan(0);
   });

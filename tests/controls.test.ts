@@ -73,7 +73,7 @@ describe("Cross: dash and run", () => {
 
 describe("Square: deflect or evade", () => {
   it("with a direction, Square evades that way and nothing touches it in the deflect window", () => {
-    const w = duel();
+    const w = duel(1.0, [0, 6]); // Winch parries; a boxer evades
     const [, b] = w.fighters;
     tap(w, 0, BTN.HIGH);
     tap(w, 1, BTN.REV, (inp) => (inp[1].y = 1));

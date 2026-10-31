@@ -2,7 +2,7 @@
 // running has to come back first, and mid-string a landed punch flows into the
 // kick string (back + Circle) and a landed kick into the punch string (Circle).
 import { describe, expect, it } from "vitest";
-import { FLOW, MOVES } from "../src/sim/moves";
+import { FLOW } from "../src/sim/moves";
 import type { World } from "../src/sim/world";
 import { BTN, chop, duel, run } from "./helpers";
 
@@ -58,15 +58,15 @@ describe("flowing from one string into the other", () => {
     w.fighters[0].y = w.fighters[1].y = 4;
     // alternate: plain, back, plain, back... every press asks to cross
     const seen = mash(w, 120, (i) => Math.floor(i / 4) % 2 === 1);
-    const kinds = seen.map((id) => MOVES[id].kind);
+    const kinds = seen.map((id) => w.mv(w.fighters[0], id).kind);
     let crossings = 0;
-    for (let i = 1; i < kinds.length; i++) if (kinds[i] !== kinds[i - 1] && MOVES[seen[i]].kind !== "special") crossings++;
+    for (let i = 1; i < kinds.length; i++) if (kinds[i] !== kinds[i - 1] && w.mv(w.fighters[0], seen[i]).kind !== "special") crossings++;
     expect(crossings).toBe(FLOW.max);
   });
 
   it("a whiffed strike flows into nothing", () => {
     const w = duel(4);
-    const seen = mash(w, MOVES.jab1.startup + MOVES.jab1.active + MOVES.jab1.recovery - 1, (i) => i >= 4); // until the jab recovers
+    const seen = mash(w, w.mv(w.fighters[0], "jab1").startup + w.mv(w.fighters[0], "jab1").active + w.mv(w.fighters[0], "jab1").recovery - 1, (i) => i >= 4); // until the jab recovers
     expect(seen).toEqual(["jab1"]);
   });
 
