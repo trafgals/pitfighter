@@ -39,6 +39,7 @@ const SPECIAL_COLOR: Record<string, number> = { spSpin: 0xffd040, spCharge: 0xff
 interface FighterView extends Body {
   last?: Target; // what the animation decided last frame (the motion debug overlay reads it)
   ring: THREE.Mesh;
+  shadowDisc: THREE.Mesh;
   fury: THREE.Mesh;
   label: THREE.Sprite;
   /** a column of light over a human through the countdown, so each player finds their fighter */
@@ -60,31 +61,107 @@ interface FighterView extends Body {
 const SPURT = 2.6;
 const PULSE = 1.7;
 
-/** The tag over a fighter's head: "P2·cpu" small, a human's "P1" twice the size with an arrow down to the head. */
+/** Soft radial contact shadow texture for grounding fighters to the arena floor. */
+let contactShadowTex: THREE.CanvasTexture | null = null;
+function getContactShadowTexture(): THREE.CanvasTexture {
+  if (contactShadowTex) return contactShadowTex;
+  contactShadowTex = canvasTexture(128, 128, (g) => {
+    const grd = g.createRadialGradient(64, 64, 6, 64, 64, 62);
+    grd.addColorStop(0, "rgba(0, 0, 0, 0.72)");
+    grd.addColorStop(0.55, "rgba(0, 0, 0, 0.36)");
+    grd.addColorStop(1, "rgba(0, 0, 0, 0)");
+    g.fillStyle = grd;
+    g.fillRect(0, 0, 128, 128);
+  });
+  contactShadowTex.wrapS = contactShadowTex.wrapT = THREE.ClampToEdgeWrapping;
+  return contactShadowTex;
+}
+
+/** Build a procedural Victorian gaslight & furnace studio environment map for PBR metal/porcelain reflections. */
+function buildStudioEnv(renderer: THREE.WebGLRenderer): THREE.Texture | null {
+  try {
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    const envScene = new THREE.Scene();
+    envScene.background = new THREE.Color(0x18141c);
+    const hemi = new THREE.HemisphereLight(0x8fa8c8, 0x7a3414, 2.2);
+    envScene.add(hemi);
+    // Warm gaslight and furnace cards around the horizon + cool skylight overhead
+    const cardGeo = new THREE.PlaneGeometry(8, 4);
+    const warmMat = new THREE.MeshBasicMaterial({ color: 0xffb86c, side: THREE.DoubleSide });
+    const fireMat = new THREE.MeshBasicMaterial({ color: 0xff5a1f, side: THREE.DoubleSide });
+    const coolMat = new THREE.MeshBasicMaterial({ color: 0x90b4e8, side: THREE.DoubleSide });
+    for (let i = 0; i < 4; i++) {
+      const a = (i * Math.PI) / 2 + 0.4;
+      const card = new THREE.Mesh(cardGeo, i % 2 === 0 ? warmMat : fireMat);
+      card.position.set(Math.cos(a) * 10, i % 2 === 0 ? 3.5 : -2.5, Math.sin(a) * 10);
+      card.lookAt(0, 0, 0);
+      envScene.add(card);
+    }
+    const skyCard = new THREE.Mesh(new THREE.PlaneGeometry(14, 14), coolMat);
+    skyCard.position.set(0, 12, 0);
+    skyCard.lookAt(0, 0, 0);
+    envScene.add(skyCard);
+    const target = pmrem.fromScene(envScene, 0.04);
+    pmrem.dispose();
+    cardGeo.dispose();
+    warmMat.dispose();
+    fireMat.dispose();
+    coolMat.dispose();
+    skyCard.geometry.dispose();
+    return target.texture;
+  } catch {
+    return null;
+  }
+}
+
+/** The tag over a fighter's head: Victorian brass-framed playbill badge with player colour and pointer chevron. */
 function labelSprite(text: string, color: number, human: boolean): THREE.Sprite {
-  const tex = canvasTexture(128, human ? 128 : 64, (g) => {
+  const w = 160;
+  const h = human ? 128 : 64;
+  const tex = canvasTexture(w, h, (g) => {
     const css = "#" + color.toString(16).padStart(6, "0");
-    g.font = `900 ${human ? 52 : 44}px system-ui, sans-serif`;
+    const pillY = 6;
+    const pillH = human ? 54 : 46;
+    const pillW = human ? 124 : 138;
+    const pillX = (w - pillW) / 2;
+    // Dark Victorian iron plaque with brass trim
+    g.fillStyle = "rgba(16, 11, 9, 0.86)";
+    g.strokeStyle = css;
+    g.lineWidth = human ? 4 : 2.5;
+    g.beginPath();
+    if (typeof g.roundRect === "function") {
+      g.roundRect(pillX, pillY, pillW, pillH, 8);
+    } else {
+      g.rect(pillX, pillY, pillW, pillH);
+    }
+    g.fill();
+    g.stroke();
+
+    g.font = `900 ${human ? 38 : 30}px Georgia, "Times New Roman", serif`;
     g.textAlign = "center";
     g.textBaseline = "middle";
-    g.lineWidth = 8;
+    g.lineWidth = 5;
     g.lineJoin = "round";
-    g.strokeStyle = "#000";
-    g.strokeText(text, 64, 34);
+    g.strokeStyle = "#080504";
+    g.strokeText(text, w / 2, pillY + pillH / 2 + 1);
     g.fillStyle = css;
-    g.fillText(text, 64, 34);
+    g.fillText(text, w / 2, pillY + pillH / 2 + 1);
     if (human) {
       g.beginPath();
-      g.moveTo(40, 70);
-      g.lineTo(88, 70);
-      g.lineTo(64, 110);
+      g.moveTo(w / 2 - 18, 68);
+      g.lineTo(w / 2 + 18, 68);
+      g.lineTo(w / 2, 102);
       g.closePath();
+      g.strokeStyle = "#080504";
+      g.lineWidth = 6;
       g.stroke();
+      g.fillStyle = css;
       g.fill();
     }
   });
+  tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
   const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false, transparent: true }));
-  s.scale.set(human ? 1.3 : 0.8, human ? 1.3 : 0.4, 1);
+  s.scale.set(human ? 1.25 : 0.95, human ? 1.0 : 0.38, 1);
   s.renderOrder = 10;
   return s;
 }
@@ -126,14 +203,18 @@ export class Scene {
     this.renderer.shadowMap.enabled = !lofi;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    if (!lofi) {
+      const env = buildStudioEnv(this.renderer);
+      if (env) this.scene.environment = env;
+    }
     // the select screen shows the first stage behind it
     this.setStage("hell-toilet");
     this.scene.add(this.fx.group);
     if (!lofi) {
-      // bloom makes the hellfire, the sparks and the halo glow
+      // selective HDR bloom: makes hellfire, sparks and the halo glow without blowing out characters
       this.composer = new EffectComposer(this.renderer);
       this.composer.addPass(new RenderPass(this.scene, this.camera));
-      this.bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.55, 0.5, 0.82);
+      this.bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.36, 0.38, 0.88);
       this.composer.addPass(this.bloom);
       this.composer.addPass(new OutputPass());
     }
@@ -199,13 +280,31 @@ export class Scene {
     const b = buildBody(f, new Set(gear.map((p) => p.gear)));
     applyFighterTextures(fighterId, b);
     const pc = PLAYER_COLORS[f.id % PLAYER_COLORS.length];
-    const ring = new THREE.Mesh(new THREE.RingGeometry(0.38, 0.48, 32), new THREE.MeshBasicMaterial({ color: pc, transparent: true, opacity: 0.85 }));
+
+    // Soft dark ground contact shadow disc underneath the fighter so boots stay visually anchored
+    const shadowDisc = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.15, 1.15),
+      new THREE.MeshBasicMaterial({
+        map: getContactShadowTexture(),
+        transparent: true,
+        opacity: 0.78,
+        depthWrite: false,
+      }),
+    );
+    shadowDisc.rotation.x = -Math.PI / 2;
+    shadowDisc.position.y = 0.012;
+    b.root.add(shadowDisc);
+
+    const ring = new THREE.Mesh(
+      new THREE.RingGeometry(0.4, 0.48, 40),
+      new THREE.MeshBasicMaterial({ color: pc, transparent: true, opacity: 0.82, depthWrite: false }),
+    );
     ring.rotation.x = -Math.PI / 2;
     ring.position.y = 0.02;
     b.root.add(ring);
     // a ring of fire under a fighter whose special is ready
     const fury = new THREE.Mesh(
-      new THREE.RingGeometry(0.5, 0.62, 32),
+      new THREE.RingGeometry(0.5, 0.62, 36),
       new THREE.MeshBasicMaterial({ color: 0xff7a10, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }),
     );
     fury.rotation.x = -Math.PI / 2;
@@ -273,7 +372,7 @@ export class Scene {
         }
       });
     }
-    const view: FighterView = { ...b, ring, fury, label, beacon, stars, aura, marker, fell: false, spurts: [], pool: -1, held: null, heldProp: "" };
+    const view: FighterView = { ...b, ring, shadowDisc, fury, label, beacon, stars, aura, marker, fell: false, spurts: [], pool: -1, held: null, heldProp: "" };
     this.holdWeapon(view, f);
     return view;
   }
@@ -344,7 +443,7 @@ export class Scene {
             const dd = Math.hypot(dx, dy) || 1;
             p.add(toV((dx / dd) * 0.3, (dy / dd) * 0.3));
           }
-          this.fx.burst(p, { count: Math.round(8 + dmg * 2.5), speed: 3 + dmg * 0.4, color: heavy ? 0xffe0a0 : 0xffa040, life: 0.3, gravity: 6 });
+          this.fx.burst(p, { count: Math.round(8 + dmg * 2.5), speed: 3 + dmg * 0.4, color: heavy ? 0xffe0a0 : 0xffa040, life: 0.3, gravity: 6 });
           if (heavy) this.fx.steam(p, 10);
           if (a) {
             // the force of it carries on through: sparks out the far side, and the camera lurches with it
@@ -362,7 +461,7 @@ export class Scene {
           if (!a) this.fx.burst(at(d, 0.4), { count: 10, speed: 2.5, color: 0xff5010, life: 0.5, up: 2 }); // burnt by the arena
           const v = this.fighters[d.id];
           if (v) {
-            v.flash = Math.max(v.flash, heavy ? 1 : 0.7);
+            v.flash = Math.max(v.flash, heavy ? 0.65 : 0.45);
             // the reaction starts on the pose the blow found; the blow whips the body
             onHit(v, d, a, q.part ?? "torso", dmg, q.stop ?? 0);
           }
@@ -623,8 +722,8 @@ export class Scene {
   /** Draw a frame; `dt` is game time (slowed in slow motion), `real` the wall-clock time since the last. */
   render(time: number, dt: number, real = dt): void {
     this.impact.update(real);
-    this.renderer.toneMappingExposure = 1 + 0.6 * this.impact.flash;
-    if (this.bloom) this.bloom.strength = 0.55 + 0.8 * this.impact.flash;
+    this.renderer.toneMappingExposure = 1 + 0.42 * this.impact.flash;
+    if (this.bloom) this.bloom.strength = 0.36 + 0.55 * this.impact.flash;
     const w = this.world;
     if (w) this.sync(w, time, dt);
     if (w && this.motion) this.motion.flush(w.s.fighters.length);
@@ -697,7 +796,13 @@ export class Scene {
         // through the countdown the human's tag bounces
         v.label.position.y = 2.45 + (this.counting ? Math.abs(Math.sin(time * 5)) * 0.35 : 0);
       }
-      v.ring.visible = !gone && f.state !== "driving" && f.state !== "falling";
+      const groundedRing = !gone && f.state !== "driving" && f.state !== "falling";
+      v.ring.visible = groundedRing;
+      v.shadowDisc.visible = groundedRing;
+      v.shadowDisc.position.y = Math.max(0.012, -f.z + 0.012);
+      const airScale = Math.max(0.35, 1 - f.z * 0.35);
+      v.shadowDisc.scale.setScalar(airScale);
+      (v.shadowDisc.material as THREE.MeshBasicMaterial).opacity = 0.78 * airScale;
       if (v.marker) {
         const tg = s.fighters[f.target];
         v.marker.visible = !!tg && tg.id !== f.id && alive(tg) && alive(f);

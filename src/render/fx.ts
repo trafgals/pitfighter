@@ -34,6 +34,35 @@ interface SprayOpts extends BleedOpts {
 export const SPLAT_LIFE = 45;
 const SPLAT_FADE = 6;
 
+/** Soft radial particle sprite (64x64 RGBA DataTexture) so sparks, steam, and blood render as round orbs instead of hard square boxes. */
+let cachedDotTex: THREE.DataTexture | null = null;
+export function dotTexture(): THREE.DataTexture {
+  if (cachedDotTex) return cachedDotTex;
+  const sz = 64;
+  const data = new Uint8Array(sz * sz * 4);
+  const half = (sz - 1) * 0.5;
+  for (let y = 0; y < sz; y++) {
+    for (let x = 0; x < sz; x++) {
+      const r = Math.hypot(x - half, y - half) / half;
+      const t = Math.max(0, 1 - r);
+      const a = t * t * (3 - 2 * t);
+      const core = Math.min(1, a * 1.25);
+      const i = (y * sz + x) * 4;
+      data[i] = Math.round(core * 255);
+      data[i + 1] = Math.round(core * 255);
+      data[i + 2] = Math.round(core * 255);
+      data[i + 3] = Math.round(a * 255);
+    }
+  }
+  const tex = new THREE.DataTexture(data, sz, sz, THREE.RGBAFormat);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.magFilter = THREE.LinearFilter;
+  tex.minFilter = THREE.LinearFilter;
+  tex.needsUpdate = true;
+  cachedDotTex = tex;
+  return tex;
+}
+
 class Particles {
   readonly points: THREE.Points;
   private pos: Float32Array;
@@ -67,7 +96,16 @@ class Particles {
     g.setAttribute("color", new THREE.BufferAttribute(this.col, 3));
     this.points = new THREE.Points(
       g,
-      new THREE.PointsMaterial({ size, vertexColors: true, transparent: true, blending, depthWrite: false, sizeAttenuation: true }),
+      new THREE.PointsMaterial({
+        size,
+        map: dotTexture(),
+        alphaTest: 0.02,
+        vertexColors: true,
+        transparent: true,
+        blending,
+        depthWrite: false,
+        sizeAttenuation: true,
+      }),
     );
     this.points.frustumCulled = false;
   }
@@ -281,9 +319,9 @@ class Splats {
 
 export class Fx {
   readonly group = new THREE.Group();
-  private sparks = new Particles(900, 0.11, THREE.AdditiveBlending);
-  private dust = new Particles(300, 0.32, THREE.NormalBlending);
-  private blood = new Particles(800, 0.07, THREE.NormalBlending);
+  private sparks = new Particles(900, 0.14, THREE.AdditiveBlending);
+  private dust = new Particles(300, 0.38, THREE.NormalBlending);
+  private blood = new Particles(800, 0.09, THREE.NormalBlending);
   private splats = new Splats(1200);
   private rings: Ring[] = [];
   private nextRing = 0;
@@ -292,12 +330,12 @@ export class Fx {
   readonly stats = { bursts: 0, rings: 0, live: 0, drops: 0, splats: 0 };
 
   constructor() {
-    (this.dust.points.material as THREE.PointsMaterial).opacity = 0.55;
+    (this.dust.points.material as THREE.PointsMaterial).opacity = 0.58;
     // a drop of blood is opaque and dark, not a glowing ember
     (this.blood.points.material as THREE.PointsMaterial).opacity = 0.95;
     this.blood.land = (x, z, i) => this.splats.add(x, z, 0.08 + 0.16 * this.blood.mark[i] * (0.5 + this.rnd()), this.rnd() * Math.PI * 2);
     this.group.add(this.sparks.points, this.dust.points, this.blood.points, this.splats.mesh);
-    const geo = new THREE.RingGeometry(0.7, 1, 40);
+    const geo = new THREE.RingGeometry(0.74, 1, 48);
     for (let i = 0; i < 24; i++) {
       const mesh = new THREE.Mesh(
         geo,
@@ -332,8 +370,8 @@ export class Fx {
     const d = dir.lengthSq() > 1e-8 ? dir.clone().normalize() : new THREE.Vector3(0, 1, 0);
     this.sparks.spray(at, d, { count: o.count, speed: o.speed, spread: o.speed * 0.3, life: 0.22, gravity: 4 }, o.color, this.rnd);
     this.stats.bursts++;
-  }
-
+  }
+
   /** A puff of Victorian steam venting upward from boilers, valves or heavy strikes. */
   steam(at: THREE.Vector3, count = 14, speed = 1.4): void {
     this.dust.burst(
@@ -392,7 +430,7 @@ export class Fx {
       r.mesh.scale.setScalar(s);
       if (r.flat) r.mesh.rotation.set(-Math.PI / 2, 0, 0);
       else r.mesh.quaternion.copy(camera.quaternion);
-      (r.mesh.material as THREE.MeshBasicMaterial).opacity = (1 - k) * 0.9;
+      (r.mesh.material as THREE.MeshBasicMaterial).opacity = (1 - k) * 0.85;
     }
   }
 }
