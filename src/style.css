@@ -469,128 +469,246 @@ body.playing #hud {
   margin: 0 auto;
 }
 
+/* Lobby: portrait cards on the left, a featured playbill panel per player on the right */
+.lobby {
+  max-width: min(1760px, 100%);
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: clamp(10px, 1.4vw, 24px);
+  align-items: start;
+  text-align: left;
+}
+#select.playbill .lobby {
+  display: block;
+}
 .grid {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 6px;
-  max-width: 1100px;
-  margin: 0 auto;
+  gap: clamp(5px, 0.6vw, 10px);
 }
 .sc {
   position: relative;
-  background: rgba(14, 18, 24, 0.9);
-  border: 1px solid rgba(216, 168, 78, 0.28);
-  border-radius: 6px;
-  padding: 5px 5px 18px;
-  font-family: "Trebuchet MS", system-ui, sans-serif;
-  font-size: 12px;
-  transition: transform 0.08s, border-color 0.08s;
-}
-.sc:hover {
-  border-color: var(--gold);
-  transform: translateY(-2px);
-}
-.sc.on {
-  border-color: var(--gold);
-  box-shadow: 0 0 12px rgba(216, 168, 78, 0.5);
-}
-/* Victorian cameo crest in the fighter's coat and trim colours */
-.sw {
-  position: relative;
-  width: 38px;
-  height: 38px;
-  margin: 2px auto 3px;
-  border-radius: 50%;
-  border: 2px solid var(--acc);
-  background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.2), rgba(10, 12, 16, 0.72) 70%), #161a22;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.65);
-  overflow: hidden;
-}
-.cameo-svg {
   display: block;
+  padding: 0;
+  overflow: hidden;
+  aspect-ratio: 3 / 4;
+  background: #0b0e13;
+  border: 2px solid rgba(216, 168, 78, 0.35);
+  border-radius: 4px;
+  font-family: "Trebuchet MS", system-ui, sans-serif;
+  text-align: left;
+  transition: transform 0.1s, border-color 0.1s, filter 0.1s;
+}
+.sc::after {
+  /* the gilt playbill frame inside the card */
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border: 1px solid rgba(229, 190, 107, 0.4);
+  pointer-events: none;
+}
+.sc-art,
+.sc-art img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
 }
+.sc-art img {
+  object-fit: cover;
+  object-position: 50% 18%;
+  filter: sepia(0.25) saturate(0.85) brightness(0.82);
+  transition: filter 0.15s, transform 0.25s;
+}
+.sc:hover {
+  border-color: var(--gold);
+  transform: translateY(-3px);
+  z-index: 2;
+}
+.sc:hover .sc-art img,
+.sc.on .sc-art img {
+  filter: none;
+  transform: scale(1.04);
+}
+.sc.on {
+  border-color: var(--pc, var(--gold));
+  z-index: 1;
+}
+.sc-plate {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 18px 7px 6px;
+  background: linear-gradient(to top, rgba(6, 8, 11, 0.95) 35%, rgba(6, 8, 11, 0));
+}
 .sn {
-  font-weight: bold;
-  font-size: 12px;
+  display: block;
+  font-family: Georgia, "Palatino Linotype", serif;
+  font-weight: 900;
+  font-size: clamp(11px, 1.05vw, 19px);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #fff3d4;
+  line-height: 1.1;
 }
 .ss {
+  display: block;
   color: var(--gold);
-  font-size: 10px;
+  font-size: clamp(9px, 0.75vw, 13px);
+  line-height: 1.2;
+  margin-top: 1px;
 }
 .cur {
   position: absolute;
-  left: 2px;
-  right: 2px;
-  bottom: 2px;
+  top: 6px;
+  left: 6px;
+  right: 6px;
+  z-index: 1;
   display: flex;
-  gap: 2px;
-  justify-content: center;
+  gap: 3px;
   flex-wrap: wrap;
 }
 .cur span {
-  font-size: 10px;
+  font-size: clamp(10px, 0.85vw, 15px);
   font-weight: bold;
   color: #000;
-  padding: 0 3px;
+  padding: 1px 5px;
   border-radius: 3px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
 }
-.info {
-  margin: 6px auto;
-  padding: 6px 12px;
-  max-width: 960px;
-  min-height: 44px;
+
+.stage-side {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.panels {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+}
+.panels:not([data-n="1"]) {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.panel {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);
+  background: linear-gradient(160deg, rgba(26, 20, 14, 0.96), rgba(9, 11, 15, 0.96));
+  border: 2px solid var(--pc);
   border-radius: 6px;
-  background: rgba(10, 13, 18, 0.82);
-  border: 1px solid rgba(216, 168, 78, 0.28);
-  font-size: 12.5px;
+  box-shadow: 0 0 18px -4px var(--pc), inset 0 0 0 3px rgba(8, 10, 14, 0.9), inset 0 0 0 4px rgba(229, 190, 107, 0.35);
+  overflow: hidden;
 }
-.info-head {
-  font-size: 13px;
+.panel.ready {
+  box-shadow: 0 0 26px 0 var(--pc), inset 0 0 0 3px rgba(8, 10, 14, 0.9), inset 0 0 0 4px rgba(229, 190, 107, 0.5);
+}
+.pn-art {
+  position: relative;
+  min-height: 0;
+  margin: 8px 0 8px 8px;
+  background: #0b0e13;
+  overflow: hidden;
+}
+.pn-art img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 12%;
+}
+.pn-body {
+  padding: 12px 14px;
+  min-width: 0;
+  font-family: "Trebuchet MS", system-ui, sans-serif;
+}
+.pn-tag {
+  display: inline-block;
+  padding: 1px 9px;
+  border-radius: 3px;
+  background: var(--pc);
+  color: #000;
+  font-weight: bold;
+  font-size: clamp(11px, 0.9vw, 16px);
+  letter-spacing: 1.5px;
+}
+.pn-tag small {
+  margin-left: 8px;
+  font-weight: normal;
+  letter-spacing: 0;
+  opacity: 0.75;
+}
+.pn-name {
+  margin: 8px 0 0;
+  font-family: Georgia, "Palatino Linotype", serif;
+  font-weight: 900;
+  font-size: clamp(18px, 1.9vw, 36px);
+  line-height: 1.05;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #fff3d4;
+  text-shadow: 0 2px 0 #200804;
 }
 .info-title {
   color: var(--gold);
-  font-size: 12px;
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-size: clamp(13px, 1.1vw, 21px);
+  margin-top: 2px;
+}
+.pn-style {
+  margin-top: 4px;
+  font-size: clamp(11px, 0.85vw, 15px);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #dcd4c4;
 }
 .info-blurb {
-  margin: 2px 0 4px;
-  opacity: 0.88;
-  font-size: 12px;
+  margin: 10px 0;
+  opacity: 0.9;
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-size: clamp(12px, 0.95vw, 17px);
+  line-height: 1.4;
+  padding-left: 9px;
+  border-left: 2px solid var(--pc);
 }
 .info-meta {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 4px 12px;
-  font-family: "Trebuchet MS", system-ui, sans-serif;
-  font-size: 11px;
+  flex-direction: column;
+  gap: 2px;
+  font-size: clamp(10.5px, 0.8vw, 14px);
   color: #dcd4c4;
 }
 .info-meta b {
   color: var(--gold);
 }
 .info-ratings {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 6px 14px;
-  margin-top: 4px;
-  font-family: "Trebuchet MS", system-ui, sans-serif;
-  font-size: 10.5px;
+  display: grid;
+  grid-template-columns: repeat(5, auto);
+  justify-content: start;
+  gap: 4px 14px;
+  margin-top: 8px;
+  font-size: clamp(10px, 0.8vw, 14px);
   font-weight: bold;
   letter-spacing: 0.5px;
   color: var(--gold);
 }
 .rate {
   display: inline-flex;
-  align-items: center;
+  flex-direction: column;
   gap: 3px;
+}
+.rate .pip {
+  display: inline-block;
 }
 .pip {
   display: inline-block;
-  width: 7px;
-  height: 7px;
+  width: clamp(7px, 0.6vw, 11px);
+  height: clamp(7px, 0.6vw, 11px);
+  margin-right: 2px;
   border-radius: 2px;
   background: rgba(216, 168, 78, 0.2);
   border: 1px solid rgba(216, 168, 78, 0.45);
@@ -598,6 +716,23 @@ body.playing #hud {
 .pip.on {
   background: var(--gold);
   box-shadow: 0 0 4px rgba(216, 168, 78, 0.6);
+}
+/* several players: the panels are compact, the art on top */
+.panels:not([data-n="1"]) .panel {
+  grid-template-columns: minmax(0, 0.55fr) minmax(0, 1fr);
+}
+.panels:not([data-n="1"]) .info-blurb,
+.panels:not([data-n="1"]) .info-meta {
+  display: none;
+}
+.panels:not([data-n="1"]) .info-ratings {
+  grid-template-columns: repeat(3, auto);
+}
+.panels:not([data-n="1"]) .pn-name {
+  font-size: clamp(14px, 1.2vw, 24px);
+}
+.panels:not([data-n="1"]) .pn-art {
+  aspect-ratio: 3 / 4;
 }
 .slots {
   display: grid;
@@ -789,9 +924,31 @@ body.playing #hud {
 #select.help-open .help {
   display: block;
 }
+@media (max-width: 1100px) {
+  .lobby {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .stage-side {
+    order: -1;
+  }
+}
 @media (max-width: 700px) {
   .grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .panels,
+  .panels:not([data-n="1"]) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .panel,
+  .panels:not([data-n="1"]) .panel {
+    grid-template-columns: minmax(0, 0.7fr) minmax(0, 1fr);
+  }
+  .info-blurb {
+    display: none;
   }
   .slots {
     grid-template-columns: repeat(2, minmax(0, 1fr));
