@@ -255,6 +255,7 @@ export interface GameEvent {
     | "burn"
     | "regrow"
     | "ko"
+    | "strip" // beaten to nothing: every limb torn off, and still alive
     | "respawn"
     | "sit"
     | "unseat"

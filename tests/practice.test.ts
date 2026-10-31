@@ -1,7 +1,7 @@
 // Practice: nobody wins, the KO'd come back on any arena, fury never runs
 // out, and a body left alone for PRACTICE.refill frames is whole again.
 import { describe, expect, it } from "vitest";
-import { FURY, KO_FRAMES, PRACTICE } from "../src/sim/moves";
+import { FALL_FRAMES, FURY, KO_FRAMES, PRACTICE } from "../src/sim/moves";
 import type { StageId } from "../src/sim/stages";
 import { World } from "../src/sim/world";
 import { onDeck, tileAt, tileRing } from "../src/sim/arena";
@@ -31,7 +31,8 @@ describe("practice", () => {
     for (const practice of [false, true]) {
       const w = world(practice, "collapsing-tower");
       const f = w.fighters[1];
-      w.damage(f, "torso", 1e4, 0);
+      w.fall(f);
+      run(w, FALL_FRAMES + 1);
       expect(f.state).toBe("ko");
       run(w, KO_FRAMES + 2);
       expect(f.out, `practice ${practice}`).toBe(!practice);
@@ -45,16 +46,16 @@ describe("practice", () => {
     // the whole outer roof is gone, the spawn tile with it
     w.s.arena.tiles = w.s.arena.tiles.map((_, k) => (tileRing(k) > 0.5 ? -1 : 0));
     expect(w.s.arena.tiles[tileAt(f.spawnX, f.spawnY)]).toBe(-1);
-    w.damage(f, "torso", 1e4, 0);
-    run(w, KO_FRAMES + 30);
+    w.fall(f);
+    run(w, FALL_FRAMES + KO_FRAMES + 30);
     expect(w.s.arena.tiles[tileAt(f.x, f.y)]).toBe(0);
     expect(["idle", "walk"]).toContain(f.state);
 
     const b = world(true, "hindenburg-blimp");
     const g = b.fighters[0];
     b.s.arena.fireX = g.spawnX - 3; // the fire is past where they started
-    b.damage(g, "torso", 1e4, 1);
-    run(b, KO_FRAMES + 2);
+    b.fall(g);
+    run(b, FALL_FRAMES + KO_FRAMES + 3);
     expect(g.x).toBeLessThan(b.s.arena.fireX - 1);
     expect(onDeck(g.x, g.y)).toBe(true);
   });
@@ -62,8 +63,8 @@ describe("practice", () => {
   it("where the floor is sound they come back where they started", () => {
     const w = world(true, "collapsing-tower");
     const f = w.fighters[1];
-    w.damage(f, "torso", 1e4, 0);
-    run(w, KO_FRAMES + 2);
+    w.fall(f);
+    run(w, FALL_FRAMES + KO_FRAMES + 2);
     expect([f.x, f.y]).toEqual([f.spawnX, f.spawnY]);
   });
 

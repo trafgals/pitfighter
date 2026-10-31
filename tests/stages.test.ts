@@ -222,7 +222,7 @@ describe("Hindenburg Blimp", () => {
     expect(onDeck(c.x, c.y)).toBe(true);
   });
 
-  it("in the wreck the burn grows every second and finishes everyone off", () => {
+  it("in the wreck the burn grows every second, and when the fire burns out somebody wins with nobody dead", () => {
     const w = two("hindenburg-blimp");
     const [a, b] = w.fighters;
     // at the nose, away from the fire, and nobody presses a button: only the burn hurts here
@@ -239,26 +239,25 @@ describe("Hindenburg Blimp", () => {
       if (!alive(a)) break;
     }
     expect(lost[1]).toBeGreaterThan(lost[0]); // it ramps
-    // within a minute of the impact nobody is left alive in the wreck... but one of them wins
+    // the fire strips them but never kills them; when it burns out one of them wins
     for (let k = 0; k < 3600 && w.s.winner < 0; k++) run(w, 1);
     expect(w.s.winner).toBeGreaterThanOrEqual(0);
-    expect(w.fighters.filter((f) => !f.out).length).toBeLessThanOrEqual(1);
-    expect(w.s.frame - BLIMP.crashAt).toBeLessThan(60 * 60);
+    expect(w.fighters.every((f) => alive(f) && !f.out)).toBe(true);
+    expect(w.s.frame - BLIMP.crashAt).toBe(BLIMP.wreckFor);
   });
 
-  it("the last one standing wins, even when the rest burn on the same frame", () => {
+  it("when the wreck burns out, whoever has the most limbs on wins", () => {
     const w = new World({ seed: 3, styles: [0, 1, 2], humans: [true, true, true], stage: "hindenburg-blimp" });
     const [a, b, c] = w.fighters;
     Object.assign(a, { x: -6, y: 0 });
     Object.assign(b, { x: 0, y: 0 });
     Object.assign(c, { x: 6, y: 0 });
-    w.s.frame = BLIMP.crashAt - 1;
-    run(w, 1);
-    a.parts.torso.hp = 200; // tougher than the other two, who burn out on the same tick
-    b.parts.torso.hp = c.parts.torso.hp = 1;
-    for (let k = 0; k < 600 && w.s.winner < 0; k++) run(w, 1);
-    expect(b.out && c.out).toBe(true);
-    expect(w.s.winner).toBe(a.id);
+    w.s.frame = BLIMP.crashAt + BLIMP.wreckFor - 2;
+    for (const f of [a, b, c]) f.parts.torso.hp = 1e4; // nobody is stripped on the last ticks
+    a.parts.armL.attached = false;
+    c.parts.armL.attached = c.parts.legR.attached = false;
+    run(w, 3);
+    expect(w.s.winner).toBe(b.id);
   });
 
 });

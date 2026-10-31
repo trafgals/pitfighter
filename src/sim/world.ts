@@ -1392,7 +1392,7 @@ export class World {
     return avail[avail.length - 1][0];
   }
 
-  /** Apply damage to a body part; limbs at 0 HP fall off, torso at 0 is a KO. */
+  /** Apply damage to a body part; limbs at 0 HP fall off, torso at 0 tears every limb off (nobody dies of a beating). */
   damage(d: Fighter, part: PartId, dmg: number, by: number): void {
     if (!alive(d)) return;
     if (by >= 0) d.lastHitBy = by;
@@ -1402,7 +1402,7 @@ export class World {
     if (part !== "torso") d.parts.torso.hp -= dmg * LIMB_TORSO_SHARE;
     if (part !== "torso" && part !== "head" && p.hp <= 0 && p.attached) this.detach(d, part, by);
     if (d.parts.torso.hp <= 0) {
-      this.ko(d, by);
+      this.strip(d, by);
       return;
     }
     if (part === "head" && p.hp <= 0 && d.state !== "dizzy") {
@@ -1463,6 +1463,29 @@ export class World {
     });
   }
 
+  /**
+   * Beaten to nothing: every limb comes off and is scattered, and the torso
+   * is knocked flat and pulled back together. Nobody dies of a beating: they
+   * hobble round on what is left until they have picked their limbs back up.
+   */
+  private strip(d: Fighter, by: number): void {
+    if (d.state === "holding" || d.state === "held") this.release(d);
+    if (d.state === "reattach") this.dropReattach(d);
+    if (d.weapon) this.dropWeapon(d, d.weapon);
+    if (d.state === "driving") this.arena.onKo(this, d);
+    d.parts.torso.hp = d.parts.torso.max;
+    d.parts.head.hp = d.parts.head.max;
+    d.deaths++;
+    const killer = this.s.fighters[by];
+    if (killer && killer.id !== d.id) killer.kos++;
+    for (const p of LIMBS) if (d.parts[p].attached) this.detach(d, p, by);
+    const src = this.s.fighters[by];
+    const ang = src && src.id !== d.id ? Math.atan2(d.y - src.y, d.x - src.x) : d.facing + Math.PI;
+    this.knockDown(d, Math.cos(ang), Math.sin(ang), 1.2);
+    this.ev({ kind: "strip", a: d.id, b: by });
+  }
+
+  /** Off the edge: the one way left to be KO'd (and out, on a stage without respawns). */
   private ko(d: Fighter, by: number, fell = false): void {
     if (d.state === "holding" || d.state === "held") this.release(d);
     if (d.state === "reattach") this.dropReattach(d);
@@ -1496,7 +1519,7 @@ export class World {
   }
 
   private respawn(f: Fighter): void {
-    this.s.pickups = this.s.pickups.filter((p) => p.owner !== f.id);
+    // the limbs they left lying about stay there, for anyone to pick up
     f.parts = freshParts(f.style, (p) => this.grow(f, p));
     const at = this.arena.respawnAt(this, f); // never back onto floor that has gone
     f.x = at.x;

@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { STYLES } from "../src/sim/styles";
-import { REATTACH, REGROW_FRAMES, SPEED } from "../src/sim/moves";
+import { REATTACH, SPEED } from "../src/sim/moves";
 import { RING_R } from "../src/sim/types";
-import { arms, legs } from "../src/sim/world";
+import { alive, arms, legs } from "../src/sim/world";
 import { BTN, chop, duel, idle, run, tap } from "./helpers";
 
 describe("limbs", () => {
@@ -162,38 +162,58 @@ describe("limbs", () => {
     expect(b.parts.legL.attached).toBe(false);
   });
 
-  it("a limb that lands in the hellfire burns, and grows back later", () => {
+  it("a limb that lands in the hellfire is not lost: it washes back up on the floor", () => {
     const w = duel();
     const b = w.fighters[1];
     chop(w, b, "armL", 0);
     const p = w.s.pickups[0];
     Object.assign(p, { x: RING_R + 0.5, y: 0, z: 0, vx: 0, vy: 0, vz: 0 });
     run(w, 60);
-    expect(w.s.pickups).toHaveLength(0);
-    expect(b.parts.armL.regrow).toBeGreaterThan(0);
-    run(w, REGROW_FRAMES);
-    expect(b.parts.armL.attached).toBe(true);
+    expect(w.s.pickups).toHaveLength(1);
+    expect(Math.hypot(p.x, p.y)).toBeLessThan(RING_R);
+    expect(p.burning).toBe(0);
+    expect(b.parts.armL.regrow).toBe(0);
   });
 
-  it("torso at 0 is a KO; you respawn at your edge spot, whole again", () => {
+  it("torso at 0 is not death: every limb comes off, and you hobble round to pick them back up", () => {
     const w = duel();
     const b = w.fighters[1];
     w.damage(b, "torso", 999, 0);
-    expect(b.state).toBe("ko");
+    const kinds = w.s.events.map((e) => e.kind);
+    expect(kinds).toContain("strip");
+    expect(kinds).not.toContain("ko");
+    expect(b.state).toBe("down");
+    expect(alive(b)).toBe(true);
     expect(w.fighters[0].kos).toBe(1);
     expect(legs(b) + arms(b)).toBe(0);
-    run(w, 200, (inp) => void inp);
-    expect(b.state).toBe("idle");
+    expect(b.parts.torso.hp).toBe(b.parts.torso.max);
+    expect(w.s.pickups.filter((p) => p.owner === b.id)).toHaveLength(4);
+    // long after a KO would have respawned them they are still here, in pieces, and the limbs still lie about
+    run(w, 400);
+    expect(alive(b)).toBe(true);
+    expect(legs(b) + arms(b)).toBe(0);
+    expect(w.s.pickups.filter((p) => p.owner === b.id)).toHaveLength(4);
+    // a bare torso goes slower than one hopping on a leg
+    expect(SPEED.bounce).toBeLessThan(SPEED.hop);
+    // beaten to nothing again: still not dead
+    w.damage(b, "torso", 999, 0);
+    expect(alive(b)).toBe(true);
+    // over to each limb, and pick it back up
+    for (let k = 0; k < 4; k++) {
+      const p = w.s.pickups.find((q) => q.owner === b.id)!;
+      Object.assign(b, { x: p.x, y: p.y });
+      w.setState(b, "idle");
+      tap(w, 1, BTN.USE);
+      run(w, REATTACH.dur + 2);
+    }
     expect(legs(b) + arms(b)).toBe(4);
-    expect(Math.hypot(b.x - b.spawnX, b.y - b.spawnY)).toBeLessThan(0.01);
-    expect(w.s.pickups.filter((p) => p.owner === b.id)).toHaveLength(0);
   });
 
   it("head at 0 HP makes you dizzy", () => {
     const w = duel();
     const b = w.fighters[1];
-    w.damage(b, "head", 999, 0);
-    expect(b.state === "dizzy" || b.state === "ko").toBe(true);
+    w.damage(b, "head", 45, 0);
+    expect(b.state).toBe("dizzy");
     w.step(idle(2));
   });
 });

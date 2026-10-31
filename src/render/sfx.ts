@@ -371,7 +371,7 @@ export class Sfx {
         }
       }
       this.played[key] = (this.played[key] ?? 0) + 1;
-      if (["ko", "reversal", "crowd", "special", "win", "fall", "wreck", "impact", "crunch", "airgrab"].includes(q.kind)) this.hype = Math.min(1, this.hype + 0.5);
+      if (["ko", "strip", "reversal", "crowd", "special", "win", "fall", "wreck", "impact", "crunch", "airgrab"].includes(q.kind)) this.hype = Math.min(1, this.hype + 0.5);
       if (q.kind === "hit") this.hype = Math.min(1, this.hype + 0.04 * k);
     }
     if (this.crowd) {

@@ -6,7 +6,7 @@
 //
 // Like the World, an Arena is deterministic: all randomness goes through
 // `w.rng`, in a fixed order.
-import { BTN, LAVA_R, RING_R, SPAWN_R, TOILET_FRAMES, TOILET_R, type ArenaState, type Fighter, type HazardKind, type OnFloor, type PlayerInput, type Vehicle, type VehicleKind } from "./types";
+import { BTN, LAVA_R, LIMBS, RING_R, SPAWN_R, TOILET_FRAMES, TOILET_R, type ArenaState, type Fighter, type HazardKind, type OnFloor, type PlayerInput, type Vehicle, type VehicleKind } from "./types";
 import { GEYSER, HITSTOP, LAVA, SIT_FRAMES, type Move, hitstopFor } from "./moves";
 import type { StageId } from "./stages";
 import { BODY_R, alive, dist, type World } from "./world";
@@ -60,6 +60,7 @@ export const BLIMP = {
   burnTick: 10,
   burnBase: 0.4,
   burnRamp: 0.06,
+  wreckFor: 1800, // the wreck burns out this long after the impact: whoever has the most limbs on then wins
   wreckFire: 0.004, // how fast the fire creeps over the rest of the wreck (m/frame): the nose goes last
   windFirst: 900, // the first gust: give everyone a moment on deck
   windMin: 540,
@@ -124,7 +125,7 @@ export interface Headline {
 
 export abstract class Arena {
   abstract readonly id: StageId;
-  /** KO'd fighters come back; false: KO and falls eliminate, and the last one standing wins */
+  /** Fighters who fall come back; false: a fall eliminates, and the last one standing wins */
   abstract readonly respawn: boolean;
   abstract spawns(n: number): Spawn[];
   /** Where a KO'd fighter comes back: their own spawn point, unless the stage has taken it away. */
@@ -139,6 +140,10 @@ export abstract class Arena {
     return true;
   }
   abstract boundPickup(w: World, p: OnFloor): void;
+  /** The nearest spot to (x, y) where a thing on the floor stays put: where a limb that went over the edge or into the fire washes back up. */
+  floorNear(_w: World, x: number, y: number): { x: number; y: number } {
+    return { x, y };
+  }
   /**
    * Whether a thing that falls to the floor at (x, y) stays there.
    *
@@ -233,9 +238,20 @@ function burn(w: World, f: Fighter): void {
   }
 }
 
-/** A thing on the floor of an edge stage that slides off the edge (or into fire) is gone; a limb grows back. */
+/**
+ * A thing on the floor of an edge stage that slides off the edge (or into
+ * fire) is gone, unless it is a limb: limbs never leave the map, so it is put
+ * back on the nearest floor, where its owner can hobble over and pick it up.
+ */
 function losePickup(w: World, p: OnFloor): void {
   if (p.burning > 0) return;
+  if ("part" in p) {
+    const at = w.arena.floorNear(w, p.x, p.y);
+    p.x = at.x;
+    p.y = at.y;
+    p.vx = p.vy = 0;
+    return;
+  }
   p.burning = 40;
   w.ev({ kind: "burn", a: p.owner });
 }
@@ -275,6 +291,12 @@ class HellToilet extends Arena {
       p.vx = p.vy = 0;
     }
     if (p.z === 0 && Math.hypot(p.x, p.y) > RING_R) losePickup(w, p);
+  }
+
+  floorNear(_w: World, x: number, y: number): { x: number; y: number } {
+    const r = Math.hypot(x, y);
+    const max = RING_R - 0.4;
+    return r > max ? { x: (x * max) / r, y: (y * max) / r } : { x, y };
   }
 
   canLand(_w: World, x: number, y: number): boolean {
@@ -766,6 +788,23 @@ class CollapsingTower extends Arena {
     if (p.z === 0 && !this.onFloor(w, p.x, p.y)) losePickup(w, p);
   }
 
+  floorNear(w: World, x: number, y: number): { x: number; y: number } {
+    if (this.onFloor(w, x, y)) return { x, y };
+    // the middle of the nearest tile still standing (the middle ones never go)
+    let best = { x: 0, y: 0 };
+    let bd = Infinity;
+    w.s.arena.tiles.forEach((t, k) => {
+      if (t === -1) return;
+      const c = tileCentre(k);
+      const d = Math.hypot(c.x - x, c.y - y);
+      if (d < bd) {
+        bd = d;
+        best = c;
+      }
+    });
+    return best;
+  }
+
   canLand(w: World, x: number, y: number): boolean {
     return this.onFloor(w, x, y);
   }
@@ -903,7 +942,13 @@ class HindenburgBlimp extends Arena {
   }
 
   boundPickup(w: World, p: OnFloor): void {
-    if (p.z === 0 && (!onDeck(p.x, p.y) || p.x > w.s.arena.fireX)) losePickup(w, p);
+    if (p.z === 0 && (!onDeck(p.x, p.y) || (p.x > w.s.arena.fireX && !crashed(w)))) losePickup(w, p);
+  }
+
+  floorNear(w: World, x: number, y: number): { x: number; y: number } {
+    // ahead of the fire while there is a deck ahead of it; in the wreck the fire is everywhere
+    const fx = crashed(w) ? x : Math.min(x, w.s.arena.fireX - 0.5);
+    return toDeck(fx, y, 0.4);
   }
 
   canLand(w: World, x: number, y: number): boolean {
@@ -919,6 +964,13 @@ class HindenburgBlimp extends Arena {
       a.fireX = Math.max(-BLIMP.half - 1, Math.min(a.fireX, BLIMP.fireStop) - BLIMP.wreckFire);
       a.wind = 0;
       const since = s.frame - BLIMP.crashAt;
+      if (since >= BLIMP.wreckFor) {
+        // nobody burns to death: the fire burns out, and whoever has the most limbs still on wins (then the most KOs)
+        const left = s.fighters.filter((f) => !f.out);
+        const limbs = (f: Fighter) => LIMBS.filter((p) => f.parts[p].attached).length;
+        if (left.length) w.win(left.reduce((a, b) => (limbs(b) > limbs(a) || (limbs(b) === limbs(a) && b.kos > a.kos) ? b : a)).id);
+        return;
+      }
       if (since > 0 && since % BLIMP.burnTick === 0) {
         const dmg = BLIMP.burnBase + (BLIMP.burnRamp * since) / 60;
         for (const f of s.fighters) {
@@ -988,7 +1040,8 @@ class HindenburgBlimp extends Arena {
     const to = BLIMP.crashAt - w.s.frame;
     if (to > BLIMP.brace) return { text: `${left} aboard · going down in ${Math.ceil(to / 60)} s`, frac: w.s.frame / BLIMP.crashAt, who: -1 };
     if (to > 0) return { text: `BRACE FOR IMPACT! ${Math.ceil(to / 60)}`, frac: w.s.frame / BLIMP.crashAt, who: -1 };
-    return { text: `${left} ${left === 1 ? "survivor" : "survivors"} in the burning wreck`, frac: 1, who: -1 };
+    const out = Math.max(0, Math.ceil((BLIMP.crashAt + BLIMP.wreckFor - w.s.frame) / 60));
+    return { text: `${left} ${left === 1 ? "survivor" : "survivors"} in the burning wreck · burns out in ${out} s`, frac: 1, who: -1 };
   }
 
   hash(mix: (v: number) => void, a: ArenaState): void {
@@ -1042,6 +1095,10 @@ class CastleUnderSiege extends Arena {
         p.vy = 0;
       }
     }
+  }
+
+  floorNear(_w: World, x: number, y: number): { x: number; y: number } {
+    return { x: clamp(x, -CASTLE.hx + 0.4, CASTLE.hx - 0.4), y: clamp(y, -CASTLE.hy + 0.4, CASTLE.hy - 0.4) };
   }
 
   canLand(_w: World, x: number, y: number): boolean {

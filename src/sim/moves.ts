@@ -119,7 +119,7 @@ export const REGROW_FRAMES = 720;
 export const SIT_FRAMES = 20;
 export const GEYSER = { warn: 60, erupt: 20, radius: 1.3, dmg: 10, minGap: 240, maxGap: 420 };
 export const LAVA = { tick: 10, dmg: 2 };
-export const SPEED = { walk: 0.05, run: 0.1, hop: 0.045, bounce: 0.03, accel: 0.35, skid: 0.72, runTurn: 0.22, track: 0.12 };
+export const SPEED = { walk: 0.05, run: 0.1, hop: 0.045, bounce: 0.02, accel: 0.35, skid: 0.72, runTurn: 0.22, track: 0.12 };
 // Cross: a dash covers about 1.6 m in its first `move` frames, then eases into
 // a run if the button is still held. Square with a direction: Urban Reign's
 // evade, a 34 frame sidestep (its decoded record) that nothing touches over the

@@ -565,7 +565,8 @@ export class Scene {
           this.shake = Math.min(1, this.shake + 0.3);
           break;
         }
-        case "ko": {
+        case "ko":
+        case "strip": {
           const f = fs[q.a];
           if (!f) break;
           this.fx.burst(at(f, 1.1), { count: 70, speed: 7, color: 0xff4010, life: 0.8, gravity: 5, up: 1 });

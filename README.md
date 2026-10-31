@@ -14,7 +14,7 @@ stage decides the arena and how a match is won.
 | **Hell Toilet** | A ring of hellfire with the last toilet in hell in the middle. Hellfire geysers erupt across the floor. Any hit knocks the sitter off the throne. | Sit on the toilet for 15 seconds in total (progress is kept between sittings). |
 | **Construction Site** | Everyone starts in a different construction vehicle: bulldozer, excavator, dump truck, forklift, steamroller, cement mixer, loader and crane truck. Steer with the stick, boost with strike, get out (or into a free machine) with USE. Machines crash into each other, run people over and get wrecked by crashes and by strikes; a wreck throws its driver out. The crane drops steel beams. | First to 4 KOs. KO'd fighters come back. |
 | **Collapsing Tower** | A rooftop of 8 x 8 tiles high above the city. Tiles crack and fall, mostly from the edges in, faster as the match goes on; the centre four never fall. You cannot walk off an edge, but a knockdown or a throw can send you over. | Last one standing. Nobody comes back. |
-| **Hindenburg Blimp** | On top of the burning airship: the fire creeps forward from the tail and gusts of wind push everyone toward the edge. Knock someone over the edge and they are gone. After 30 seconds it hits the ground: the impact throws everyone flat, the wreck is walled in by twisted frame, and the fire burns everyone a little more every second until nobody is left. | Last one standing. Nobody comes back. |
+| **Hindenburg Blimp** | On top of the burning airship: the fire creeps forward from the tail and gusts of wind push everyone toward the edge. Knock someone over the edge and they are gone. After 30 seconds it hits the ground: the impact throws everyone flat, the wreck is walled in by twisted frame, and the fire burns everyone a little more every second. It burns out 30 seconds later. | Last one standing; if more than one is left when the wreck burns out, whoever has the most limbs on. Nobody comes back. |
 | **Castle Under Siege** | The wall walk of a besieged castle. The parapet stops you, except at the two breaches the siege has knocked in it, which are a long way down. Catapult stones knock you down, arrow volleys sting. | Raise your banner at the flagpole: the fighter nearest the pole raises theirs, 10 seconds alone wins, and it rises at half speed while someone else is in the circle. KO'd fighters come back. |
 
 The menu picks the kind of match, not the stage: **King of the Hill** (Hell
@@ -96,13 +96,14 @@ floor. Walk over to it and press *grab* (or *pick up*) to reattach it at half
 HP. Grab someone else's limb and it goes on you instead, keeping its first
 owner's colours and fighting like them: a boxer's arm punches like a boxer.
 Its owner grows a new one 12 s later. *Pick up* on someone else's limb punts
-it away. A limb that lands in the hellfire burns, and grows back 12 s later.
+it away. Limbs never leave the map: one that slides into the hellfire, off an
+edge or through a breach washes back up on the nearest floor.
 
 - One leg: you hop. You're slower, can't run and can't low kick.
-- No legs: you bounce along on your torso.
+- No legs: you bounce along on your torso, slowly.
 - One arm: slower, weaker punches and weaker throws.
 - No arms: Circle becomes a headbutt, and you can't grab.
-- Head at 0 HP: you're dizzy. Torso at 0 HP: you're torn apart and respawn at your spot on the edge.
+- Head at 0 HP: you're dizzy. Torso at 0 HP: you don't die. Every limb is torn off and scattered, and you hobble round on your torso to pick them back up. The only way out of a fight is over an edge.
 
 ## Fighters
 

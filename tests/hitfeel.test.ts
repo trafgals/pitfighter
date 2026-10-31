@@ -1,7 +1,7 @@
 // Hitstop, fury and the style specials: the sim side of the hit-feel and
 // combat-depth passes.
 import { describe, expect, it } from "vitest";
-import { FURY, HITSTOP, MOVES, REVERSAL, hitstopFor } from "../src/sim/moves";
+import { FALL_FRAMES, FURY, HITSTOP, MOVES, REVERSAL, hitstopFor } from "../src/sim/moves";
 import { STYLES } from "../src/sim/styles";
 import { World } from "../src/sim/world";
 import { BTN, duel, idle, run, tap } from "./helpers";
@@ -172,11 +172,12 @@ describe("fury and specials", () => {
     for (const s of STYLES) expect(MOVES[s.special]?.kind).toBe("special");
   });
 
-  it("a KO empties the fury bar", () => {
+  it("a KO (only a fall now) empties the fury bar", () => {
     const w = duel(1.0);
     const b = w.fighters[1];
     b.fury = 80;
-    w.damage(b, "torso", 1000, 0);
+    w.fall(b);
+    run(w, FALL_FRAMES + 1);
     expect(b.state).toBe("ko");
     expect(b.fury).toBe(0);
   });

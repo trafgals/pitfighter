@@ -33,7 +33,7 @@ export const STAGES: readonly Stage[] = [
   {
     id: "hindenburg-blimp",
     name: "Hindenburg Blimp",
-    blurb: "On top of the doomed airship: gusts blow you to the edge and the fire creeps forward. Then it hits the ground, and the burning wreck finishes off whoever is left. Last one standing wins.",
+    blurb: "On top of the doomed airship: gusts blow you to the edge and the fire creeps forward. Then it hits the ground and the wreck burns: last one aboard wins, or whoever has the most limbs on when the fire burns out.",
     playable: true,
   },
   {

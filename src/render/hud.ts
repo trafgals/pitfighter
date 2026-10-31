@@ -107,6 +107,7 @@ export class Hud {
     for (const e of s.events) {
       const nm = (id: number) => `P${id + 1}`;
       if (e.kind === "ko") this.say(koLine(s.stage, e.what, e.a, e.b), 70);
+      else if (e.kind === "strip") this.say(e.b !== undefined && e.b >= 0 && e.b !== e.a ? `${nm(e.b)} TORE ${nm(e.a)} APART` : `${nm(e.a)} IS IN PIECES`, 70);
       else if (e.kind === "fall") this.say(e.b !== undefined && e.b >= 0 ? `${nm(e.b)} SENT ${nm(e.a)} OVER THE EDGE` : `${nm(e.a)} WENT OVER THE EDGE`, 70);
       else if (e.kind === "wreck") this.say(e.b !== undefined && e.b >= 0 ? `${nm(e.b)} WRECKED THE ${(VEHICLES[e.what as keyof typeof VEHICLES]?.name ?? "MACHINE").toUpperCase()}` : "WRECKED!", 60);
       else if (e.kind === "collapse") this.say("THE ROOF IS GIVING WAY!", 40);
@@ -154,8 +155,8 @@ export class Hud {
 const P = (id: number) => `P${id + 1}`;
 
 function koLine(stage: string, what: string | undefined, a: number, b: number | undefined): string {
-  if (b !== undefined && b >= 0) return `${P(b)} TORE ${P(a)} APART`;
   if (what === "fall") return `${P(a)} FELL TO THEIR DOOM`;
+  if (b !== undefined && b >= 0) return `${P(b)} TORE ${P(a)} APART`;
   if (stage === "hell-toilet") return `${P(a)} WAS CONSUMED BY HELL`;
   if (stage === "hindenburg-blimp") return `${P(a)} WENT UP IN FLAMES`;
   return `${P(a)} IS DOWN FOR GOOD`;
