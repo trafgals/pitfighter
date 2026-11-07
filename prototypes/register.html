@@ -1,0 +1,1358 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Prototype: The Register · Pitfighter 1899</title>
+<!--
+  A visual prototype of the new landing page: the Register, where players sign in.
+  Standalone: no build step. Served by Vite at /prototypes/register.html.
+  The porthole shows the game's own live CPU brawl (index.html in an iframe, its menu hidden).
+-->
+<style>
+:root {
+  --ink: #ece4d4;
+  --gold: #d8a84e;
+  --brass-hi: #f6dc9a;
+  --brass: #d8a84e;
+  --brass-mid: #a77b2c;
+  --brass-lo: #5a3e12;
+  --crimson: #8f1d18;
+  --chase: 1.4s;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: #07090c; color: var(--ink); font-family: Georgia, "Palatino Linotype", "Book Antiqua", serif; }
+
+/* the design is drawn at 1600 x 900 and scaled to fit the window */
+#stage { position: absolute; left: 50%; top: 50%; width: 1600px; height: 900px; transform-origin: center center; overflow: hidden; }
+#rig { position: absolute; inset: 0; }
+
+/* ---------------------------------------------------------------- the backdrop */
+.plates {
+  position: absolute; inset: 0;
+  background-color: #15181d;
+  background-image:
+    radial-gradient(circle at 16px 112px, #5c626b 0 1.7px, #23272d 2.3px, #090b0d 3.1px, transparent 3.7px),
+    linear-gradient(to bottom, rgba(0,0,0,.6) 0 2px, rgba(255,255,255,.04) 2px 3px, transparent 3px),
+    linear-gradient(to right, rgba(0,0,0,.6) 0 2px, rgba(255,255,255,.04) 2px 3px, transparent 3px),
+    radial-gradient(ellipse at 30% 20%, rgba(255,255,255,.035), transparent 60%),
+    radial-gradient(ellipse at 75% 70%, rgba(120,90,50,.06), transparent 55%);
+  background-size: 32px 225px, 100% 225px, 400px 100%, 400px 225px, 400px 225px;
+  background-position: 0 -100px, 0 0, 0 0, 0 0, 0 0;
+}
+.fire {
+  position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse 62% 42% at 50% 104%, rgba(222,104,38,.38), rgba(160,60,20,.12) 45%, transparent 72%);
+  animation: fireflicker 3.1s linear infinite;
+}
+@keyframes fireflicker { 0%,100%{filter:brightness(1)} 17%{filter:brightness(1.25)} 23%{filter:brightness(.85)} 41%{filter:brightness(1.1)} 58%{filter:brightness(.92)} 77%{filter:brightness(1.18)} }
+.vignette { position: absolute; inset: 0; pointer-events: none; z-index: 5; background: radial-gradient(ellipse at 50% 45%, transparent 48%, rgba(0,0,0,.72) 100%); }
+#gears { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+
+/* ---------------------------------------------------------------- the marquee */
+.marquee {
+  position: absolute; left: 380px; top: 8px; width: 840px; height: 160px; z-index: 3;
+  border-radius: 14px;
+  background: linear-gradient(#21160f, #110b08);
+  border: 3px solid #6e501c;
+  box-shadow: inset 0 0 0 2px rgba(216,168,78,.35), inset 0 0 0 16px #150e09, inset 0 0 0 17px rgba(216,168,78,.25), inset 0 0 50px rgba(0,0,0,.9), 0 12px 34px rgba(0,0,0,.7);
+}
+.bulbs { position: absolute; inset: 0; pointer-events: none; }
+.bulb {
+  position: absolute; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 50%;
+  background: #5e4117; box-shadow: inset 0 -2px 2px rgba(0,0,0,.55);
+  animation: chase var(--chase) linear infinite;
+  animation-delay: calc(var(--k) * var(--chase) / -3);
+}
+@keyframes chase {
+  0%, 30% { background: #fff4c8; box-shadow: 0 0 7px 3px rgba(255,214,120,.85), 0 0 18px 6px rgba(255,160,50,.35); }
+  34%, 100% { background: #5e4117; box-shadow: inset 0 -2px 2px rgba(0,0,0,.55); }
+}
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; margin: 0; }
+#title {
+  position: absolute; left: 17px; top: 17px; width: 800px; height: 120px; overflow: visible;
+  filter: drop-shadow(0 3px 0 #0b0603) drop-shadow(0 0 12px rgba(216,168,78,.2));
+}
+#title text { font-family: "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif; }
+
+/* ---------------------------------------------------------------- the ticker tape */
+.tape {
+  position: absolute; left: 50%; top: 178px; width: 780px; height: 30px; margin-left: -390px; z-index: 3;
+  background: linear-gradient(#efe4c6, #ddd0ac); color: #2a1d10;
+  font: 700 14px/30px "Courier New", Courier, monospace; letter-spacing: 2px; text-align: center; white-space: nowrap; overflow: hidden;
+  box-shadow: 0 5px 12px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.5);
+}
+.tape::before, .tape::after { content: ""; position: absolute; top: 0; bottom: 0; width: 6px; background: repeating-linear-gradient(to bottom, #07090c 0 4px, transparent 4px 8px); opacity: .45; }
+.tape::before { left: 10px; } .tape::after { right: 10px; }
+.roller { position: absolute; top: 172px; width: 22px; height: 42px; z-index: 4; border-radius: 6px; background: linear-gradient(90deg, #3a2709, #d8a84e 40%, #f6dc9a 55%, #8a6420 80%, #3a2709); box-shadow: 0 4px 8px rgba(0,0,0,.6); }
+.roller.l { left: 398px; } .roller.r { left: 1180px; }
+.caret { display: inline-block; width: 9px; height: 15px; margin-left: 3px; background: #2a1d10; vertical-align: -2px; animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* ---------------------------------------------------------------- the instruction plaque */
+.plaque {
+  position: absolute; left: 78px; top: 236px; width: 396px; height: 362px; z-index: 3; padding: 26px 30px 20px;
+  border-radius: 10px;
+  background: linear-gradient(160deg, #3d2c13, #22180b 55%, #302111);
+  border: 2px solid #8a6420;
+  box-shadow: inset 0 0 0 6px #1a1209, inset 0 0 0 8px rgba(184,138,58,.4), inset 0 0 40px rgba(0,0,0,.6), 0 18px 40px rgba(0,0,0,.75);
+}
+.plaque::before {
+  content: ""; position: absolute; inset: 14px; pointer-events: none;
+  background:
+    radial-gradient(circle at 0 0, #f6dc9a 0 2px, #6e501c 4px, transparent 5px) 0 0 / 10px 10px no-repeat,
+    radial-gradient(circle at 10px 0, #f6dc9a 0 2px, #6e501c 4px, transparent 5px) 100% 0 / 10px 10px no-repeat,
+    radial-gradient(circle at 0 10px, #f6dc9a 0 2px, #6e501c 4px, transparent 5px) 0 100% / 10px 10px no-repeat,
+    radial-gradient(circle at 10px 10px, #f6dc9a 0 2px, #6e501c 4px, transparent 5px) 100% 100% / 10px 10px no-repeat;
+}
+.plaque h2 {
+  margin: 0 0 4px; font-size: 30px; line-height: 1.04; letter-spacing: 4px; font-weight: 900; text-align: center;
+  background: linear-gradient(to bottom, #fff8e4, #e5be6b 50%, #a87628); -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 2px 0 #120b05);
+}
+.plaque .lead { margin: 0 0 10px; text-align: center; font-style: italic; font-size: 15px; color: #e6d6b0; }
+.howrow { display: grid; grid-template-columns: 54px 1fr; gap: 12px; align-items: center; padding: 7px 0; border-top: 1px solid rgba(216,168,78,.18); }
+.howrow svg { width: 44px; height: 28px; color: var(--gold); }
+.howrow .who { font-size: 13px; font-weight: 900; letter-spacing: 2px; color: var(--brass-hi); }
+.howrow .what { font-size: 13px; color: #d9c9a2; margin-top: 3px; }
+.plaque .foot { margin-top: 6px; padding-top: 9px; border-top: 1px solid rgba(216,168,78,.18); font-size: 13px; font-style: italic; color: #cbb68a; text-align: center; line-height: 1.45; }
+kbd {
+  display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 5px; margin: 0 1px; border-radius: 11px;
+  background: radial-gradient(circle at 40% 30%, #fffaf0, #d9cba6); color: #2a1d10;
+  border: 2px solid #1a1209; box-shadow: 0 0 0 1.5px #8a6420, 0 2px 0 #0a0805;
+  font: 900 11px Georgia, serif; letter-spacing: 0; vertical-align: 1px;
+}
+
+/* ---------------------------------------------------------------- the porthole */
+.porthole-wrap { position: absolute; left: 595px; top: 205px; width: 410px; height: 410px; z-index: 3; }
+.porthole {
+  position: absolute; left: 33px; top: 33px; width: 344px; height: 344px; border-radius: 50%; overflow: hidden;
+  background: #0b0e12 url("../tex/characters/nell_sluice.jpg") center 20% / cover;
+}
+.porthole iframe { position: absolute; left: 50%; top: 50%; width: 960px; height: 600px; border: 0; transform: translate(-50%, -50%) scale(.62); opacity: 0; transition: opacity 1.4s; pointer-events: none; }
+.porthole iframe.live { opacity: 1; }
+.porthole .glass {
+  position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
+  background:
+    radial-gradient(circle at 30% 24%, rgba(255,255,255,.2), transparent 30%),
+    linear-gradient(132deg, transparent 44%, rgba(255,255,255,.07) 49%, transparent 54%),
+    radial-gradient(circle at 50% 50%, rgba(120,160,150,.05) 55%, rgba(0,0,0,.6) 100%);
+  box-shadow: inset 0 0 40px rgba(0,0,0,.85);
+}
+.rain { position: absolute; inset: 0; pointer-events: none; }
+.drop { position: absolute; top: -70px; width: 1.4px; background: linear-gradient(transparent, rgba(200,220,255,.5)); transform: rotate(10deg); animation: fall linear infinite; }
+@keyframes fall { to { transform: translate(-70px, 470px) rotate(10deg); } }
+.bead { position: absolute; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.75), rgba(180,200,220,.18) 45%, rgba(0,0,0,.25) 100%); animation: slide linear infinite; }
+@keyframes slide { 0% { transform: translateY(0); opacity: 0; } 10% { opacity: 1; } 55% { transform: translateY(40px); } 60% { transform: translateY(46px); } 100% { transform: translateY(240px); opacity: 0; } }
+.porthole-ring { position: absolute; inset: 0; pointer-events: none; }
+.porthole-plate {
+  position: absolute; left: 50%; bottom: -6px; transform: translateX(-50%); padding: 4px 16px; border-radius: 4px; white-space: nowrap;
+  background: linear-gradient(#e2bf72, #a77b2c); color: #2a1708; font: 900 12px Georgia; letter-spacing: 3px;
+  box-shadow: 0 3px 8px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,240,200,.6);
+}
+.porthole-plate .live { display: inline-block; width: 8px; height: 8px; margin-left: 8px; border-radius: 50%; background: #c8241a; box-shadow: 0 0 6px #ff3b2b; animation: blink 1.3s steps(1) infinite; vertical-align: 0; }
+
+/* ---------------------------------------------------------------- the gauge */
+.gauge-wrap { position: absolute; left: 1140px; top: 245px; width: 300px; height: 300px; z-index: 3; transition: filter .4s; }
+.gauge-wrap svg { width: 300px; height: 300px; overflow: visible; filter: drop-shadow(0 14px 22px rgba(0,0,0,.75)); }
+#needle { filter: drop-shadow(3px 4px 2px rgba(0,0,0,.45)); }
+.whistle { position: absolute; left: 1262px; top: 166px; width: 56px; height: 92px; z-index: 2; }
+.gauge-plate {
+  position: absolute; left: 1160px; top: 552px; width: 260px; height: 56px; z-index: 3; text-align: center; padding-top: 7px; border-radius: 6px;
+  background: linear-gradient(#e2bf72, #a77b2c); color: #2a1708;
+  box-shadow: 0 6px 14px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,240,200,.6), inset 0 0 0 3px rgba(90,62,18,.35);
+}
+.gauge-plate .t { font: 900 14px Georgia; letter-spacing: 3px; }
+.gauge-plate .s { font: italic 13px Georgia; margin-top: 3px; }
+.building .gauge-wrap { animation: rattle .09s linear infinite; filter: drop-shadow(0 0 26px rgba(255,90,40,.55)); }
+@keyframes rattle { 0% { transform: translate(0,0); } 25% { transform: translate(1px,-1px); } 50% { transform: translate(-1px,1px); } 75% { transform: translate(1px,1px); } }
+
+/* ---------------------------------------------------------------- the pipe */
+.pipe { position: absolute; left: 24px; top: 620px; width: 1552px; height: 18px; z-index: 2; border-radius: 9px; background: linear-gradient(to bottom, #3a2709, #f3d58a 28%, #d8a84e 50%, #8a6420 78%, #2a1a06); box-shadow: 0 6px 10px rgba(0,0,0,.6); }
+.vpipe { position: absolute; width: 16px; z-index: 2; background: linear-gradient(to right, #3a2709, #f3d58a 28%, #d8a84e 50%, #8a6420 78%, #2a1a06); }
+.flange { position: absolute; top: 611px; width: 14px; height: 36px; z-index: 2; border-radius: 3px; background: linear-gradient(to right, #3a2709, #e9c77a 35%, #a77b2c 70%, #2a1a06); box-shadow: 0 4px 6px rgba(0,0,0,.6); }
+.flange::before, .flange::after { content: ""; position: absolute; left: 4px; width: 6px; height: 6px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff2c0, #6e501c); }
+.flange::before { top: 4px; } .flange::after { bottom: 4px; }
+
+/* ---------------------------------------------------------------- the register */
+.register { position: absolute; left: 71px; top: 650px; width: 1458px; height: 214px; z-index: 3; display: grid; grid-template-columns: repeat(8, 170px); gap: 14px; }
+.slot {
+  --pc: #8a6420;
+  position: relative; height: 214px; padding: 8px; border-radius: 10px; cursor: pointer;
+  background: linear-gradient(#2b2117, #17110b);
+  border: 2px solid #6e501c;
+  box-shadow: inset 0 0 0 4px #120d08, inset 0 0 0 5px rgba(184,138,58,.28), 0 12px 24px rgba(0,0,0,.65);
+  transition: border-color .3s, box-shadow .3s;
+}
+.slot::after { content: ""; position: absolute; inset: -4px; border-radius: 12px; border: 2px solid #f3d58a; opacity: 0; pointer-events: none; }
+.slot.next::after { animation: nextpulse 1.8s ease-in-out infinite; }
+@keyframes nextpulse { 0%, 100% { opacity: 0; } 50% { opacity: .7; box-shadow: 0 0 18px rgba(243,213,138,.5); } }
+.slot.ready { border-color: var(--pc); box-shadow: inset 0 0 0 4px #120d08, inset 0 0 0 5px rgba(184,138,58,.28), 0 12px 24px rgba(0,0,0,.65), 0 0 22px -2px var(--pc); }
+.head { display: flex; justify-content: space-between; align-items: center; height: 28px; padding: 0 9px; border-radius: 4px; background: linear-gradient(#e2bf72, #a77b2c); color: #2a1708; font: 900 15px Georgia; letter-spacing: 2px; box-shadow: inset 0 1px 0 rgba(255,240,200,.6); }
+.lamp { width: 14px; height: 14px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #6a5a40, #241b12); box-shadow: inset 0 0 0 1px #000, 0 0 0 2px rgba(42,23,8,.5); transition: background .3s, box-shadow .3s; }
+.slot.on .lamp { background: radial-gradient(circle at 40% 35%, #fff, var(--pc) 55%, #000 120%); box-shadow: 0 0 5px 1px var(--pc), 0 0 0 2px rgba(42,23,8,.5); opacity: .65; }
+.slot.ready .lamp { opacity: 1; box-shadow: 0 0 10px 4px var(--pc), 0 0 0 2px rgba(42,23,8,.5); animation: lampbeat 1.1s ease-in-out infinite; }
+@keyframes lampbeat { 50% { filter: brightness(1.35); } }
+.window { position: relative; display: flex; height: 140px; margin-top: 8px; border-radius: 6px; overflow: hidden; background: #0a0806; box-shadow: inset 0 3px 10px rgba(0,0,0,.9), inset 0 0 0 1px #3a2709; }
+.bay { position: relative; flex: 1; overflow: hidden; }
+.empty { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center; font: 900 13px/1.35 Georgia; letter-spacing: 2px; color: #a5824a; opacity: .5; animation: gasflicker 4.3s linear infinite; transition: opacity .3s; }
+.empty .glyphs { display: flex; gap: 6px; opacity: .8; }
+.empty .glyphs svg { width: 24px; height: 15px; color: #a5824a; }
+.slot.next .empty { opacity: 1; color: #f3d58a; }
+.slot.on .empty { opacity: 0; animation: none; }
+@keyframes gasflicker { 0%, 100% { filter: brightness(1); } 44% { filter: brightness(1.08); } 47% { filter: brightness(.6); } 49% { filter: brightness(1.12); } 71% { filter: brightness(.9); } }
+.card {
+  position: absolute; left: 6px; right: 5px; top: 7px; bottom: 7px; border-radius: 3px; overflow: hidden;
+  background: linear-gradient(170deg, #f4ead0, #e3d5af); color: #2a1d10; text-align: center;
+  box-shadow: 0 3px 6px rgba(0,0,0,.6);
+  transform: translateY(-135%); transition: transform .42s cubic-bezier(.3,1.35,.5,1);
+}
+.slot.on .card { transform: translateY(0); }
+.slot.wiggle .card { animation: wiggle .3s; }
+@keyframes wiggle { 25% { transform: rotate(-3deg); } 75% { transform: rotate(3deg); } }
+.card .band { height: 9px; background: var(--pc); box-shadow: inset 0 -1px 0 rgba(0,0,0,.25); }
+.card .devicon { display: block; margin: 7px auto 0; width: 30px; height: 19px; color: #3a2a18; }
+.card .devicon svg { width: 30px; height: 19px; display: block; }
+.card .devname { margin-top: 3px; font: 900 11px Georgia; letter-spacing: .5px; white-space: nowrap; }
+.card .keys { margin-top: 3px; font: italic 11px/1.3 Georgia; color: #5a4630; }
+.card .keys b { font-style: normal; color: #2a1d10; }
+.holes { position: absolute; left: 9px; right: 9px; bottom: 8px; display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; }
+.holes i { height: 6px; border-radius: 1px; background: rgba(90,70,40,.16); }
+.holes i.p { background: #0d0a07; }
+.holes i.pop { animation: pop .22s ease-out; }
+@keyframes pop { 0% { transform: scale(2); background: #b83224; } 100% { transform: scale(1); } }
+.stamp {
+  position: absolute; left: 50%; top: 79%; padding: 1px 4px; white-space: nowrap; pointer-events: none;
+  border: 3px double #a3221b; color: #a3221b; font: 900 10px Georgia; letter-spacing: 1px; border-radius: 3px;
+  opacity: 0; transform: translate(-50%, -50%) rotate(-14deg); mix-blend-mode: multiply;
+}
+.slot.stamped .stamp { opacity: .85; }
+.slot.stamping .stamp { animation: stamp .34s cubic-bezier(.2,.9,.3,1.2) both; }
+@keyframes stamp {
+  0% { opacity: 0; transform: translate(-50%, -50%) rotate(-32deg) scale(2.9); }
+  60% { opacity: .95; transform: translate(-50%, -50%) rotate(-12deg) scale(.9); }
+  100% { opacity: .85; transform: translate(-50%, -50%) rotate(-14deg) scale(1); }
+}
+.card .x { position: absolute; top: 12px; right: 3px; width: 16px; height: 16px; border-radius: 50%; display: grid; place-items: center; font: 900 11px/1 Georgia; color: #5a4630; opacity: 0; transition: opacity .2s; }
+.slot.on:hover .card .x { opacity: .8; }
+.leverbay { position: relative; width: 34px; border-left: 1px solid #3a2709; background: linear-gradient(90deg, #120d08, #1d150c); transition: opacity .3s; }
+.slot:not(.on) .leverbay { opacity: .35; }
+.track { position: absolute; left: 50%; top: 14px; bottom: 14px; width: 8px; margin-left: -4px; border-radius: 4px; background: #050403 repeating-linear-gradient(to bottom, #2a1c0a 0 2px, transparent 2px 9px); box-shadow: inset 0 0 0 1px #3a2709; }
+.handle { position: absolute; left: 50%; top: 8px; width: 26px; height: 12px; margin-left: -17px; border-radius: 3px; background: linear-gradient(#f3d58a, #8a6420); box-shadow: 0 3px 4px rgba(0,0,0,.75); transition: top .34s cubic-bezier(.5,1.7,.5,1); }
+.handle::after { content: ""; position: absolute; right: -9px; top: -5px; width: 20px; height: 20px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.75), var(--knob, #6e1a14) 50%, #1a0604 100%); box-shadow: 0 2px 3px rgba(0,0,0,.7); }
+.slot.on .handle { --knob: var(--pc); }
+.slot.ready .handle { top: calc(100% - 22px); }
+.sfoot { height: 22px; margin-top: 8px; text-align: center; font: 900 12px/22px Georgia; letter-spacing: 3px; color: #a58a5c; }
+.slot.on .sfoot { color: #e9d3a0; }
+.slot.ready .sfoot { color: var(--pc); text-shadow: 0 0 8px var(--pc); }
+
+/* ---------------------------------------------------------------- the footer */
+.footer { position: absolute; left: 71px; right: 71px; top: 870px; z-index: 3; display: flex; justify-content: space-between; font-size: 12px; letter-spacing: 2px; color: #a58a5c; }
+.footer kbd { min-width: 20px; height: 20px; font-size: 10px; }
+
+/* ---------------------------------------------------------------- steam */
+#steam { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
+.puff { position: absolute; border-radius: 50%; pointer-events: none; will-change: transform, opacity; background: radial-gradient(circle, rgba(238,236,230,.8) 0%, rgba(222,220,212,.38) 38%, rgba(200,200,200,0) 70%); }
+
+/* ---------------------------------------------------------------- the shutters */
+.shutters { position: absolute; inset: 0; z-index: 8; pointer-events: none; }
+.door {
+  position: absolute; top: -12px; bottom: -12px; width: 50.4%;
+  background-color: #1b1f25;
+  background-image:
+    radial-gradient(circle at 15px 15px, #646a74 0 2.4px, #0b0d10 3.2px, transparent 3.9px),
+    radial-gradient(circle at 15px 15px, #646a74 0 2.4px, #0b0d10 3.2px, transparent 3.9px),
+    radial-gradient(circle at 15px 15px, #646a74 0 2.4px, #0b0d10 3.2px, transparent 3.9px),
+    radial-gradient(circle at 15px 15px, #646a74 0 2.4px, #0b0d10 3.2px, transparent 3.9px),
+    linear-gradient(to bottom, transparent 270px, #262b33 270px 300px, transparent 300px 610px, #262b33 610px 640px, transparent 640px),
+    linear-gradient(58deg, transparent 49.2%, #2a2f37 49.2% 51.6%, transparent 51.6%),
+    linear-gradient(-58deg, transparent 49.2%, #2a2f37 49.2% 51.6%, transparent 51.6%),
+    radial-gradient(ellipse at 40% 30%, rgba(255,255,255,.05), transparent 60%);
+  background-repeat: repeat-y, repeat-y, repeat-x, repeat-x, no-repeat, no-repeat, no-repeat, no-repeat;
+  background-size: 30px 30px, 30px 30px, 30px 30px, 30px 30px, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+  background-position: 18px 0, calc(100% - 18px) 0, 0 270px, 0 610px, 0 0, 0 0, 0 0, 0 0;
+  transition: transform .26s cubic-bezier(.65,0,1,1);
+}
+.door.l { left: 0; transform: translateX(-104%); box-shadow: inset -16px 0 0 #8a6420, inset -18px 0 0 #2a1a06, 8px 0 30px rgba(0,0,0,.8); }
+.door.r { right: 0; transform: translateX(104%); box-shadow: inset 16px 0 0 #8a6420, inset 18px 0 0 #2a1a06, -8px 0 30px rgba(0,0,0,.8); }
+.shut .door { transform: none; }
+.opening .door { transition: transform .9s cubic-bezier(.2,.8,.2,1); }
+.half { position: absolute; top: 50%; width: 150px; height: 300px; margin-top: -170px; }
+.door.l .half { right: 0; border-radius: 150px 0 0 150px; background: radial-gradient(circle at 100% 50%, #2a1a06 0 40px, #f3d58a 41px 44px, #8a6420 45px 92px, #e2bf72 93px 96px, #5a3e12 97px 132px, #f3d58a 133px 136px, #3a2709 137px); }
+.door.r .half { left: 0; border-radius: 0 150px 150px 0; background: radial-gradient(circle at 0 50%, #2a1a06 0 40px, #f3d58a 41px 44px, #8a6420 45px 92px, #e2bf72 93px 96px, #5a3e12 97px 132px, #f3d58a 133px 136px, #3a2709 137px); }
+.doorplate {
+  position: absolute; left: 50%; top: 610px; width: 560px; margin-left: -280px; padding: 16px 0 14px; text-align: center; border-radius: 8px;
+  background: linear-gradient(#e2bf72, #a77b2c); color: #2a1708;
+  box-shadow: 0 10px 30px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,240,200,.6), inset 0 0 0 4px rgba(90,62,18,.35);
+  opacity: 0; transform: translateY(14px) scale(.96); transition: opacity .3s, transform .3s;
+}
+.landed .doorplate { opacity: 1; transform: none; }
+.doorplate .t { font: 900 34px Georgia; letter-spacing: 6px; }
+.doorplate .s { font: italic 15px Georgia; margin-top: 4px; }
+
+/* ---------------------------------------------------------------- the prototype's own tools (not part of the design) */
+#proto { position: fixed; left: 10px; top: 10px; z-index: 20; font: 12px "Trebuchet MS", system-ui, sans-serif; color: #ddd; }
+#proto > button { background: rgba(10,12,16,.75); color: #d8a84e; border: 1px solid rgba(216,168,78,.5); border-radius: 4px; padding: 4px 8px; font: 11px "Trebuchet MS", sans-serif; letter-spacing: 1px; cursor: pointer; }
+#proto .tools { display: none; margin-top: 6px; width: 260px; padding: 10px; background: rgba(10,12,16,.92); border: 1px solid rgba(216,168,78,.4); border-radius: 6px; }
+#proto.open .tools { display: block; }
+#proto .tools button { display: block; width: 100%; margin: 0 0 6px; padding: 5px 8px; text-align: left; background: #1c2128; color: #eee; border: 1px solid #333a44; border-radius: 4px; cursor: pointer; font: 12px "Trebuchet MS", sans-serif; }
+#proto .tools button:hover { background: #262d36; }
+#proto .tools p { margin: 6px 0 0; line-height: 1.45; color: #aaa; }
+
+/* ---------------------------------------------------------------- reduced motion */
+.reduced .bulb { animation: none; background: #e9c77a; box-shadow: 0 0 5px 2px rgba(255,214,120,.5); }
+.reduced .drop, .reduced .bead { display: none; }
+.reduced .empty, .reduced .fire, .reduced .slot.next::after, .reduced .slot.ready .lamp { animation: none; }
+.reduced.building .gauge-wrap { animation: none; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="rig">
+    <div class="plates"></div>
+    <div class="fire" id="fire"></div>
+    <svg id="gears" viewBox="0 0 1600 900" aria-hidden="true">
+      <defs>
+        <radialGradient id="gBrass">
+          <stop offset="0" stop-color="#7a5719" />
+          <stop offset=".55" stop-color="#c99a45" />
+          <stop offset=".8" stop-color="#e7c272" />
+          <stop offset=".92" stop-color="#b88a3a" />
+          <stop offset="1" stop-color="#5a3e12" />
+        </radialGradient>
+        <radialGradient id="gHub" cx=".4" cy=".35">
+          <stop offset="0" stop-color="#fff2c0" />
+          <stop offset=".5" stop-color="#d8a84e" />
+          <stop offset="1" stop-color="#5a3e12" />
+        </radialGradient>
+        <radialGradient id="gLight" cx=".3" cy=".25" r=".8">
+          <stop offset="0" stop-color="#fff" stop-opacity=".22" />
+          <stop offset=".5" stop-color="#fff" stop-opacity="0" />
+          <stop offset="1" stop-color="#000" stop-opacity=".35" />
+        </radialGradient>
+      </defs>
+    </svg>
+
+    <header class="marquee">
+      <div class="bulbs" id="bulbs"></div>
+      <h1 class="sr">Pitfighter 1899</h1>
+      <!-- the wordmark: every letter is built from pistons, girders and gears (drawn by the script) -->
+      <svg id="title" viewBox="0 0 800 120" role="img" aria-label="Pitfighter 1899">
+        <defs>
+          <linearGradient id="tBrassV" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0" stop-color="#4a3210" /><stop offset=".16" stop-color="#a77b2c" /><stop offset=".36" stop-color="#f6dc9a" />
+            <stop offset=".55" stop-color="#d8a84e" /><stop offset=".82" stop-color="#8a6420" /><stop offset="1" stop-color="#3a2709" />
+          </linearGradient>
+          <linearGradient id="tBrassH" href="#tBrassV" x1="0" x2="0" y1="0" y2="1" />
+          <linearGradient id="tCopperV" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0" stop-color="#2a1206" /><stop offset=".2" stop-color="#7a3a16" /><stop offset=".4" stop-color="#e09a62" />
+            <stop offset=".56" stop-color="#b8682e" /><stop offset=".84" stop-color="#5a2a0e" /><stop offset="1" stop-color="#1e0c04" />
+          </linearGradient>
+          <linearGradient id="tBackV" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0" stop-color="#24170a" /><stop offset=".5" stop-color="#5e4318" /><stop offset="1" stop-color="#24170a" />
+          </linearGradient>
+          <linearGradient id="tSteelV" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0" stop-color="#2c3036" /><stop offset=".35" stop-color="#c9d0d8" /><stop offset=".48" stop-color="#ffffff" />
+            <stop offset=".7" stop-color="#8d959e" /><stop offset="1" stop-color="#2c3036" />
+          </linearGradient>
+          <radialGradient id="tRivet" cx=".35" cy=".35" r=".7">
+            <stop offset="0" stop-color="#fff2c0" /><stop offset=".5" stop-color="#c99a45" /><stop offset="1" stop-color="#3a2709" />
+          </radialGradient>
+          <linearGradient id="tPlate" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0" stop-color="#f0d48a" /><stop offset=".45" stop-color="#d0a24c" /><stop offset="1" stop-color="#8a6420" />
+          </linearGradient>
+          <linearGradient id="tDrum" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0" stop-color="#000" stop-opacity=".75" /><stop offset=".3" stop-color="#000" stop-opacity="0" />
+            <stop offset=".7" stop-color="#000" stop-opacity="0" /><stop offset="1" stop-color="#000" stop-opacity=".75" />
+          </linearGradient>
+        </defs>
+      </svg>
+    </header>
+
+    <div class="roller l"></div>
+    <div class="tape"><span id="tapeText"></span><span class="caret"></span></div>
+    <div class="roller r"></div>
+
+    <section class="plaque">
+      <h2>SIGN THE<br />REGISTER</h2>
+      <p class="lead">Any button on your own keys or pad.</p>
+      <div class="howrow">
+        <span class="icon-kb"></span>
+        <div><div class="who">KEYBOARD I</div><div class="what"><kbd>WASD</kbd> · <kbd>J</kbd> pull · <kbd>K</kbd> back</div></div>
+      </div>
+      <div class="howrow">
+        <span class="icon-kb"></span>
+        <div><div class="who">KEYBOARD II</div><div class="what">arrows · <kbd>Num6</kbd> pull · <kbd>Num8</kbd> back</div></div>
+      </div>
+      <div class="howrow">
+        <span class="icon-pad"></span>
+        <div><div class="who">PADS, UP TO EIGHT</div><div class="what">any · <kbd>○</kbd> <kbd>Start</kbd> pull · <kbd>△</kbd> back</div></div>
+      </div>
+      <div class="foot">Every lever pulled: the boiler blows.</div>
+    </section>
+
+    <section class="porthole-wrap">
+      <div class="porthole">
+        <iframe id="pit" src="../index.html" tabindex="-1" title="The live CPU brawl" aria-hidden="true"></iframe>
+        <div class="rain" id="rain"></div>
+        <div class="glass"></div>
+      </div>
+      <svg class="porthole-ring" id="ring" viewBox="0 0 410 410" aria-hidden="true">
+        <defs>
+          <linearGradient id="rBrass" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#fbe3a0" />
+            <stop offset=".3" stop-color="#d8a84e" />
+            <stop offset=".65" stop-color="#8a6420" />
+            <stop offset="1" stop-color="#3a2709" />
+          </linearGradient>
+          <radialGradient id="bolt" cx=".35" cy=".3">
+            <stop offset="0" stop-color="#fff2c0" />
+            <stop offset=".55" stop-color="#b88a3a" />
+            <stop offset="1" stop-color="#3a2709" />
+          </radialGradient>
+        </defs>
+      </svg>
+      <div class="porthole-plate">THE IRON HALL · NOW BRAWLING<span class="live"></span></div>
+    </section>
+
+    <svg class="whistle" id="whistle" viewBox="0 0 56 92" aria-hidden="true">
+      <defs>
+        <linearGradient id="wBrass" x1="0" x2="1">
+          <stop offset="0" stop-color="#3a2709" />
+          <stop offset=".3" stop-color="#f3d58a" />
+          <stop offset=".55" stop-color="#d8a84e" />
+          <stop offset="1" stop-color="#4a3410" />
+        </linearGradient>
+      </defs>
+      <rect x="22" y="58" width="12" height="34" fill="url(#wBrass)" />
+      <rect x="15" y="52" width="26" height="8" rx="2" fill="url(#wBrass)" />
+      <rect x="17" y="18" width="22" height="36" rx="3" fill="url(#wBrass)" />
+      <rect x="17" y="30" width="22" height="5" fill="#1a1208" />
+      <ellipse cx="28" cy="18" rx="13" ry="5" fill="url(#wBrass)" />
+      <rect x="25" y="4" width="6" height="12" fill="url(#wBrass)" />
+      <circle cx="28" cy="4" r="4" fill="url(#wBrass)" />
+      <path d="M39 44 l14 -6" stroke="#8a6420" stroke-width="4" stroke-linecap="round" />
+    </svg>
+    <div class="gauge-wrap"><svg id="gauge" viewBox="-150 -150 300 300" aria-hidden="true">
+      <defs>
+        <radialGradient id="bezel" cx=".35" cy=".3">
+          <stop offset="0" stop-color="#fff2c0" />
+          <stop offset=".35" stop-color="#d8a84e" />
+          <stop offset=".8" stop-color="#7a5719" />
+          <stop offset="1" stop-color="#3a2709" />
+        </radialGradient>
+        <radialGradient id="face" cx=".45" cy=".4">
+          <stop offset="0" stop-color="#f6ecd2" />
+          <stop offset=".75" stop-color="#e3d3a8" />
+          <stop offset="1" stop-color="#b9a27a" />
+        </radialGradient>
+      </defs>
+    </svg></div>
+    <div class="gauge-plate"><div class="t">PULL EVERY LEVER</div><div class="s" id="plateStatus">Awaiting combatants</div></div>
+    <div class="vpipe" style="left:1282px; top:600px; height:24px"></div>
+
+    <div class="pipe"></div>
+    <div id="flanges"></div>
+    <section class="register" id="register"></section>
+
+    <footer class="footer">
+      <span><kbd>M</kbd> SOUND <span id="soundState">ON</span></span>
+      <span><kbd>L</kbd> <kbd>Num4</kbd> <kbd>□</kbd> HOW TO PLAY</span>
+    </footer>
+
+    <div id="steam"></div>
+    <div class="vignette"></div>
+
+    <div class="shutters" id="shutters">
+      <div class="door l"><div class="half"></div></div>
+      <div class="door r"><div class="half"></div></div>
+      <div class="doorplate"><div class="t">TO THE ROSTER!</div><div class="s">The doors open on fighter select (in this prototype, back to the register)</div></div>
+    </div>
+  </div>
+</div>
+
+<div id="proto">
+  <button id="protoTab">PROTOTYPE · TOOLS (`)</button>
+  <div class="tools">
+    <button data-a="pad">+ Sign in a simulated pad</button>
+    <button data-a="readyall">Pull every lever</button>
+    <button data-a="unready">Let one lever go</button>
+    <button data-a="reset">Clear the register</button>
+    <button data-a="motion">Reduced motion: off</button>
+    <button data-a="mute">Sound: on</button>
+    <p>Any WASD/J/K/L key signs in Keyboard I; arrows or numpad sign in Keyboard II; any pad button signs in that pad. J / Num6 / ○ / Start pulls your lever; K / Num8 / △ lets it go, then leaves. Click an open slot to sign in, its lever to pull it, and the × on a card to leave. Click once anywhere to let the browser play sound.</p>
+  </div>
+</div>
+
+<script>
+"use strict";
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const SVGNS = "http://www.w3.org/2000/svg";
+const svgEl = (tag, attrs, parent) => {
+  const e = document.createElementNS(SVGNS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+};
+const rand = (a, b) => a + Math.random() * (b - a);
+
+/* ------------------------------------------------------------------ fit the 1600 x 900 stage to the window */
+const stage = $("#stage"), rig = $("#rig");
+function fit() {
+  const s = Math.min(innerWidth / 1600, innerHeight / 900);
+  stage.style.transform = `translate(-50%, -50%) scale(${s})`;
+}
+addEventListener("resize", fit);
+fit();
+
+const motion = { reduced: matchMedia("(prefers-reduced-motion: reduce)").matches };
+const setReduced = (on) => {
+  motion.reduced = on;
+  rig.classList.toggle("reduced", on);
+  $('[data-a="motion"]').textContent = `Reduced motion: ${on ? "on" : "off"}`;
+  // any steam still in the air settles at once (finishing its animation also clears it away)
+  if (on) for (const p of document.querySelectorAll("#steam .puff")) p.getAnimations().forEach((a) => a.finish());
+};
+
+/* ------------------------------------------------------------------ icons */
+const ICON_KB = `<svg viewBox="0 0 32 20" aria-hidden="true"><rect x="1" y="2" width="30" height="16" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><g fill="currentColor"><rect x="5" y="6" width="3" height="3"/><rect x="10" y="6" width="3" height="3"/><rect x="15" y="6" width="3" height="3"/><rect x="20" y="6" width="3" height="3"/><rect x="25" y="6" width="3" height="3"/><rect x="9" y="12" width="14" height="3"/></g></svg>`;
+const ICON_PAD = `<svg viewBox="0 0 32 20" aria-hidden="true"><path d="M8 2.5h16c4 0 7 4.2 7 9.2 0 4-2 6.3-4 6.3-2 0-3.2-2-5-4H10c-1.8 2-3 4-5 4-2 0-4-2.3-4-6.3 0-5 3-9.2 7-9.2z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="23" cy="7.5" r="1.7" fill="currentColor"/><circle cx="26.2" cy="10.7" r="1.7" fill="currentColor"/><circle cx="19.8" cy="10.7" r="1.7" fill="currentColor"/><path d="M6 10.5h6M9 7.5v6" stroke="currentColor" stroke-width="2"/></svg>`;
+$$(".icon-kb").forEach((e) => (e.innerHTML = ICON_KB));
+$$(".icon-pad").forEach((e) => (e.innerHTML = ICON_PAD));
+
+/* ------------------------------------------------------------------ sound: synthesised, like src/render/sfx.ts */
+const Snd = {
+  ctx: null, out: null, noise: null, muted: false, build: null,
+  unlock() {
+    try {
+      if (!this.ctx) {
+        const C = window.AudioContext || window.webkitAudioContext;
+        if (!C) return;
+        this.ctx = new C();
+        this.out = this.ctx.createGain();
+        this.out.gain.value = this.muted ? 0 : 0.6;
+        const comp = this.ctx.createDynamicsCompressor();
+        this.out.connect(comp).connect(this.ctx.destination);
+        const n = this.ctx.sampleRate * 2, b = this.ctx.createBuffer(1, n, this.ctx.sampleRate), d = b.getChannelData(0);
+        for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+        this.noise = b;
+      }
+      if (this.ctx.state === "suspended") this.ctx.resume();
+    } catch (e) { /* no sound */ }
+  },
+  get ok() { return !!this.ctx && this.ctx.state === "running"; },
+  setMuted(m) {
+    this.muted = m;
+    if (this.out) this.out.gain.value = m ? 0 : 0.6;
+    $("#soundState").textContent = m ? "OFF" : "ON";
+    $('[data-a="mute"]').textContent = `Sound: ${m ? "off" : "on"}`;
+  },
+  env(t, peak, a, dur) {
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(peak, t + a);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    g.connect(this.out);
+    return g;
+  },
+  nz(t, type, f0, f1, q, peak, dur, a = 0.005) {
+    const s = this.ctx.createBufferSource(); s.buffer = this.noise;
+    const f = this.ctx.createBiquadFilter(); f.type = type; f.Q.value = q;
+    f.frequency.setValueAtTime(f0, t);
+    if (f1 !== f0) f.frequency.exponentialRampToValueAtTime(f1, t + dur);
+    s.connect(f).connect(this.env(t, peak, a, dur));
+    s.start(t, Math.random() * 1.5); s.stop(t + dur + 0.05);
+  },
+  osc(t, type, f0, f1, peak, dur, a = 0.004) {
+    const o = this.ctx.createOscillator(); o.type = type;
+    o.frequency.setValueAtTime(f0, t);
+    if (f1 !== f0) o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+    o.connect(this.env(t, peak, a, dur));
+    o.start(t); o.stop(t + dur + 0.05);
+  },
+  stamp() { if (!this.ok) return; const t = this.ctx.currentTime; this.osc(t, "sine", 150, 42, 0.9, 0.3); this.nz(t, "lowpass", 1200, 300, 0.7, 0.7, 0.16); this.nz(t, "bandpass", 3200, 2400, 3, 0.2, 0.05); },
+  clank() { if (!this.ok) return; const t = this.ctx.currentTime; this.osc(t, "triangle", 523, 500, 0.22, 0.35); this.osc(t, "sine", 1397, 1380, 0.1, 0.25); this.osc(t, "sine", 2093, 2080, 0.05, 0.18); this.nz(t, "highpass", 4000, 4000, 0.7, 0.18, 0.04); },
+  ratchet(n = 6, up = false) {
+    if (!this.ok) return;
+    const t = this.ctx.currentTime;
+    for (let i = 0; i < n; i++) {
+      const tt = t + i * 0.034, f = up ? 2600 - i * 120 : 1900 + i * 120;
+      this.nz(tt, "bandpass", f, f, 6, 0.5, 0.022, 0.001);
+      this.osc(tt, "square", f / 2, f / 2, 0.03, 0.015, 0.001);
+    }
+  },
+  hiss(dur = 0.7, peak = 0.22) { if (!this.ok) return; const t = this.ctx.currentTime; this.nz(t, "highpass", 2200, 5200, 0.6, peak, dur, 0.03); },
+  tick() { if (!this.ok) return; const t = this.ctx.currentTime; this.nz(t, "bandpass", 3000, 3000, 8, 0.05, 0.012, 0.001); },
+  slam() {
+    if (!this.ok) return;
+    const t = this.ctx.currentTime;
+    this.osc(t, "sine", 90, 30, 1, 0.6); this.nz(t, "lowpass", 900, 120, 0.8, 0.9, 0.45);
+    this.osc(t + 0.01, "triangle", 220, 200, 0.22, 0.5); this.osc(t + 0.01, "sine", 622, 610, 0.07, 0.6);
+    this.nz(t + 0.02, "highpass", 2500, 6000, 0.5, 0.22, 0.9, 0.05);
+  },
+  whistle() {
+    if (!this.ok) return;
+    const c = this.ctx, t = c.currentTime, dur = 1.5;
+    const g = c.createGain();
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.32, t + 0.08);
+    g.gain.setValueAtTime(0.32, t + dur - 0.35); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    const bp = c.createBiquadFilter(); bp.type = "bandpass"; bp.frequency.value = 1200; bp.Q.value = 0.8;
+    bp.connect(g).connect(this.out);
+    const lfo = c.createOscillator(); lfo.frequency.value = 5.5;
+    const lg = c.createGain(); lg.gain.value = 9; lfo.connect(lg);
+    for (const f of [587, 740, 880]) {
+      const o = c.createOscillator(); o.type = "sawtooth";
+      o.frequency.setValueAtTime(f * 0.94, t); o.frequency.exponentialRampToValueAtTime(f, t + 0.12);
+      lg.connect(o.frequency);
+      const og = c.createGain(); og.gain.value = 0.22;
+      o.connect(og).connect(bp); o.start(t); o.stop(t + dur + 0.05);
+    }
+    lfo.start(t); lfo.stop(t + dur + 0.05);
+    this.nz(t, "bandpass", 2200, 2600, 1.2, 0.16, dur, 0.05);
+  },
+  startBuild(dur) {
+    if (!this.ok) return;
+    const c = this.ctx, t = c.currentTime;
+    const s = c.createBufferSource(); s.buffer = this.noise; s.loop = true;
+    const f = c.createBiquadFilter(); f.type = "bandpass"; f.Q.value = 1.2;
+    f.frequency.setValueAtTime(350, t); f.frequency.exponentialRampToValueAtTime(3200, t + dur);
+    const g = c.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.26, t + dur);
+    s.connect(f).connect(g).connect(this.out);
+    const o = c.createOscillator(); o.type = "sawtooth";
+    o.frequency.setValueAtTime(42, t); o.frequency.exponentialRampToValueAtTime(95, t + dur);
+    const lp = c.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 260;
+    const og = c.createGain(); og.gain.setValueAtTime(0.0001, t); og.gain.exponentialRampToValueAtTime(0.2, t + dur * 0.8);
+    o.connect(lp).connect(og).connect(this.out);
+    s.start(t); o.start(t);
+    this.build = { s, o, g, og };
+  },
+  stopBuild(release) {
+    const b = this.build; this.build = null;
+    if (!b || !this.ctx) return;
+    const t = this.ctx.currentTime;
+    for (const g of [b.g, b.og]) {
+      g.gain.cancelScheduledValues(t);
+      g.gain.setValueAtTime(Math.max(g.gain.value, 0.0001), t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + (release ? 0.5 : 0.08));
+    }
+    b.s.stop(t + 0.6); b.o.stop(t + 0.6);
+    if (release) this.hiss(0.9, 0.3);
+  },
+};
+
+/* ------------------------------------------------------------------ the gears: real meshing trains, one driver */
+const gearsSvg = $("#gears");
+const gears = [];
+function gearPath(n, m) {
+  const r = (n * m) / 2, ro = r + m, ri = r - 1.25 * m, s = (2 * Math.PI) / n;
+  const pts = [];
+  for (let i = 0; i < n; i++) {
+    const a = i * s;
+    for (const [R, da] of [[ri, -0.3], [ro, -0.14], [ro, 0.14], [ri, 0.3]]) pts.push([R * Math.cos(a + da * s), R * Math.sin(a + da * s)]);
+  }
+  return "M" + pts.map((p) => p[0].toFixed(1) + " " + p[1].toFixed(1)).join("L") + "Z";
+}
+function makeGear(n, m, x, y, spokes) {
+  const r = (n * m) / 2, rim = r - 1.25 * m - 5;
+  const wrap = svgEl("g", { transform: `translate(${x.toFixed(1)} ${y.toFixed(1)})` }, gearsSvg);
+  const inner = svgEl("g", {}, wrap);
+  svgEl("path", { d: gearPath(n, m), fill: "url(#gBrass)", stroke: "#2a1a06", "stroke-width": 2 }, inner);
+  svgEl("circle", { r: rim, fill: "#120c06" }, inner);
+  for (let k = 0; k < spokes; k++) svgEl("rect", { x: -m * 0.9, y: -rim - 1, width: m * 1.8, height: rim, fill: "#b88a3a", stroke: "#2a1a06", "stroke-width": 1, transform: `rotate(${(k * 360) / spokes})` }, inner);
+  svgEl("circle", { r: rim, fill: "none", stroke: "#e7c272", "stroke-opacity": 0.45, "stroke-width": 2.5 }, inner);
+  svgEl("circle", { r: Math.max(10, r * 0.2), fill: "url(#gHub)", stroke: "#2a1a06", "stroke-width": 2 }, inner);
+  svgEl("rect", { x: -1.5, y: -Math.max(10, r * 0.2) + 3, width: 3, height: Math.max(10, r * 0.2) * 2 - 6, fill: "#2a1a06" }, inner);
+  svgEl("circle", { r: r + m, fill: "url(#gLight)", "pointer-events": "none" }, wrap); // the light stays put while the gear turns
+  return { inner, n, m, r, x, y, phase: 0, ratio: 1 };
+}
+function driver(n, m, x, y, spokes, ratio) { const g = makeGear(n, m, x, y, spokes); g.ratio = ratio; gears.push(g); return g; }
+// a child meshes with its parent at angle theta: its phase is chosen so a tooth meets a gap
+function mesh(parent, n, thetaDeg, spokes) {
+  const d = parent.r + (n * parent.m) / 2, th = (thetaDeg * Math.PI) / 180;
+  const g = makeGear(n, parent.m, parent.x + d * Math.cos(th), parent.y + d * Math.sin(th), spokes);
+  const p1 = 360 / parent.n, p2 = 360 / n;
+  const f1 = ((((thetaDeg - parent.phase) / p1) % 1) + 1) % 1;
+  g.phase = thetaDeg + 180 - p2 * (0.5 - f1);
+  g.ratio = (-parent.ratio * parent.n) / n;
+  gears.push(g);
+  return g;
+}
+{
+  const tl = driver(30, 7, 34, 34, 6, 1);
+  const tl2 = mesh(tl, 14, 55, 4);
+  mesh(tl2, 20, 100, 5);
+  const tr = driver(30, 7, 1566, 34, 6, -1);
+  const tr2 = mesh(tr, 14, 125, 4);
+  mesh(tr2, 20, 80, 5);
+}
+
+/* ------------------------------------------------------------------ the wordmark: every letter a machine */
+// Each letter is built from three parts: copper steam cylinders whose steel rods and crossheads pump
+// along brass slide bars, riveted brass girders, and gears. The pistons fire in a wave across the word
+// and quicken with the boiler; the gears turn with the rest of the room's train. 1899 is an odometer.
+const pistons = [];
+const drums = [];
+{
+  const title = $("#title"), defs = title.querySelector("defs");
+  const S = 16, INK = "#1c1006";
+  const f2 = (v) => +v.toFixed(2);
+  const R = (g, x, y, w, h, fill, extra = {}) =>
+    svgEl("rect", { x: f2(x), y: f2(y), width: f2(w), height: f2(h), fill, stroke: INK, "stroke-width": 1.2, ...extra }, g);
+  const rivet = (g, x, y, r = 1.8) => svgEl("circle", { cx: f2(x), cy: f2(y), r, fill: "url(#tRivet)", stroke: INK, "stroke-width": 0.7 }, g);
+  let clipN = 0;
+  const clip = (d) => { const id = `tclip${clipN++}`; svgEl("path", { d }, svgEl("clipPath", { id }, defs)); return `url(#${id})`; };
+
+  // a riveted girder: an I-beam seen face on
+  function girder(g, x, y, w, h) {
+    const v = h > w;
+    R(g, x, y, w, h, v ? "url(#tBrassV)" : "url(#tBrassH)", { rx: 1.5 });
+    const line = { stroke: "#2a1806", "stroke-opacity": 0.55, "stroke-width": 0.8 };
+    if (v) { svgEl("line", { x1: x + 3.5, y1: y + 2, x2: x + 3.5, y2: y + h - 2, ...line }, g); svgEl("line", { x1: x + w - 3.5, y1: y + 2, x2: x + w - 3.5, y2: y + h - 2, ...line }, g); }
+    else { svgEl("line", { x1: x + 2, y1: y + 3.5, x2: x + w - 2, y2: y + 3.5, ...line }, g); svgEl("line", { x1: x + 2, y1: y + h - 3.5, x2: x + w - 2, y2: y + h - 3.5, ...line }, g); }
+    const len = v ? h : w, n = Math.max(2, Math.round(len / 14));
+    for (let i = 0; i < n; i++) { const t = (i + 0.5) / n; rivet(g, v ? x + w / 2 : x + t * w, v ? y + t * h : y + h / 2); }
+  }
+  // a flange plate: the serifs
+  function plate(g, x, y, w, h) {
+    R(g, x, y, w, h, h > w ? "url(#tBrassV)" : "url(#tBrassH)", { rx: 1.2 });
+    if (w > h) { rivet(g, x + 3.2, y + h / 2, 1.3); rivet(g, x + w - 3.2, y + h / 2, 1.3); }
+    else { rivet(g, x + w / 2, y + 3.2, 1.3); rivet(g, x + w / 2, y + h - 3.2, 1.3); }
+  }
+  // a steam cylinder: drawn along +y from (x, y), then turned by rot degrees.
+  // cylinder, gland, rod, crosshead between slide bars, an end plate at either end.
+  function piston(g, x, y, len, rot, o = {}) {
+    const { cap = true, foot = true, hl = 0.52, ph = 0, capW = S + 8, footW = S + 8 } = o;
+    const w = svgEl("g", { transform: `translate(${f2(x)} ${f2(y)}) rotate(${f2(rot)})` }, g);
+    const c0 = cap ? 5 : 0, f0 = foot ? 5 : 0;
+    const hEnd = c0 + (len - c0 - f0) * hl, railBot = len - f0;
+    const chH = 8, travel = Math.min(13, (railBot - hEnd) * 0.42);
+    R(w, -S / 2 + 2, hEnd, S - 4, railBot - hEnd, "url(#tBackV)", { stroke: "none" }); // the guide's back plate keeps the stroke solid
+    R(w, -S / 2, hEnd - 2, 3.4, railBot - hEnd + 2, "url(#tBrassV)", { "stroke-width": 0.9 });
+    R(w, S / 2 - 3.4, hEnd - 2, 3.4, railBot - hEnd + 2, "url(#tBrassV)", { "stroke-width": 0.9 });
+    const mov = svgEl("g", {}, w);
+    const chY = railBot - chH - travel;
+    R(mov, -2.6, c0 + 2, 5.2, chY - c0 - 1, "url(#tSteelV)", { "stroke-width": 0.8 });
+    R(mov, -(S - 7) / 2, chY, S - 7, chH, "url(#tBrassV)", { rx: 1 });
+    rivet(mov, 0, chY + chH / 2, 1.5);
+    R(w, -(S + 4) / 2, c0, S + 4, hEnd - c0, "url(#tCopperV)", { rx: 2.5 });
+    for (const t of [0.2, 0.8]) R(w, -(S + 6) / 2, c0 + t * (hEnd - c0) - 1.5, S + 6, 3, "url(#tBrassV)", { "stroke-width": 0.8, rx: 1 });
+    R(w, -(S - 3) / 2, hEnd - 1, S - 3, 4, "url(#tBrassV)", { "stroke-width": 0.9 }); // the gland the rod slides through
+    if (cap) plate(w, -capW / 2, 0, capW, 5.5);
+    if (foot) plate(w, -footW / 2, len - 5.5, footW, 5.5);
+    pistons.push({ el: mov, travel, ph });
+  }
+  // a gear with an open centre, so the letter's counter stays open. opts.clip shows only part of it.
+  function tgear(g, cx, cy, n, ro, o = {}) {
+    const { hr = ro * 0.4, spokes = 0, ratio = 1, phase = 0, holes = 0, clipTo } = o;
+    const m = ro / (n / 2 + 1), r = (n * m) / 2, ri = r - 1.25 * m;
+    const host = clipTo ? svgEl("g", { "clip-path": clip(clipTo) }, g) : g;
+    const wrap = svgEl("g", { transform: `translate(${f2(cx)} ${f2(cy)})` }, host);
+    const inner = svgEl("g", {}, wrap);
+    const ring = `M${f2(hr)} 0A${f2(hr)} ${f2(hr)} 0 1 0 ${f2(-hr)} 0A${f2(hr)} ${f2(hr)} 0 1 0 ${f2(hr)} 0Z`;
+    svgEl("path", { d: gearPath(n, m) + ring, "fill-rule": "evenodd", fill: "url(#gBrass)", stroke: INK, "stroke-width": 1.1 }, inner);
+    svgEl("circle", { r: f2((ri + hr) / 2), fill: "none", stroke: "#fff2c0", "stroke-opacity": 0.3, "stroke-width": 1 }, inner);
+    for (let s = 0; s < spokes; s++) R(inner, -1.8, -hr - 0.5, 3.6, hr, "url(#tBrassV)", { "stroke-width": 0.8, transform: `rotate(${(s * 360) / spokes})` });
+    if (spokes) { svgEl("circle", { r: f2(Math.min(5, hr * 0.48)), fill: "url(#gHub)", stroke: INK, "stroke-width": 1 }, inner); }
+    for (let h = 0; h < holes; h++) {
+      const a = (h / holes) * Math.PI * 2, rr = (ri + hr) / 2;
+      svgEl("circle", { cx: f2(rr * Math.cos(a)), cy: f2(rr * Math.sin(a)), r: f2(Math.max(1.2, (ri - hr) * 0.16)), fill: "#160d05" }, inner);
+    }
+    gears.push({ inner, phase, ratio });
+  }
+
+  // ---- the letters, each drawn in a 100-high cell of its own width
+  const L = {
+    P(g, W, ph) {
+      tgear(g, 33, 28, 15, 27, { hr: 10, spokes: 3, ratio: 1.25, phase: 7 });
+      piston(g, 12, 0, 100, 0, { ph });
+    },
+    I(g, W, ph) { piston(g, W / 2, 0, 100, 0, { ph }); },
+    T(g, W, ph) {
+      piston(g, W / 2, 16, 84, 0, { cap: false, ph });
+      girder(g, 0, 0, W, 16);
+      plate(g, -1, -1.5, 5, 19); plate(g, W - 4, -1.5, 5, 19);
+      tgear(g, W / 2, 8, 10, 12, { hr: 4.5, holes: 5, ratio: -2.4 });
+    },
+    F(g, W, ph) {
+      piston(g, 20, 9, W - 20, -90, { cap: false, footW: 20, ph });
+      piston(g, 20, 52, W - 27, -90, { cap: false, footW: 18, ph: ph + 1.6 });
+      girder(g, 4, 0, 16, 100);
+      plate(g, 0, 94.5, 26, 5.5);
+      tgear(g, 12, 52, 9, 11, { hr: 3.8, holes: 4, ratio: 2.6 });
+    },
+    G(g, W, ph) {
+      // three corners are toothed: quarter-gears that turn like a tread run round the letter
+      const ro = 26, opt = { hr: ro - S, holes: 9, ratio: 1.1 };
+      tgear(g, ro, ro, 18, ro, { ...opt, clipTo: `M-6 -6H${ro}V${ro}H-6Z` });
+      tgear(g, ro, 100 - ro, 18, ro, { ...opt, phase: 10, clipTo: `M-6 ${100 - ro}H${ro}V106H-6Z` });
+      tgear(g, W - ro, 100 - ro, 18, ro, { ...opt, phase: 4, clipTo: `M${W - ro} ${100 - ro}H${W + 6}V106H${W - ro}Z` });
+      girder(g, 0, ro, S, 100 - 2 * ro);
+      girder(g, ro, 0, W - ro - 6, S);
+      plate(g, W - 9, -1.5, 5, 19);
+      girder(g, ro, 100 - S, W - 2 * ro, S);
+      girder(g, W - S, 56, S, 100 - ro - 56);
+      piston(g, W, 56, 30, 90, { capW: 20, footW: 18, ph: ph + 0.8 });
+    },
+    H(g, W, ph) {
+      girder(g, 18, 42, W - 36, 16);
+      piston(g, 12, 0, 100, 0, { ph });
+      piston(g, W - 12, 100, 100, 180, { ph: ph + Math.PI });
+      tgear(g, W / 2, 50, 8, 8.5, { hr: 3, holes: 4, ratio: -2.2 });
+    },
+    E(g, W, ph) {
+      piston(g, 20, 9, W - 20, -90, { cap: false, footW: 20, ph });
+      piston(g, 20, 50, W - 27, -90, { cap: false, footW: 18, ph: ph + 1.6 });
+      piston(g, 20, 91, W - 20, -90, { cap: false, footW: 20, ph: ph + 3.2 });
+      girder(g, 4, 0, 16, 100);
+      tgear(g, 12, 50, 9, 11, { hr: 3.8, holes: 4, ratio: -2.6 });
+    },
+    R(g, W, ph) {
+      tgear(g, 34, 28, 15, 27, { hr: 10, spokes: 3, ratio: -1.25, phase: 3 });
+      const x0 = 33, y0 = 50, x1 = 52, y1 = 95;
+      piston(g, x0, y0, Math.hypot(x1 - x0, y1 - y0), (Math.atan2(-(x1 - x0), y1 - y0) * 180) / Math.PI, { cap: false, foot: false, hl: 0.5, ph: ph + 1.2 });
+      plate(g, 40, 94.5, 24, 5.5);
+      piston(g, 12, 0, 100, 0, { ph });
+    },
+  };
+  const WORD = [["P", 60], ["I", 26], ["T", 60], ["F", 54], ["I", 26], ["G", 62], ["H", 62], ["T", 60], ["E", 56], ["R", 64]];
+  const GAP = 9, OD_GAP = 18, OD_W = 140;
+  const total = WORD.reduce((s, [, w]) => s + w, 0) + GAP * (WORD.length - 1) + OD_GAP + OD_W;
+  let x = (800 - total) / 2;
+  WORD.forEach(([ch, W], i) => {
+    const g = svgEl("g", { transform: `translate(${f2(x)} 10)` }, title);
+    L[ch](g, W, -i * 0.8); // the pistons fire in a wave that runs left to right
+    x += W + GAP;
+  });
+
+  // ---- 1899: a brass odometer whose drums roll while the boiler builds, and settle when it lets go
+  x += OD_GAP - GAP;
+  const od = svgEl("g", { transform: `translate(${f2(x)} 18)` }, title);
+  const OH = 84;
+  R(od, 0, 0, OD_W, OH, "url(#tPlate)", { rx: 8, "stroke-width": 1.6 });
+  R(od, 3.5, 3.5, OD_W - 7, OH - 7, "none", { rx: 6, stroke: "#fff3c4", "stroke-opacity": 0.45, "stroke-width": 1 });
+  for (const [sx, sy] of [[9, 9], [OD_W - 9, 9], [9, OH - 9], [OD_W - 9, OH - 9]]) {
+    svgEl("circle", { cx: sx, cy: sy, r: 3.2, fill: "url(#tRivet)", stroke: INK, "stroke-width": 0.8 }, od);
+    R(od, sx - 2.4, sy - 0.6, 4.8, 1.2, "#3a2408", { stroke: "none", transform: `rotate(${sx * 7 + sy * 3} ${sx} ${sy})` });
+  }
+  const anno = svgEl("text", { x: OD_W / 2 + 2.5, y: 17, "text-anchor": "middle", "font-size": 10, "font-weight": 700, "letter-spacing": 5, fill: "#3a2408" }, od);
+  anno.textContent = "ANNO";
+  R(od, 9, 22, OD_W - 18, 50, "#120c06", { rx: 4 });
+  const dw = 25, dg = 5, dh = 42, dx0 = (OD_W - (4 * dw + 3 * dg)) / 2, dy0 = 26;
+  [..."1899"].forEach((ch, k) => {
+    const dx = dx0 + k * (dw + dg);
+    const win = svgEl("g", { "clip-path": clip(`M${dx} ${dy0}h${dw}v${dh}h${-dw}Z`) }, od);
+    R(win, dx, dy0, dw, dh, "#efe4c6", { stroke: "none" });
+    const strip = svgEl("g", {}, win);
+    for (let d = 0; d <= 10; d++) {
+      const t = svgEl("text", { x: dx + dw / 2, y: dy0 + d * dh + 32, "text-anchor": "middle", "font-size": 31, "font-weight": 700, fill: "#1e1408" }, strip);
+      t.textContent = String(d % 10);
+    }
+    R(win, dx, dy0, dw, dh, "url(#tDrum)", { stroke: "none" });
+    R(od, dx - 0.5, dy0 - 0.5, dw + 1, dh + 1, "none", { rx: 2, stroke: "#b88a3a", "stroke-width": 1.4 });
+    drums.push({ strip, k, digit: +ch, pos: +ch, v: 0, settle: null, dh, y: NaN });
+  });
+}
+// the pistons pump once per 360/7 degrees of the gear train
+function stepPistons() {
+  const a = (A * 7 * Math.PI) / 180;
+  for (const pi of pistons) pi.el.setAttribute("transform", `translate(0 ${(pi.travel * (0.5 + 0.5 * Math.sin(a + pi.ph))).toFixed(2)})`);
+}
+function stepDrums(dt) {
+  for (const d of drums) {
+    if (phase === "building" && !motion.reduced) {
+      d.v = Math.min(2 + d.k * 4, d.v + dt * (1.5 + d.k * 3));
+      d.pos += d.v * dt;
+      d.settle = null;
+    } else if (d.v > 0) {
+      if (!d.settle) {
+        let dist = (((d.digit - d.pos) % 10) + 10) % 10;
+        if (dist < d.v * 0.35) dist += 10;
+        d.settle = { from: d.pos, dist, t: 0, dur: 0.45 + 0.22 * d.k + dist * 0.035 };
+      }
+      const s = d.settle;
+      s.t += dt;
+      const u = Math.min(1, s.t / s.dur);
+      d.pos = s.from + s.dist * (1 - Math.pow(1 - u, 3));
+      if (u >= 1) { d.pos = d.digit; d.v = 0; d.settle = null; Snd.tick(); }
+    }
+    const y = -((((d.pos % 10) + 10) % 10) * d.dh);
+    if (y !== d.y) { d.y = y; d.strip.setAttribute("transform", `translate(0 ${y.toFixed(2)})`); }
+  }
+}
+
+/* ------------------------------------------------------------------ the marquee's chase bulbs */
+{
+  const box = $("#bulbs"), w = 834, h = 154, ins = 8, gap = 24;
+  const pts = [];
+  const edge = (x0, y0, x1, y1) => {
+    const len = Math.hypot(x1 - x0, y1 - y0), n = Math.round(len / gap);
+    for (let i = 0; i < n; i++) pts.push([x0 + ((x1 - x0) * i) / n, y0 + ((y1 - y0) * i) / n]);
+  };
+  edge(ins, ins, w - ins, ins); edge(w - ins, ins, w - ins, h - ins); edge(w - ins, h - ins, ins, h - ins); edge(ins, h - ins, ins, ins);
+  pts.forEach(([x, y], i) => {
+    const b = document.createElement("i");
+    b.className = "bulb";
+    b.style.cssText = `left:${x - 3}px; top:${y - 3}px; --k:${i % 3}`;
+    box.appendChild(b);
+  });
+}
+
+/* ------------------------------------------------------------------ the porthole: brass ring, bolts, rain */
+{
+  const ring = $("#ring");
+  svgEl("circle", { cx: 205, cy: 205, r: 187.5, fill: "none", stroke: "url(#rBrass)", "stroke-width": 31 }, ring);
+  svgEl("circle", { cx: 205, cy: 205, r: 202, fill: "none", stroke: "#2a1a06", "stroke-width": 3 }, ring);
+  svgEl("circle", { cx: 205, cy: 205, r: 173, fill: "none", stroke: "#1a1006", "stroke-width": 4 }, ring);
+  svgEl("circle", { cx: 205, cy: 205, r: 177, fill: "none", stroke: "#fbe3a0", "stroke-opacity": 0.4, "stroke-width": 1.5 }, ring);
+  for (let k = 0; k < 16; k++) {
+    const a = (k / 16) * Math.PI * 2 + Math.PI / 16, x = 205 + 188 * Math.cos(a), y = 205 + 188 * Math.sin(a);
+    svgEl("circle", { cx: x, cy: y, r: 7, fill: "url(#bolt)", stroke: "#2a1a06", "stroke-width": 1.5 }, ring);
+    svgEl("rect", { x: x - 4, y: y - 1, width: 8, height: 2, fill: "#3a2709", transform: `rotate(${(a * 180) / Math.PI + 30} ${x} ${y})` }, ring);
+  }
+  // the hinge on the left and the dog clamp on the right
+  svgEl("rect", { x: -2, y: 180, width: 22, height: 50, rx: 4, fill: "url(#rBrass)", stroke: "#2a1a06", "stroke-width": 2 }, ring);
+  svgEl("rect", { x: 392, y: 190, width: 18, height: 30, rx: 4, fill: "url(#rBrass)", stroke: "#2a1a06", "stroke-width": 2 }, ring);
+  const rain = $("#rain");
+  for (let i = 0; i < 34; i++) {
+    const d = document.createElement("i");
+    d.className = "drop";
+    d.style.cssText = `left:${rand(0, 420)}px; height:${rand(30, 70)}px; animation-duration:${rand(0.45, 0.85)}s; animation-delay:${-rand(0, 1)}s; opacity:${rand(0.3, 0.8)}`;
+    rain.appendChild(d);
+  }
+  for (let i = 0; i < 9; i++) {
+    const b = document.createElement("i"), s = rand(5, 11);
+    b.className = "bead";
+    b.style.cssText = `left:${rand(40, 300)}px; top:${rand(10, 160)}px; width:${s}px; height:${s * 1.15}px; animation-duration:${rand(7, 15)}s; animation-delay:${-rand(0, 15)}s`;
+    rain.appendChild(b);
+  }
+  // the live brawl: the game's own attract match, with its menu hidden and its input switched off
+  const pit = $("#pit");
+  pit.addEventListener("load", () => {
+    let tries = 0;
+    const t = setInterval(() => {
+      try {
+        const w = pit.contentWindow, d = pit.contentDocument, g = w.__game;
+        if (g && g.select) {
+          clearInterval(t);
+          g.select.poll = () => {};
+          const st = d.createElement("style");
+          st.textContent = "#select,#hud,#over,#moves{display:none!important}";
+          d.head.appendChild(st);
+          pit.classList.add("live");
+          // the floating "P3·cpu" tags are for the fight, not the porthole: shrink them away (each new brawl makes new ones)
+          setInterval(() => { for (const v of g.scene?.fighters ?? []) v.label?.scale.setScalar(0.0001); }, 250);
+        }
+      } catch (e) { clearInterval(t); }
+      if (++tries > 150) clearInterval(t);
+    }, 100);
+  });
+}
+
+/* ------------------------------------------------------------------ the pressure gauge */
+const needleEl = (() => {
+  const g = $("#gauge");
+  svgEl("circle", { r: 146, fill: "url(#bezel)", stroke: "#2a1a06", "stroke-width": 3 }, g);
+  svgEl("circle", { r: 131, fill: "#2a1c0a" }, g);
+  svgEl("circle", { r: 126, fill: "url(#face)" }, g);
+  for (let k = 0; k < 8; k++) {
+    const a = (k / 8) * Math.PI * 2 + Math.PI / 8;
+    svgEl("circle", { cx: 138.5 * Math.cos(a), cy: 138.5 * Math.sin(a), r: 4.5, fill: "url(#bezel)", stroke: "#2a1a06", "stroke-width": 1 }, g);
+  }
+  const ang = (p) => ((-135 + 270 * p - 90) * Math.PI) / 180;
+  const arc = (p0, p1, r) => {
+    const a0 = ang(p0), a1 = ang(p1);
+    return `M${r * Math.cos(a0)} ${r * Math.sin(a0)} A${r} ${r} 0 0 1 ${r * Math.cos(a1)} ${r * Math.sin(a1)}`;
+  };
+  svgEl("path", { d: arc(0.82, 1, 104), fill: "none", stroke: "#b83224", "stroke-width": 12, opacity: 0.85 }, g);
+  svgEl("path", { d: arc(0.62, 0.82, 104), fill: "none", stroke: "#c98a2a", "stroke-width": 12, opacity: 0.45 }, g);
+  for (let i = 0; i <= 40; i++) {
+    const a = ang(i / 40), major = i % 5 === 0, r1 = major ? 93 : 101, r2 = 111;
+    svgEl("line", { x1: r1 * Math.cos(a), y1: r1 * Math.sin(a), x2: r2 * Math.cos(a), y2: r2 * Math.sin(a), stroke: "#2a1d10", "stroke-width": major ? 3 : 1.4 }, g);
+    if (major) {
+      const t = svgEl("text", { x: 79 * Math.cos(a), y: 79 * Math.sin(a) + 4.5, "text-anchor": "middle", "font-family": "Georgia", "font-size": 13, "font-weight": 700, fill: "#2a1d10" }, g);
+      t.textContent = String((i / 40) * 400);
+    }
+  }
+  const label = (y, size, text, extra = {}) => { const t = svgEl("text", { x: 0, y, "text-anchor": "middle", "font-family": "Georgia", "font-size": size, fill: "#2a1d10", "letter-spacing": 2, ...extra }, g); t.textContent = text; };
+  label(-22, 8.5, "Crosby & Son · Londo", { "font-style": "italic", "letter-spacing": 1 });
+  label(32, 10.5, "BOILER PRESSURE", { "font-weight": 900 });
+  label(47, 8.5, "LBS · PER · SQ · IN");
+  svgEl("rect", { x: -36, y: 60, width: 72, height: 26, rx: 3, fill: "#1a1208", stroke: "#8a6420", "stroke-width": 2 }, g);
+  const count = svgEl("text", { id: "gaugeCount", x: 0, y: 79, "text-anchor": "middle", "font-family": "Georgia", "font-size": 17, "font-weight": 900, fill: "#f3d58a", "letter-spacing": 2 }, g);
+  count.textContent = "– / –";
+  const needle = svgEl("g", { id: "needle" }, g);
+  svgEl("path", { d: "M-4 20 L0 -110 L4 20 Z", fill: "#1a1208" }, needle);
+  svgEl("path", { d: "M-1.6 8 L0 -102 L1.6 8 Z", fill: "#b83224" }, needle);
+  svgEl("circle", { cy: 20, r: 9, fill: "#1a1208" }, needle);
+  svgEl("circle", { r: 12, fill: "url(#bezel)", stroke: "#2a1a06", "stroke-width": 2 }, g);
+  svgEl("rect", { x: -7, y: -1.5, width: 14, height: 3, fill: "#2a1a06", transform: "rotate(35)" }, g);
+  svgEl("path", { d: "M-112 -30 A118 118 0 0 1 30 -114 A132 132 0 0 0 -112 -30 Z", fill: "#fff", opacity: 0.16 }, g);
+  return needle;
+})();
+
+/* ------------------------------------------------------------------ the pipe's flanges: the steam vents */
+const VENTS = [];
+{
+  const box = $("#flanges");
+  const xs = [40];
+  for (let i = 0; i < 7; i++) xs.push(71 + 170 + 7 + i * 184);
+  xs.push(1546);
+  for (const x of xs) {
+    const f = document.createElement("i");
+    f.className = "flange";
+    f.style.left = `${x - 7}px`;
+    box.appendChild(f);
+    VENTS.push(x);
+  }
+}
+
+/* ------------------------------------------------------------------ steam and shake */
+const steamLayer = $("#steam");
+let puffs = 0;
+function puff(x, y, o = {}) {
+  let { n = 6, spread = 20, rise = 160, size = 60, dur = 2200, vx = 0, alpha = 0.55 } = o;
+  if (motion.reduced) return; // a puff only ever drifts and swells: with reduced motion there is none
+  for (let i = 0; i < n; i++) {
+    if (puffs > 110) return;
+    const d = document.createElement("i"), s = size * rand(0.6, 1.4);
+    d.className = "puff";
+    d.style.cssText = `left:${x - s / 2 + (Math.random() - 0.5) * spread}px; top:${y - s / 2}px; width:${s}px; height:${s}px; opacity:0`;
+    steamLayer.appendChild(d);
+    puffs++;
+    const dx = vx * rand(0.6, 1.3) + (Math.random() - 0.5) * 60, dy = -rise * rand(0.6, 1.4);
+    const a = d.animate(
+      [{ transform: "translate(0,0) scale(.35)", opacity: alpha }, { transform: `translate(${dx}px,${dy}px) scale(${rand(1.6, 2.6)})`, opacity: 0 }],
+      { duration: dur * rand(0.7, 1.3), easing: "cubic-bezier(.2,.6,.4,1)", delay: Math.random() * 140, fill: "both" },
+    );
+    a.onfinish = () => { d.remove(); puffs--; };
+  }
+}
+function shake(mag = 4, dur = 280) {
+  if (motion.reduced) return;
+  const k = [];
+  for (let i = 0; i < 7; i++) k.push({ transform: `translate(${(Math.random() - 0.5) * 2 * mag}px, ${(Math.random() - 0.5) * 2 * mag}px)` });
+  k.push({ transform: "translate(0,0)" });
+  rig.animate(k, { duration: dur });
+}
+
+/* ------------------------------------------------------------------ the ticker tape */
+const tapeText = $("#tapeText");
+let tapeTimer = 0, idleTimer = 0;
+function say(msg, hold = 3800) {
+  clearInterval(tapeTimer); clearTimeout(idleTimer);
+  let i = 0;
+  tapeText.textContent = "";
+  tapeTimer = setInterval(() => {
+    tapeText.textContent = msg.slice(0, ++i);
+    if (i % 2) Snd.tick();
+    if (i >= msg.length) {
+      clearInterval(tapeTimer);
+      if (hold) idleTimer = setTimeout(() => say(idleLine(), 0), hold);
+    }
+  }, 22);
+}
+
+/* ------------------------------------------------------------------ the register */
+const COLORS = ["#ff3b3b", "#3b8bff", "#4cff6a", "#ffd23b", "#ff6bf0", "#3bf0ff", "#ff9a3b", "#b07bff"];
+const NUMERAL = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII"];
+const slots = Array(8).fill(null); // { dev, name, kind, ready }
+let phase = "idle"; // idle | building | doors
+let buildT = 0;
+const BUILD = 2.4;
+let simNo = 0;
+
+const slotEls = [];
+{
+  const reg = $("#register");
+  for (let i = 0; i < 8; i++) {
+    const el = document.createElement("div");
+    el.className = "slot";
+    el.style.setProperty("--pc", COLORS[i]);
+    el.innerHTML = `
+      <div class="head"><span>No. ${i + 1}</span><span class="lamp"></span></div>
+      <div class="window">
+        <div class="bay">
+          <div class="empty"><span>PRESS ANY<br>BUTTON</span><span class="glyphs">${ICON_KB}${ICON_PAD}</span></div>
+          <div class="card">
+            <div class="band"></div>
+            <span class="devicon"></span>
+            <div class="devname"></div>
+            <div class="keys"></div>
+            <div class="holes">${"<i></i>".repeat(20)}</div>
+            <div class="stamp">REGISTERED</div>
+            <span class="x" title="Leave the register">×</span>
+          </div>
+        </div>
+        <div class="leverbay"><div class="track"></div><div class="handle"></div></div>
+      </div>
+      <div class="sfoot">OPEN</div>`;
+    el.addEventListener("click", (e) => {
+      Snd.unlock();
+      const s = slots[i];
+      if (!s) { join(slots.some((x) => x && x.dev === "kb1") ? `sim${simNo++}` : "kb1", i); return; }
+      if (e.target.closest(".x")) { leave(i); return; }
+      if (e.target.closest(".leverbay")) setReady(i, !s.ready);
+    });
+    reg.appendChild(el);
+    slotEls.push(el);
+  }
+}
+
+const count = () => slots.filter(Boolean).length;
+const readyCount = () => slots.filter((s) => s && s.ready).length;
+const indexOf = (dev) => slots.findIndex((s) => s && s.dev === dev);
+function deviceInfo(dev) {
+  if (dev === "kb1") return { name: "KEYBOARD I", kind: "kb", keys: "<b>J</b> pull<br><b>K</b> back" };
+  if (dev === "kb2") return { name: "KEYBOARD II", kind: "kb", keys: "<b>Num6</b> pull<br><b>Num8</b> back" };
+  if (dev.startsWith("pad")) return { name: `PAD ${NUMERAL[Number(dev.slice(3))] ?? ""}`, kind: "pad", keys: "<b>○</b> pull<br><b>△</b> back" };
+  return { name: "PAD (SIM.)", kind: "pad", keys: "<b>○</b> pull<br><b>△</b> back" };
+}
+function idleLine() {
+  const n = count(), r = readyCount();
+  if (!n) return "PRESS ANY BUTTON TO SIGN THE REGISTER · UP TO EIGHT COMBATANTS";
+  if (phase === "building") return "ALL LEVERS PULLED · BUILDING PRESSURE";
+  if (n === 8) return `THE REGISTER IS FULL · ${r} OF 8 LEVERS PULLED`;
+  return `${n} SIGNED · ${r} OF ${n} LEVERS PULLED · MORE MAY YET SIGN`;
+}
+
+function render() {
+  const next = phase === "doors" ? -1 : slots.findIndex((s) => !s);
+  slotEls.forEach((el, i) => {
+    const s = slots[i];
+    el.classList.toggle("on", !!s);
+    el.classList.toggle("ready", !!s && s.ready);
+    el.classList.toggle("next", i === next);
+    el.querySelector(".sfoot").textContent = !s ? "OPEN" : s.ready ? "READY" : "PULL LEVER";
+  });
+  const n = count(), r = readyCount();
+  $("#gaugeCount").textContent = n ? `${r} / ${n}` : "– / –";
+  $("#plateStatus").textContent = !n ? "Awaiting combatants" : r === n ? "All levers pulled" : `${r} of ${n} levers pulled`;
+}
+
+function join(dev, at = -1) {
+  if (phase === "doors") return;
+  const i = at >= 0 && !slots[at] ? at : slots.findIndex((s) => !s);
+  if (i < 0) { say("THE REGISTER IS FULL · EIGHT COMBATANTS IS THE LIMIT"); return; }
+  const info = deviceInfo(dev);
+  slots[i] = { dev, name: info.name, kind: info.kind, ready: false };
+  const el = slotEls[i];
+  el.querySelector(".devicon").innerHTML = info.kind === "pad" ? ICON_PAD : ICON_KB;
+  el.querySelector(".devname").textContent = info.name;
+  el.querySelector(".keys").innerHTML = info.keys;
+  el.querySelectorAll(".holes i").forEach((h) => h.classList.toggle("p", Math.random() < 0.3));
+  el.classList.remove("stamped", "stamping");
+  render();
+  const cx = 71 + i * 184 + 85;
+  puff(cx, 652, { n: 5, size: 50, rise: 90, alpha: 0.4 });
+  setTimeout(() => {
+    if (!slots[i] || slots[i].dev !== dev) return;
+    void el.offsetWidth;
+    el.classList.add("stamping", "stamped");
+    Snd.stamp();
+    shake(3, 220);
+    puff(cx, 700, { n: 9, size: 70, rise: 120, spread: 60 });
+    setTimeout(() => el.classList.remove("stamping"), 400);
+  }, 300);
+  Snd.hiss(0.35, 0.12);
+  say(`No. ${i + 1} · ${info.name} · HAS SIGNED THE REGISTER`);
+  check(`No. ${i + 1} HAS JUST SIGNED IN`);
+}
+
+function leave(i) {
+  const s = slots[i];
+  if (!s || phase === "doors") return;
+  slots[i] = null;
+  slotEls[i].classList.remove("stamped");
+  render();
+  Snd.hiss(0.5, 0.18);
+  puff(71 + i * 184 + 85, 660, { n: 6, size: 55, rise: 100 });
+  say(`No. ${i + 1} · ${s.name} · HAS LEFT THE REGISTER`);
+  check(`No. ${i + 1} HAS LEFT`);
+}
+
+function setReady(i, on) {
+  const s = slots[i];
+  if (!s || s.ready === on || phase === "doors") return;
+  s.ready = on;
+  render();
+  const el = slotEls[i], lx = 71 + i * 184 + 145;
+  if (on) {
+    Snd.ratchet(6);
+    setTimeout(() => Snd.clank(), 230);
+    setTimeout(() => puff(lx, 830, { n: 4, size: 40, rise: 70, vx: 30, alpha: 0.45 }), 230);
+    const holes = [...el.querySelectorAll(".holes i:not(.p)")].slice(-6);
+    holes.forEach((h, k) => setTimeout(() => { h.classList.add("p", "pop"); setTimeout(() => h.classList.remove("pop"), 260); }, 240 + k * 45));
+    say(`No. ${i + 1} HAS PULLED THE LEVER · ${readyCount()} OF ${count()}`);
+  } else {
+    Snd.ratchet(5, true);
+    say(`No. ${i + 1} HAS LET GO OF THE LEVER`);
+  }
+  check(`No. ${i + 1} LET GO OF THE LEVER`);
+}
+
+function wiggle(i) {
+  const el = slotEls[i];
+  el.classList.remove("wiggle"); void el.offsetWidth; el.classList.add("wiggle");
+  setTimeout(() => el.classList.remove("wiggle"), 320);
+}
+
+/* ------------------------------------------------------------------ the boiler: all levers pulled builds pressure, then the doors */
+function check(reason) {
+  const n = count(), r = readyCount(), all = n > 0 && r === n;
+  if (phase === "idle" && all) startBuild();
+  else if (phase === "building" && !all) cancelBuild(reason);
+}
+function startBuild() {
+  phase = "building"; buildT = 0;
+  rig.classList.add("building");
+  Snd.startBuild(BUILD);
+  say("ALL LEVERS PULLED · BUILDING PRESSURE", 0);
+}
+function cancelBuild(reason) {
+  phase = "idle";
+  rig.classList.remove("building");
+  Snd.stopBuild(true);
+  puff(1318, 200, { n: 10, size: 70, rise: 60, vx: 160, alpha: 0.6 });
+  say(`PRESSURE RELEASED · ${reason}`);
+}
+function fire() {
+  phase = "doors";
+  rig.classList.remove("building");
+  render();
+  Snd.stopBuild(false);
+  Snd.whistle();
+  let k = 0;
+  const plume = setInterval(() => { puff(1290, 172, { n: 3, size: 90, rise: 220, spread: 10, alpha: 0.75, dur: 1800 }); if (++k > 16) clearInterval(plume); }, 70);
+  say("THE BOILER BLOWS · TO THE ROSTER!", 0);
+  const sh = $("#shutters");
+  setTimeout(() => {
+    sh.classList.remove("opening");
+    sh.classList.add("shut");
+    setTimeout(() => {
+      Snd.slam();
+      shake(10, 450);
+      for (let y = 80; y < 880; y += 70) puff(800, y, { n: 2, size: 80, rise: 40, spread: 30, alpha: 0.6, dur: 1500 });
+      sh.classList.add("landed");
+    }, 260);
+  }, 800);
+  setTimeout(() => {
+    sh.classList.remove("landed", "shut");
+    sh.classList.add("opening");
+    Snd.hiss(1.1, 0.25);
+    slots.forEach((s) => s && (s.ready = false));
+    phase = "idle";
+    render();
+    say("BACK AT THE REGISTER · EVERYONE STAYS SIGNED IN FOR THE NEXT BOUT", 5000);
+  }, 4200);
+}
+
+/* ------------------------------------------------------------------ input: what each device asks for */
+function act(dev, kind) {
+  if (phase === "doors") return;
+  const i = indexOf(dev);
+  if (kind === "help") { say("HOW TO PLAY WOULD OPEN HERE · THE CONTROLS FOR YOUR DEVICE"); return; }
+  if (i < 0) { if (kind !== "back") join(dev); return; }
+  const s = slots[i];
+  if (kind === "confirm") { if (!s.ready) setReady(i, true); else wiggle(i); }
+  else if (kind === "back") { if (s.ready) setReady(i, false); else leave(i); }
+  else wiggle(i);
+}
+
+const KB = {
+  kb1: { confirm: ["KeyJ", "Enter", "Space"], back: ["KeyK", "Escape", "Backspace"], help: ["KeyL"] },
+  kb2: { confirm: ["Numpad6", "NumpadEnter"], back: ["Numpad8"], help: ["Numpad4"] },
+};
+addEventListener("keydown", (e) => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  if (["Space", "Tab", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Enter", "Backspace"].includes(e.code)) e.preventDefault();
+  Snd.unlock();
+  if (e.repeat) return;
+  if (e.code === "Backquote") { $("#proto").classList.toggle("open"); return; }
+  if (e.code === "KeyM") { Snd.setMuted(!Snd.muted); return; }
+  const dev = /^(Arrow|Numpad)/.test(e.code) ? "kb2" : "kb1";
+  const m = KB[dev];
+  act(dev, m.confirm.includes(e.code) ? "confirm" : m.back.includes(e.code) ? "back" : m.help.includes(e.code) ? "help" : "any");
+});
+addEventListener("pointerdown", () => Snd.unlock());
+
+// pads: a press is a button that went down since the last frame (standard mapping: 1 Circle, 3 Triangle, 2 Square, 9 Start)
+const padPrev = [];
+function pollPads() {
+  const pads = navigator.getGamepads ? navigator.getGamepads() : [];
+  for (let i = 0; i < Math.min(8, pads.length); i++) {
+    const p = pads[i];
+    if (!p || !p.connected) { padPrev[i] = undefined; continue; }
+    let bits = 0;
+    for (let b = 0; b < 17; b++) if (p.buttons[b] && p.buttons[b].pressed) bits |= 1 << b;
+    const prev = padPrev[i] ?? bits; // a button already held when the pad is first seen does not count
+    padPrev[i] = bits;
+    const edge = bits & ~prev;
+    if (!edge) continue;
+    const dev = `pad${i}`;
+    act(dev, edge & (1 << 1) || edge & (1 << 9) ? "confirm" : edge & (1 << 3) ? "back" : edge & (1 << 2) ? "help" : "any");
+  }
+}
+addEventListener("gamepadconnected", (e) => { if (phase !== "doors") say(`A PAD HAS BEEN CONNECTED · PRESS ANY BUTTON ON IT TO SIGN IN`); });
+
+/* ------------------------------------------------------------------ the prototype's tools */
+$("#protoTab").addEventListener("click", () => $("#proto").classList.toggle("open"));
+$$("#proto button").forEach((b) => b.addEventListener("mousedown", (e) => e.preventDefault())); // keep the keyboard on the page
+$$("#proto [data-a]").forEach((b) => b.addEventListener("click", () => {
+  Snd.unlock();
+  const a = b.dataset.a;
+  if (a === "pad") join(`sim${simNo++}`);
+  else if (a === "readyall") slots.forEach((s, i) => s && !s.ready && setTimeout(() => setReady(i, true), i * 220));
+  else if (a === "unready") { const i = slots.findIndex((s) => s && s.ready); if (i >= 0) setReady(i, false); }
+  else if (a === "reset") { for (let i = 0; i < 8; i++) if (slots[i]) { slots[i] = null; slotEls[i].classList.remove("stamped"); } if (phase === "building") cancelBuild("THE REGISTER WAS CLEARED"); render(); say(idleLine()); }
+  else if (a === "motion") setReduced(!motion.reduced);
+  else if (a === "mute") Snd.setMuted(!Snd.muted);
+}));
+
+/* ------------------------------------------------------------------ the frame loop */
+let last = performance.now(), A = 0, speed = 8, p = 0.04, steamAcc = 0, chaseSet = "";
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000);
+  last = now;
+  pollPads();
+  const n = count(), r = readyCount();
+  let target = n ? 0.14 + 0.56 * (r / n) : 0.04;
+  if (phase === "building") {
+    buildT += dt;
+    target = 0.72 + 0.31 * Math.min(1, buildT / BUILD);
+    if (buildT >= BUILD) fire();
+  } else if (phase === "doors") target = 0.1;
+  p += (target - p) * Math.min(1, dt * (phase === "building" ? 6 : 2.5));
+  const jitter = motion.reduced ? 0 : (Math.random() - 0.5) * (0.6 + 9 * Math.pow(p, 4));
+  needleEl.setAttribute("transform", `rotate(${(-135 + 270 * Math.min(1.02, p) + jitter).toFixed(2)})`);
+
+  const tSpeed = 7 + 7 * n + 26 * (n ? r / n : 0) + (phase === "building" ? 220 * (buildT / BUILD) : 0) + (phase === "doors" ? -20 : 0);
+  speed += (tSpeed - speed) * Math.min(1, dt * 1.6);
+  if (!motion.reduced) A += speed * dt;
+  for (const g of gears) g.inner.setAttribute("transform", `rotate(${(g.phase + g.ratio * A).toFixed(2)})`);
+  stepPistons();
+  stepDrums(dt);
+
+  const chase = (1.6 - 1.25 * Math.min(1, p)).toFixed(1) + "s";
+  if (chase !== chaseSet) { chaseSet = chase; $("#bulbs").style.setProperty("--chase", chase); }
+
+  steamAcc += dt * (0.45 + 2.5 * p + (phase === "building" ? 9 : 0));
+  while (steamAcc > 1) {
+    steamAcc -= 1;
+    const x = VENTS[(Math.random() * VENTS.length) | 0];
+    puff(x, 628, { n: 2, size: 42, rise: 80, alpha: 0.32, vx: (Math.random() - 0.5) * 80 });
+    if (p > 0.6 && Math.random() < 0.5) puff(1318, 200, { n: 1, size: 40, rise: 50, vx: 60, alpha: 0.35 });
+    // the title's cylinders blow off over the top of the marquee as the boiler nears its mark
+    if (phase === "building" && Math.random() < 0.45) puff(rand(420, 1040), 14, { n: 1, size: 30, rise: 22, alpha: 0.26, dur: 1200 });
+  }
+  $("#fire").style.opacity = (0.45 + 0.55 * p).toFixed(2);
+  requestAnimationFrame(frame);
+}
+
+setReduced(motion.reduced);
+render();
+say(idleLine(), 0);
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

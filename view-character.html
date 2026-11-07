@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pitfighter 3D Character Rig Studio</title>
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+  <style>
+    :root {
+      --bg: #090c10;
+      --panel-bg: rgba(13, 17, 23, 0.94);
+      --card-bg: #161b22;
+      --card-hover: #21262d;
+      --border: #30363d;
+      --gold: #d4af37;
+      --gold-glow: rgba(212, 175, 55, 0.35);
+      --text: #f0f6fc;
+      --muted: #8b949e;
+      --accent: #58a6ff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at center, #151b23 0%, #080a0e 100%);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: var(--text);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Sidebar Roster */
+    #sidebar {
+      width: 320px;
+      min-width: 320px;
+      height: 100vh;
+      background: var(--panel-bg);
+      border-right: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      z-index: 20;
+    }
+    .sidebar-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(0, 0, 0, 0.3);
+    }
+    .sidebar-header h1 {
+      margin: 0 0 4px 0;
+      font-size: 18px;
+      color: var(--gold);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      font-weight: 800;
+    }
+    .sidebar-header p {
+      margin: 0;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+    .roster-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .roster-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 12px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: left;
+    }
+    .roster-card:hover {
+      background: var(--card-hover);
+      border-color: var(--gold);
+      transform: translateX(3px);
+    }
+    .roster-card.active {
+      background: rgba(212, 175, 55, 0.14);
+      border-color: var(--gold);
+      box-shadow: 0 0 12px var(--gold-glow);
+    }
+    .roster-card img {
+      width: 44px;
+      height: 44px;
+      border-radius: 6px;
+      object-fit: cover;
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .card-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .card-name {
+      font-weight: 700;
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--text);
+    }
+    .roster-card.active .card-name {
+      color: var(--gold);
+    }
+    .card-title {
+      font-size: 11px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Main Viewport Area */
+    #viewport-container {
+      flex: 1;
+      position: relative;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    model-viewer {
+      width: 100%;
+      height: 100%;
+      --poster-color: transparent;
+      outline: none;
+    }
+
+    /* Top Overlay Header */
+    .top-bar {
+      position: absolute;
+      top: 16px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .fighter-badge {
+      background: var(--panel-bg);
+      backdrop-filter: blur(8px);
+      padding: 10px 18px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      pointer-events: auto;
+    }
+    .fighter-badge h2 {
+      margin: 0;
+      font-size: 18px;
+      color: var(--gold);
+    }
+    .fighter-badge p {
+      margin: 2px 0 0;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 8px;
+      pointer-events: auto;
+    }
+    .btn {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+    .btn:hover {
+      background: var(--card-hover);
+      border-color: var(--gold);
+      color: #fff;
+    }
+    .btn.active {
+      background: var(--gold);
+      color: #0b0e14;
+      border-color: var(--gold);
+      font-weight: 700;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #d4af37, #b8860b);
+      color: #0b0e14;
+      border: none;
+      font-weight: 700;
+      box-shadow: 0 4px 12px var(--gold-glow);
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #e5c158, #c9971c);
+      color: #000;
+      box-shadow: 0 6px 16px rgba(212, 175, 55, 0.5);
+    }
+
+    /* Floating Bottom Controls Dock */
+    .controls-dock {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--panel-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 18px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      z-index: 10;
+      box-shadow: 0 12px 36px rgba(0,0,0,0.6);
+    }
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .control-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .seg-control {
+      display: flex;
+      background: #0d1117;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2px;
+      gap: 2px;
+    }
+    .seg-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .seg-btn:hover {
+      color: var(--text);
+    }
+    .seg-btn.active {
+      background: var(--card-hover);
+      color: var(--gold);
+    }
+
+    /* Technical Specs Floating Card */
+    .specs-card {
+      position: absolute;
+      bottom: 24px;
+      left: 20px;
+      background: var(--panel-bg);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.6;
+      z-index: 10;
+      pointer-events: none;
+      min-width: 170px;
+    }
+    .specs-card span {
+      color: var(--gold);
+      font-weight: 600;
+    }
+
+    /* Instructions Floating Pill */
+    .hint-pill {
+      position: absolute;
+      bottom: 24px;
+      right: 20px;
+      background: var(--panel-bg);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 11px;
+      color: var(--muted);
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .hint-pill kbd {
+      background: #21262d;
+      border: 1px solid var(--border);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--text);
+      font-family: monospace;
+      font-size: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Left Sidebar Roster Selector -->
+  <aside id="sidebar">
+    <div class="sidebar-header">
+      <h1>Fighter Roster</h1>
+      <p>Select any character to spin, orbit, and inspect their 3D rig.</p>
+    </div>
+    <div class="roster-list" id="rosterList">
+      <!-- Populated via JavaScript -->
+    </div>
+  </aside>
+
+  <!-- Main Viewport Area -->
+  <main id="viewport-container">
+    
+    <!-- Top Action Bar -->
+    <div class="top-bar">
+      <div class="fighter-badge" id="fighterBadge">
+        <h2 id="badgeName">Constable Obadiah Winch</h2>
+        <p id="badgeTitle">The Wound Constable · Clockwork-Brass</p>
+      </div>
+      <div class="top-actions">
+        <a href="./?bodies=mesh" class="btn btn-primary" title="Launch the game with 3D rigged character meshes">
+          ⚔️ Play in Pitfighter
+        </a>
+        <a href="./?bodies=mesh&lab=1" class="btn" title="Open the Feel Lab to scrub physics and animation frames">
+          🧪 Feel Lab
+        </a>
+        <a href="./" class="btn" title="Back to main title menu">
+          🏟️ Title Menu
+        </a>
+      </div>
+    </div>
+
+    <!-- 3D Model Viewer Canvas -->
+    <model-viewer
+      id="rigViewer"
+      src="models/characters/constable-winch_rigged.glb"
+      alt="3D Rigged Character Mesh"
+      camera-controls
+      auto-rotate
+      rotation-per-second="25deg"
+      shadow-intensity="1.5"
+      shadow-softness="0.8"
+      exposure="1.1"
+      camera-orbit="0deg 78deg 3.5m"
+      field-of-view="32deg"
+      min-camera-orbit="auto auto 1.5m"
+      max-camera-orbit="auto auto 7m"
+      interaction-prompt="none"
+    >
+    </model-viewer>
+
+    <!-- Technical Specs HUD -->
+    <div class="specs-card" id="specsCard">
+      Height: <span id="specHeight">1.80m</span><br>
+      Rig: <span id="specRig">11 Bones (Modular)</span><br>
+      Parts: <span id="specParts">Torso, Arms (L/R), Legs (L/R)</span><br>
+      Model: <span id="specType">Rigged GLB</span>
+    </div>
+
+    <!-- Bottom Controls Dock -->
+    <div class="controls-dock">
+      
+      <!-- Model Type: Rigged vs Body -->
+      <div class="control-group">
+        <span class="control-label">Mesh</span>
+        <div class="seg-control">
+          <button class="seg-btn active" id="btnRigged" onclick="setModelType('rigged')">Rigged 5-Piece</button>
+          <button class="seg-btn" id="btnBody" onclick="setModelType('body')">Solid Body</button>
+        </div>
+      </div>
+
+      <div style="width: 1px; height: 24px; background: var(--border);"></div>
+
+      <!-- Spin & Turntable Control -->
+      <div class="control-group">
+        <span class="control-label">Spin</span>
+        <button class="btn active" id="btnAutoRotate" onclick="toggleAutoRotate()">
+          🔄 Auto-Spin
+        </button>
+      </div>
+
+      <div style="width: 1px; height: 24px; background: var(--border);"></div>
+
+      <!-- Camera Presets -->
+      <div class="control-group">
+        <span class="control-label">Camera</span>
+        <div class="seg-control">
+          <button class="seg-btn" onclick="setAngle('0deg 85deg 3.5m')">Front</button>
+          <button class="seg-btn" onclick="setAngle('45deg 80deg 3.5m')">3/4</button>
+          <button class="seg-btn" onclick="setAngle('90deg 85deg 3.5m')">Side</button>
+          <button class="seg-btn" onclick="setAngle('180deg 85deg 3.5m')">Back</button>
+        </div>
+      </div>
+
+      <div style="width: 1px; height: 24px; background: var(--border);"></div>
+
+      <!-- Reset -->
+      <button class="btn" onclick="resetView()" title="Reset Camera">
+        ⟲ Reset
+      </button>
+
+    </div>
+
+    <!-- Mouse & Gesture Hint -->
+    <div class="hint-pill">
+      <span><kbd>Left Click + Drag</kbd> Orbit / Spin</span>
+      <span><kbd>Right Click + Drag</kbd> Pan</span>
+      <span><kbd>Scroll Wheel</kbd> Zoom</span>
+    </div>
+
+  </main>
+
+  <script>
+    const ROSTER = [
+      { id: "constable-winch", name: "Constable Obadiah Winch", title: "The Wound Constable", craft: "Clockwork-Brass", height: "1.80m", portrait: "tex/characters/obadiah_winch.jpg" },
+      { id: "tilly-tongs", name: "Tilly Furnace-Tongs", title: "The Sump Stoker", craft: "Cinder-Iron", height: "1.70m", portrait: "tex/characters/tilly_tongs.png" },
+      { id: "hezekiah-smelt", name: "Mr. Hezekiah Smelt", title: "The Proprietor", craft: "Foundry-Iron", height: "2.20m", portrait: "tex/characters/hezekiah_smelt.jpg" },
+      { id: "martha-crape", name: "Mistress Martha Crape", title: "The Undertaker's Shadow", craft: "Jet-Whalebone", height: "1.82m", portrait: "tex/characters/martha_crape.png" },
+      { id: "tabitha-pegg", name: "Mistress Tabitha Pegg", title: "The Cobbler's Automaton", craft: "Cast-Iron-Lasts", height: "1.72m", portrait: "tex/characters/tabitha_pegg.png" },
+      { id: "lady-eleanor", name: "Lady Eleanor Ashby-Lisle", title: "The Disowned Duelist", craft: "Silver-Ebony", height: "1.78m", portrait: "tex/characters/eleanor_ashby.png" },
+      { id: "nell-sluice", name: "Nell Sluice", title: "The Mudlark", craft: "Apothecary-Copper", height: "1.62m", portrait: "tex/characters/nell_sluice.jpg" },
+      { id: "matron-kilnworth", name: "Matron Prudence Kilnworth", title: "The Porcelain Sister", craft: "Willow-Porcelain", height: "1.76m", portrait: "tex/characters/prudence_kilnworth.jpg" },
+      { id: "bartholomew-mule", name: "Bartholomew Mule", title: "The Iron Bruiser", craft: "Grizzly-Fur", height: "1.92m", portrait: "tex/characters/bartholomew_mule.jpg" },
+      { id: "bosun-rook", name: "Bosun Absalom Rook", title: "The Salt-Gallows", craft: "Rigging-Oak", height: "1.84m", portrait: "tex/characters/absalom_rook.jpg" },
+      { id: "lady-bulwark", name: "Lady Hester Bulwark", title: "The Iron Rose", craft: "Pneumatic-Brass", height: "1.74m", portrait: "tex/characters/hester_bulwark.jpg" },
+      { id: "percival-crump", name: "Percival \"Oolong\" Crump", title: "The Tea-Vat Pugilist", craft: "Copper-Boiler", height: "1.68m", portrait: "tex/characters/percival_crump.jpg" },
+    ];
+
+    let currentFighter = ROSTER[0];
+    let currentModelType = "rigged";
+    const viewer = document.getElementById("rigViewer");
+
+    // Initialize Roster UI
+    const rosterList = document.getElementById("rosterList");
+    ROSTER.forEach((f, idx) => {
+      const card = document.createElement("div");
+      card.className = "roster-card" + (idx === 0 ? " active" : "");
+      card.id = `card-${f.id}`;
+      card.onclick = () => selectFighter(f.id);
+      card.innerHTML = `
+        <img src="${f.portrait}" alt="${f.name}">
+        <div class="card-info">
+          <div class="card-name">${f.name}</div>
+          <div class="card-title">${f.title}</div>
+        </div>
+      `;
+      rosterList.appendChild(card);
+    });
+
+    function selectFighter(id) {
+      const f = ROSTER.find(x => x.id === id);
+      if (!f) return;
+      currentFighter = f;
+
+      // Update sidebar active class
+      document.querySelectorAll(".roster-card").forEach(c => c.classList.remove("active"));
+      const card = document.getElementById(`card-${f.id}`);
+      if (card) card.classList.add("active");
+
+      // Update Top Badge
+      document.getElementById("badgeName").textContent = f.name;
+      document.getElementById("badgeTitle").textContent = `${f.title} · ${f.craft}`;
+
+      // Update Specs
+      document.getElementById("specHeight").textContent = f.height;
+
+      // Update Model Source
+      updateModelSrc();
+
+      // Update URL query without page reload
+      const u = new URL(window.location);
+      u.searchParams.set("char", f.id);
+      window.history.replaceState({}, "", u);
+    }
+
+    function setModelType(type) {
+      currentModelType = type;
+      document.getElementById("btnRigged").classList.toggle("active", type === "rigged");
+      document.getElementById("btnBody").classList.toggle("active", type === "body");
+      document.getElementById("specType").textContent = type === "rigged" ? "Rigged GLB (5-Piece)" : "Solid Body Mesh";
+      updateModelSrc();
+    }
+
+    function updateModelSrc() {
+      const suffix = currentModelType === "rigged" ? "_rigged.glb" : "_body.glb";
+      const path = `models/characters/${currentFighter.id}${suffix}?v=${Date.now()}`;
+      viewer.src = path;
+    }
+
+    function toggleAutoRotate() {
+      viewer.autoRotate = !viewer.autoRotate;
+      document.getElementById("btnAutoRotate").classList.toggle("active", viewer.autoRotate);
+    }
+
+    function setAngle(orbit) {
+      viewer.cameraOrbit = orbit;
+    }
+
+    function resetView() {
+      viewer.cameraOrbit = "0deg 78deg 3.5m";
+      viewer.fieldOfView = "32deg";
+      if (!viewer.autoRotate) toggleAutoRotate();
+    }
+
+    // Check URL parameters on load
+    window.addEventListener("DOMContentLoaded", () => {
+      const params = new URLSearchParams(window.location.search);
+      const charParam = params.get("char");
+      if (charParam && ROSTER.some(f => f.id === charParam)) {
+        selectFighter(charParam);
+      } else {
+        updateModelSrc();
+      }
+      if (params.get("mesh") === "body") {
+        setModelType("body");
+      }
+    });
+  </script>
+</body>
+</html>
