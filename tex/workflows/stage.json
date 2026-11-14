@@ -1,0 +1,842 @@
+{
+  "110": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "111": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "112": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "173": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless tileable texture, top-down photograph of black volcanic basalt slabs with lava-filled cracks between them, glowing molten rock in the fissures, black basalt grey, flat even lighting, no shadows, no vignette, highly detailed, 4k material",
+      "clip": [
+        "111",
+        0
+      ]
+    }
+  },
+  "174": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "173",
+        0
+      ],
+      "guidance": 3.5
+    }
+  },
+  "175": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "111",
+        0
+      ]
+    }
+  },
+  "176": {
+    "class_type": "EmptySD3LatentImage",
+    "_meta": {
+      "title": "Empty latent"
+    },
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    }
+  },
+  "177": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample"
+    },
+    "inputs": {
+      "model": [
+        "110",
+        0
+      ],
+      "seed": 7101,
+      "steps": 4,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "positive": [
+        "174",
+        0
+      ],
+      "negative": [
+        "175",
+        0
+      ],
+      "latent_image": [
+        "176",
+        0
+      ]
+    }
+  },
+  "178": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "177",
+        0
+      ],
+      "vae": [
+        "112",
+        0
+      ]
+    }
+  },
+  "209": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "178",
+        0
+      ],
+      "filename_prefix": "outputs/gen/hell-toilet__basalt"
+    }
+  },
+  "270": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "271": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "272": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "333": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless tileable texture, top-down photograph of churned muddy dirt with tyre tracks and scattered gravel, wet brown mud, flat even lighting, no shadows, no vignette, highly detailed, 4k material",
+      "clip": [
+        "271",
+        0
+      ]
+    }
+  },
+  "334": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "333",
+        0
+      ],
+      "guidance": 3.5
+    }
+  },
+  "335": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "271",
+        0
+      ]
+    }
+  },
+  "336": {
+    "class_type": "EmptySD3LatentImage",
+    "_meta": {
+      "title": "Empty latent"
+    },
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    }
+  },
+  "337": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample"
+    },
+    "inputs": {
+      "model": [
+        "270",
+        0
+      ],
+      "seed": 7214,
+      "steps": 4,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "positive": [
+        "334",
+        0
+      ],
+      "negative": [
+        "335",
+        0
+      ],
+      "latent_image": [
+        "336",
+        0
+      ]
+    }
+  },
+  "338": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "337",
+        0
+      ],
+      "vae": [
+        "272",
+        0
+      ]
+    }
+  },
+  "369": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "338",
+        0
+      ],
+      "filename_prefix": "outputs/gen/construction-site__dirt"
+    }
+  },
+  "430": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "431": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "432": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "493": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless tileable texture, top-down photograph of stained cracked poured concrete slab with expansion joints, grey concrete, flat even lighting, no shadows, no vignette, highly detailed, 4k material",
+      "clip": [
+        "431",
+        0
+      ]
+    }
+  },
+  "494": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "493",
+        0
+      ],
+      "guidance": 3.5
+    }
+  },
+  "495": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "431",
+        0
+      ]
+    }
+  },
+  "496": {
+    "class_type": "EmptySD3LatentImage",
+    "_meta": {
+      "title": "Empty latent"
+    },
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    }
+  },
+  "497": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample"
+    },
+    "inputs": {
+      "model": [
+        "430",
+        0
+      ],
+      "seed": 7327,
+      "steps": 4,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "positive": [
+        "494",
+        0
+      ],
+      "negative": [
+        "495",
+        0
+      ],
+      "latent_image": [
+        "496",
+        0
+      ]
+    }
+  },
+  "498": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "497",
+        0
+      ],
+      "vae": [
+        "432",
+        0
+      ]
+    }
+  },
+  "529": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "498",
+        0
+      ],
+      "filename_prefix": "outputs/gen/construction-site__concrete"
+    }
+  },
+  "590": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "591": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "592": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "653": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless tileable texture, top-down photograph of tar-and-gravel rooftop membrane with patched seams, dark grey tar, flat even lighting, no shadows, no vignette, highly detailed, 4k material",
+      "clip": [
+        "591",
+        0
+      ]
+    }
+  },
+  "654": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "653",
+        0
+      ],
+      "guidance": 3.5
+    }
+  },
+  "655": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "591",
+        0
+      ]
+    }
+  },
+  "656": {
+    "class_type": "EmptySD3LatentImage",
+    "_meta": {
+      "title": "Empty latent"
+    },
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    }
+  },
+  "657": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample"
+    },
+    "inputs": {
+      "model": [
+        "590",
+        0
+      ],
+      "seed": 7440,
+      "steps": 4,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "positive": [
+        "654",
+        0
+      ],
+      "negative": [
+        "655",
+        0
+      ],
+      "latent_image": [
+        "656",
+        0
+      ]
+    }
+  },
+  "658": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "657",
+        0
+      ],
+      "vae": [
+        "592",
+        0
+      ]
+    }
+  },
+  "689": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "658",
+        0
+      ],
+      "filename_prefix": "outputs/gen/collapsing-tower__roof"
+    }
+  },
+  "750": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "751": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "752": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "813": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless tileable texture, top-down photograph of varnished wooden deck planks running one way, scuffed, brass nail heads, warm brown wood, flat even lighting, no shadows, no vignette, highly detailed, 4k material",
+      "clip": [
+        "751",
+        0
+      ]
+    }
+  },
+  "814": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "813",
+        0
+      ],
+      "guidance": 3.5
+    }
+  },
+  "815": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "751",
+        0
+      ]
+    }
+  },
+  "816": {
+    "class_type": "EmptySD3LatentImage",
+    "_meta": {
+      "title": "Empty latent"
+    },
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    }
+  },
+  "817": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample"
+    },
+    "inputs": {
+      "model": [
+        "750",
+        0
+      ],
+      "seed": 7553,
+      "steps": 4,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "positive": [
+        "814",
+        0
+      ],
+      "negative": [
+        "815",
+        0
+      ],
+      "latent_image": [
+        "816",
+        0
+      ]
+    }
+  },
+  "818": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "817",
+        0
+      ],
+      "vae": [
+        "752",
+        0
+      ]
+    }
+  },
+  "849": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "818",
+        0
+      ],
+      "filename_prefix": "outputs/gen/hindenburg-blimp__planks"
+    }
+  },
+  "910": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "911": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "912": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "973": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless tileable texture, top-down photograph of worn medieval flagstones and ashlar blocks with mortar lines and soot, grey weathered stone, flat even lighting, no shadows, no vignette, highly detailed, 4k material",
+      "clip": [
+        "911",
+        0
+      ]
+    }
+  },
+  "974": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "973",
+        0
+      ],
+      "guidance": 3.5
+    }
+  },
+  "975": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "911",
+        0
+      ]
+    }
+  },
+  "976": {
+    "class_type": "EmptySD3LatentImage",
+    "_meta": {
+      "title": "Empty latent"
+    },
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    }
+  },
+  "977": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample"
+    },
+    "inputs": {
+      "model": [
+        "910",
+        0
+      ],
+      "seed": 7666,
+      "steps": 4,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "positive": [
+        "974",
+        0
+      ],
+      "negative": [
+        "975",
+        0
+      ],
+      "latent_image": [
+        "976",
+        0
+      ]
+    }
+  },
+  "978": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "977",
+        0
+      ],
+      "vae": [
+        "912",
+        0
+      ]
+    }
+  },
+  "1009": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "978",
+        0
+      ],
+      "filename_prefix": "outputs/gen/castle-under-siege__stone"
+    }
+  }
+}
