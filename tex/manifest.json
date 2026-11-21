@@ -1,0 +1,148 @@
+{
+  "schema": "pitfighter-tex/1",
+  "files": [
+    {
+      "file": "stages/hell-toilet/basalt.webp",
+      "model": "flux1-schnell-fp8",
+      "licence": "Apache-2.0",
+      "prompt": "seamless tileable texture, top-down photograph of black volcanic basalt slabs with lava-filled cracks between them, glowing molten rock in the fissures, black basalt grey, flat even lighting, no shadows, no vignette, highly detailed, 4k material",
+      "negative": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "seed": 7101,
+      "steps": 4,
+      "workflow": "workflows/stage.json",
+      "post": "roll-half, seam-inpaint denoise 0.6 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
+    },
+    {
+      "file": "stages/hell-toilet/basalt_h.webp",
+      "model": "derived",
+      "licence": "Apache-2.0",
+      "prompt": "seamless tileable texture, top-down photograph of black volcanic basalt slabs with lava-filled cracks between them, glowing molten rock in the fissures, black basalt grey, flat even lighting, no shadows, no vignette, highly detailed, 4k material",
+      "negative": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "seed": 7101,
+      "steps": 4,
+      "workflow": "workflows/stage.json",
+      "post": "height from colour luminance high-pass, blur, 32 levels, lossless webp"
+    },
+    {
+      "file": "stages/hell-toilet/basalt_glow.webp",
+      "model": "derived",
+      "licence": "Apache-2.0",
+      "prompt": "seamless tileable texture, top-down photograph of black volcanic basalt slabs with lava-filled cracks between them, glowing molten rock in the fissures, black basalt grey, flat even lighting, no shadows, no vignette, highly detailed, 4k material",
+      "negative": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "seed": 7101,
+      "steps": 4,
+      "workflow": "workflows/stage.json",
+      "post": "glow from colour warmth, lossless webp"
+    },
+    {
+      "file": "stages/construction-site/dirt.webp",
+      "model": "flux1-schnell-fp8",
+      "licence": "Apache-2.0",
+      "prompt": "seamless tileable texture, top-down photograph of churned muddy dirt with tyre tracks and scattered gravel, wet brown mud, flat even lighting, no shadows, no vignette, highly detailed, 4k material",
+      "negative": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "seed": 7214,
+      "steps": 4,
+      "workflow": "workflows/stage.json",
+      "post": "roll-half, seam-inpaint denoise 0.6 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
+    },
+    {
+      "file": "stages/construction-site/dirt_h.webp",
+      "model": "derived",
+      "licence": "Apache-2.0",
+      "prompt": "seamless tileable texture, top-down photograph of churned muddy dirt with tyre tracks and scattered gravel, wet brown mud, flat even lighting, no shadows, no vignette, highly detailed, 4k material",
+      "negative": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "seed": 7214,
+      "steps": 4,
+      "workflow": "workflows/stage.json",
+      "post": "height from colour luminance high-pass, blur, 32 levels, lossless webp"
+    },
+    {
+      "file": "stages/construction-site/concrete.webp",
+      "model": "flux1-schnell-fp8",
+      "licence": "Apache-2.0",
+      "prompt": "seamless tileable texture, top-down photograph of stained cracked poured concrete slab with expansion joints, grey concrete, flat even lighting, no shadows, no vignette, highly detailed, 4k material",
+      "negative": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "seed": 7327,
+      "steps": 4,
+      "workflow": "workflows/stage.json",
+      "post": "roll-half, seam-inpaint denoise 0.6 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
+    },
+    {
+      "file": "stages/construction-site/concrete_h.webp",
+      "model": "derived",
+      "licence": "Apache-2.0",
+      "prompt": "seamless tileable texture, top-down photograph of stained cracked poured concrete slab with expansion joints, grey concrete, flat even lighting, no shadows, no vignette, highly detailed, 4k material",
+      "negative": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "seed": 7327,
+      "steps": 4,
+      "workflow": "workflows/stage.json",
+      "post": "height from colour luminance high-pass, blur, 32 levels, lossless webp"
+    },
+    {
+      "file": "stages/collapsing-tower/roof.webp",
+      "model": "flux1-schnell-fp8",
+      "licence": "Apache-2.0",
+      "prompt": "seamless tileable texture, top-down photograph of tar-and-gravel rooftop membrane with patched seams, dark grey tar, flat even lighting, no shadows, no vignette, highly detailed, 4k material",
+      "negative": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "seed": 7440,
+      "steps": 4,
+      "workflow": "workflows/stage.json",
+      "post": "roll-half, seam-inpaint denoise 0.6 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q75"
+    },
+    {
+      "file": "stages/collapsing-tower/roof_h.webp",
+      "model": "derived",
+      "licence": "Apache-2.0",
+      "prompt": "seamless tileable texture, top-down photograph of tar-and-gravel rooftop membrane with patched seams, dark grey tar, flat even lighting, no shadows, no vignette, highly detailed, 4k material",
+      "negative": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "seed": 7440,
+      "steps": 4,
+      "workflow": "workflows/stage.json",
+      "post": "height from colour luminance high-pass, blur, 32 levels, lossless webp"
+    },
+    {
+      "file": "stages/hindenburg-blimp/planks.webp",
+      "model": "flux1-schnell-fp8",
+      "licence": "Apache-2.0",
+      "prompt": "seamless tileable texture, top-down photograph of varnished wooden deck planks running one way, scuffed, brass nail heads, warm brown wood, flat even lighting, no shadows, no vignette, highly detailed, 4k material",
+      "negative": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "seed": 7553,
+      "steps": 4,
+      "workflow": "workflows/stage.json",
+      "post": "roll-half, seam-inpaint denoise 0.6 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q85"
+    },
+    {
+      "file": "stages/hindenburg-blimp/planks_h.webp",
+      "model": "derived",
+      "licence": "Apache-2.0",
+      "prompt": "seamless tileable texture, top-down photograph of varnished wooden deck planks running one way, scuffed, brass nail heads, warm brown wood, flat even lighting, no shadows, no vignette, highly detailed, 4k material",
+      "negative": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "seed": 7553,
+      "steps": 4,
+      "workflow": "workflows/stage.json",
+      "post": "height from colour luminance high-pass, blur, 32 levels, lossless webp"
+    },
+    {
+      "file": "stages/castle-under-siege/stone.webp",
+      "model": "flux1-schnell-fp8",
+      "licence": "Apache-2.0",
+      "prompt": "seamless tileable texture, top-down photograph of worn medieval flagstones and ashlar blocks with mortar lines and soot, grey weathered stone, flat even lighting, no shadows, no vignette, highly detailed, 4k material",
+      "negative": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "seed": 7666,
+      "steps": 4,
+      "workflow": "workflows/stage.json",
+      "post": "roll-half, seam-inpaint denoise 0.6 (workflows/seam.json) over the rolled tile, blend, lanczos, webp q80"
+    },
+    {
+      "file": "stages/castle-under-siege/stone_h.webp",
+      "model": "derived",
+      "licence": "Apache-2.0",
+      "prompt": "seamless tileable texture, top-down photograph of worn medieval flagstones and ashlar blocks with mortar lines and soot, grey weathered stone, flat even lighting, no shadows, no vignette, highly detailed, 4k material",
+      "negative": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "seed": 7666,
+      "steps": 4,
+      "workflow": "workflows/stage.json",
+      "post": "height from colour luminance high-pass, blur, 32 levels, lossless webp"
+    }
+  ]
+}

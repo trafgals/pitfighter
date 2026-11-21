@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pitfighter 1899 - the record crate</title>
+    <meta name="description" content="Every track Pitfighter 1899 has, one after another: the Playbill, the stages, then the nine genres, each from its slowest track to its fastest." />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%230b0e1c' stroke='%2339f3ff' stroke-width='6'/%3E%3Ccircle cx='50' cy='50' r='26' fill='%23161c34' stroke='%23ff3b8d' stroke-width='6'/%3E%3Ccircle cx='50' cy='50' r='6' fill='%23ffba42'/%3E%3C/svg%3E" />
+    <script type="module" crossorigin src="./assets/music-CHUWAtv8.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/audioParams-B7dJxSAE.js">
+    <link rel="stylesheet" crossorigin href="./assets/music-ZO15YdvY.css">
+  </head>
+  <body>
+    <header>
+      <h1>The Record Crate</h1>
+      <p class="lede">
+        Every track <em>Pitfighter 1899</em> has, one song after another: the Playbill, then the
+        stages, then the nine genres, each from its slowest track to its fastest. Levelled the way
+        the game levels its music.
+      </p>
+      <p class="counts" id="counts">the crate is being stacked&hellip;</p>
+    </header>
+
+    <section class="deck">
+      <div class="now">
+        <div class="label">Now playing</div>
+        <h2 id="now-title">&mdash;</h2>
+        <div class="meta" id="now-meta">nothing yet</div>
+        <div class="bar" id="bar" role="slider" aria-label="Seek" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0" aria-valuetext="0:00 of 0:00" tabindex="0">
+          <div class="fill" id="fill"></div>
+        </div>
+        <div class="times"><span id="elapsed">0:00</span><span id="total">0:00</span></div>
+      </div>
+      <div class="controls">
+        <button id="prev" type="button" title="The track before this one">&#9664;&#9664;</button>
+        <button id="play" type="button" class="big">&#9654; Play the crate</button>
+        <button id="next" type="button" title="The next track">&#9654;&#9654;</button>
+        <button id="repeat" type="button" title="Start the crate again when it runs out">Repeat</button>
+        <label class="level">Level <input id="level" type="range" min="0" max="200" value="160" /></label>
+      </div>
+      <div class="search"><input id="search" type="search" placeholder="Search the crate&hellip;  ( / )" /></div>
+      <p class="note" id="note"></p>
+    </section>
+
+    <main id="shelves"></main>
+
+    <footer>
+      <p>
+        The soundtrack is a folder tree: every file in <code>public/music/</code> is a track
+        (<code>src/render/musicLibrary.ts</code>). The audition pile in
+        <code>public/music/candidates/</code> is not in the crate - the game never plays it.
+      </p>
+      <p>Space plays and pauses, the arrow keys step through the crate, and a click on the bar seeks.</p>
+    </footer>
+
+  </body>
+</html>
