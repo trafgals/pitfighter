@@ -1,0 +1,9074 @@
+{
+  "110": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "111": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "112": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "209": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_dale-damnation__skin.png"
+    },
+    "inputs": {
+      "image": "rolled_dale-damnation__skin.png"
+    }
+  },
+  "260": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "311": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "260",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "183": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, plain red devil hide, light pores, faint veins, warm brick red, flat even lighting, no shadows",
+      "clip": [
+        "111",
+        0
+      ]
+    }
+  },
+  "184": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "183",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "185": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "111",
+        0
+      ]
+    }
+  },
+  "186": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "184",
+        0
+      ],
+      "negative": [
+        "185",
+        0
+      ],
+      "vae": [
+        "112",
+        0
+      ],
+      "pixels": [
+        "209",
+        0
+      ],
+      "mask": [
+        "311",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "187": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "110",
+        0
+      ],
+      "seed": 60000,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "186",
+        0
+      ],
+      "negative": [
+        "186",
+        1
+      ],
+      "latent_image": [
+        "186",
+        2
+      ]
+    }
+  },
+  "188": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "187",
+        0
+      ],
+      "vae": [
+        "112",
+        0
+      ]
+    }
+  },
+  "362": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "188",
+        0
+      ],
+      "filename_prefix": "outputs/heal/dale-damnation__skin"
+    }
+  },
+  "423": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "424": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "425": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "522": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_dale-damnation__cloth.png"
+    },
+    "inputs": {
+      "image": "rolled_dale-damnation__cloth.png"
+    }
+  },
+  "573": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "624": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "573",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "496": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, worn satin fabric, soft sheen, slight pilling, dark charcoal grey, flat even lighting, no shadows",
+      "clip": [
+        "424",
+        0
+      ]
+    }
+  },
+  "497": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "496",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "498": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "424",
+        0
+      ]
+    }
+  },
+  "499": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "497",
+        0
+      ],
+      "negative": [
+        "498",
+        0
+      ],
+      "vae": [
+        "425",
+        0
+      ],
+      "pixels": [
+        "522",
+        0
+      ],
+      "mask": [
+        "624",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "500": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "423",
+        0
+      ],
+      "seed": 60001,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "499",
+        0
+      ],
+      "negative": [
+        "499",
+        1
+      ],
+      "latent_image": [
+        "499",
+        2
+      ]
+    }
+  },
+  "501": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "500",
+        0
+      ],
+      "vae": [
+        "425",
+        0
+      ]
+    }
+  },
+  "675": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "501",
+        0
+      ],
+      "filename_prefix": "outputs/heal/dale-damnation__cloth"
+    }
+  },
+  "736": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "737": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "738": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "835": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_brimstone-bruno__skin.png"
+    },
+    "inputs": {
+      "image": "rolled_brimstone-bruno__skin.png"
+    }
+  },
+  "886": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "937": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "886",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "809": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, thick cracked hide like cooled lava crust, glowing seams very faint, dark rust brown, flat even lighting, no shadows",
+      "clip": [
+        "737",
+        0
+      ]
+    }
+  },
+  "810": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "809",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "811": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "737",
+        0
+      ]
+    }
+  },
+  "812": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "810",
+        0
+      ],
+      "negative": [
+        "811",
+        0
+      ],
+      "vae": [
+        "738",
+        0
+      ],
+      "pixels": [
+        "835",
+        0
+      ],
+      "mask": [
+        "937",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "813": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "736",
+        0
+      ],
+      "seed": 60002,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "812",
+        0
+      ],
+      "negative": [
+        "812",
+        1
+      ],
+      "latent_image": [
+        "812",
+        2
+      ]
+    }
+  },
+  "814": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "813",
+        0
+      ],
+      "vae": [
+        "738",
+        0
+      ]
+    }
+  },
+  "988": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "814",
+        0
+      ],
+      "filename_prefix": "outputs/heal/brimstone-bruno__skin"
+    }
+  },
+  "1049": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "1050": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "1051": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "1148": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_brimstone-bruno__cloth.png"
+    },
+    "inputs": {
+      "image": "rolled_brimstone-bruno__cloth.png"
+    }
+  },
+  "1199": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "1250": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "1199",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "1122": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, heavy black leather with thick stitched straps and a metal buckle, black, flat even lighting, no shadows",
+      "clip": [
+        "1050",
+        0
+      ]
+    }
+  },
+  "1123": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "1122",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "1124": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "1050",
+        0
+      ]
+    }
+  },
+  "1125": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "1123",
+        0
+      ],
+      "negative": [
+        "1124",
+        0
+      ],
+      "vae": [
+        "1051",
+        0
+      ],
+      "pixels": [
+        "1148",
+        0
+      ],
+      "mask": [
+        "1250",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "1126": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "1049",
+        0
+      ],
+      "seed": 60003,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "1125",
+        0
+      ],
+      "negative": [
+        "1125",
+        1
+      ],
+      "latent_image": [
+        "1125",
+        2
+      ]
+    }
+  },
+  "1127": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "1126",
+        0
+      ],
+      "vae": [
+        "1051",
+        0
+      ]
+    }
+  },
+  "1301": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "1127",
+        0
+      ],
+      "filename_prefix": "outputs/heal/brimstone-bruno__cloth"
+    }
+  },
+  "1362": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "1363": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "1364": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "1461": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_gutter-gus__skin.png"
+    },
+    "inputs": {
+      "image": "rolled_gutter-gus__skin.png"
+    }
+  },
+  "1512": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "1563": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "1512",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "1435": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, grimy tanned leather skin with soot smudges, old scrapes, sooty tan brown, flat even lighting, no shadows",
+      "clip": [
+        "1363",
+        0
+      ]
+    }
+  },
+  "1436": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "1435",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "1437": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "1363",
+        0
+      ]
+    }
+  },
+  "1438": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "1436",
+        0
+      ],
+      "negative": [
+        "1437",
+        0
+      ],
+      "vae": [
+        "1364",
+        0
+      ],
+      "pixels": [
+        "1461",
+        0
+      ],
+      "mask": [
+        "1563",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "1439": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "1362",
+        0
+      ],
+      "seed": 60004,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "1438",
+        0
+      ],
+      "negative": [
+        "1438",
+        1
+      ],
+      "latent_image": [
+        "1438",
+        2
+      ]
+    }
+  },
+  "1440": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "1439",
+        0
+      ],
+      "vae": [
+        "1364",
+        0
+      ]
+    }
+  },
+  "1614": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "1440",
+        0
+      ],
+      "filename_prefix": "outputs/heal/gutter-gus__skin"
+    }
+  },
+  "1675": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "1676": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "1677": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "1774": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_gutter-gus__cloth.png"
+    },
+    "inputs": {
+      "image": "rolled_gutter-gus__cloth.png"
+    }
+  },
+  "1825": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "1876": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "1825",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "1748": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, faded grey denim with frayed edges and worn seams, faded grey blue, flat even lighting, no shadows",
+      "clip": [
+        "1676",
+        0
+      ]
+    }
+  },
+  "1749": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "1748",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "1750": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "1676",
+        0
+      ]
+    }
+  },
+  "1751": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "1749",
+        0
+      ],
+      "negative": [
+        "1750",
+        0
+      ],
+      "vae": [
+        "1677",
+        0
+      ],
+      "pixels": [
+        "1774",
+        0
+      ],
+      "mask": [
+        "1876",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "1752": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "1675",
+        0
+      ],
+      "seed": 60005,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "1751",
+        0
+      ],
+      "negative": [
+        "1751",
+        1
+      ],
+      "latent_image": [
+        "1751",
+        2
+      ]
+    }
+  },
+  "1753": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "1752",
+        0
+      ],
+      "vae": [
+        "1677",
+        0
+      ]
+    }
+  },
+  "1927": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "1753",
+        0
+      ],
+      "filename_prefix": "outputs/heal/gutter-gus__cloth"
+    }
+  },
+  "1988": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "1989": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "1990": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "2087": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_sensei-smoulder__skin.png"
+    },
+    "inputs": {
+      "image": "rolled_sensei-smoulder__skin.png"
+    }
+  },
+  "2138": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "2189": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "2138",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "2061": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, pale ash-white skin with fine charcoal scorch marks, pale ash white, flat even lighting, no shadows",
+      "clip": [
+        "1989",
+        0
+      ]
+    }
+  },
+  "2062": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "2061",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "2063": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "1989",
+        0
+      ]
+    }
+  },
+  "2064": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "2062",
+        0
+      ],
+      "negative": [
+        "2063",
+        0
+      ],
+      "vae": [
+        "1990",
+        0
+      ],
+      "pixels": [
+        "2087",
+        0
+      ],
+      "mask": [
+        "2189",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "2065": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "1988",
+        0
+      ],
+      "seed": 60006,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "2064",
+        0
+      ],
+      "negative": [
+        "2064",
+        1
+      ],
+      "latent_image": [
+        "2064",
+        2
+      ]
+    }
+  },
+  "2066": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "2065",
+        0
+      ],
+      "vae": [
+        "1990",
+        0
+      ]
+    }
+  },
+  "2240": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "2066",
+        0
+      ],
+      "filename_prefix": "outputs/heal/sensei-smoulder__skin"
+    }
+  },
+  "2301": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "2302": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "2303": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "2400": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_sensei-smoulder__cloth.png"
+    },
+    "inputs": {
+      "image": "rolled_sensei-smoulder__cloth.png"
+    }
+  },
+  "2451": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "2502": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "2451",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "2374": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, heavy black cotton gi canvas, tight weave, black, flat even lighting, no shadows",
+      "clip": [
+        "2302",
+        0
+      ]
+    }
+  },
+  "2375": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "2374",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "2376": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "2302",
+        0
+      ]
+    }
+  },
+  "2377": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "2375",
+        0
+      ],
+      "negative": [
+        "2376",
+        0
+      ],
+      "vae": [
+        "2303",
+        0
+      ],
+      "pixels": [
+        "2400",
+        0
+      ],
+      "mask": [
+        "2502",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "2378": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "2301",
+        0
+      ],
+      "seed": 60007,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "2377",
+        0
+      ],
+      "negative": [
+        "2377",
+        1
+      ],
+      "latent_image": [
+        "2377",
+        2
+      ]
+    }
+  },
+  "2379": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "2378",
+        0
+      ],
+      "vae": [
+        "2303",
+        0
+      ]
+    }
+  },
+  "2553": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "2379",
+        0
+      ],
+      "filename_prefix": "outputs/heal/sensei-smoulder__cloth"
+    }
+  },
+  "2614": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "2615": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "2616": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "2713": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_big-lou-cipher__skin.png"
+    },
+    "inputs": {
+      "image": "rolled_big-lou-cipher__skin.png"
+    }
+  },
+  "2764": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "2815": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "2764",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "2687": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, purple oily stretched skin with gold-foil tattoo flecks, deep violet purple, flat even lighting, no shadows",
+      "clip": [
+        "2615",
+        0
+      ]
+    }
+  },
+  "2688": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "2687",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "2689": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "2615",
+        0
+      ]
+    }
+  },
+  "2690": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "2688",
+        0
+      ],
+      "negative": [
+        "2689",
+        0
+      ],
+      "vae": [
+        "2616",
+        0
+      ],
+      "pixels": [
+        "2713",
+        0
+      ],
+      "mask": [
+        "2815",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "2691": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "2614",
+        0
+      ],
+      "seed": 60008,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "2690",
+        0
+      ],
+      "negative": [
+        "2690",
+        1
+      ],
+      "latent_image": [
+        "2690",
+        2
+      ]
+    }
+  },
+  "2692": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "2691",
+        0
+      ],
+      "vae": [
+        "2616",
+        0
+      ]
+    }
+  },
+  "2866": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "2692",
+        0
+      ],
+      "filename_prefix": "outputs/heal/big-lou-cipher__skin"
+    }
+  },
+  "2927": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "2928": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "2929": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "3026": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_big-lou-cipher__cloth.png"
+    },
+    "inputs": {
+      "image": "rolled_big-lou-cipher__cloth.png"
+    }
+  },
+  "3077": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "3128": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "3077",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "3000": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, quilted gold satin with stitched panels, antique gold, flat even lighting, no shadows",
+      "clip": [
+        "2928",
+        0
+      ]
+    }
+  },
+  "3001": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "3000",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "3002": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "2928",
+        0
+      ]
+    }
+  },
+  "3003": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "3001",
+        0
+      ],
+      "negative": [
+        "3002",
+        0
+      ],
+      "vae": [
+        "2929",
+        0
+      ],
+      "pixels": [
+        "3026",
+        0
+      ],
+      "mask": [
+        "3128",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "3004": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "2927",
+        0
+      ],
+      "seed": 60009,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "3003",
+        0
+      ],
+      "negative": [
+        "3003",
+        1
+      ],
+      "latent_image": [
+        "3003",
+        2
+      ]
+    }
+  },
+  "3005": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "3004",
+        0
+      ],
+      "vae": [
+        "2929",
+        0
+      ]
+    }
+  },
+  "3179": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "3005",
+        0
+      ],
+      "filename_prefix": "outputs/heal/big-lou-cipher__cloth"
+    }
+  },
+  "3240": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "3241": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "3242": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "3339": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_eight-limbed-ash__skin.png"
+    },
+    "inputs": {
+      "image": "rolled_eight-limbed-ash__skin.png"
+    }
+  },
+  "3390": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "3441": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "3390",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "3313": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, orange hide dusted with ash, knotted scar tissue, burnt orange, flat even lighting, no shadows",
+      "clip": [
+        "3241",
+        0
+      ]
+    }
+  },
+  "3314": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "3313",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "3315": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "3241",
+        0
+      ]
+    }
+  },
+  "3316": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "3314",
+        0
+      ],
+      "negative": [
+        "3315",
+        0
+      ],
+      "vae": [
+        "3242",
+        0
+      ],
+      "pixels": [
+        "3339",
+        0
+      ],
+      "mask": [
+        "3441",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "3317": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "3240",
+        0
+      ],
+      "seed": 60010,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "3316",
+        0
+      ],
+      "negative": [
+        "3316",
+        1
+      ],
+      "latent_image": [
+        "3316",
+        2
+      ]
+    }
+  },
+  "3318": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "3317",
+        0
+      ],
+      "vae": [
+        "3242",
+        0
+      ]
+    }
+  },
+  "3492": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "3318",
+        0
+      ],
+      "filename_prefix": "outputs/heal/eight-limbed-ash__skin"
+    }
+  },
+  "3553": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "3554": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "3555": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "3652": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_eight-limbed-ash__cloth.png"
+    },
+    "inputs": {
+      "image": "rolled_eight-limbed-ash__cloth.png"
+    }
+  },
+  "3703": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "3754": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "3703",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "3626": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, matte black wrapped cloth, folded overlapping bands, charcoal black, flat even lighting, no shadows",
+      "clip": [
+        "3554",
+        0
+      ]
+    }
+  },
+  "3627": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "3626",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "3628": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "3554",
+        0
+      ]
+    }
+  },
+  "3629": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "3627",
+        0
+      ],
+      "negative": [
+        "3628",
+        0
+      ],
+      "vae": [
+        "3555",
+        0
+      ],
+      "pixels": [
+        "3652",
+        0
+      ],
+      "mask": [
+        "3754",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "3630": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "3553",
+        0
+      ],
+      "seed": 60011,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "3629",
+        0
+      ],
+      "negative": [
+        "3629",
+        1
+      ],
+      "latent_image": [
+        "3629",
+        2
+      ]
+    }
+  },
+  "3631": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "3630",
+        0
+      ],
+      "vae": [
+        "3555",
+        0
+      ]
+    }
+  },
+  "3805": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "3631",
+        0
+      ],
+      "filename_prefix": "outputs/heal/eight-limbed-ash__cloth"
+    }
+  },
+  "3866": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "3867": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "3868": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "3965": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_knuckles-inferno__skin.png"
+    },
+    "inputs": {
+      "image": "rolled_knuckles-inferno__skin.png"
+    }
+  },
+  "4016": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "4067": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "4016",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "3939": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, cobalt-blue smooth skin with bruising mottles, cobalt blue, flat even lighting, no shadows",
+      "clip": [
+        "3867",
+        0
+      ]
+    }
+  },
+  "3940": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "3939",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "3941": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "3867",
+        0
+      ]
+    }
+  },
+  "3942": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "3940",
+        0
+      ],
+      "negative": [
+        "3941",
+        0
+      ],
+      "vae": [
+        "3868",
+        0
+      ],
+      "pixels": [
+        "3965",
+        0
+      ],
+      "mask": [
+        "4067",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "3943": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "3866",
+        0
+      ],
+      "seed": 60012,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "3942",
+        0
+      ],
+      "negative": [
+        "3942",
+        1
+      ],
+      "latent_image": [
+        "3942",
+        2
+      ]
+    }
+  },
+  "3944": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "3943",
+        0
+      ],
+      "vae": [
+        "3868",
+        0
+      ]
+    }
+  },
+  "4118": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "3944",
+        0
+      ],
+      "filename_prefix": "outputs/heal/knuckles-inferno__skin"
+    }
+  },
+  "4179": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "4180": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "4181": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "4278": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_knuckles-inferno__cloth.png"
+    },
+    "inputs": {
+      "image": "rolled_knuckles-inferno__cloth.png"
+    }
+  },
+  "4329": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "4380": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "4329",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "4252": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, pale silver grey silky satin, fine weave, pale silver grey, flat even lighting, no shadows",
+      "clip": [
+        "4180",
+        0
+      ]
+    }
+  },
+  "4253": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "4252",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "4254": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "4180",
+        0
+      ]
+    }
+  },
+  "4255": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "4253",
+        0
+      ],
+      "negative": [
+        "4254",
+        0
+      ],
+      "vae": [
+        "4181",
+        0
+      ],
+      "pixels": [
+        "4278",
+        0
+      ],
+      "mask": [
+        "4380",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "4256": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "4179",
+        0
+      ],
+      "seed": 60013,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "4255",
+        0
+      ],
+      "negative": [
+        "4255",
+        1
+      ],
+      "latent_image": [
+        "4255",
+        2
+      ]
+    }
+  },
+  "4257": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "4256",
+        0
+      ],
+      "vae": [
+        "4181",
+        0
+      ]
+    }
+  },
+  "4431": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "4257",
+        0
+      ],
+      "filename_prefix": "outputs/heal/knuckles-inferno__cloth"
+    }
+  },
+  "4492": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "4493": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "4494": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "4591": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_rage-reaper__skin.png"
+    },
+    "inputs": {
+      "image": "rolled_rage-reaper__skin.png"
+    }
+  },
+  "4642": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "4693": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "4642",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "4565": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, deep red raw ridged skin like exposed muscle fibre, deep blood red, flat even lighting, no shadows",
+      "clip": [
+        "4493",
+        0
+      ]
+    }
+  },
+  "4566": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "4565",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "4567": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "4493",
+        0
+      ]
+    }
+  },
+  "4568": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "4566",
+        0
+      ],
+      "negative": [
+        "4567",
+        0
+      ],
+      "vae": [
+        "4494",
+        0
+      ],
+      "pixels": [
+        "4591",
+        0
+      ],
+      "mask": [
+        "4693",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "4569": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "4492",
+        0
+      ],
+      "seed": 60014,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "4568",
+        0
+      ],
+      "negative": [
+        "4568",
+        1
+      ],
+      "latent_image": [
+        "4568",
+        2
+      ]
+    }
+  },
+  "4570": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "4569",
+        0
+      ],
+      "vae": [
+        "4494",
+        0
+      ]
+    }
+  },
+  "4744": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "4570",
+        0
+      ],
+      "filename_prefix": "outputs/heal/rage-reaper__skin"
+    }
+  },
+  "4805": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "4806": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "4807": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "4904": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_rage-reaper__cloth.png"
+    },
+    "inputs": {
+      "image": "rolled_rage-reaper__cloth.png"
+    }
+  },
+  "4955": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "5006": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "4955",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "4878": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, matte black leather strapping, creased, black, flat even lighting, no shadows",
+      "clip": [
+        "4806",
+        0
+      ]
+    }
+  },
+  "4879": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "4878",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "4880": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "4806",
+        0
+      ]
+    }
+  },
+  "4881": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "4879",
+        0
+      ],
+      "negative": [
+        "4880",
+        0
+      ],
+      "vae": [
+        "4807",
+        0
+      ],
+      "pixels": [
+        "4904",
+        0
+      ],
+      "mask": [
+        "5006",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "4882": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "4805",
+        0
+      ],
+      "seed": 60015,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "4881",
+        0
+      ],
+      "negative": [
+        "4881",
+        1
+      ],
+      "latent_image": [
+        "4881",
+        2
+      ]
+    }
+  },
+  "4883": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "4882",
+        0
+      ],
+      "vae": [
+        "4807",
+        0
+      ]
+    }
+  },
+  "5057": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "4883",
+        0
+      ],
+      "filename_prefix": "outputs/heal/rage-reaper__cloth"
+    }
+  },
+  "5118": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "5119": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "5120": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "5217": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_quickfire-imp__skin.png"
+    },
+    "inputs": {
+      "image": "rolled_quickfire-imp__skin.png"
+    }
+  },
+  "5268": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "5319": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "5268",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "5191": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, bright pinkish-red fine lizard scales, bright pinkish red, flat even lighting, no shadows",
+      "clip": [
+        "5119",
+        0
+      ]
+    }
+  },
+  "5192": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "5191",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "5193": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "5119",
+        0
+      ]
+    }
+  },
+  "5194": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "5192",
+        0
+      ],
+      "negative": [
+        "5193",
+        0
+      ],
+      "vae": [
+        "5120",
+        0
+      ],
+      "pixels": [
+        "5217",
+        0
+      ],
+      "mask": [
+        "5319",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "5195": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "5118",
+        0
+      ],
+      "seed": 60016,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "5194",
+        0
+      ],
+      "negative": [
+        "5194",
+        1
+      ],
+      "latent_image": [
+        "5194",
+        2
+      ]
+    }
+  },
+  "5196": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "5195",
+        0
+      ],
+      "vae": [
+        "5120",
+        0
+      ]
+    }
+  },
+  "5370": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "5196",
+        0
+      ],
+      "filename_prefix": "outputs/heal/quickfire-imp__skin"
+    }
+  },
+  "5431": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "5432": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "5433": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "5530": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_quickfire-imp__cloth.png"
+    },
+    "inputs": {
+      "image": "rolled_quickfire-imp__cloth.png"
+    }
+  },
+  "5581": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "5632": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "5581",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "5504": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, dark maroon satin with thin straps, dark maroon, flat even lighting, no shadows",
+      "clip": [
+        "5432",
+        0
+      ]
+    }
+  },
+  "5505": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "5504",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "5506": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "5432",
+        0
+      ]
+    }
+  },
+  "5507": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "5505",
+        0
+      ],
+      "negative": [
+        "5506",
+        0
+      ],
+      "vae": [
+        "5433",
+        0
+      ],
+      "pixels": [
+        "5530",
+        0
+      ],
+      "mask": [
+        "5632",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "5508": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "5431",
+        0
+      ],
+      "seed": 60017,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "5507",
+        0
+      ],
+      "negative": [
+        "5507",
+        1
+      ],
+      "latent_image": [
+        "5507",
+        2
+      ]
+    }
+  },
+  "5509": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "5508",
+        0
+      ],
+      "vae": [
+        "5433",
+        0
+      ]
+    }
+  },
+  "5683": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "5509",
+        0
+      ],
+      "filename_prefix": "outputs/heal/quickfire-imp__cloth"
+    }
+  },
+  "5744": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "5745": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "5746": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "5843": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_crimson-crane__skin.png"
+    },
+    "inputs": {
+      "image": "rolled_crimson-crane__skin.png"
+    }
+  },
+  "5894": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "5945": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "5894",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "5817": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, red skin with gold painted scrollwork fading into it, deep crimson red, flat even lighting, no shadows",
+      "clip": [
+        "5745",
+        0
+      ]
+    }
+  },
+  "5818": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "5817",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "5819": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "5745",
+        0
+      ]
+    }
+  },
+  "5820": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "5818",
+        0
+      ],
+      "negative": [
+        "5819",
+        0
+      ],
+      "vae": [
+        "5746",
+        0
+      ],
+      "pixels": [
+        "5843",
+        0
+      ],
+      "mask": [
+        "5945",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "5821": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "5744",
+        0
+      ],
+      "seed": 60018,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "5820",
+        0
+      ],
+      "negative": [
+        "5820",
+        1
+      ],
+      "latent_image": [
+        "5820",
+        2
+      ]
+    }
+  },
+  "5822": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "5821",
+        0
+      ],
+      "vae": [
+        "5746",
+        0
+      ]
+    }
+  },
+  "5996": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "5822",
+        0
+      ],
+      "filename_prefix": "outputs/heal/crimson-crane__skin"
+    }
+  },
+  "6057": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "6058": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "6059": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "6156": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_crimson-crane__cloth.png"
+    },
+    "inputs": {
+      "image": "rolled_crimson-crane__cloth.png"
+    }
+  },
+  "6207": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "6258": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "6207",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "6130": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, pale gold silk brocade, woven pattern, pale yellow gold, flat even lighting, no shadows",
+      "clip": [
+        "6058",
+        0
+      ]
+    }
+  },
+  "6131": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "6130",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "6132": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "6058",
+        0
+      ]
+    }
+  },
+  "6133": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "6131",
+        0
+      ],
+      "negative": [
+        "6132",
+        0
+      ],
+      "vae": [
+        "6059",
+        0
+      ],
+      "pixels": [
+        "6156",
+        0
+      ],
+      "mask": [
+        "6258",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "6134": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "6057",
+        0
+      ],
+      "seed": 60019,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "6133",
+        0
+      ],
+      "negative": [
+        "6133",
+        1
+      ],
+      "latent_image": [
+        "6133",
+        2
+      ]
+    }
+  },
+  "6135": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "6134",
+        0
+      ],
+      "vae": [
+        "6059",
+        0
+      ]
+    }
+  },
+  "6309": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "6135",
+        0
+      ],
+      "filename_prefix": "outputs/heal/crimson-crane__cloth"
+    }
+  },
+  "6370": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "6371": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "6372": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "6469": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_hellmountain__skin.png"
+    },
+    "inputs": {
+      "image": "rolled_hellmountain__skin.png"
+    }
+  },
+  "6520": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "6571": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "6520",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "6443": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, basalt rock plates and moss-dark crevices, like a cliff face, grey brown stone, flat even lighting, no shadows",
+      "clip": [
+        "6371",
+        0
+      ]
+    }
+  },
+  "6444": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "6443",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "6445": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "6371",
+        0
+      ]
+    }
+  },
+  "6446": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "6444",
+        0
+      ],
+      "negative": [
+        "6445",
+        0
+      ],
+      "vae": [
+        "6372",
+        0
+      ],
+      "pixels": [
+        "6469",
+        0
+      ],
+      "mask": [
+        "6571",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "6447": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "6370",
+        0
+      ],
+      "seed": 60020,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "6446",
+        0
+      ],
+      "negative": [
+        "6446",
+        1
+      ],
+      "latent_image": [
+        "6446",
+        2
+      ]
+    }
+  },
+  "6448": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "6447",
+        0
+      ],
+      "vae": [
+        "6372",
+        0
+      ]
+    }
+  },
+  "6622": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "6448",
+        0
+      ],
+      "filename_prefix": "outputs/heal/hellmountain__skin"
+    }
+  },
+  "6683": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "6684": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "6685": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "6782": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_hellmountain__cloth.png"
+    },
+    "inputs": {
+      "image": "rolled_hellmountain__cloth.png"
+    }
+  },
+  "6833": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "6884": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "6833",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "6756": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, rough dark red sackcloth, coarse jute weave, dark rust red, flat even lighting, no shadows",
+      "clip": [
+        "6684",
+        0
+      ]
+    }
+  },
+  "6757": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "6756",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "6758": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "6684",
+        0
+      ]
+    }
+  },
+  "6759": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "6757",
+        0
+      ],
+      "negative": [
+        "6758",
+        0
+      ],
+      "vae": [
+        "6685",
+        0
+      ],
+      "pixels": [
+        "6782",
+        0
+      ],
+      "mask": [
+        "6884",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "6760": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "6683",
+        0
+      ],
+      "seed": 60021,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "6759",
+        0
+      ],
+      "negative": [
+        "6759",
+        1
+      ],
+      "latent_image": [
+        "6759",
+        2
+      ]
+    }
+  },
+  "6761": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "6760",
+        0
+      ],
+      "vae": [
+        "6685",
+        0
+      ]
+    }
+  },
+  "6935": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "6761",
+        0
+      ],
+      "filename_prefix": "outputs/heal/hellmountain__cloth"
+    }
+  },
+  "6996": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "6997": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "6998": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "7095": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_choke-chimera__skin.png"
+    },
+    "inputs": {
+      "image": "rolled_choke-chimera__skin.png"
+    }
+  },
+  "7146": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "7197": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "7146",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "7069": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, green reptilian scales mixed with patches of coarse fur, mossy green, flat even lighting, no shadows",
+      "clip": [
+        "6997",
+        0
+      ]
+    }
+  },
+  "7070": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "7069",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "7071": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "6997",
+        0
+      ]
+    }
+  },
+  "7072": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "7070",
+        0
+      ],
+      "negative": [
+        "7071",
+        0
+      ],
+      "vae": [
+        "6998",
+        0
+      ],
+      "pixels": [
+        "7095",
+        0
+      ],
+      "mask": [
+        "7197",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "7073": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "6996",
+        0
+      ],
+      "seed": 60022,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "7072",
+        0
+      ],
+      "negative": [
+        "7072",
+        1
+      ],
+      "latent_image": [
+        "7072",
+        2
+      ]
+    }
+  },
+  "7074": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "7073",
+        0
+      ],
+      "vae": [
+        "6998",
+        0
+      ]
+    }
+  },
+  "7248": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "7074",
+        0
+      ],
+      "filename_prefix": "outputs/heal/choke-chimera__skin"
+    }
+  },
+  "7309": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "7310": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "7311": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "7408": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_choke-chimera__cloth.png"
+    },
+    "inputs": {
+      "image": "rolled_choke-chimera__cloth.png"
+    }
+  },
+  "7459": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "7510": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "7459",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "7382": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, black oiled leather with straps and a brass buckle, black, flat even lighting, no shadows",
+      "clip": [
+        "7310",
+        0
+      ]
+    }
+  },
+  "7383": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "7382",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "7384": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "7310",
+        0
+      ]
+    }
+  },
+  "7385": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "7383",
+        0
+      ],
+      "negative": [
+        "7384",
+        0
+      ],
+      "vae": [
+        "7311",
+        0
+      ],
+      "pixels": [
+        "7408",
+        0
+      ],
+      "mask": [
+        "7510",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "7386": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "7309",
+        0
+      ],
+      "seed": 60023,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "7385",
+        0
+      ],
+      "negative": [
+        "7385",
+        1
+      ],
+      "latent_image": [
+        "7385",
+        2
+      ]
+    }
+  },
+  "7387": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "7386",
+        0
+      ],
+      "vae": [
+        "7311",
+        0
+      ]
+    }
+  },
+  "7561": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "7387",
+        0
+      ],
+      "filename_prefix": "outputs/heal/choke-chimera__cloth"
+    }
+  },
+  "7622": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "7623": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "7624": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "7721": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_sergeant-sulphur__skin.png"
+    },
+    "inputs": {
+      "image": "rolled_sergeant-sulphur__skin.png"
+    }
+  },
+  "7772": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "7823": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "7772",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "7695": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, olive skin with yellow sulphur crust in the creases, olive green, flat even lighting, no shadows",
+      "clip": [
+        "7623",
+        0
+      ]
+    }
+  },
+  "7696": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "7695",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "7697": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "7623",
+        0
+      ]
+    }
+  },
+  "7698": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "7696",
+        0
+      ],
+      "negative": [
+        "7697",
+        0
+      ],
+      "vae": [
+        "7624",
+        0
+      ],
+      "pixels": [
+        "7721",
+        0
+      ],
+      "mask": [
+        "7823",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "7699": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "7622",
+        0
+      ],
+      "seed": 60024,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "7698",
+        0
+      ],
+      "negative": [
+        "7698",
+        1
+      ],
+      "latent_image": [
+        "7698",
+        2
+      ]
+    }
+  },
+  "7700": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "7699",
+        0
+      ],
+      "vae": [
+        "7624",
+        0
+      ]
+    }
+  },
+  "7874": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "7700",
+        0
+      ],
+      "filename_prefix": "outputs/heal/sergeant-sulphur__skin"
+    }
+  },
+  "7935": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "7936": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "7937": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "8034": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_sergeant-sulphur__cloth.png"
+    },
+    "inputs": {
+      "image": "rolled_sergeant-sulphur__cloth.png"
+    }
+  },
+  "8085": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "8136": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "8085",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "8008": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, stiff dark olive drill cotton, pressed, dark olive, flat even lighting, no shadows",
+      "clip": [
+        "7936",
+        0
+      ]
+    }
+  },
+  "8009": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "8008",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "8010": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "7936",
+        0
+      ]
+    }
+  },
+  "8011": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "8009",
+        0
+      ],
+      "negative": [
+        "8010",
+        0
+      ],
+      "vae": [
+        "7937",
+        0
+      ],
+      "pixels": [
+        "8034",
+        0
+      ],
+      "mask": [
+        "8136",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "8012": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "7935",
+        0
+      ],
+      "seed": 60025,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "8011",
+        0
+      ],
+      "negative": [
+        "8011",
+        1
+      ],
+      "latent_image": [
+        "8011",
+        2
+      ]
+    }
+  },
+  "8013": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "8012",
+        0
+      ],
+      "vae": [
+        "7937",
+        0
+      ]
+    }
+  },
+  "8187": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "8013",
+        0
+      ],
+      "filename_prefix": "outputs/heal/sergeant-sulphur__cloth"
+    }
+  },
+  "8248": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "8249": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "8250": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "8347": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_cinder-ginga__skin.png"
+    },
+    "inputs": {
+      "image": "rolled_cinder-ginga__skin.png"
+    }
+  },
+  "8398": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "8449": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "8398",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "8321": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, warm amber skin with glowing ember speckles, warm amber tan, flat even lighting, no shadows",
+      "clip": [
+        "8249",
+        0
+      ]
+    }
+  },
+  "8322": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "8321",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "8323": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "8249",
+        0
+      ]
+    }
+  },
+  "8324": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "8322",
+        0
+      ],
+      "negative": [
+        "8323",
+        0
+      ],
+      "vae": [
+        "8250",
+        0
+      ],
+      "pixels": [
+        "8347",
+        0
+      ],
+      "mask": [
+        "8449",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "8325": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "8248",
+        0
+      ],
+      "seed": 60026,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "8324",
+        0
+      ],
+      "negative": [
+        "8324",
+        1
+      ],
+      "latent_image": [
+        "8324",
+        2
+      ]
+    }
+  },
+  "8326": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "8325",
+        0
+      ],
+      "vae": [
+        "8250",
+        0
+      ]
+    }
+  },
+  "8500": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "8326",
+        0
+      ],
+      "filename_prefix": "outputs/heal/cinder-ginga__skin"
+    }
+  },
+  "8561": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "8562": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "8563": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "8660": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_cinder-ginga__cloth.png"
+    },
+    "inputs": {
+      "image": "rolled_cinder-ginga__cloth.png"
+    }
+  },
+  "8711": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "8762": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "8711",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "8634": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, off white cotton cord and light canvas, off white, flat even lighting, no shadows",
+      "clip": [
+        "8562",
+        0
+      ]
+    }
+  },
+  "8635": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "8634",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "8636": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "8562",
+        0
+      ]
+    }
+  },
+  "8637": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "8635",
+        0
+      ],
+      "negative": [
+        "8636",
+        0
+      ],
+      "vae": [
+        "8563",
+        0
+      ],
+      "pixels": [
+        "8660",
+        0
+      ],
+      "mask": [
+        "8762",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "8638": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "8561",
+        0
+      ],
+      "seed": 60027,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "8637",
+        0
+      ],
+      "negative": [
+        "8637",
+        1
+      ],
+      "latent_image": [
+        "8637",
+        2
+      ]
+    }
+  },
+  "8639": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "8638",
+        0
+      ],
+      "vae": [
+        "8563",
+        0
+      ]
+    }
+  },
+  "8813": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "8639",
+        0
+      ],
+      "filename_prefix": "outputs/heal/cinder-ginga__cloth"
+    }
+  },
+  "8874": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "8875": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "8876": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "8973": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_hellkick-hana__skin.png"
+    },
+    "inputs": {
+      "image": "rolled_hellkick-hana__skin.png"
+    }
+  },
+  "9024": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "9075": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "9024",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "8947": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, porcelain-white skin with thin red crack lines like repaired ceramic, porcelain white, flat even lighting, no shadows",
+      "clip": [
+        "8875",
+        0
+      ]
+    }
+  },
+  "8948": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "8947",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "8949": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "8875",
+        0
+      ]
+    }
+  },
+  "8950": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "8948",
+        0
+      ],
+      "negative": [
+        "8949",
+        0
+      ],
+      "vae": [
+        "8876",
+        0
+      ],
+      "pixels": [
+        "8973",
+        0
+      ],
+      "mask": [
+        "9075",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "8951": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "8874",
+        0
+      ],
+      "seed": 60028,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "8950",
+        0
+      ],
+      "negative": [
+        "8950",
+        1
+      ],
+      "latent_image": [
+        "8950",
+        2
+      ]
+    }
+  },
+  "8952": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "8951",
+        0
+      ],
+      "vae": [
+        "8876",
+        0
+      ]
+    }
+  },
+  "9126": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "8952",
+        0
+      ],
+      "filename_prefix": "outputs/heal/hellkick-hana__skin"
+    }
+  },
+  "9187": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "9188": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "9189": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "9286": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_hellkick-hana__cloth.png"
+    },
+    "inputs": {
+      "image": "rolled_hellkick-hana__cloth.png"
+    }
+  },
+  "9337": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "9388": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "9337",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "9260": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, white cotton dobok weave with a black trim edge, white, flat even lighting, no shadows",
+      "clip": [
+        "9188",
+        0
+      ]
+    }
+  },
+  "9261": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "9260",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "9262": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "9188",
+        0
+      ]
+    }
+  },
+  "9263": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "9261",
+        0
+      ],
+      "negative": [
+        "9262",
+        0
+      ],
+      "vae": [
+        "9189",
+        0
+      ],
+      "pixels": [
+        "9286",
+        0
+      ],
+      "mask": [
+        "9388",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "9264": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "9187",
+        0
+      ],
+      "seed": 60029,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "9263",
+        0
+      ],
+      "negative": [
+        "9263",
+        1
+      ],
+      "latent_image": [
+        "9263",
+        2
+      ]
+    }
+  },
+  "9265": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "9264",
+        0
+      ],
+      "vae": [
+        "9189",
+        0
+      ]
+    }
+  },
+  "9439": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "9265",
+        0
+      ],
+      "filename_prefix": "outputs/heal/hellkick-hana__cloth"
+    }
+  },
+  "9500": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "9501": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "9502": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "9599": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_ronin-of-gehenna__skin.png"
+    },
+    "inputs": {
+      "image": "rolled_ronin-of-gehenna__skin.png"
+    }
+  },
+  "9650": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "9701": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "9650",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "9573": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, slate-grey skin like lacquered armour plates, chipped at the edges, slate grey, flat even lighting, no shadows",
+      "clip": [
+        "9501",
+        0
+      ]
+    }
+  },
+  "9574": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "9573",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "9575": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "9501",
+        0
+      ]
+    }
+  },
+  "9576": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "9574",
+        0
+      ],
+      "negative": [
+        "9575",
+        0
+      ],
+      "vae": [
+        "9502",
+        0
+      ],
+      "pixels": [
+        "9599",
+        0
+      ],
+      "mask": [
+        "9701",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "9577": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "9500",
+        0
+      ],
+      "seed": 60030,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "9576",
+        0
+      ],
+      "negative": [
+        "9576",
+        1
+      ],
+      "latent_image": [
+        "9576",
+        2
+      ]
+    }
+  },
+  "9578": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "9577",
+        0
+      ],
+      "vae": [
+        "9502",
+        0
+      ]
+    }
+  },
+  "9752": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "9578",
+        0
+      ],
+      "filename_prefix": "outputs/heal/ronin-of-gehenna__skin"
+    }
+  },
+  "9813": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "9814": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "9815": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "9912": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_ronin-of-gehenna__cloth.png"
+    },
+    "inputs": {
+      "image": "rolled_ronin-of-gehenna__cloth.png"
+    }
+  },
+  "9963": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "10014": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "9963",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "9886": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, dark slate lacquered plate, riveted and chipped, dark slate, flat even lighting, no shadows",
+      "clip": [
+        "9814",
+        0
+      ]
+    }
+  },
+  "9887": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "9886",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "9888": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "9814",
+        0
+      ]
+    }
+  },
+  "9889": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "9887",
+        0
+      ],
+      "negative": [
+        "9888",
+        0
+      ],
+      "vae": [
+        "9815",
+        0
+      ],
+      "pixels": [
+        "9912",
+        0
+      ],
+      "mask": [
+        "10014",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "9890": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "9813",
+        0
+      ],
+      "seed": 60031,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "9889",
+        0
+      ],
+      "negative": [
+        "9889",
+        1
+      ],
+      "latent_image": [
+        "9889",
+        2
+      ]
+    }
+  },
+  "9891": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "9890",
+        0
+      ],
+      "vae": [
+        "9815",
+        0
+      ]
+    }
+  },
+  "10065": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "9891",
+        0
+      ],
+      "filename_prefix": "outputs/heal/ronin-of-gehenna__cloth"
+    }
+  },
+  "10126": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "10127": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "10128": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "10225": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_the-old-devil__skin.png"
+    },
+    "inputs": {
+      "image": "rolled_the-old-devil__skin.png"
+    }
+  },
+  "10276": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "10327": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "10276",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "10199": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, wrinkled dark-red skin, liver spots, very old, dark dried red, flat even lighting, no shadows",
+      "clip": [
+        "10127",
+        0
+      ]
+    }
+  },
+  "10200": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "10199",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "10201": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "10127",
+        0
+      ]
+    }
+  },
+  "10202": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "10200",
+        0
+      ],
+      "negative": [
+        "10201",
+        0
+      ],
+      "vae": [
+        "10128",
+        0
+      ],
+      "pixels": [
+        "10225",
+        0
+      ],
+      "mask": [
+        "10327",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "10203": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "10126",
+        0
+      ],
+      "seed": 60032,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "10202",
+        0
+      ],
+      "negative": [
+        "10202",
+        1
+      ],
+      "latent_image": [
+        "10202",
+        2
+      ]
+    }
+  },
+  "10204": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "10203",
+        0
+      ],
+      "vae": [
+        "10128",
+        0
+      ]
+    }
+  },
+  "10378": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "10204",
+        0
+      ],
+      "filename_prefix": "outputs/heal/the-old-devil__skin"
+    }
+  },
+  "10439": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "10440": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "10441": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "10538": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_the-old-devil__cloth.png"
+    },
+    "inputs": {
+      "image": "rolled_the-old-devil__cloth.png"
+    }
+  },
+  "10589": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "10640": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "10589",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "10512": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, pale silver white silk weave, soft drape, pale silver white, flat even lighting, no shadows",
+      "clip": [
+        "10440",
+        0
+      ]
+    }
+  },
+  "10513": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "10512",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "10514": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "10440",
+        0
+      ]
+    }
+  },
+  "10515": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "10513",
+        0
+      ],
+      "negative": [
+        "10514",
+        0
+      ],
+      "vae": [
+        "10441",
+        0
+      ],
+      "pixels": [
+        "10538",
+        0
+      ],
+      "mask": [
+        "10640",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "10516": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "10439",
+        0
+      ],
+      "seed": 60033,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "10515",
+        0
+      ],
+      "negative": [
+        "10515",
+        1
+      ],
+      "latent_image": [
+        "10515",
+        2
+      ]
+    }
+  },
+  "10517": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "10516",
+        0
+      ],
+      "vae": [
+        "10441",
+        0
+      ]
+    }
+  },
+  "10691": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "10517",
+        0
+      ],
+      "filename_prefix": "outputs/heal/the-old-devil__cloth"
+    }
+  },
+  "10752": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "10753": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "10754": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "10851": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_hellfire-flick__skin.png"
+    },
+    "inputs": {
+      "image": "rolled_hellfire-flick__skin.png"
+    }
+  },
+  "10902": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "10953": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "10902",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "10825": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, charcoal skin with orange glowing burn veins, charcoal black grey, flat even lighting, no shadows",
+      "clip": [
+        "10753",
+        0
+      ]
+    }
+  },
+  "10826": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "10825",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "10827": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "10753",
+        0
+      ]
+    }
+  },
+  "10828": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "10826",
+        0
+      ],
+      "negative": [
+        "10827",
+        0
+      ],
+      "vae": [
+        "10754",
+        0
+      ],
+      "pixels": [
+        "10851",
+        0
+      ],
+      "mask": [
+        "10953",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "10829": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "10752",
+        0
+      ],
+      "seed": 60034,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "10828",
+        0
+      ],
+      "negative": [
+        "10828",
+        1
+      ],
+      "latent_image": [
+        "10828",
+        2
+      ]
+    }
+  },
+  "10830": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "10829",
+        0
+      ],
+      "vae": [
+        "10754",
+        0
+      ]
+    }
+  },
+  "11004": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "10830",
+        0
+      ],
+      "filename_prefix": "outputs/heal/hellfire-flick__skin"
+    }
+  },
+  "11065": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "11066": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "11067": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "11164": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_hellfire-flick__cloth.png"
+    },
+    "inputs": {
+      "image": "rolled_hellfire-flick__cloth.png"
+    }
+  },
+  "11215": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "11266": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "11215",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "11138": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, blackened leather, heat-scorched and blistered, charcoal black, flat even lighting, no shadows",
+      "clip": [
+        "11066",
+        0
+      ]
+    }
+  },
+  "11139": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "11138",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "11140": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "11066",
+        0
+      ]
+    }
+  },
+  "11141": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "11139",
+        0
+      ],
+      "negative": [
+        "11140",
+        0
+      ],
+      "vae": [
+        "11067",
+        0
+      ],
+      "pixels": [
+        "11164",
+        0
+      ],
+      "mask": [
+        "11266",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "11142": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "11065",
+        0
+      ],
+      "seed": 60035,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "11141",
+        0
+      ],
+      "negative": [
+        "11141",
+        1
+      ],
+      "latent_image": [
+        "11141",
+        2
+      ]
+    }
+  },
+  "11143": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "11142",
+        0
+      ],
+      "vae": [
+        "11067",
+        0
+      ]
+    }
+  },
+  "11317": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "11143",
+        0
+      ],
+      "filename_prefix": "outputs/heal/hellfire-flick__cloth"
+    }
+  },
+  "11378": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "11379": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "11380": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "11477": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_brother-blaze__skin.png"
+    },
+    "inputs": {
+      "image": "rolled_brother-blaze__skin.png"
+    }
+  },
+  "11528": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "11579": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "11528",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "11451": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, golden-tan skin with a sweat sheen and small burn spots, golden tan, flat even lighting, no shadows",
+      "clip": [
+        "11379",
+        0
+      ]
+    }
+  },
+  "11452": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "11451",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "11453": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "11379",
+        0
+      ]
+    }
+  },
+  "11454": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "11452",
+        0
+      ],
+      "negative": [
+        "11453",
+        0
+      ],
+      "vae": [
+        "11380",
+        0
+      ],
+      "pixels": [
+        "11477",
+        0
+      ],
+      "mask": [
+        "11579",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "11455": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "11378",
+        0
+      ],
+      "seed": 60036,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "11454",
+        0
+      ],
+      "negative": [
+        "11454",
+        1
+      ],
+      "latent_image": [
+        "11454",
+        2
+      ]
+    }
+  },
+  "11456": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "11455",
+        0
+      ],
+      "vae": [
+        "11380",
+        0
+      ]
+    }
+  },
+  "11630": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "11456",
+        0
+      ],
+      "filename_prefix": "outputs/heal/brother-blaze__skin"
+    }
+  },
+  "11691": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "11692": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "11693": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "11790": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_brother-blaze__cloth.png"
+    },
+    "inputs": {
+      "image": "rolled_brother-blaze__cloth.png"
+    }
+  },
+  "11841": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "11892": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "11841",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "11764": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, black cotton jersey, soft and stretchy, black, flat even lighting, no shadows",
+      "clip": [
+        "11692",
+        0
+      ]
+    }
+  },
+  "11765": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "11764",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "11766": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "11692",
+        0
+      ]
+    }
+  },
+  "11767": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "11765",
+        0
+      ],
+      "negative": [
+        "11766",
+        0
+      ],
+      "vae": [
+        "11693",
+        0
+      ],
+      "pixels": [
+        "11790",
+        0
+      ],
+      "mask": [
+        "11892",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "11768": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "11691",
+        0
+      ],
+      "seed": 60037,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "11767",
+        0
+      ],
+      "negative": [
+        "11767",
+        1
+      ],
+      "latent_image": [
+        "11767",
+        2
+      ]
+    }
+  },
+  "11769": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "11768",
+        0
+      ],
+      "vae": [
+        "11693",
+        0
+      ]
+    }
+  },
+  "11943": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "11769",
+        0
+      ],
+      "filename_prefix": "outputs/heal/brother-blaze__cloth"
+    }
+  },
+  "12004": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "12005": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "12006": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "12103": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_ashen-judoka__skin.png"
+    },
+    "inputs": {
+      "image": "rolled_ashen-judoka__skin.png"
+    }
+  },
+  "12154": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "12205": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "12154",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "12077": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, pale ashen skin with soft grey smudges, pale bone ash, flat even lighting, no shadows",
+      "clip": [
+        "12005",
+        0
+      ]
+    }
+  },
+  "12078": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "12077",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "12079": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "12005",
+        0
+      ]
+    }
+  },
+  "12080": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "12078",
+        0
+      ],
+      "negative": [
+        "12079",
+        0
+      ],
+      "vae": [
+        "12006",
+        0
+      ],
+      "pixels": [
+        "12103",
+        0
+      ],
+      "mask": [
+        "12205",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "12081": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "12004",
+        0
+      ],
+      "seed": 60038,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "12080",
+        0
+      ],
+      "negative": [
+        "12080",
+        1
+      ],
+      "latent_image": [
+        "12080",
+        2
+      ]
+    }
+  },
+  "12082": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "12081",
+        0
+      ],
+      "vae": [
+        "12006",
+        0
+      ]
+    }
+  },
+  "12256": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "12082",
+        0
+      ],
+      "filename_prefix": "outputs/heal/ashen-judoka__skin"
+    }
+  },
+  "12317": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "12318": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "12319": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "12416": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_ashen-judoka__cloth.png"
+    },
+    "inputs": {
+      "image": "rolled_ashen-judoka__cloth.png"
+    }
+  },
+  "12467": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "12518": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "12467",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "12390": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, midnight blue heavy cotton twill, midnight blue, flat even lighting, no shadows",
+      "clip": [
+        "12318",
+        0
+      ]
+    }
+  },
+  "12391": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "12390",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "12392": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "12318",
+        0
+      ]
+    }
+  },
+  "12393": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "12391",
+        0
+      ],
+      "negative": [
+        "12392",
+        0
+      ],
+      "vae": [
+        "12319",
+        0
+      ],
+      "pixels": [
+        "12416",
+        0
+      ],
+      "mask": [
+        "12518",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "12394": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "12317",
+        0
+      ],
+      "seed": 60039,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "12393",
+        0
+      ],
+      "negative": [
+        "12393",
+        1
+      ],
+      "latent_image": [
+        "12393",
+        2
+      ]
+    }
+  },
+  "12395": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "12394",
+        0
+      ],
+      "vae": [
+        "12319",
+        0
+      ]
+    }
+  },
+  "12569": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "12395",
+        0
+      ],
+      "filename_prefix": "outputs/heal/ashen-judoka__cloth"
+    }
+  },
+  "12630": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "12631": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "12632": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "12729": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_fresh-soul-kevin__skin.png"
+    },
+    "inputs": {
+      "image": "rolled_fresh-soul-kevin__skin.png"
+    }
+  },
+  "12780": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "12831": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "12780",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "12703": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, grey slightly translucent ghostly skin, faint office-pallor blotches, pale grey, flat even lighting, no shadows",
+      "clip": [
+        "12631",
+        0
+      ]
+    }
+  },
+  "12704": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "12703",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "12705": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "12631",
+        0
+      ]
+    }
+  },
+  "12706": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "12704",
+        0
+      ],
+      "negative": [
+        "12705",
+        0
+      ],
+      "vae": [
+        "12632",
+        0
+      ],
+      "pixels": [
+        "12729",
+        0
+      ],
+      "mask": [
+        "12831",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "12707": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "12630",
+        0
+      ],
+      "seed": 60040,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "12706",
+        0
+      ],
+      "negative": [
+        "12706",
+        1
+      ],
+      "latent_image": [
+        "12706",
+        2
+      ]
+    }
+  },
+  "12708": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "12707",
+        0
+      ],
+      "vae": [
+        "12632",
+        0
+      ]
+    }
+  },
+  "12882": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "12708",
+        0
+      ],
+      "filename_prefix": "outputs/heal/fresh-soul-kevin__skin"
+    }
+  },
+  "12943": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "12944": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "12945": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "13042": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_fresh-soul-kevin__cloth.png"
+    },
+    "inputs": {
+      "image": "rolled_fresh-soul-kevin__cloth.png"
+    }
+  },
+  "13093": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "13144": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "13093",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "13016": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, pale blue grey office shirt cotton with a faint pinstripe, pale blue grey, flat even lighting, no shadows",
+      "clip": [
+        "12944",
+        0
+      ]
+    }
+  },
+  "13017": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "13016",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "13018": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "12944",
+        0
+      ]
+    }
+  },
+  "13019": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "13017",
+        0
+      ],
+      "negative": [
+        "13018",
+        0
+      ],
+      "vae": [
+        "12945",
+        0
+      ],
+      "pixels": [
+        "13042",
+        0
+      ],
+      "mask": [
+        "13144",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "13020": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "12943",
+        0
+      ],
+      "seed": 60041,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "13019",
+        0
+      ],
+      "negative": [
+        "13019",
+        1
+      ],
+      "latent_image": [
+        "13019",
+        2
+      ]
+    }
+  },
+  "13021": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "13020",
+        0
+      ],
+      "vae": [
+        "12945",
+        0
+      ]
+    }
+  },
+  "13195": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "13021",
+        0
+      ],
+      "filename_prefix": "outputs/heal/fresh-soul-kevin__cloth"
+    }
+  },
+  "13256": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "13257": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "13258": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "13355": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_hell-toilet__basalt.png"
+    },
+    "inputs": {
+      "image": "rolled_hell-toilet__basalt.png"
+    }
+  },
+  "13406": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "13457": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "13406",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "13329": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, black volcanic basalt slabs with lava-filled cracks between them, glowing molten rock in the fissures, black basalt grey, flat even lighting, no shadows",
+      "clip": [
+        "13257",
+        0
+      ]
+    }
+  },
+  "13330": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "13329",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "13331": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "13257",
+        0
+      ]
+    }
+  },
+  "13332": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "13330",
+        0
+      ],
+      "negative": [
+        "13331",
+        0
+      ],
+      "vae": [
+        "13258",
+        0
+      ],
+      "pixels": [
+        "13355",
+        0
+      ],
+      "mask": [
+        "13457",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "13333": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "13256",
+        0
+      ],
+      "seed": 60042,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "13332",
+        0
+      ],
+      "negative": [
+        "13332",
+        1
+      ],
+      "latent_image": [
+        "13332",
+        2
+      ]
+    }
+  },
+  "13334": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "13333",
+        0
+      ],
+      "vae": [
+        "13258",
+        0
+      ]
+    }
+  },
+  "13508": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "13334",
+        0
+      ],
+      "filename_prefix": "outputs/heal/hell-toilet__basalt"
+    }
+  },
+  "13569": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "13570": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "13571": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "13668": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_construction-site__dirt.png"
+    },
+    "inputs": {
+      "image": "rolled_construction-site__dirt.png"
+    }
+  },
+  "13719": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "13770": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "13719",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "13642": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, churned muddy dirt with tyre tracks and scattered gravel, wet brown mud, flat even lighting, no shadows",
+      "clip": [
+        "13570",
+        0
+      ]
+    }
+  },
+  "13643": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "13642",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "13644": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "13570",
+        0
+      ]
+    }
+  },
+  "13645": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "13643",
+        0
+      ],
+      "negative": [
+        "13644",
+        0
+      ],
+      "vae": [
+        "13571",
+        0
+      ],
+      "pixels": [
+        "13668",
+        0
+      ],
+      "mask": [
+        "13770",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "13646": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "13569",
+        0
+      ],
+      "seed": 60043,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "13645",
+        0
+      ],
+      "negative": [
+        "13645",
+        1
+      ],
+      "latent_image": [
+        "13645",
+        2
+      ]
+    }
+  },
+  "13647": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "13646",
+        0
+      ],
+      "vae": [
+        "13571",
+        0
+      ]
+    }
+  },
+  "13821": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "13647",
+        0
+      ],
+      "filename_prefix": "outputs/heal/construction-site__dirt"
+    }
+  },
+  "13882": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "13883": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "13884": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "13981": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_construction-site__concrete.png"
+    },
+    "inputs": {
+      "image": "rolled_construction-site__concrete.png"
+    }
+  },
+  "14032": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "14083": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "14032",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "13955": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, stained cracked poured concrete slab with expansion joints, grey concrete, flat even lighting, no shadows",
+      "clip": [
+        "13883",
+        0
+      ]
+    }
+  },
+  "13956": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "13955",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "13957": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "13883",
+        0
+      ]
+    }
+  },
+  "13958": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "13956",
+        0
+      ],
+      "negative": [
+        "13957",
+        0
+      ],
+      "vae": [
+        "13884",
+        0
+      ],
+      "pixels": [
+        "13981",
+        0
+      ],
+      "mask": [
+        "14083",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "13959": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "13882",
+        0
+      ],
+      "seed": 60044,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "13958",
+        0
+      ],
+      "negative": [
+        "13958",
+        1
+      ],
+      "latent_image": [
+        "13958",
+        2
+      ]
+    }
+  },
+  "13960": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "13959",
+        0
+      ],
+      "vae": [
+        "13884",
+        0
+      ]
+    }
+  },
+  "14134": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "13960",
+        0
+      ],
+      "filename_prefix": "outputs/heal/construction-site__concrete"
+    }
+  },
+  "14195": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "14196": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "14197": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "14294": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_collapsing-tower__roof.png"
+    },
+    "inputs": {
+      "image": "rolled_collapsing-tower__roof.png"
+    }
+  },
+  "14345": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "14396": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "14345",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "14268": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, tar-and-gravel rooftop membrane with patched seams, dark grey tar, flat even lighting, no shadows",
+      "clip": [
+        "14196",
+        0
+      ]
+    }
+  },
+  "14269": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "14268",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "14270": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "14196",
+        0
+      ]
+    }
+  },
+  "14271": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "14269",
+        0
+      ],
+      "negative": [
+        "14270",
+        0
+      ],
+      "vae": [
+        "14197",
+        0
+      ],
+      "pixels": [
+        "14294",
+        0
+      ],
+      "mask": [
+        "14396",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "14272": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "14195",
+        0
+      ],
+      "seed": 60045,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "14271",
+        0
+      ],
+      "negative": [
+        "14271",
+        1
+      ],
+      "latent_image": [
+        "14271",
+        2
+      ]
+    }
+  },
+  "14273": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "14272",
+        0
+      ],
+      "vae": [
+        "14197",
+        0
+      ]
+    }
+  },
+  "14447": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "14273",
+        0
+      ],
+      "filename_prefix": "outputs/heal/collapsing-tower__roof"
+    }
+  },
+  "14508": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "14509": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "14510": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "14607": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_hindenburg-blimp__planks.png"
+    },
+    "inputs": {
+      "image": "rolled_hindenburg-blimp__planks.png"
+    }
+  },
+  "14658": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "14709": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "14658",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "14581": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, varnished wooden deck planks running one way, scuffed, brass nail heads, warm brown wood, flat even lighting, no shadows",
+      "clip": [
+        "14509",
+        0
+      ]
+    }
+  },
+  "14582": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "14581",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "14583": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "14509",
+        0
+      ]
+    }
+  },
+  "14584": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "14582",
+        0
+      ],
+      "negative": [
+        "14583",
+        0
+      ],
+      "vae": [
+        "14510",
+        0
+      ],
+      "pixels": [
+        "14607",
+        0
+      ],
+      "mask": [
+        "14709",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "14585": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "14508",
+        0
+      ],
+      "seed": 60046,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "14584",
+        0
+      ],
+      "negative": [
+        "14584",
+        1
+      ],
+      "latent_image": [
+        "14584",
+        2
+      ]
+    }
+  },
+  "14586": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "14585",
+        0
+      ],
+      "vae": [
+        "14510",
+        0
+      ]
+    }
+  },
+  "14760": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "14586",
+        0
+      ],
+      "filename_prefix": "outputs/heal/hindenburg-blimp__planks"
+    }
+  },
+  "14821": {
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load FLUX diffusion model"
+    },
+    "inputs": {
+      "unet_name": "flux1-schnell-fp8.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "14822": {
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "Load FLUX text encoders"
+    },
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp8_e4m3fn.safetensors",
+      "type": "flux",
+      "device": "default"
+    }
+  },
+  "14823": {
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load FLUX VAE"
+    },
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    }
+  },
+  "14920": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load rolled_castle-under-siege__stone.png"
+    },
+    "inputs": {
+      "image": "rolled_castle-under-siege__stone.png"
+    }
+  },
+  "14971": {
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "load seam1024.png"
+    },
+    "inputs": {
+      "image": "seam1024.png"
+    }
+  },
+  "15022": {
+    "class_type": "ImageToMask",
+    "_meta": {
+      "title": "\u2192 mask"
+    },
+    "inputs": {
+      "image": [
+        "14971",
+        0
+      ],
+      "channel": "red"
+    }
+  },
+  "14894": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Positive prompt"
+    },
+    "inputs": {
+      "text": "seamless continuation of the surrounding surface, worn medieval flagstones and ashlar blocks with mortar lines and soot, grey weathered stone, flat even lighting, no shadows",
+      "clip": [
+        "14822",
+        0
+      ]
+    }
+  },
+  "14895": {
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "Guidance"
+    },
+    "inputs": {
+      "conditioning": [
+        "14894",
+        0
+      ],
+      "guidance": 2.5
+    }
+  },
+  "14896": {
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "Negative prompt"
+    },
+    "inputs": {
+      "text": "text, watermark, logo, signature, frame, border, picture frame, perspective, depth of field, shadows, vignette, hands, fingers, anatomy, face, eyes, body, limbs, objects, scenery, symmetrical pattern, repeating motif, tiled pattern, busy composition, blurry, low quality",
+      "clip": [
+        "14822",
+        0
+      ]
+    }
+  },
+  "14897": {
+    "class_type": "InpaintModelConditioning",
+    "_meta": {
+      "title": "Inpaint conditioning"
+    },
+    "inputs": {
+      "positive": [
+        "14895",
+        0
+      ],
+      "negative": [
+        "14896",
+        0
+      ],
+      "vae": [
+        "14823",
+        0
+      ],
+      "pixels": [
+        "14920",
+        0
+      ],
+      "mask": [
+        "15022",
+        0
+      ],
+      "noise_mask": true
+    }
+  },
+  "14898": {
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "Sample the masked area"
+    },
+    "inputs": {
+      "model": [
+        "14821",
+        0
+      ],
+      "seed": 60047,
+      "steps": 8,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 0.6,
+      "positive": [
+        "14897",
+        0
+      ],
+      "negative": [
+        "14897",
+        1
+      ],
+      "latent_image": [
+        "14897",
+        2
+      ]
+    }
+  },
+  "14899": {
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "Decode"
+    },
+    "inputs": {
+      "samples": [
+        "14898",
+        0
+      ],
+      "vae": [
+        "14823",
+        0
+      ]
+    }
+  },
+  "15073": {
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "save composed final (image)"
+    },
+    "inputs": {
+      "images": [
+        "14899",
+        0
+      ],
+      "filename_prefix": "outputs/heal/castle-under-siege__stone"
+    }
+  }
+}
